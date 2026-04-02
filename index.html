@@ -430,6 +430,7 @@ textarea.fc{resize:vertical;min-height:68px}
           <div class="ph-r">
             <select id="mt-sf" class="fc" style="width:auto;padding:6px 10px" onchange="renderMyTasks()"><option value="">All Status</option><option value="assigned">Assigned</option><option value="in progress">In Progress</option><option value="overdue">Overdue</option><option value="completed">Completed</option></select>
             <input class="si" id="mt-q" placeholder="Search tasks..." oninput="renderMyTasks()">
+            <button class="btn bp admin-only" onclick="openAddTask()" id="mt-assign-btn">+ Assign Task</button>
           </div>
         </div>
         <div class="card" id="sub-box" style="margin-bottom:14px;border-left:4px solid var(--green)">
@@ -816,7 +817,11 @@ function doLogin(){
   const pass=($('lpw')||{value:''}).value;
   const u=USERS[email];
   if(!u||u.pass!==pass){const e=$('lerr');if(e)e.style.display='block';return;}
-  cu={...u,email,isWorkAssigner:u.isWorkAssigner||false};
+  // Merge empReg data (may have been updated by admin this session)
+  const empData=empReg.find(e=>e.email===email);
+  const isWA=empData?empData.isWorkAssigner:u.isWorkAssigner||false;
+  const isAdm=empData?(empData.isAdmin||u.isAdmin):u.isAdmin||false;
+  cu={...u,email,isWorkAssigner:isWA,isAdmin:isAdm};
   const e=$('lerr');if(e)e.style.display='none';
   $('lp').classList.add('hidden');
   $('app').classList.remove('hidden');
@@ -1002,6 +1007,27 @@ async function loadData(){
         });
       }
     }catch(e){}
+    // After employees loaded from Sheet, refresh cu with latest role data
+    if(cu){
+      const meInSheet=USERS[cu.email];
+      if(meInSheet){
+        const wasAdmin=cu.isAdmin, wasWA=cu.isWorkAssigner;
+        cu.isAdmin=meInSheet.isAdmin||false;
+        cu.isWorkAssigner=meInSheet.isWorkAssigner||false;
+        // If role changed, re-apply visibility
+        if(wasAdmin!==cu.isAdmin||wasWA!==cu.isWorkAssigner){
+          const canManage=cu.isAdmin||cu.isWorkAssigner;
+          document.querySelectorAll('.admin-only').forEach(el=>{
+            canManage?el.classList.remove('hidden'):el.classList.add('hidden');
+          });
+          document.querySelectorAll('.admin-strict').forEach(el=>{
+            cu.isAdmin?el.classList.remove('hidden'):el.classList.add('hidden');
+          });
+          const roleLabel=cu.isAdmin?'👑 Admin':(cu.isWorkAssigner?'🔀 Work Assigner':cu.role);
+          const srEl=document.getElementById('sb-role');if(srEl)srEl.textContent=roleLabel;
+        }
+      }
+    }
     // Load notifications
     if(cu)pollNotifications();
 
@@ -1191,6 +1217,9 @@ function renderDashTasks(){
 //  MY TASKS
 // ════════════════════════════════════════════════════════════════
 function renderMyTasks(){
+  // Update page subtitle based on role
+  const sub=document.querySelector('#pg-mytasks .ph-s');
+  if(sub) sub.textContent=cu.isWorkAssigner&&!cu.isAdmin?'Your tasks · Use "+ Assign Task" to assign work to your team':'Your assigned work items';
   let tasks=allTasks.filter(t=>t.email===cu.email);
   const sf=($('mt-sf')||{value:''}).value;
   const q=($('mt-q')||{value:''}).value.toLowerCase();
