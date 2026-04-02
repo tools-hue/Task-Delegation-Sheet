@@ -805,7 +805,17 @@ function doLogin(){
   const pass=($('lpw')||{value:''}).value;
   const u=USERS[email];
   if(!u||u.pass!==pass){const e=$('lerr');if(e)e.style.display='block';return;}
-  cu={...u,email};
+  // Check localStorage for saved role overrides (set by admin)
+  let isAdminFinal = u.isAdmin||false;
+  let isWAFinal = u.isWorkAssigner||false;
+  try{
+    const savedRoles=JSON.parse(localStorage.getItem('upgro_roles')||'{}');
+    if(savedRoles[email]!==undefined){
+      isAdminFinal = savedRoles[email].isAdmin||false;
+      isWAFinal = savedRoles[email].isWorkAssigner||false;
+    }
+  }catch(e){}
+  cu={...u,email,isAdmin:isAdminFinal,isWorkAssigner:isWAFinal};
   const e=$('lerr');if(e)e.style.display='none';
   $('lp').classList.add('hidden');
   $('app').classList.remove('hidden');
@@ -928,12 +938,22 @@ async function loadData(){
           if(ri>=0){empReg[ri].isAdmin=isAdm;empReg[ri].isWorkAssigner=isWA;}
           else{empReg.push({email:em,name:USERS[em].name,pass:USERS[em].pass,role:USERS[em].role,desig:USERS[em].desig,isAdmin:isAdm,isWorkAssigner:isWA,active:emp.active!=='false',bg:CLRS[empReg.length%CLRS.length],joinDate:emp.joinDate||''});}
         });
-        // Refresh current user's role from Sheet
+        // Refresh current user's role from Sheet + save to localStorage
         if(cu&&USERS[cu.email]){
-          cu.isAdmin=USERS[cu.email].isAdmin;
-          cu.isWorkAssigner=USERS[cu.email].isWorkAssigner;
+          const prevAdmin=cu.isAdmin, prevWA=cu.isWorkAssigner;
+          cu.isAdmin=USERS[cu.email].isAdmin||false;
+          cu.isWorkAssigner=USERS[cu.email].isWorkAssigner||false;
+          // Save to localStorage so it persists on next login
+          try{
+            const allRoles=JSON.parse(localStorage.getItem('upgro_roles')||'{}');
+            allRoles[cu.email]={isAdmin:cu.isAdmin,isWorkAssigner:cu.isWorkAssigner};
+            localStorage.setItem('upgro_roles',JSON.stringify(allRoles));
+          }catch(e){}
           const srEl=$('sb-role');if(srEl)srEl.textContent=cu.isAdmin?'👑 Admin':(cu.isWorkAssigner?'🔀 Work Assigner':cu.role);
           applyRoleVisibility();
+          // Also refresh assign button on My Tasks
+          const mtBtn=document.getElementById('mt-assign-btn');
+          if(mtBtn)mtBtn.style.display=(cu.isAdmin||cu.isWorkAssigner)?'':'none';
         }
       }
     }catch(e){}
@@ -1420,11 +1440,17 @@ async function saveEmp(email){
   if(idx>=0)Object.assign(empReg[idx],{name,pass:finalPass,desig,role:desig,isAdmin,isWorkAssigner,active});
   if(USERS[email])Object.assign(USERS[email],{name,desig,role:desig,isAdmin,isWorkAssigner,pass:finalPass});
   else USERS[email]={name,pass:finalPass,role:desig,desig,isAdmin,isWorkAssigner};
+  // Save role to localStorage so it persists across page reloads
+  try{
+    const allRoles=JSON.parse(localStorage.getItem('upgro_roles')||'{}');
+    allRoles[email]={isAdmin,isWorkAssigner};
+    localStorage.setItem('upgro_roles', JSON.stringify(allRoles));
+  }catch(e){}
   // Sync to Sheet
   if(SURL){
     try{await fetch(SURL,{method:'POST',body:JSON.stringify({action:'updateEmployee',email,name,desig,role:desig,isAdmin,isWorkAssigner,active,pass:finalPass})});toast('✅ Saved & synced to Sheet!');}
     catch(e){toast('✅ Saved locally (Sheet sync failed)');}
-  }else{toast('✅ Employee updated! (Connect Sheet to persist across reloads)');}
+  }else{toast('✅ Employee updated! (Role saved to browser storage)');}
   renderEmpList();refillEmpDropdown();selectEmp(email);
 }
 async function addNewEmp(){
