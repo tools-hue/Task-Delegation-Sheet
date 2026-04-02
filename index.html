@@ -344,7 +344,7 @@ textarea.fc{resize:vertical;min-height:68px}
         <input type="password" id="lpw" class="li" placeholder="Enter your password" onkeydown="if(event.key==='Enter')doLogin()">
         <button class="le" type="button" onclick="togglePwd()" title="Show/Hide">👁</button>
       </div>
-      <button class="lbtn" onclick="doLogin()">Sign In →</button>
+      <button class="lbtn" onclick="doLogin()"><span id="lbtn-txt">Sign In →</span></button>
     </div>
     <div class="lfoot">🔒 Secure · UpGro Media Mission Control v4.1</div>
   </div>
@@ -800,12 +800,13 @@ function applyRoleVisibility(){
 
 // ── LOGIN
 function togglePwd(){const i=$('lpw');i.type=i.type==='password'?'text':'password';}
-function doLogin(){
+async function doLogin(){
   const email=($('lem')||{value:''}).value.trim().toLowerCase();
   const pass=($('lpw')||{value:''}).value;
   const u=USERS[email];
   if(!u||u.pass!==pass){const e=$('lerr');if(e)e.style.display='block';return;}
-  // Check localStorage for saved role overrides (set by admin)
+
+  // Step 1: Start with hardcoded + localStorage role
   let isAdminFinal = u.isAdmin||false;
   let isWAFinal = u.isWorkAssigner||false;
   try{
@@ -815,6 +816,32 @@ function doLogin(){
       isWAFinal = savedRoles[email].isWorkAssigner||false;
     }
   }catch(e){}
+
+  // Step 2: If Sheet connected, fetch latest role from Sheet BEFORE showing app
+  if(SURL){
+    const lbtn=$('lbtn-txt');if(lbtn)lbtn.textContent='Signing in...';
+    try{
+      const res=await fetch(SURL+'?action=getEmployees',{signal:AbortSignal.timeout(8000)});
+      const j=await res.json();
+      if(j.employees&&Array.isArray(j.employees)){
+        const myRow=j.employees.find(emp=>(emp.email||'').toLowerCase().trim()===email);
+        if(myRow){
+          isAdminFinal = myRow.isAdmin==='true'||myRow.isAdmin===true;
+          isWAFinal = myRow.isWorkAssigner==='true'||myRow.isWorkAssigner===true;
+          // Update USERS and localStorage with fresh data
+          USERS[email].isAdmin=isAdminFinal;
+          USERS[email].isWorkAssigner=isWAFinal;
+          try{
+            const allRoles=JSON.parse(localStorage.getItem('upgro_roles')||'{}');
+            allRoles[email]={isAdmin:isAdminFinal,isWorkAssigner:isWAFinal};
+            localStorage.setItem('upgro_roles',JSON.stringify(allRoles));
+          }catch(e){}
+        }
+      }
+    }catch(e){}
+    if(lbtn)lbtn.textContent='Sign In →';
+  }
+
   cu={...u,email,isAdmin:isAdminFinal,isWorkAssigner:isWAFinal};
   const e=$('lerr');if(e)e.style.display='none';
   $('lp').classList.add('hidden');
