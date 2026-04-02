@@ -243,6 +243,8 @@ button,input,select,textarea{font-family:'Inter',sans-serif;font-size:13px}
 .mini-bf{height:100%;border-radius:3px}
 .gw{font-size:10px;padding:3px 9px;border-radius:5px;font-weight:600;display:inline-flex;align-items:center;gap:3px}
 .gwg{background:#F0FDF4;color:#15803D}.gwo{background:#FFFBEB;color:#B45309}.gwr{background:#FEF2F2;color:#B91C1C}
+.role-banner{display:flex;align-items:center;gap:10px;background:var(--purple3);border:1px solid rgba(124,58,237,.2);border-radius:var(--r);padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--purple)}
+.role-banner-icon{font-size:18px;flex-shrink:0}
 
 /* FORM LINKS */
 .flc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:13px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;transition:all .15s}
@@ -363,7 +365,7 @@ textarea.fc{resize:vertical;min-height:68px}
       <div class="sb-sec admin-only">Management</div>
       <div class="ni admin-only" onclick="nav('alltasks')"><span class="ico">📋</span><span class="lbl">All Tasks</span><span class="nbdg" id="nb-all" style="display:none"></span><span class="ni-tip">All Tasks</span></div>
       <div class="ni admin-only" onclick="nav('analytics')"><span class="ico">📈</span><span class="lbl">Analytics</span><span class="ni-tip">Analytics</span></div>
-      <div class="ni admin-only" onclick="nav('employees')"><span class="ico">👥</span><span class="lbl">Employees</span><span class="ni-tip">Employees</span></div>
+      <div class="ni admin-only admin-strict" onclick="nav('employees')"><span class="ico">👥</span><span class="lbl">Employees</span><span class="ni-tip">Employees</span></div>
       <div class="sb-sec">Resources</div>
       <div class="ni" onclick="nav('forms')"><span class="ico">📝</span><span class="lbl">Forms &amp; Links</span><span class="ni-tip">Forms &amp; Links</span></div>
       <div class="sb-sec">System</div>
@@ -491,6 +493,11 @@ textarea.fc{resize:vertical;min-height:68px}
           </div>
         </div>
 
+        <!-- Assigner Role Banner -->
+        <div id="assigner-banner" class="role-banner hidden">
+          <span class="role-banner-icon">🔀</span>
+          <span><strong>Work Assigner View:</strong> You are seeing performance data only for employees you have assigned tasks to. Admin has full visibility across all employees.</span>
+        </div>
         <!-- KPI Ribbon -->
         <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px" id="an-kpi"></div>
 
@@ -718,28 +725,28 @@ textarea.fc{resize:vertical;min-height:68px}
 // ════════════════════════════════════════════════════════════════
 
 const USERS={
-  'ritutyagiea@upgromedia.com':     {pass:'Ritu@1001',    name:'Ritu Tyagi',           role:'Executive Assistant',desig:'EA',              isAdmin:true},
-  'adarsh.mis@upgromedia.com':      {pass:'Adarsh@1012',  name:'Adarsh Singh',          role:'MIS',                desig:'MIS',             isAdmin:true},
-  'dhiraj.jaiswal@upgromedia.com':  {pass:'Dheeraj@1013', name:'Dhiraj Jaiswal',        role:'Founder',            desig:'Founder',         isAdmin:true},
-  'vraj9424@gmail.com':             {pass:'Tarun@1017',   name:'Tarun Verma',            role:'Founder',            desig:'Founder',         isAdmin:true},
-  'vishal.editor@upgromedia.com':   {pass:'Vishal@1002',  name:'Vishal Srivastava',     role:'Video Editor',       desig:'Video Editor',    isAdmin:false},
-  'ankit.seo@upgromedia.com':       {pass:'Ankit@1003',   name:'Ankit Prajapati',       role:'SEO Executive',      desig:'SEO',             isAdmin:false},
-  'harsh.graphic@upgromedia.com':   {pass:'Harsh@1004',   name:'Harsh Kumar',            role:'Graphic Designer',   desig:'Graphic Designer',isAdmin:false},
-  'vikasvideoedit@upgromedia.com':  {pass:'Vikas@1005',   name:'Vikas Pandey',           role:'Video Editor',       desig:'Video Editor',    isAdmin:false},
-  'abhishek.meta@upgromedia.com':   {pass:'Abhishek@1006',name:'Abhishek Kasaudhan',    role:'Meta Media Buyer',   desig:'Meta Media Buyer',isAdmin:false},
-  'harsh.editor@upgromedia.com':    {pass:'Harsh@1007',   name:'Harsh Verma',            role:'Video Editor',       desig:'Video Editor',    isAdmin:false},
-  'dharmendra.web@upgromedia.com':  {pass:'Dharmendra@1008',name:'Dharmendra Sharma',   role:'Web Developer',      desig:'Web Developer',   isAdmin:false},
-  'palak.intern@upgromedia.com':    {pass:'Palak@1009',   name:'Palak Gupta',            role:'Intern',             desig:'Intern',          isAdmin:false},
-  'adarsh.web@upgromedia.com':      {pass:'Adarsh@1010',  name:'Adarsh Srivastava',     role:'Web Developer',      desig:'Web Developer',   isAdmin:false},
-  'arpit@upgromedia.com':           {pass:'Arpit@1011',   name:'Arpit Yadav',            role:'Team',               desig:'Team',            isAdmin:false},
-  'junaid@upgromedia.com':          {pass:'Junaid@1014',  name:'Junaid',                 role:'Google Ads',         desig:'Google Ads',      isAdmin:false},
-  'neeraj.meta@upgromedia.com':     {pass:'Neeraj@1015',  name:'Neeraj Kumar Yadav',    role:'Meta Media Buyer',   desig:'Meta Media Buyer',isAdmin:false},
-  'chnadrakala.meta@upgromedia.com':{pass:'Chandrakala@1016',name:'Chandrakala Waldia', role:'Meta Media Buyer',   desig:'Meta Media Buyer',isAdmin:false},
-  'muskan.crm@upgromedia.com':      {pass:'Muskan@1018',  name:'Muskan Agarwal',         role:'CRM',                desig:'CRM',             isAdmin:false},
-  'aditya.googleads@upgromedia.com':{pass:'Aditya@1019',  name:'Aditya Sharma',          role:'Google Ads',         desig:'Google Ads',      isAdmin:false},
-  'aditya.mis@upgromedia.com':      {pass:'Aditya@1020',  name:'Aditya (MIS)',           role:'MIS',                desig:'MIS',             isAdmin:false},
-  'anshikagupta@upgromedia.com':    {pass:'Anshika@1021', name:'Anshika Gupta',          role:'CRM Executive',      desig:'CRM',             isAdmin:false},
-  'nishant.meta@upgromedia.com':    {pass:'Nishant@1022', name:'Nishant Arya',           role:'Meta Media Buyer',   desig:'Meta Media Buyer',isAdmin:false}
+  'ritutyagiea@upgromedia.com':     {pass:'Ritu@1001',    name:'Ritu Tyagi',           role:'Executive Assistant',desig:'EA',              isAdmin:true, isWorkAssigner:false},
+  'adarsh.mis@upgromedia.com':      {pass:'Adarsh@1012',  name:'Adarsh Singh',          role:'MIS',                desig:'MIS',             isAdmin:true, isWorkAssigner:false},
+  'dhiraj.jaiswal@upgromedia.com':  {pass:'Dheeraj@1013', name:'Dhiraj Jaiswal',        role:'Founder',            desig:'Founder',         isAdmin:true, isWorkAssigner:false},
+  'vraj9424@gmail.com':             {pass:'Tarun@1017',   name:'Tarun Verma',            role:'Founder',            desig:'Founder',         isAdmin:true, isWorkAssigner:false},
+  'vishal.editor@upgromedia.com':   {pass:'Vishal@1002',  name:'Vishal Srivastava',     role:'Video Editor',       desig:'Video Editor',    isAdmin:false,isWorkAssigner:false},
+  'ankit.seo@upgromedia.com':       {pass:'Ankit@1003',   name:'Ankit Prajapati',       role:'SEO Executive',      desig:'SEO',             isAdmin:false,isWorkAssigner:false},
+  'harsh.graphic@upgromedia.com':   {pass:'Harsh@1004',   name:'Harsh Kumar',            role:'Graphic Designer',   desig:'Graphic Designer',isAdmin:false,isWorkAssigner:false},
+  'vikasvideoedit@upgromedia.com':  {pass:'Vikas@1005',   name:'Vikas Pandey',           role:'Video Editor',       desig:'Video Editor',    isAdmin:false,isWorkAssigner:false},
+  'abhishek.meta@upgromedia.com':   {pass:'Abhishek@1006',name:'Abhishek Kasaudhan',    role:'Meta Media Buyer',   desig:'Meta Media Buyer',isAdmin:false,isWorkAssigner:false},
+  'harsh.editor@upgromedia.com':    {pass:'Harsh@1007',   name:'Harsh Verma',            role:'Video Editor',       desig:'Video Editor',    isAdmin:false,isWorkAssigner:false},
+  'dharmendra.web@upgromedia.com':  {pass:'Dharmendra@1008',name:'Dharmendra Sharma',   role:'Web Developer',      desig:'Web Developer',   isAdmin:false,isWorkAssigner:false},
+  'palak.intern@upgromedia.com':    {pass:'Palak@1009',   name:'Palak Gupta',            role:'Intern',             desig:'Intern',          isAdmin:false,isWorkAssigner:false},
+  'adarsh.web@upgromedia.com':      {pass:'Adarsh@1010',  name:'Adarsh Srivastava',     role:'Web Developer',      desig:'Web Developer',   isAdmin:false,isWorkAssigner:false},
+  'arpit@upgromedia.com':           {pass:'Arpit@1011',   name:'Arpit Yadav',            role:'Team',               desig:'Team',            isAdmin:false,isWorkAssigner:false},
+  'junaid@upgromedia.com':          {pass:'Junaid@1014',  name:'Junaid',                 role:'Google Ads',         desig:'Google Ads',      isAdmin:false,isWorkAssigner:false},
+  'neeraj.meta@upgromedia.com':     {pass:'Neeraj@1015',  name:'Neeraj Kumar Yadav',    role:'Meta Media Buyer',   desig:'Meta Media Buyer',isAdmin:false,isWorkAssigner:false},
+  'chnadrakala.meta@upgromedia.com':{pass:'Chandrakala@1016',name:'Chandrakala Waldia', role:'Meta Media Buyer',   desig:'Meta Media Buyer',isAdmin:false,isWorkAssigner:false},
+  'muskan.crm@upgromedia.com':      {pass:'Muskan@1018',  name:'Muskan Agarwal',         role:'CRM',                desig:'CRM',             isAdmin:false,isWorkAssigner:false},
+  'aditya.googleads@upgromedia.com':{pass:'Aditya@1019',  name:'Aditya Sharma',          role:'Google Ads',         desig:'Google Ads',      isAdmin:false,isWorkAssigner:false},
+  'aditya.mis@upgromedia.com':      {pass:'Aditya@1020',  name:'Aditya (MIS)',           role:'MIS',                desig:'MIS',             isAdmin:false,isWorkAssigner:false},
+  'anshikagupta@upgromedia.com':    {pass:'Anshika@1021', name:'Anshika Gupta',          role:'CRM Executive',      desig:'CRM',             isAdmin:false,isWorkAssigner:false},
+  'nishant.meta@upgromedia.com':    {pass:'Nishant@1022', name:'Nishant Arya',           role:'Meta Media Buyer',   desig:'Meta Media Buyer',isAdmin:false,isWorkAssigner:false}
 };
 
 const CLRS=['#0B84FF','#E53935','#00B67A','#F59E0B','#7C3AED','#0E9F8E','#EA580C','#DB2777','#64748B','#D97706','#1565C0','#16A34A','#9333EA','#0891B2'];
@@ -750,6 +757,7 @@ const PAGE_TITLES={dash:'Dashboard',mytasks:'My Tasks',alltasks:'All Tasks',anal
 let cu=null, allTasks=[], empReg=[], formLinks=[], charts={}, notifications=[];
 let activeEmpF=null, dateRange='all', drillData=[], editTaskId=null, editEmpEmail=null;
 const TODAY=new Date().toISOString().split('T')[0];
+const CUTOFF_DONE='2026-03-31'; // 31 March tak ke saare tasks Done hain Google Sheet mein
 
 // FIX: Persistent status overrides survive loadData() reload
 // This prevents task status from reverting after user action
@@ -808,7 +816,7 @@ function doLogin(){
   const pass=($('lpw')||{value:''}).value;
   const u=USERS[email];
   if(!u||u.pass!==pass){const e=$('lerr');if(e)e.style.display='block';return;}
-  cu={...u,email};
+  cu={...u,email,isWorkAssigner:u.isWorkAssigner||false};
   const e=$('lerr');if(e)e.style.display='none';
   $('lp').classList.add('hidden');
   $('app').classList.remove('hidden');
@@ -829,11 +837,19 @@ function initApp(){
   const bg=CLRS[ci%CLRS.length];
   const av=$('sb-av');if(av){av.textContent=ini(cu.name);av.style.background=bg;}
   const sn=$('sb-name');if(sn)sn.textContent=cu.name;
-  const sr=$('sb-role');if(sr)sr.textContent=cu.role;
 
+  // Show admin-only items for both admin AND work assigner
+  const canManage=cu.isAdmin||cu.isWorkAssigner;
   document.querySelectorAll('.admin-only').forEach(el=>{
+    canManage?el.classList.remove('hidden'):el.classList.add('hidden');
+  });
+  // Show/hide items that only pure admin should see (Employees page)
+  document.querySelectorAll('.admin-strict').forEach(el=>{
     cu.isAdmin?el.classList.remove('hidden'):el.classList.add('hidden');
   });
+  // Update sidebar role label
+  const roleLabel=cu.isAdmin?'👑 Admin':(cu.isWorkAssigner?'🔀 Work Assigner':cu.role);
+  const sr=$('sb-role');if(sr)sr.textContent=roleLabel;
 
   const h=new Date().getHours();
   const dg=$('dash-greet');if(dg)dg.textContent=(h<12?'Good Morning ☀️':h<17?'Good Afternoon 🌤':'Good Evening 🌙')+', '+cu.name.split(' ')[0];
@@ -855,6 +871,7 @@ function updateClock(){const el=$('tb-clk');if(el)el.textContent=new Date().toLo
 function refillEmpDropdown(){
   const sel=$('add-emp');if(!sel)return;
   sel.innerHTML='<option value="">— Select Employee —</option>';
+  // Admin sees all, Assigner sees all (they can assign to anyone), non-admin has no dropdown
   Object.entries(USERS).forEach(([email,u])=>{
     const o=document.createElement('option');
     o.value=email;o.textContent=u.name+' ('+u.desig+')';
@@ -879,7 +896,11 @@ function nav(page){
   pg.classList.add('act');
   document.querySelectorAll('.ni').forEach(n=>{if((n.getAttribute('onclick')||'').includes("'"+page+"'"))n.classList.add('act');});
   const ttl=$('tb-ttl');if(ttl)ttl.textContent=PAGE_TITLES[page]||page;
-  if(page==='analytics') renderCharts(allTasks);
+  if(page==='analytics'){
+    const ab=$('assigner-banner');
+    if(ab){cu.isWorkAssigner&&!cu.isAdmin?ab.classList.remove('hidden'):ab.classList.add('hidden');}
+    renderCharts(allTasks);
+  }
   if(page==='employees'){initEmpReg();renderEmpList();}
   if(page==='mytasks'){renderMyTasks();populateSubSel();}
   if(page==='alltasks') renderAllTasks();
@@ -956,6 +977,31 @@ async function loadData(){
 
     // Load form links
     try{const r2=await fetch(SURL+'?action=getFormLinks');const j2=await r2.json();if(j2.links)formLinks=j2.links;}catch(e){}
+    // Load employees from sheet (merges with hardcoded USERS)
+    try{
+      const re=await fetch(SURL+'?action=getEmployees');const je=await re.json();
+      if(je.employees&&Array.isArray(je.employees)){
+        je.employees.forEach(emp=>{
+          const email=(emp.email||'').toLowerCase().trim();if(!email)return;
+          const existing=USERS[email];
+          // Merge sheet data into USERS and empReg
+          USERS[email]={
+            name:emp.name||emp.Name||(existing&&existing.name)||email.split('@')[0],
+            pass:emp.pass||emp.Pass||(existing&&existing.pass)||'',
+            role:emp.role||emp.Role||emp.desig||emp.Desig||(existing&&existing.role)||'Team',
+            desig:emp.desig||emp.Desig||emp.role||emp.Role||(existing&&existing.desig)||'Team',
+            isAdmin:emp.isAdmin==='true'||emp.isAdmin===true||(existing&&existing.isAdmin)||false,
+            isWorkAssigner:emp.isWorkAssigner==='true'||emp.isWorkAssigner===true||(existing&&existing.isWorkAssigner)||false
+          };
+          const regIdx=empReg.findIndex(e=>e.email===email);
+          if(regIdx>=0){
+            Object.assign(empReg[regIdx],USERS[email]);
+          }else{
+            empReg.push({email,...USERS[email],active:emp.active!=='false'&&emp.active!==false,bg:CLRS[empReg.length%CLRS.length],joinDate:emp.joinDate||''});
+          }
+        });
+      }
+    }catch(e){}
     // Load notifications
     if(cu)pollNotifications();
 
@@ -1029,7 +1075,17 @@ function buildUI(){
 //  FILTERS
 // ════════════════════════════════════════════════════════════════
 function applyEmpF(tasks){
+  // Work Assigner: sees own tasks + tasks they assigned to others
+  if(!cu.isAdmin && cu.isWorkAssigner){
+    const mine=tasks.filter(t=>t.email===cu.email);
+    const myTeam=tasks.filter(t=>t.by===cu.name && t.email!==cu.email);
+    const combined=[...mine,...myTeam.filter(t=>!mine.find(x=>x.id===t.id))];
+    if(activeEmpF) return combined.filter(t=>t.email===activeEmpF);
+    return combined;
+  }
+  // Regular employee: only own tasks
   if(!cu.isAdmin) return tasks.filter(t=>t.email===cu.email);
+  // Admin: see all, optionally filtered by employee
   if(activeEmpF) return tasks.filter(t=>t.email===activeEmpF);
   return tasks;
 }
@@ -1046,9 +1102,10 @@ function applyDateF(tasks){
 function setRange(r,btn){dateRange=r;document.querySelectorAll('.fp2').forEach(b=>b.classList.remove('act'));if(btn)btn.classList.add('act');buildUI();}
 function setEmpF(email,el){activeEmpF=email;document.querySelectorAll('.efp').forEach(p=>p.classList.remove('act'));if(el)el.classList.add('act');buildUI();}
 function buildEmpPills(tasks){
-  if(!cu.isAdmin) return;
+  if(!cu.isAdmin && !cu.isWorkAssigner) return;
+  const filteredForPills=applyEmpF([...tasks]);
   const map={};
-  tasks.forEach(t=>{if(t.email){if(!map[t.email])map[t.email]={email:t.email,name:uname(t.email),cnt:0};map[t.email].cnt++;}});
+  filteredForPills.forEach(t=>{if(t.email){if(!map[t.email])map[t.email]={email:t.email,name:uname(t.email),cnt:0};map[t.email].cnt++;}});
   const sorted=Object.values(map).sort((a,b)=>b.cnt-a.cnt);
   const cont=$('emp-pills');if(!cont)return;
   cont.innerHTML='';
@@ -1253,6 +1310,7 @@ async function delTask(id){
 //  ADD/EDIT TASK
 // ════════════════════════════════════════════════════════════════
 function openAddTask(){
+  if(!cu.isAdmin && !cu.isWorkAssigner){toast('⚠ You do not have permission to assign tasks');return;}
   editTaskId=null;
   const t=$('m-add-t');if(t)t.textContent='📋 Assign New Task';
   ['add-task','add-emp','add-dd'].forEach(id=>{const el=$(id);if(el)el.value='';});
@@ -1394,7 +1452,9 @@ function buildEmpStats(tasks){
 
 function renderCharts(tasks){
   Object.values(charts).forEach(c=>{try{c.destroy()}catch(e){}});charts={};
-  const es=buildEmpStats(tasks),nm=es.map(e=>e.short);
+  // Work Assigner only sees their team's stats, not everyone
+  const chartTasks=(!cu.isAdmin && cu.isWorkAssigner)?applyEmpF([...tasks]):tasks;
+  const es=buildEmpStats(chartTasks),nm=es.map(e=>e.short);
   if(!es.length){
     ['c-perf','c-score','c-work','c-week','c-stat','c-pri','c-24h','c-dept','c-compare'].forEach(id=>{
       const cv=$(id);if(!cv)return;
@@ -1493,6 +1553,7 @@ function switchPerf(mode,el){
 }
 
 function renderPerfMatrix(es,tasks){
+  // tasks here should already be filtered for assigner
   const pm=$('pm-cnt');if(pm)pm.textContent=es.length+' employees';
   const tbody=$('pm-body');if(!tbody)return;
   tbody.innerHTML='';
@@ -1525,7 +1586,8 @@ function initEmpReg(){
   if(!empReg.length){
     empReg=Object.entries(USERS).map(([email,u],i)=>({
       email,name:u.name,pass:u.pass,role:u.role,desig:u.desig,
-      isAdmin:u.isAdmin,active:true,bg:CLRS[i%CLRS.length],joinDate:''
+      isAdmin:u.isAdmin,isWorkAssigner:u.isWorkAssigner||false,
+      active:true,bg:CLRS[i%CLRS.length],joinDate:''
     }));
   }
 }
@@ -1537,8 +1599,9 @@ function renderEmpList(){
   empReg.filter(e=>e.name.toLowerCase().includes(q)||e.email.toLowerCase().includes(q)).forEach(e=>{
     const div=document.createElement('div');div.className='ei'+(editEmpEmail===e.email?' act':'');
     div.onclick=()=>selectEmp(e.email);
+    const badge=e.isAdmin?' · 👑 Admin':e.isWorkAssigner?' · 🔀 Assigner':'';
     div.innerHTML=`<div class="ei-av" style="background:${e.bg}">${ini(e.name)}</div>
-      <div class="ei-info"><div class="ei-name">${e.name}</div><div class="ei-role">${e.desig}${e.isAdmin?' · Admin':''}</div></div>
+      <div class="ei-info"><div class="ei-name">${e.name}</div><div class="ei-role">${e.desig}${badge}</div></div>
       <div class="ei-dot" style="background:${e.active?'#00B67A':'#E53935'}"></div>`;
     cont.appendChild(div);
   });
@@ -1554,9 +1617,23 @@ function selectEmp(email){
   <div class="fg"><label class="fl2">Email (readonly)</label><input id="ef-e" value="${e.email}" class="fc" style="background:#f9f9f9;color:var(--muted)" readonly></div>
   <div class="fg"><label class="fl2">Password</label><input id="ef-p" type="password" value="${e.pass}" class="fc"></div>
   <div class="fg"><label class="fl2">Designation</label><select id="ef-d" class="fc">${DESIG_OPTS.map(d=>`<option value="${d}"${d===e.desig?' selected':''}>${d}</option>`).join('')}</select></div>
-  <div style="display:flex;gap:20px;margin-bottom:14px">
-    <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="ef-a"${e.isAdmin?' checked':''} style="width:14px;height:14px;accent-color:var(--blue)"> Admin</label>
-    <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="ef-ac"${e.active?' checked':''} style="width:14px;height:14px;accent-color:var(--green)"> Active</label>
+  <div style="background:#F8FAFC;border-radius:10px;padding:12px 14px;margin-bottom:14px;border:1px solid var(--border)">
+    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">Role & Access</div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="ef-a"${e.isAdmin?' checked':''} style="width:14px;height:14px;accent-color:var(--blue)" onchange="toggleAdminAssigner(this,'a')">
+        <span>👑 Make Admin <span style="font-size:10px;color:var(--muted)">(Full Access)</span></span>
+      </label>
+      <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="ef-wa"${e.isWorkAssigner?' checked':''} style="width:14px;height:14px;accent-color:var(--purple)" onchange="toggleAdminAssigner(this,'wa')">
+        <span>🔀 Make Work Assigner <span style="font-size:10px;color:var(--muted)">(Assign tasks, see team)</span></span>
+      </label>
+      <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="ef-ac"${e.active?' checked':''} style="width:14px;height:14px;accent-color:var(--green)">
+        <span>✅ Active</span>
+      </label>
+    </div>
+    <div id="ef-role-note" style="font-size:11px;color:var(--muted);margin-top:8px">${e.isAdmin?'👑 Admin has full access to all data, all employees, all analytics.':(e.isWorkAssigner?'🔀 Work Assigner can assign tasks and see performance of their team members only.':' Regular employee — only sees their own tasks.')}</div>
   </div>
   <div style="display:flex;gap:8px" id="ef-brow"></div>`;
   const brow=fp.querySelector('#ef-brow');
@@ -1571,26 +1648,79 @@ function selectNewEmp(){
   <div class="fg"><label class="fl2">Email *</label><input id="ef-e" class="fc" placeholder="rahul@upgromedia.com"></div>
   <div class="fg"><label class="fl2">Password *</label><input id="ef-p" type="password" class="fc" placeholder="e.g. Rahul@1020"></div>
   <div class="fg"><label class="fl2">Designation *</label><select id="ef-d" class="fc">${DESIG_OPTS.map(d=>`<option>${d}</option>`).join('')}</select></div>
-  <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer;margin-bottom:14px"><input type="checkbox" id="ef-a" style="width:14px;height:14px;accent-color:var(--blue)"> Admin Access</label>
+  <div style="background:#F8FAFC;border-radius:10px;padding:12px 14px;margin-bottom:14px;border:1px solid var(--border)">
+    <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">Role & Access</div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="ef-a" style="width:14px;height:14px;accent-color:var(--blue)" onchange="toggleAdminAssigner(this,'a')">
+        <span>👑 Make Admin <span style="font-size:10px;color:var(--muted)">(Full Access)</span></span>
+      </label>
+      <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="ef-wa" style="width:14px;height:14px;accent-color:var(--purple)" onchange="toggleAdminAssigner(this,'wa')">
+        <span>🔀 Make Work Assigner <span style="font-size:10px;color:var(--muted)">(Can assign tasks, see team)</span></span>
+      </label>
+    </div>
+    <div id="ef-role-note" style="font-size:11px;color:var(--muted);margin-top:8px">Regular employee — only sees their own tasks.</div>
+  </div>
   <button class="btn bs" style="width:100%" onclick="addNewEmp()">✅ Add Employee</button>`;
 }
-function saveEmp(oldEmail){
-  const name=($('ef-n')||{value:''}).value.trim();const pass=($('ef-p')||{value:''}).value.trim();
-  const desig=($('ef-d')||{value:''}).value;const isAdmin=($('ef-a')||{checked:false}).checked;const active=($('ef-ac')||{checked:true}).checked;
+function toggleAdminAssigner(el,type){
+  // Admin and WorkAssigner are mutually exclusive (unless you want both)
+  const efA=$('ef-a'),efWA=$('ef-wa'),note=$('ef-role-note');
+  if(!efA||!efWA) return;
+  if(type==='a'&&el.checked){ efWA.checked=false; }
+  if(type==='wa'&&el.checked){ efA.checked=false; }
+  const isAdmin=efA.checked, isWA=efWA.checked;
+  if(note) note.textContent=isAdmin?'👑 Admin has full access to all data, all employees, all analytics.':(isWA?'🔀 Work Assigner can assign tasks and see performance of their team members only.':'Regular employee — only sees their own tasks.');
+}
+async function saveEmp(oldEmail){
+  const name=($('ef-n')||{value:''}).value.trim();
+  const pass=($('ef-p')||{value:''}).value.trim();
+  const desig=($('ef-d')||{value:''}).value;
+  const isAdmin=($('ef-a')||{checked:false}).checked;
+  const isWorkAssigner=($('ef-wa')||{checked:false}).checked;
+  const active=($('ef-ac')||{checked:true}).checked;
   if(!name){toast('⚠ Name required');return;}
   const idx=empReg.findIndex(e=>e.email===oldEmail);
-  if(idx>=0)Object.assign(empReg[idx],{name,pass:pass||empReg[idx].pass,desig,role:desig,isAdmin,active});
-  if(USERS[oldEmail])Object.assign(USERS[oldEmail],{name,desig,role:desig,isAdmin,pass:pass||USERS[oldEmail].pass});
-  toast('✅ Employee updated!');renderEmpList();refillEmpDropdown();
+  const finalPass=pass||(idx>=0?empReg[idx].pass:'');
+  if(idx>=0) Object.assign(empReg[idx],{name,pass:finalPass,desig,role:desig,isAdmin,isWorkAssigner,active});
+  if(USERS[oldEmail]) Object.assign(USERS[oldEmail],{name,desig,role:desig,isAdmin,isWorkAssigner,pass:finalPass});
+  // Sync to Google Sheet
+  if(SURL){
+    try{
+      await fetch(SURL,{method:'POST',body:JSON.stringify({action:'updateEmployee',email:oldEmail,name,desig,role:desig,isAdmin,isWorkAssigner,active,pass:finalPass})});
+      toast('✅ Employee updated & synced to Sheet!');
+    }catch(e){toast('✅ Employee updated locally (Sheet sync failed)');}
+  }else{toast('✅ Employee updated! (Connect Sheet to persist)');}
+  renderEmpList();refillEmpDropdown();
+  // Re-render to show updated badge
+  selectEmp(oldEmail);
 }
-function addNewEmp(){
-  const name=($('ef-n')||{value:''}).value.trim();const email=($('ef-e')||{value:''}).value.trim().toLowerCase();
-  const pass=($('ef-p')||{value:''}).value.trim();const desig=($('ef-d')||{value:'Team'}).value;const isAdmin=($('ef-a')||{checked:false}).checked;
+async function addNewEmp(){
+  const name=($('ef-n')||{value:''}).value.trim();
+  const email=($('ef-e')||{value:''}).value.trim().toLowerCase();
+  const pass=($('ef-p')||{value:''}).value.trim();
+  const desig=($('ef-d')||{value:'Team'}).value;
+  const isAdmin=($('ef-a')||{checked:false}).checked;
+  const isWorkAssigner=($('ef-wa')||{checked:false}).checked;
   if(!name||!email||!pass){toast('⚠ Name, email and password required');return;}
   if(USERS[email]){toast('⚠ Email already exists');return;}
-  USERS[email]={name,pass,role:desig,desig,isAdmin};
-  empReg.push({email,name,pass,role:desig,desig,isAdmin,active:true,bg:CLRS[empReg.length%CLRS.length],joinDate:TODAY});
-  toast('✅ Employee added: '+name);renderEmpList();refillEmpDropdown();buildUI();
+  if(!email.includes('@')){toast('⚠ Valid email required');return;}
+  // Add to in-memory USERS and empReg
+  USERS[email]={name,pass,role:desig,desig,isAdmin,isWorkAssigner};
+  empReg.push({email,name,pass,role:desig,desig,isAdmin,isWorkAssigner,active:true,bg:CLRS[empReg.length%CLRS.length],joinDate:TODAY});
+  // Sync to Google Sheet
+  if(SURL){
+    try{
+      const res=await fetch(SURL,{method:'POST',body:JSON.stringify({action:'addEmployee',email,name,pass,desig,role:desig,isAdmin,isWorkAssigner,active:true,joinDate:TODAY})});
+      const d=await res.json().catch(()=>({}));
+      if(d.success===false) toast('✅ '+name+' added locally (Sheet: '+d.message+')');
+      else toast('✅ Employee added & synced: '+name);
+    }catch(e){toast('✅ '+name+' added locally (Sheet sync failed)');}
+  }else{toast('✅ Employee added: '+name+' (Connect Sheet to persist)');}
+  renderEmpList();refillEmpDropdown();buildUI();
+  // Show the new employee in panel
+  selectEmp(email);
 }
 function delEmp(email){
   if(!confirm('Remove '+email+'? Task history will remain.'))return;
@@ -1600,7 +1730,7 @@ function delEmp(email){
 }
 async function syncEmps(){
   if(!SURL){toast('⚠ Connect Google Sheet first');return;}
-  const emps=empReg.map(e=>({name:e.name,email:e.email,pass:e.pass,role:e.role,desig:e.desig,isAdmin:e.isAdmin,active:e.active,joinDate:e.joinDate||''}));
+  const emps=empReg.map(e=>({name:e.name,email:e.email,pass:e.pass,role:e.role,desig:e.desig,isAdmin:e.isAdmin,isWorkAssigner:e.isWorkAssigner||false,active:e.active,joinDate:e.joinDate||''}));
   try{await fetch(SURL,{method:'POST',body:JSON.stringify({action:'syncEmployees',employees:emps})});toast('✅ Synced!');}
   catch(e){toast('❌ Sync failed: '+e.message);}
 }
