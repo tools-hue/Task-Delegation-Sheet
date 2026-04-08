@@ -733,6 +733,8 @@ const USERS = {
   'adarsh.web@upgromedia.com':       {pass:'Adarsh@1010',     name:'Adarsh Srivastava',     role:'Web Developer',      desig:'Web Developer',    isAdmin:false, isManager:true},
   'ankit.seo@upgromedia.com':        {pass:'Ankit@1003',      name:'Ankit Prajapati',       role:'SEO Executive',      desig:'SEO',              isAdmin:false, isManager:true},
   'aditya.googleads@upgromedia.com': {pass:'Aditya@1019',     name:'Aditya Sharma',         role:'Google Ads',         desig:'Google Ads',       isAdmin:false, isManager:true},
+  'surya.meta@upgromedia.com':       {pass:'Surya@123',        name:'Surya Pratap Singh',    role:'Meta Media Buyer',   desig:'Meta Media Buyer', isAdmin:false, isManager:true},
+  'shubhi.meta@upgromedia.com':      {pass:'Shubhi@123',       name:'Shubhi Singh',          role:'Meta Media Buyer',   desig:'Meta Media Buyer', isAdmin:false, isManager:true},
 
   // USERS
   'vishal.editor@upgromedia.com':    {pass:'Vishal@1002',     name:'Vishal Srivastava',     role:'Video Editor',       desig:'Video Editor',     isAdmin:false, isManager:false},
@@ -800,12 +802,15 @@ const SESSION_STORE_KEY='upgro_current_user_v1';
 const EMP_SYNC_KEY='upgro_emp_sync_ping_v1';
 const FORCED_ASSIGNER_EMAILS=new Set([
   'ankit.seo@upgromedia.com',
-  'adarsh.web@upgromedia.com'
+  'adarsh.web@upgromedia.com',
+  'surya.meta@upgromedia.com',
+  'shubhi.meta@upgromedia.com'
 ]);
 const FORCED_ASSIGNER_NAMES=new Set([
   'ankit',
   'ankit prajapati',
   'surya',
+  'surya pratap singh',
   'shubhi singh',
   'adarsh srivastava'
 ]);
