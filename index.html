@@ -4,7 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>UpGro Media — Mission Control</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js">
+initEmpReg(true);
+if(restoreCurrentSession()){
+  const lp=$('lp'), app=$('app');
+  if(lp&&app){lp.classList.add('hidden');app.classList.remove('hidden');initApp();}
+}
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -447,8 +453,13 @@ textarea.fc{resize:vertical;min-height:68px}
           <div class="ch"><div class="ct">📤 Submit Completed Work</div></div>
           <div class="cb">
             <div class="fr" style="margin-bottom:10px">
-              <div class="fg" style="margin:0"><label class="fl2">Select Task *</label><select id="sub-task" class="fc"><option value="">— Select task —</option></select></div>
+              <div class="fg" style="margin:0"><label class="fl2">Select Task *</label><select id="sub-task" class="fc" onchange="refreshSubTaskMeta()"><option value="">— Select task —</option></select></div>
               <div class="fg" style="margin:0"><label class="fl2">Status</label><select id="sub-stat" class="fc"><option value="Completed">✅ Completed</option><option value="In Progress">⚡ Still In Progress</option></select></div>
+            </div>
+            <div id="sub-meta" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:var(--text2)"></div>
+            <div class="fr" style="margin-bottom:10px">
+              <div class="fg" style="margin:0"><label class="fl2">Done Units</label><input type="number" id="sub-done-units" class="fc" min="0" step="1" value="1"></div>
+              <div class="fg" style="margin:0"><label class="fl2">Edited Video Drive Link</label><input type="url" id="sub-drive-link" class="fc" placeholder="https://drive.google.com/..."/></div>
             </div>
             <div class="fg"><label class="fl2">Notes / Remarks</label><textarea id="sub-notes" class="fc" placeholder="Describe what you completed, add links or comments..."></textarea></div>
             <button class="btn bs" onclick="submitWork()">📤 Submit Work</button>
@@ -637,6 +648,11 @@ textarea.fc{resize:vertical;min-height:68px}
         <div class="fg" style="margin:0"><label class="fl2">Assign Date</label><input type="date" id="add-ad" class="fc"></div>
         <div class="fg" style="margin:0"><label class="fl2">Due Date</label><input type="date" id="add-dd" class="fc"></div>
       </div>
+      <div class="fr" style="margin-top:10px">
+        <div class="fg" style="margin:0"><label class="fl2">Total Units / Count *</label><input type="number" id="add-units" class="fc" min="1" step="1" value="1" placeholder="e.g. 17"></div>
+        <div class="fg" style="margin:0"><label class="fl2">References *</label><textarea id="add-ref" class="fc" rows="2" placeholder="Drive links, reference reels, inspirations, source file links..."></textarea></div>
+      </div>
+      <div class="fg" style="margin-top:10px"><label class="fl2">Ad Script / Ad Copy *</label><textarea id="add-copy" class="fc" rows="3" placeholder="Paste script / ad copy / instructions here..."></textarea></div>
       <div class="fg" style="margin-top:10px"><label class="fl2">Notes (optional)</label><textarea id="add-note" class="fc" rows="2" placeholder="Additional notes..."></textarea></div>
     </div>
     <div class="mof"><button class="btn bo" onclick="CM('m-add')">Cancel</button><button class="btn bp" onclick="saveTask()">💾 Save Task</button></div>
@@ -756,11 +772,32 @@ const $=id=>document.getElementById(id);
 const toast=msg=>{const el=document.createElement('div');el.className='toast';el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),2700);};
 
 // Role helpers
-const isAdmin=()=>!!(cu&&cu.isAdmin);
-const isManager=()=>!!(cu&&cu.isManager&&!cu.isAdmin);
-const canAssign=()=>!!(cu&&(cu.isAdmin||cu.isManager));
+function getCurrentEmployeeRecord(){
+  if(!cu||!cu.email) return null;
+  try{ initEmpReg(true); }catch(e){}
+  const email=String(cu.email).trim().toLowerCase();
+  const fresh=(typeof getStoredEmployee==='function' ? getStoredEmployee(email) : null) || empReg.find(e=>e.email===email) || null;
+  if(fresh){
+    cu={...cu,...fresh,email:fresh.email,role:fresh.role||fresh.desig,desig:fresh.desig||fresh.role};
+    cu.isAdmin=!!fresh.isAdmin;
+    cu.isManager=!!(!fresh.isAdmin && (fresh.isManager || /manager|assigner/i.test(String(fresh.role||fresh.desig||''))));
+  }
+  return fresh;
+}
+const isAdmin=()=>{
+  const r=getCurrentEmployeeRecord();
+  return !!((r&&r.isAdmin) || (cu&&cu.isAdmin));
+};
+const isManager=()=>{
+  const r=getCurrentEmployeeRecord();
+  if(r) return !!(!r.isAdmin && (r.isManager || /manager|assigner/i.test(String(r.role||r.desig||''))));
+  return !!(cu && !cu.isAdmin && (cu.isManager || /manager|assigner/i.test(String(cu.role||cu.desig||''))));
+};
+const canAssign=()=>!!(isAdmin()||isManager());
 const EMP_STORE_KEY='upgro_emp_dyn';
 const ROLE_STORE_KEY='upgro_roles_v3';
+const SESSION_STORE_KEY='upgro_current_user_v1';
+const EMP_SYNC_KEY='upgro_emp_sync_ping_v1';
 
 function getBaseRegistry(){
   return Object.entries(USERS).map(([email,u],i)=>({
@@ -779,6 +816,29 @@ function loadStoredRoles(){
 }
 function saveStoredRoles(obj){
   try{localStorage.setItem(ROLE_STORE_KEY,JSON.stringify(obj));}catch(e){}
+}
+function saveCurrentSession(){
+  try{if(cu&&cu.email)localStorage.setItem(SESSION_STORE_KEY,JSON.stringify({email:cu.email,ts:Date.now()}));}
+  catch(e){}
+}
+function clearCurrentSession(){
+  try{localStorage.removeItem(SESSION_STORE_KEY);}catch(e){}
+}
+function restoreCurrentSession(){
+  try{
+    const raw=localStorage.getItem(SESSION_STORE_KEY);
+    if(!raw)return false;
+    const sess=JSON.parse(raw)||{};
+    if(!sess.email)return false;
+    initEmpReg(true);
+    const fresh=getStoredEmployee(sess.email);
+    if(!fresh||fresh.active===false)return false;
+    cu={...fresh,email:fresh.email,role:fresh.role||fresh.desig,desig:fresh.desig||fresh.role};
+    return true;
+  }catch(e){return false;}
+}
+function emitEmpSync(){
+  try{localStorage.setItem(EMP_SYNC_KEY,String(Date.now()));}catch(e){}
 }
 function mergeRegistry(base,dyn,roles){
   const map=new Map();
@@ -842,6 +902,9 @@ function rehydrateCurrentUser(forceUI=false){
   const fresh=getStoredEmployee(cu.email);
   if(fresh){
     cu={...cu,...fresh,email:fresh.email,role:fresh.role||fresh.desig,desig:fresh.desig||fresh.role};
+    cu.isManager=!!(fresh.isManager||/manager|assigner/i.test(String(fresh.role||fresh.desig||'')));
+    cu.isAdmin=!!fresh.isAdmin;
+    saveCurrentSession();
     if($('sb-name'))$('sb-name').textContent=cu.name;
     if($('sb-role'))$('sb-role').textContent=cu.isAdmin?'👑 Admin':cu.isManager?'🔀 Manager':cu.role;
   }
@@ -853,24 +916,46 @@ function rehydrateCurrentUser(forceUI=false){
 }
 function handleRoleStorageSync(){
   initEmpReg(true);
+  if((!cu||!cu.email))restoreCurrentSession();
   rehydrateCurrentUser(true);
   buildUI();
   processAutoAccepts();
 }
+function flexDate(v){
+  if(v===null||v===undefined)return null;
+  const raw=String(v).trim();
+  if(!raw)return null;
+  let d=new Date(raw);
+  if(!isNaN(d))return d;
+  let m=raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(m){d=new Date(Number(m[1]),Number(m[2])-1,Number(m[3]));if(!isNaN(d))return d;}
+  m=raw.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})(?:,?\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(am|pm)?)?$/i);
+  if(m){
+    let day=Number(m[1]), month=Number(m[2])-1, year=Number(m[3]);
+    let hour=Number(m[4]||0), minute=Number(m[5]||0), second=Number(m[6]||0);
+    const mer=(m[7]||'').toLowerCase();
+    if(mer==='pm'&&hour<12)hour+=12;
+    if(mer==='am'&&hour===12)hour=0;
+    d=new Date(year,month,day,hour,minute,second);
+    if(!isNaN(d))return d;
+  }
+  return null;
+}
 function taskDateValue(t){
   if(!t)return null;
-  return pd(t.adate)||pd((t.ts||'').slice(0,10))||pd(t.ddate)||null;
+  return flexDate(t.adate)||parseTaskTimestamp(t)||flexDate(t.ddate)||null;
 }
 function sortTasksNewestFirst(tasks){
   return tasks.sort((a,b)=>{
     const bd=taskDateValue(b), ad=taskDateValue(a);
     const bt=bd?bd.getTime():0, at=ad?ad.getTime():0;
     if(bt!==at)return bt-at;
-    const bts=pd(b.ts||'')?.getTime?.()||0;
-    const ats=pd(a.ts||'')?.getTime?.()||0;
-    return bts-ats;
+    const bts=parseTaskTimestamp(b);
+    const ats=parseTaskTimestamp(a);
+    return (bts?bts.getTime():0)-(ats?ats.getTime():0);
   });
 }
+
 function openTaskDrillView(kind,label){
   const status=$('at-sf');
   const q=$('at-q');
@@ -966,7 +1051,7 @@ function isOD(t){
   const d=pd(t.ddate);if(!d)return false;
   const now=new Date();now.setHours(0,0,0,0);return d<now;
 }
-const pd=s=>{if(!s)return null;try{const d=new Date(s.length===10?s+'T00:00:00':s);return isNaN(d)?null:d;}catch(e){return null;}};
+const pd=s=>flexDate(s);
 const fd=s=>{const d=pd(s);if(!d)return s||'—';return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});};
 const dl=s=>{const d=pd(s);if(!d)return null;const n=new Date();n.setHours(0,0,0,0);return Math.round((d-n)/86400000);};
 function uname(email){if(!email)return 'Unknown';const u=USERS[email.toLowerCase()];if(u)return u.name;const r=empReg.find(e=>e.email.toLowerCase()===email.toLowerCase());if(r)return r.name;return email.split('@')[0].replace(/[._-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());}
@@ -994,6 +1079,8 @@ function doLogin(){
       return;
     }
     cu = {...regEmp, email, role:regEmp.role||regEmp.desig, desig:regEmp.desig||regEmp.role};
+    cu.isAdmin=!!regEmp.isAdmin;
+    cu.isManager=!!(!regEmp.isAdmin && (regEmp.isManager || /manager|assigner/i.test(String(regEmp.role||regEmp.desig||''))));
   } else {
     const e = $('lerr');
     if(e) e.style.display = 'block';
@@ -1004,12 +1091,14 @@ function doLogin(){
   const e = $('lerr');
   if(e) e.style.display = 'none';
 
+  saveCurrentSession();
   $('lp').classList.add('hidden');
   $('app').classList.remove('hidden');
   initApp();
 }
 
 function logout(){
+  clearCurrentSession();
   cu=null;allTasks=[];statusOverrides.clear();
   Object.values(charts).forEach(c=>{try{c.destroy()}catch(e){}});charts={};
   $('app').classList.add('hidden');$('lp').classList.remove('hidden');
@@ -1021,6 +1110,7 @@ function logout(){
 // ════════════════════════════════════════════════════════════════
 function initApp(){
   initEmpReg(true);
+  if((!cu||!cu.email))restoreCurrentSession();
   rehydrateCurrentUser();
   dataSheets=loadDS();
   const ci=Math.max(0,Object.keys(USERS).indexOf(cu.email));
@@ -1050,13 +1140,14 @@ function initApp(){
   setInterval(()=>{if(cu)pollNotifications();},60000);
   setInterval(()=>{processAutoAccepts();},60000);
   window.removeEventListener('storage',handleRoleStorageSync);
-  window.addEventListener('storage',handleRoleStorageSync);
+  window.addEventListener('storage',(ev)=>{ if(!ev || !ev.key || [ROLE_STORE_KEY,EMP_SYNC_KEY,SESSION_STORE_KEY].includes(ev.key)) handleRoleStorageSync(); });
   window.addEventListener('focus',()=>handleRoleStorageSync(),{once:false});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)handleRoleStorageSync();});
 }
 
 
 function updateSidebarVis(){
+  rehydrateCurrentUser();
   const niAll=$('ni-alltasks');
   const niAn=$('ni-analytics');
   const niEmp=$('ni-employees');
@@ -1080,6 +1171,7 @@ function updateSidebarVis(){
 }
 
 function renderPageButtons(){
+  rehydrateCurrentUser();
   // clear stale assign buttons
   document.querySelectorAll('.assign-main-btn').forEach(btn=>{ if(!canAssign()) btn.remove(); });
   // Dashboard
@@ -1192,6 +1284,8 @@ async function loadData(){
           adate:(r.AssignDate||r.adate||'').toString().slice(0,10),ddate,ts:r.Timestamp||r.ts||'',
           status,priority:(r.Priority||r.priority||'medium').toLowerCase(),
           acceptedAt:r.AcceptedAt||'',completedAt:r.CompletedAt||'',notes:r.Notes||r.notes||'',
+          references:r.References||r.references||'',adCopy:r.AdScript||r.AdCopy||r.adCopy||'',driveLink:r.DriveLink||r.driveLink||'',
+          totalUnits:Number(r.TotalUnits||r.totalUnits||1)||1,doneUnits:Number(r.DoneUnits||r.doneUnits||0)||0,pendingUnits:Number(r.PendingUnits||r.pendingUnits||0)||0,
           _source:r._source||'tasks'
         };
         if(!idMap[task.id]||r._source==='tasks')idMap[task.id]=task;
@@ -1306,27 +1400,35 @@ function applyEmpF(tasks){
 }
 function applyDateF(tasks){
   const now=new Date();now.setHours(0,0,0,0);
+  const endToday=new Date(now);endToday.setHours(23,59,59,999);
   if(dateRange==='all')return sortTasksNewestFirst(tasks);
   if(dateRange==='today')return sortTasksNewestFirst(tasks.filter(t=>{
     const d=taskDateValue(t); if(!d) return false;
-    d.setHours(0,0,0,0);
-    return d.getTime()===now.getTime();
+    return d>=now&&d<=endToday;
   }));
-  if(dateRange==='week'){const w=new Date(now);w.setDate(now.getDate()-6);return sortTasksNewestFirst(tasks.filter(t=>{const d=taskDateValue(t);return d&&d>=w&&d<=now;}));}
-  if(dateRange==='month'){const m=new Date(now.getFullYear(),now.getMonth(),1);return sortTasksNewestFirst(tasks.filter(t=>{const d=taskDateValue(t);return d&&d>=m&&d<=now;}));}
-  if(dateRange==='year'){const y=new Date(now.getFullYear(),0,1);return sortTasksNewestFirst(tasks.filter(t=>{const d=taskDateValue(t);return d&&d>=y&&d<=now;}));}
-  if(dateRange==='custom'){const f=$('dr-f'),t=$('dr-t');const fv=f?f.value:'',tv=t?t.value:'';return sortTasksNewestFirst(tasks.filter(t2=>{const d=taskDateValue(t2);if(!d)return false;const iso=d.toISOString().slice(0,10);return (!fv||iso>=fv)&&(!tv||iso<=tv);}));}
+  if(dateRange==='week'){const w=new Date(now);w.setDate(now.getDate()-6);return sortTasksNewestFirst(tasks.filter(t=>{const d=taskDateValue(t);return d&&d>=w&&d<=endToday;}));}
+  if(dateRange==='month'){const m=new Date(now.getFullYear(),now.getMonth(),1);return sortTasksNewestFirst(tasks.filter(t=>{const d=taskDateValue(t);return d&&d>=m&&d<=endToday;}));}
+  if(dateRange==='year'){const y=new Date(now.getFullYear(),0,1);return sortTasksNewestFirst(tasks.filter(t=>{const d=taskDateValue(t);return d&&d>=y&&d<=endToday;}));}
+  if(dateRange==='custom'){const f=$('dr-f'),t=$('dr-t');const fv=f?f.value:'',tv=t?t.value:'';return sortTasksNewestFirst(tasks.filter(t2=>{const d=taskDateValue(t2);if(!d)return false;const iso=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);return (!fv||iso>=fv)&&(!tv||iso<=tv);}));}
   return sortTasksNewestFirst(tasks);
 }
 function setRange(r,btn){
   dateRange=r;
   document.querySelectorAll('.fp2').forEach(b=>b.classList.remove('act'));
   if(btn)btn.classList.add('act');
-  if(!btn){
+  if(!btn&&r!=='custom'){
     const map={all:0,today:1,week:2,month:3,year:4};
     const idx=map[r];
     const buttons=document.querySelectorAll('.fp2');
     if(buttons[idx])buttons[idx].classList.add('act');
+  }
+  if(r==='custom'){
+    const f=$('dr-f'),t=$('dr-t');
+    if((!f||!f.value)&&(!t||!t.value)){
+      dateRange='all';
+      const buttons=document.querySelectorAll('.fp2');
+      if(buttons[0])buttons[0].classList.add('act');
+    }
   }
   buildUI();
 }
@@ -1365,8 +1467,8 @@ function renderStats(tasks){
   sv('k-ip',tasks.filter(t=>t.status==='in progress').length);
   sv('k-ov',tasks.filter(t=>isOD(t)).length);
   sv('k-aw',tasks.filter(t=>t.status==='assigned').length);
-  sv('k-mo',comp.filter(t=>pd(t.adate)>=m).length);
-  sv('k-yr',comp.filter(t=>pd(t.adate)>=y).length);
+  sv('k-mo',comp.filter(t=>{const d=taskDateValue(t);return d&&d>=m;}).length);
+  sv('k-yr',comp.filter(t=>{const d=taskDateValue(t);return d&&d>=y;}).length);
   sv('k-pg2',tasks.filter(t=>t.status==='in progress').length);
   const cwd=comp.filter(t=>t.ddate&&t.completedAt);
   let ot=0;
@@ -1443,7 +1545,7 @@ function renderMyTasks(){
       <div class="tc-top"><div class="tc-task">${t.task}</div><span class="pill ${sc}">${st}</span></div>
       <div class="tc-meta"><span>👤 By: ${t.by||'Admin'}</span><span>📅 Assign: ${fd(t.adate)}</span><span>🕐 Due: ${fd(t.ddate)}</span>
         ${d!==null?`<span style="color:${d<0?'var(--red)':d===0?'var(--orange)':'var(--muted)'}}">${d<0?Math.abs(d)+'d overdue':d===0?'Due today':'in '+d+' days'}</span>`:''}
-        <span>⚡ ${t.priority.charAt(0).toUpperCase()+t.priority.slice(1)}</span></div>
+        <span>⚡ ${t.priority.charAt(0).toUpperCase()+t.priority.slice(1)}</span><span>🔢 ${Number(t.doneUnits||0)}/${Number(t.totalUnits||1)} done</span>${t.driveLink?`<a href="${t.driveLink}" target="_blank" rel="noopener noreferrer">🎞 Drive</a>`:''}</div>
       <div class="tc-acts">${acts.join('')}</div>
     </div>`;
   }).join('');
@@ -1453,7 +1555,22 @@ function populateSubSel(){
   const sel=$('sub-task');if(!sel)return;
   const mine=allTasks.filter(t=>t.email===cu.email&&t.status!=='completed');
   sel.innerHTML='<option value="">— Select task —</option>';
-  mine.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=t.task.slice(0,80);sel.appendChild(o);});
+  mine.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=t.task.slice(0,80)+(t.totalUnits&&t.totalUnits>1?` · ${t.pendingUnits||t.totalUnits} pending`:'' );sel.appendChild(o);});
+  refreshSubTaskMeta();
+}
+function refreshSubTaskMeta(){
+  const taskId=($('sub-task')||{value:''}).value;
+  const meta=$('sub-meta');
+  const done=$('sub-done-units');
+  if(!meta||!done)return;
+  const t=allTasks.find(x=>x.id===taskId);
+  if(!t){meta.style.display='none';done.value=1;return;}
+  const pending=Math.max(0,Number(t.pendingUnits||Math.max(1,Number(t.totalUnits||1)-Number(t.doneUnits||0))));
+  meta.style.display='block';
+  meta.innerHTML=`<div><strong>${t.task}</strong></div><div style="margin-top:4px;display:flex;gap:12px;flex-wrap:wrap"><span>Total Units: <strong>${Number(t.totalUnits||1)}</strong></span><span>Done: <strong>${Number(t.doneUnits||0)}</strong></span><span>Pending: <strong>${pending}</strong></span>${t.driveLink?`<a href="${t.driveLink}" target="_blank" rel="noopener noreferrer">Current Drive Link</a>`:''}</div>`;
+  done.min='1';
+  done.max=String(Math.max(1,pending||1));
+  done.value=String(Math.max(1,Math.min(Number(done.value||1)||1,Math.max(1,pending||1))));
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -1482,7 +1599,7 @@ function renderAllTasks(){
     const d=dl(t.ddate);
     const tr=document.createElement('tr');
     tr.innerHTML=`<td style="color:var(--muted2);font-size:11px">${i+1}</td>
-      <td style="max-width:260px;white-space:normal;font-weight:600">${t.task.slice(0,100)}${t.task.length>100?'...':''}</td>
+      <td style="max-width:320px;white-space:normal;font-weight:600">${t.task.slice(0,100)}${t.task.length>100?'...':''}<div style="font-size:10px;color:var(--muted);margin-top:4px">🔢 ${Number(t.doneUnits||0)}/${Number(t.totalUnits||1)} done · ${Number(t.pendingUnits||Math.max(0,(Number(t.totalUnits||1)-Number(t.doneUnits||0))))} pending${t.driveLink?` · <a href="${t.driveLink}" target="_blank" rel="noopener noreferrer">Drive</a>`:''}</div></td>
       <td><div style="font-weight:600">${uname(t.email)}</div><div style="font-size:10px;color:var(--muted)">${udesig(t.email)}</div></td>
       <td style="color:var(--muted)">${t.by||'—'}</td>
       <td>${fd(t.adate)}</td>
@@ -1542,7 +1659,8 @@ async function delTask(id){
 function openAddTask(){
   editTaskId=null;
   const t=$('m-add-t');if(t)t.textContent='📋 Assign New Task';
-  ['add-task','add-dd','add-note'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  ['add-task','add-dd','add-note','add-ref','add-copy'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  const units=$('add-units');if(units)units.value='1';
   const empSel=$('add-emp');if(empSel)empSel.value='';
   const pri=$('add-pri');if(pri)pri.value='Medium';
   const ad=$('add-ad');if(ad)ad.value=TODAY;
@@ -1552,9 +1670,10 @@ function openEditTask(id){
   const t=allTasks.find(x=>x.id===id);if(!t)return;
   editTaskId=id;
   const ti=$('m-add-t');if(ti)ti.textContent='✏ Edit Task';
-  const fields={['add-task']:t.task,['add-emp']:t.email,['add-ad']:t.adate,['add-dd']:t.ddate,['add-note']:t.notes||''};
+  const fields={['add-task']:t.task,['add-emp']:t.email,['add-ad']:t.adate,['add-dd']:t.ddate,['add-note']:t.notes||'',['add-ref']:t.references||'',['add-copy']:t.adCopy||''};
   Object.entries(fields).forEach(([k,v])=>{const el=$(k);if(el)el.value=v;});
   const pri=$('add-pri');if(pri)pri.value=t.priority.charAt(0).toUpperCase()+t.priority.slice(1);
+  const units=$('add-units');if(units)units.value=String(Number(t.totalUnits||1)||1);
   const m=$('m-add');if(m)m.classList.remove('hidden');
 }
 async function saveTask(){
@@ -1564,20 +1683,29 @@ async function saveTask(){
   const adate=($('add-ad')||{value:''}).value;
   const ddate=($('add-dd')||{value:''}).value;
   const note=($('add-note')||{value:''}).value.trim();
+  const references=($('add-ref')||{value:''}).value.trim();
+  const adCopy=($('add-copy')||{value:''}).value.trim();
+  const totalUnits=Math.max(1,parseInt((($('add-units')||{value:'1'}).value||'1'),10)||1);
   if(!task){toast('⚠ Task description required');return;}
   if(!email){toast('⚠ Please select an employee');return;}
+  if(!references){toast('⚠ References required');return;}
+  if(!adCopy){toast('⚠ Ad Script / Ad Copy required');return;}
   if(!SURL){toast('⚠ Connect Google Sheet in Settings');return;}
   try{
     if(editTaskId){
-      await fetch(SURL,{method:'POST',body:JSON.stringify({action:'updateTask',id:editTaskId,task,priority:pri,ddate,notes:note})});
+      await fetch(SURL,{method:'POST',body:JSON.stringify({action:'updateTask',id:editTaskId,task,email,empName:uname(email),priority:pri,adate,ddate,notes:note,references,adCopy,totalUnits,pendingUnits:Math.max(0,totalUnits-Number((allTasks.find(x=>x.id===editTaskId)?.doneUnits)||0))})});
       const t=allTasks.find(x=>x.id===editTaskId);
-      if(t)Object.assign(t,{task,priority:pri.toLowerCase(),ddate,notes:note});
+      if(t){
+        const doneUnits=Number(t.doneUnits||0)||0;
+        Object.assign(t,{task,email,empName:uname(email),priority:pri.toLowerCase(),adate,ddate,notes:note,references,adCopy,totalUnits,doneUnits,pendingUnits:Math.max(0,totalUnits-doneUnits),desig:udesig(email)});
+      }
       toast('✅ Task updated!');
     } else {
-      const res=await fetch(SURL,{method:'POST',body:JSON.stringify({action:'addTask',task,email,empName:uname(email),by:cu.name,adate,ddate,priority:pri,notes:note})});
+      const payload={action:'addTask',task,email,empName:uname(email),by:cu.name,adate,ddate,priority:pri,notes:note,references,adCopy,totalUnits,doneUnits:0,pendingUnits:totalUnits,driveLink:''};
+      const res=await fetch(SURL,{method:'POST',body:JSON.stringify(payload)});
       const d=await res.json();
       if(d.id){
-        allTasks.push({id:d.id,task,email,empName:uname(email),by:cu.name,adate,ddate,priority:pri.toLowerCase(),status:'assigned',ts:new Date().toLocaleString('en-IN'),acceptedAt:'',completedAt:'',notes:note,desig:udesig(email),_source:'tasks'});
+        allTasks.push({id:d.id,task,email,empName:uname(email),by:cu.name,adate,ddate,priority:pri.toLowerCase(),status:'assigned',ts:new Date().toLocaleString('en-IN'),acceptedAt:'',completedAt:'',notes:note,references,adCopy,driveLink:'',totalUnits,doneUnits:0,pendingUnits:totalUnits,desig:udesig(email),_source:'tasks'});
         toast('✅ Task assigned to '+uname(email)+' + email sent!');
       }
     }
@@ -1592,18 +1720,28 @@ async function submitWork(){
   const taskId=($('sub-task')||{value:''}).value;
   const status=($('sub-stat')||{value:'Completed'}).value;
   const notes=($('sub-notes')||{value:''}).value.trim();
+  const driveLink=($('sub-drive-link')||{value:''}).value.trim();
+  let doneUnits=Math.max(1,parseInt((($('sub-done-units')||{value:'1'}).value||'1'),10)||1);
   if(!taskId){toast('⚠ Please select a task first');return;}
   if(!SURL){toast('⚠ Connect Google Sheet in Settings');return;}
   const t=allTasks.find(x=>x.id===taskId);
+  const totalUnits=Math.max(1,Number(t?.totalUnits||1)||1);
+  const currentDone=Math.max(0,Number(t?.doneUnits||0)||0);
+  const currentPending=Math.max(0,Number(t?.pendingUnits||Math.max(0,totalUnits-currentDone))||0);
+  doneUnits=Math.min(Math.max(1,doneUnits),Math.max(1,currentPending||1));
+  const updatedDone=Math.min(totalUnits,currentDone+doneUnits);
+  const updatedPending=Math.max(0,totalUnits-updatedDone);
   const now=new Date().toLocaleString('en-IN');
-  const newStatus=status==='Completed'?'completed':'in progress';
-  statusOverrides.set(taskId,{status:newStatus,completedAt:status==='Completed'?now:''});
-  if(t){t.status=newStatus;if(status==='Completed')t.completedAt=now;}
+  const newStatus=(status==='Completed'||updatedPending===0)?'completed':'in progress';
+  statusOverrides.set(taskId,{status:newStatus,completedAt:newStatus==='completed'?now:'',driveLink:driveLink||(t?.driveLink||''),doneUnits:updatedDone,pendingUnits:updatedPending});
+  if(t){t.status=newStatus;if(newStatus==='completed')t.completedAt=now;t.driveLink=driveLink||t.driveLink||'';t.doneUnits=updatedDone;t.pendingUnits=updatedPending;}
   buildUI();
   try{
-    await fetch(SURL,{method:'POST',body:JSON.stringify({action:'submitWork',taskId,email:cu.email,empName:cu.name,task:t?t.task:'',status,notes,id:taskId,adate:t?t.adate:'',ddate:t?t.ddate:'',by:t?t.by:'',ts:t?t.ts:''})});
+    await fetch(SURL,{method:'POST',body:JSON.stringify({action:'submitWork',taskId,email:cu.email,empName:cu.name,task:t?t.task:'',status:newStatus==='completed'?'Completed':'In Progress',notes,driveLink,doneUnits,updatedDoneUnits:updatedDone,pendingUnits:updatedPending,totalUnits,id:taskId,adate:t?t.adate:'',ddate:t?t.ddate:'',by:t?t.by:'',ts:t?t.ts:''})});
     toast('✅ Work submitted successfully!');
     const sn=$('sub-notes');if(sn)sn.value='';
+    const sdl=$('sub-drive-link');if(sdl)sdl.value='';
+    const sdu=$('sub-done-units');if(sdu)sdu.value='1';
     populateSubSel();
   }catch(e){toast('⚠ Submitted locally, sheet sync failed');}
 }
@@ -1967,6 +2105,23 @@ function saveEmp(oldEmail){
   };
   persistEmpRegistry();
   syncUserDirectoryFromRegistry();
+  const normalizedEmail=String(oldEmail).trim().toLowerCase();
+  if(USERS[normalizedEmail]){
+    USERS[normalizedEmail]={
+      ...(USERS[normalizedEmail]||{}),
+      name,
+      pass:pass||existing.pass,
+      role:desig,
+      desig,
+      isAdmin:!!isAdminCk,
+      isManager:!!(isMgrCk&&!isAdminCk),
+      active,
+      bg:existing.bg,
+      joinDate:existing.joinDate||''
+    };
+  }
+  emitEmpSync();
+  if(cu&&cu.email===normalizedEmail) saveCurrentSession();
   rehydrateCurrentUser(true);
   toast('✅ Employee updated and role synced live!');
   renderEmpList();
@@ -1988,6 +2143,16 @@ function addNewEmp(){
   empReg.push(newEmp);
   persistEmpRegistry();
   syncUserDirectoryFromRegistry();
+  USERS[email]={
+    ...(USERS[email]||{}),
+    email,name,pass,role:desig,desig,
+    isAdmin:!!isAdminCk,
+    isManager:!!(isMgrCk&&!isAdminCk),
+    active:true,
+    bg:newEmp.bg,
+    joinDate:TODAY
+  };
+  emitEmpSync();
   renderEmpList();
   selectEmp(email);
   refillEmpDropdown();
@@ -2002,6 +2167,7 @@ function delEmp(email){
   editEmpEmail=null;
   persistEmpRegistry();
   syncUserDirectoryFromRegistry();
+  emitEmpSync();
   if(cu&&cu.email===String(email).trim().toLowerCase()) rehydrateCurrentUser(true);
   const fp=$('emp-fp');if(fp)fp.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:32px;margin-bottom:8px">✓</div><div style="font-weight:600">Employee removed</div></div>';
   toast('🗑 Employee removed');renderEmpList();refillEmpDropdown();buildUI();
