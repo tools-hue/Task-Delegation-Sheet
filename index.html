@@ -450,6 +450,10 @@ textarea.fc{resize:vertical;min-height:68px}
               <div class="fg" style="margin:0"><label class="fl2">Select Task *</label><select id="sub-task" class="fc"><option value="">— Select task —</option></select></div>
               <div class="fg" style="margin:0"><label class="fl2">Status</label><select id="sub-stat" class="fc"><option value="Completed">✅ Completed</option><option value="In Progress">⚡ Still In Progress</option></select></div>
             </div>
+            <div class="fr" style="margin-bottom:10px">
+              <div class="fg" style="margin:0"><label class="fl2">Completed Count</label><input type="number" id="sub-count" class="fc" min="1" value="1" placeholder="How many parts completed?"></div>
+              <div class="fg" style="margin:0"><label class="fl2">Edited Video Drive Link</label><input type="url" id="sub-drive" class="fc" placeholder="https://drive.google.com/..."></div>
+            </div>
             <div class="fg"><label class="fl2">Notes / Remarks</label><textarea id="sub-notes" class="fc" placeholder="Describe what you completed, add links or comments..."></textarea></div>
             <button class="btn bs" onclick="submitWork()">📤 Submit Work</button>
           </div>
@@ -636,6 +640,14 @@ textarea.fc{resize:vertical;min-height:68px}
       <div class="fr" style="margin-top:10px">
         <div class="fg" style="margin:0"><label class="fl2">Assign Date</label><input type="date" id="add-ad" class="fc"></div>
         <div class="fg" style="margin:0"><label class="fl2">Due Date</label><input type="date" id="add-dd" class="fc"></div>
+      </div>
+      <div class="fr" style="margin-top:10px">
+        <div class="fg" style="margin:0"><label class="fl2">Project / Asset Name</label><input type="text" id="add-project" class="fc" placeholder="e.g. ABC Video Campaign"></div>
+        <div class="fg" style="margin:0"><label class="fl2">Work Count / Parts *</label><input type="number" id="add-count" class="fc" min="1" value="1" placeholder="e.g. 17"></div>
+      </div>
+      <div class="fr" style="margin-top:10px">
+        <div class="fg" style="margin:0"><label class="fl2">References *</label><textarea id="add-ref" class="fc" rows="2" placeholder="Reference links, brief, raw files, examples..."></textarea></div>
+        <div class="fg" style="margin:0"><label class="fl2">Ad Script / Ad Copy *</label><textarea id="add-script" class="fc" rows="2" placeholder="Mandatory for creative team tasks"></textarea></div>
       </div>
       <div class="fg" style="margin-top:10px"><label class="fl2">Notes (optional)</label><textarea id="add-note" class="fc" rows="2" placeholder="Additional notes..."></textarea></div>
     </div>
@@ -869,7 +881,9 @@ function initApp(){
   renderDSAddBtn();
   updateClock();setInterval(updateClock,1000);
   loadData();
-  setInterval(()=>{if(cu)pollNotifications();},60000);
+  window.addEventListener('focus',()=>{if(cu)loadData();});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&cu)loadData();});
+  setInterval(()=>{if(cu){pollNotifications();loadData();}},20000);
 }
 
 function updateSidebarVis(){
@@ -999,6 +1013,8 @@ async function loadData(){
           const due=new Date(ddate+'T00:00:00');const now=new Date();now.setHours(0,0,0,0);
           if(due<now&&status!=='in progress')status='overdue';
         }
+        const totalUnits=Math.max(1,parseInt(r.TotalUnits||r.totalUnits||r.Count||r.count||1,10)||1);
+        const doneUnits=Math.max(0,parseInt(r.DoneUnits||r.doneUnits||r.CompletedCount||r.completedCount||0,10)||0);
         const task={
           id:r.ID||r.id||('X'+Math.random().toString(36).slice(2)),
           task:r.Task||r.task||'',by:r.AssignedBy||r.by||'',email,
@@ -1006,8 +1022,17 @@ async function loadData(){
           adate:(r.AssignDate||r.adate||'').toString().slice(0,10),ddate,ts:r.Timestamp||r.ts||'',
           status,priority:(r.Priority||r.priority||'medium').toLowerCase(),
           acceptedAt:r.AcceptedAt||'',completedAt:r.CompletedAt||'',notes:r.Notes||r.notes||'',
+          projectName:r.ProjectName||r.projectName||'',
+          totalUnits,
+          doneUnits,
+          pendingUnits:Math.max(totalUnits-doneUnits,0),
+          references:r.References||r.references||'',
+          adScript:r.AdScript||r.AdCopy||r.adScript||r.adCopy||'',
+          driveLink:r.DriveLink||r.GoogleDriveLink||r.driveLink||'',
           _source:r._source||'tasks'
         };
+        if(task.doneUnits>=task.totalUnits && task.status!=='completed') task.status='completed';
+        else if(task.doneUnits>0 && task.status==='assigned') task.status='in progress';
         if(!idMap[task.id]||r._source==='tasks')idMap[task.id]=task;
       });
       allTasks=Object.values(idMap);
@@ -1084,11 +1109,17 @@ function renderCounters(tasks, containerId){
   const inprog=tasks.filter(t=>t.status==='in progress').length;
   const over=tasks.filter(t=>isOD(t)).length;
   const pending=tasks.filter(t=>t.status==='assigned').length;
+  const totalUnits=tasks.reduce((s,t)=>s+(t.totalUnits||1),0);
+  const doneUnits=tasks.reduce((s,t)=>s+(t.doneUnits||0),0);
+  const pendingUnits=tasks.reduce((s,t)=>s+(t.pendingUnits!=null?t.pendingUnits:Math.max((t.totalUnits||1)-(t.doneUnits||0),0)),0);
   let html=`<div class="tctr tctr-blue"><div class="tctr-v">${assigned}</div><div class="tctr-l">Total Assigned</div></div>
     <div class="tctr tctr-green"><div class="tctr-v">${done}</div><div class="tctr-l">Completed</div></div>
     <div class="tctr tctr-orange"><div class="tctr-v">${inprog}</div><div class="tctr-l">In Progress</div></div>
     <div class="tctr tctr-red"><div class="tctr-v">${over}</div><div class="tctr-l">Overdue</div></div>
-    <div class="tctr tctr-purple"><div class="tctr-v">${pending}</div><div class="tctr-l">Pending Accept</div></div>`;
+    <div class="tctr tctr-purple"><div class="tctr-v">${pending}</div><div class="tctr-l">Pending Accept</div></div>
+    <div class="tctr"><div class="tctr-v" style="color:var(--text);font-size:18px">${totalUnits}</div><div class="tctr-l">Total Units</div></div>
+    <div class="tctr"><div class="tctr-v" style="color:var(--green);font-size:18px">${doneUnits}</div><div class="tctr-l">Units Done</div></div>
+    <div class="tctr"><div class="tctr-v" style="color:var(--orange);font-size:18px">${pendingUnits}</div><div class="tctr-l">Units Pending</div></div>`;
   // Task name counters
   const taskNameCount={};
   tasks.forEach(t=>{const k=(t.task||'').slice(0,30);taskNameCount[k]=(taskNameCount[k]||0)+1;});
@@ -1208,7 +1239,7 @@ function renderDashTasks(){
     const ds=d===null?'':d<0?`<span style="color:var(--red)">${Math.abs(d)}d overdue</span>`:d===0?'<span style="color:var(--orange)">Due today</span>':`in ${d}d`;
     return `<div class="${cls}">
       <div class="tc-top"><div class="tc-task">${t.task.slice(0,100)}${t.task.length>100?'...':''}</div><span class="pill ${sc}">${st}</span></div>
-      <div class="tc-meta"><span>📅 Due: ${fd(t.ddate)}</span>${ds?`<span>${ds}</span>`:''}<span>⚡ ${t.priority}</span></div>
+      <div class="tc-meta"><span>📅 Due: ${fd(t.ddate)}</span>${ds?`<span>${ds}</span>`:''}<span>⚡ ${t.priority}</span><span>🔢 ${t.doneUnits||0}/${t.totalUnits||1}</span>${(t.pendingUnits||0)>0?`<span>⏳ ${t.pendingUnits} pending</span>`:''}</div>
       <div class="tc-acts">${t.status==='assigned'?`<button class="btn bp bxs" onclick="qAccept('${t.id}','${t.task.replace(/'/g,"\\'")}','${t.email}','${t.adate}','${t.ddate}')">▶ Accept</button>`:''}
         <button class="btn bs bxs" onclick="qDone('${t.id}')">✓ Done</button></div>
     </div>`;
@@ -1239,10 +1270,10 @@ function renderMyTasks(){
     if(t.status!=='completed')acts.push(`<button class="btn bs bsm" onclick="qDone('${t.id}')">✓ Mark Done</button>`);
     acts.push(`<button class="btn bo bsm" onclick="openEditTask('${t.id}')">✏ Edit</button>`);
     return `<div class="${cls}">
-      <div class="tc-top"><div class="tc-task">${t.task}</div><span class="pill ${sc}">${st}</span></div>
+      <div class="tc-top"><div class="tc-task">${t.task}${t.projectName?`<div style="font-size:11px;color:var(--muted);font-weight:500;margin-top:4px">📁 ${t.projectName}</div>`:''}</div><span class="pill ${sc}">${st}</span></div>
       <div class="tc-meta"><span>👤 By: ${t.by||'Admin'}</span><span>📅 Assign: ${fd(t.adate)}</span><span>🕐 Due: ${fd(t.ddate)}</span>
         ${d!==null?`<span style="color:${d<0?'var(--red)':d===0?'var(--orange)':'var(--muted)'}}">${d<0?Math.abs(d)+'d overdue':d===0?'Due today':'in '+d+' days'}</span>`:''}
-        <span>⚡ ${t.priority.charAt(0).toUpperCase()+t.priority.slice(1)}</span></div>
+        <span>⚡ ${t.priority.charAt(0).toUpperCase()+t.priority.slice(1)}</span><span>🔢 ${t.doneUnits||0}/${t.totalUnits||1}</span>${(t.pendingUnits||0)>0?`<span>⏳ ${t.pendingUnits} pending</span>`:''}${t.driveLink?`<span><a href="${t.driveLink}" target="_blank" rel="noopener noreferrer">Drive Link</a></span>`:''}</div>
       <div class="tc-acts">${acts.join('')}</div>
     </div>`;
   }).join('');
@@ -1252,7 +1283,7 @@ function populateSubSel(){
   const sel=$('sub-task');if(!sel)return;
   const mine=allTasks.filter(t=>t.email===cu.email&&t.status!=='completed');
   sel.innerHTML='<option value="">— Select task —</option>';
-  mine.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=t.task.slice(0,80);sel.appendChild(o);});
+  mine.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=`${t.task.slice(0,60)} • ${t.doneUnits||0}/${t.totalUnits||1} done • ${t.pendingUnits||((t.totalUnits||1)-(t.doneUnits||0))} pending`;sel.appendChild(o);});
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -1287,7 +1318,7 @@ function renderAllTasks(){
       <td>${fd(t.adate)}</td>
       <td>${fd(t.ddate)}<div style="font-size:10px;color:${d!==null&&d<0?'var(--red)':'var(--muted)'}">${d===null?'':d<0?Math.abs(d)+'d late':d===0?'Today':'in '+d+'d'}</div></td>
       <td><span class="pill ${sc}">${st}</span></td>
-      <td><span class="pdot ${pc}"></span>${t.priority.charAt(0).toUpperCase()+t.priority.slice(1)}</td>
+      <td><span class="pdot ${pc}"></span>${t.priority.charAt(0).toUpperCase()+t.priority.slice(1)}<div style="font-size:10px;color:var(--muted);margin-top:3px">${t.doneUnits||0}/${t.totalUnits||1} done${(t.pendingUnits||0)>0?` · ${t.pendingUnits} pending`:''}</div></td>
       <td class="acts-td"></td>`;
     const cell=tr.querySelector('.acts-td');
     const wrap=document.createElement('div');wrap.style.cssText='display:flex;gap:4px;flex-wrap:wrap';
@@ -1318,9 +1349,9 @@ async function qDone(id){
   const now=new Date().toLocaleString('en-IN');
   statusOverrides.set(id,{status:'completed',completedAt:now});
   const t=allTasks.find(x=>x.id===id);
-  if(t){t.status='completed';t.completedAt=now;}
+  if(t){t.status='completed';t.completedAt=now;t.doneUnits=t.totalUnits||1;t.pendingUnits=0;}
   buildUI();toast('✅ Task marked complete!');
-  try{await fetch(SURL,{method:'POST',body:JSON.stringify({action:'updateTask',id,status:'Completed'})});}
+  try{await fetch(SURL,{method:'POST',body:JSON.stringify({action:'updateTask',id,status:'Completed',doneUnits:(t&&t.totalUnits)||1,pendingUnits:0})});}
   catch(e){toast('⚠ Sheet sync failed — saved locally');}
 }
 
@@ -1341,7 +1372,7 @@ async function delTask(id){
 function openAddTask(){
   editTaskId=null;
   const t=$('m-add-t');if(t)t.textContent='📋 Assign New Task';
-  ['add-task','add-dd','add-note'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  ['add-task','add-dd','add-note','add-project','add-ref','add-script'].forEach(id=>{const el=$(id);if(el)el.value='';}); const ac=$('add-count'); if(ac)ac.value='1';
   const empSel=$('add-emp');if(empSel)empSel.value='';
   const pri=$('add-pri');if(pri)pri.value='Medium';
   const ad=$('add-ad');if(ad)ad.value=TODAY;
@@ -1351,7 +1382,7 @@ function openEditTask(id){
   const t=allTasks.find(x=>x.id===id);if(!t)return;
   editTaskId=id;
   const ti=$('m-add-t');if(ti)ti.textContent='✏ Edit Task';
-  const fields={['add-task']:t.task,['add-emp']:t.email,['add-ad']:t.adate,['add-dd']:t.ddate,['add-note']:t.notes||''};
+  const fields={['add-task']:t.task,['add-emp']:t.email,['add-ad']:t.adate,['add-dd']:t.ddate,['add-note']:t.notes||'',['add-project']:t.projectName||'',['add-ref']:t.references||'',['add-script']:t.adScript||''}; const ac=$('add-count'); if(ac)ac.value=t.totalUnits||1;
   Object.entries(fields).forEach(([k,v])=>{const el=$(k);if(el)el.value=v;});
   const pri=$('add-pri');if(pri)pri.value=t.priority.charAt(0).toUpperCase()+t.priority.slice(1);
   const m=$('m-add');if(m)m.classList.remove('hidden');
@@ -1363,22 +1394,28 @@ async function saveTask(){
   const adate=($('add-ad')||{value:''}).value;
   const ddate=($('add-dd')||{value:''}).value;
   const note=($('add-note')||{value:''}).value.trim();
+  const projectName=($('add-project')||{value:''}).value.trim();
+  const references=($('add-ref')||{value:''}).value.trim();
+  const adScript=($('add-script')||{value:''}).value.trim();
+  const totalUnits=Math.max(1,parseInt(($('add-count')||{value:'1'}).value,10)||1);
   if(!task){toast('⚠ Task description required');return;}
   if(!email){toast('⚠ Please select an employee');return;}
+  if(!references){toast('⚠ References are mandatory');return;}
+  if(!adScript){toast('⚠ Ad script / ad copy is mandatory');return;}
   if(!SURL){toast('⚠ Connect Google Sheet in Settings');return;}
   try{
     if(editTaskId){
-      await fetch(SURL,{method:'POST',body:JSON.stringify({action:'updateTask',id:editTaskId,task,priority:pri,ddate,notes:note})});
+      await fetch(SURL,{method:'POST',body:JSON.stringify({action:'updateTask',id:editTaskId,task,priority:pri,ddate,notes:note,projectName,totalUnits,references,adScript})});
       const t=allTasks.find(x=>x.id===editTaskId);
-      if(t)Object.assign(t,{task,priority:pri.toLowerCase(),ddate,notes:note});
+      if(t)Object.assign(t,{task,priority:pri.toLowerCase(),ddate,notes:note,projectName,totalUnits,pendingUnits:Math.max(totalUnits-(t.doneUnits||0),0),references,adScript});
       toast('✅ Task updated!');
     } else {
-      const res=await fetch(SURL,{method:'POST',body:JSON.stringify({action:'addTask',task,email,empName:uname(email),by:cu.name,adate,ddate,priority:pri,notes:note})});
+      const payload={action:'addTask',task,email,empName:uname(email),by:cu.name,adate,ddate,priority:pri,notes:note,projectName,totalUnits,doneUnits:0,pendingUnits:totalUnits,references,adScript};
+      const res=await fetch(SURL,{method:'POST',body:JSON.stringify(payload)});
       const d=await res.json();
-      if(d.id){
-        allTasks.push({id:d.id,task,email,empName:uname(email),by:cu.name,adate,ddate,priority:pri.toLowerCase(),status:'assigned',ts:new Date().toLocaleString('en-IN'),acceptedAt:'',completedAt:'',notes:note,desig:udesig(email),_source:'tasks'});
-        toast('✅ Task assigned to '+uname(email)+' + email sent!');
-      }
+      const taskId=d.id||('T'+Date.now());
+      allTasks.push({id:taskId,task,email,empName:uname(email),by:cu.name,adate,ddate,priority:pri.toLowerCase(),status:'assigned',ts:new Date().toLocaleString('en-IN'),acceptedAt:'',completedAt:'',notes:note,desig:udesig(email),projectName,totalUnits,doneUnits:0,pendingUnits:totalUnits,references,adScript,driveLink:'',_source:'tasks'});
+      toast('✅ Task assigned to '+uname(email));
     }
     CM('m-add');buildUI();
   }catch(e){toast('❌ '+e.message);}
@@ -1391,18 +1428,29 @@ async function submitWork(){
   const taskId=($('sub-task')||{value:''}).value;
   const status=($('sub-stat')||{value:'Completed'}).value;
   const notes=($('sub-notes')||{value:''}).value.trim();
+  const driveLink=($('sub-drive')||{value:''}).value.trim();
+  const countInput=Math.max(1,parseInt(($('sub-count')||{value:'1'}).value,10)||1);
   if(!taskId){toast('⚠ Please select a task first');return;}
   if(!SURL){toast('⚠ Connect Google Sheet in Settings');return;}
   const t=allTasks.find(x=>x.id===taskId);
+  if(!t){toast('⚠ Task not found');return;}
+  const currentDone=t.doneUnits||0;
+  const total=t.totalUnits||1;
+  const increment=Math.min(countInput,Math.max(total-currentDone,0));
+  const updatedDone=Math.min(total,currentDone+increment);
+  const pendingUnits=Math.max(total-updatedDone,0);
   const now=new Date().toLocaleString('en-IN');
-  const newStatus=status==='Completed'?'completed':'in progress';
-  statusOverrides.set(taskId,{status:newStatus,completedAt:status==='Completed'?now:''});
-  if(t){t.status=newStatus;if(status==='Completed')t.completedAt=now;}
+  const newStatus=(status==='Completed' && pendingUnits===0)?'completed':'in progress';
+  statusOverrides.set(taskId,{status:newStatus,completedAt:newStatus==='completed'?now:'',doneUnits:updatedDone,pendingUnits,driveLink:driveLink||t.driveLink||''});
+  Object.assign(t,{status:newStatus,doneUnits:updatedDone,pendingUnits,driveLink:driveLink||t.driveLink||''});
+  if(newStatus==='completed') t.completedAt=now;
   buildUI();
   try{
-    await fetch(SURL,{method:'POST',body:JSON.stringify({action:'submitWork',taskId,email:cu.email,empName:cu.name,task:t?t.task:'',status,notes,id:taskId,adate:t?t.adate:'',ddate:t?t.ddate:'',by:t?t.by:'',ts:t?t.ts:''})});
-    toast('✅ Work submitted successfully!');
+    await fetch(SURL,{method:'POST',body:JSON.stringify({action:'submitWork',taskId,email:cu.email,empName:cu.name,task:t?t.task:'',status:newStatus==='completed'?'Completed':'In Progress',notes,id:taskId,adate:t?t.adate:'',ddate:t?t.ddate:'',by:t?t.by:'',ts:t?t.ts:'',completedCount:increment,doneUnits:updatedDone,pendingUnits,driveLink:driveLink||'',projectName:t.projectName||'',references:t.references||'',adScript:t.adScript||''})});
+    toast(newStatus==='completed'?'✅ Work submitted successfully!':'✅ Progress updated successfully!');
     const sn=$('sub-notes');if(sn)sn.value='';
+    const sd=$('sub-drive');if(sd)sd.value='';
+    const sc=$('sub-count');if(sc)sc.value='1';
     populateSubSel();
   }catch(e){toast('⚠ Submitted locally, sheet sync failed');}
 }
@@ -1747,19 +1795,30 @@ function selectNewEmp(){
   </div>
   <button class="btn bs" style="width:100%" onclick="addNewEmp()">✅ Add Employee</button>`;
 }
+function updateCurrentUserRoleUI(){
+  if(!cu)return;
+  const sr=$('sb-role');if(sr)sr.textContent=cu.isAdmin?'👑 Admin':cu.isManager?'🔀 Manager':cu.role;
+  updateSidebarVis();
+  renderPageButtons();
+}
 function saveEmp(oldEmail){
   const name=($('ef-n')||{value:''}).value.trim();const pass=($('ef-p')||{value:''}).value.trim();
   const desig=($('ef-d')||{value:''}).value;const isAdminCk=($('ef-admin')||{checked:false}).checked;
   const isMgrCk=($('ef-mgr')||{checked:false}).checked;const active=($('ef-ac')||{checked:true}).checked;
   if(!name){toast('⚠ Name required');return;}
-  // Save role override to localStorage
+  const finalIsManager=isMgrCk&&!isAdminCk;
   const roles=JSON.parse(localStorage.getItem('upgro_roles_v3')||'{}');
-  roles[oldEmail]={isAdmin:isAdminCk,isManager:isMgrCk&&!isAdminCk};
+  roles[oldEmail]={isAdmin:isAdminCk,isManager:finalIsManager};
   localStorage.setItem('upgro_roles_v3',JSON.stringify(roles));
   const idx=empReg.findIndex(e=>e.email===oldEmail);
-  if(idx>=0)Object.assign(empReg[idx],{name,pass:pass||empReg[idx].pass,desig,role:desig,isAdmin:isAdminCk,isManager:isMgrCk&&!isAdminCk,active});
-  if(USERS[oldEmail])Object.assign(USERS[oldEmail],{name,desig,role:desig,isAdmin:isAdminCk,isManager:isMgrCk&&!isAdminCk,pass:pass||USERS[oldEmail].pass});
-  toast('✅ Employee updated! Role will apply on next login.');renderEmpList();refillEmpDropdown();
+  if(idx>=0)Object.assign(empReg[idx],{name,pass:pass||empReg[idx].pass,desig,role:desig,isAdmin:isAdminCk,isManager:finalIsManager,active});
+  if(USERS[oldEmail])Object.assign(USERS[oldEmail],{name,desig,role:desig,isAdmin:isAdminCk,isManager:finalIsManager,pass:pass||USERS[oldEmail].pass,active});
+  const dyn=JSON.parse(localStorage.getItem('upgro_emp_dyn')||'[]');
+  const dIdx=dyn.findIndex(e=>e.email===oldEmail);
+  if(dIdx>=0) dyn[dIdx]={...dyn[dIdx],name,pass:pass||dyn[dIdx].pass,desig,role:desig,isAdmin:isAdminCk,isManager:finalIsManager,active};
+  localStorage.setItem('upgro_emp_dyn',JSON.stringify(dyn));
+  if(cu&&cu.email===oldEmail){Object.assign(cu,{name,pass:pass||cu.pass,desig,role:desig,isAdmin:isAdminCk,isManager:finalIsManager,active}); updateCurrentUserRoleUI();}
+  toast('✅ Employee updated and role applied instantly!');renderEmpList();refillEmpDropdown();buildUI();
 }
 function addNewEmp(){
   const name=($('ef-n')||{value:''}).value.trim();const email=($('ef-e')||{value:''}).value.trim().toLowerCase();
@@ -1771,7 +1830,7 @@ function addNewEmp(){
   USERS[email]={pass,name,role:desig,desig,isAdmin:isAdminCk,isManager:isMgrCk&&!isAdminCk};
   empReg.push(newEmp);
   // Persist dynamic employees
-  const dyn=JSON.parse(localStorage.getItem('upgro_emp_dyn')||'[]');dyn.push(newEmp);localStorage.setItem('upgro_emp_dyn',JSON.stringify(dyn));
+  const dyn=JSON.parse(localStorage.getItem('upgro_emp_dyn')||'[]');dyn.push(newEmp);localStorage.setItem('upgro_emp_dyn',JSON.stringify(dyn)); const roles=JSON.parse(localStorage.getItem('upgro_roles_v3')||'{}'); roles[email]={isAdmin:isAdminCk,isManager:isMgrCk&&!isAdminCk}; localStorage.setItem('upgro_roles_v3',JSON.stringify(roles));
   toast('✅ Employee added: '+name);renderEmpList();refillEmpDropdown();buildUI();
 }
 function delEmp(email){
