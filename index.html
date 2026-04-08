@@ -780,7 +780,7 @@ function getCurrentEmployeeRecord(){
   if(fresh){
     cu={...cu,...fresh,email:fresh.email,role:fresh.role||fresh.desig,desig:fresh.desig||fresh.role};
     cu.isAdmin=!!fresh.isAdmin;
-    cu.isManager=!!(!fresh.isAdmin && (fresh.isManager || /manager|assigner/i.test(String(fresh.role||fresh.desig||''))));
+    cu.isManager=computeManagerFlag(fresh);
   }
   return fresh;
 }
@@ -790,14 +790,40 @@ const isAdmin=()=>{
 };
 const isManager=()=>{
   const r=getCurrentEmployeeRecord();
-  if(r) return !!(!r.isAdmin && (r.isManager || /manager|assigner/i.test(String(r.role||r.desig||''))));
-  return !!(cu && !cu.isAdmin && (cu.isManager || /manager|assigner/i.test(String(cu.role||cu.desig||''))));
+  if(r) return computeManagerFlag(r);
+  return computeManagerFlag(cu);
 };
 const canAssign=()=>!!(isAdmin()||isManager());
 const EMP_STORE_KEY='upgro_emp_dyn';
 const ROLE_STORE_KEY='upgro_roles_v3';
 const SESSION_STORE_KEY='upgro_current_user_v1';
 const EMP_SYNC_KEY='upgro_emp_sync_ping_v1';
+const FORCED_ASSIGNER_EMAILS=new Set([
+  'ankit.seo@upgromedia.com',
+  'adarsh.web@upgromedia.com'
+]);
+const FORCED_ASSIGNER_NAMES=new Set([
+  'ankit',
+  'ankit prajapati',
+  'surya',
+  'shubhi singh',
+  'adarsh srivastava'
+]);
+function normEmail(v){return String(v||'').trim().toLowerCase();}
+function normName(v){return String(v||'').trim().toLowerCase().replace(/\s+/g,' ');}
+function isForcedAssigner(rec){
+  if(!rec)return false;
+  const email=normEmail(rec.email);
+  const name=normName(rec.name);
+  if(FORCED_ASSIGNER_EMAILS.has(email))return true;
+  if(FORCED_ASSIGNER_NAMES.has(name))return true;
+  if(name==='adarsh srivastava' && /web developer/i.test(String(rec.desig||rec.role||'')))return true;
+  return false;
+}
+function computeManagerFlag(rec){
+  if(!rec || rec.isAdmin)return false;
+  return !!(rec.isManager || isForcedAssigner(rec) || /manager|assigner/i.test(String(rec.role||rec.desig||'')));
+}
 
 function getBaseRegistry(){
   return Object.entries(USERS).map(([email,u],i)=>({
@@ -867,6 +893,7 @@ function mergeRegistry(base,dyn,roles){
       bg: e.bg||CLRS[i%CLRS.length],
       joinDate: e.joinDate||''
     };
+    rec.isManager=computeManagerFlag(rec);
     if(rec.isAdmin)rec.isManager=false;
     out.push(rec);
   });
@@ -879,7 +906,7 @@ function persistEmpRegistry(){
   }));
   saveDynEmployees(dyn);
   const roles={};
-  dyn.forEach(e=>{roles[e.email]={isAdmin:!!e.isAdmin,isManager:!!(e.isManager&&!e.isAdmin)};});
+  dyn.forEach(e=>{roles[e.email]={isAdmin:!!e.isAdmin,isManager:!!computeManagerFlag(e)};});
   saveStoredRoles(roles);
 }
 function syncUserDirectoryFromRegistry(){
@@ -887,7 +914,7 @@ function syncUserDirectoryFromRegistry(){
     USERS[e.email]={
       ...(USERS[e.email]||{}),
       pass:e.pass,name:e.name,role:e.role||e.desig,desig:e.desig||e.role,
-      isAdmin:!!e.isAdmin,isManager:!!(e.isManager&&!e.isAdmin),active:e.active!==false,bg:e.bg,joinDate:e.joinDate||''
+      isAdmin:!!e.isAdmin,isManager:!!computeManagerFlag(e),active:e.active!==false,bg:e.bg,joinDate:e.joinDate||''
     };
   });
 }
@@ -902,7 +929,7 @@ function rehydrateCurrentUser(forceUI=false){
   const fresh=getStoredEmployee(cu.email);
   if(fresh){
     cu={...cu,...fresh,email:fresh.email,role:fresh.role||fresh.desig,desig:fresh.desig||fresh.role};
-    cu.isManager=!!(fresh.isManager||/manager|assigner/i.test(String(fresh.role||fresh.desig||'')));
+    cu.isManager=computeManagerFlag(fresh);
     cu.isAdmin=!!fresh.isAdmin;
     saveCurrentSession();
     if($('sb-name'))$('sb-name').textContent=cu.name;
@@ -922,13 +949,28 @@ function handleRoleStorageSync(){
   processAutoAccepts();
 }
 function flexDate(v){
-  if(v===null||v===undefined)return null;
+  if(v===null||v===undefined||v==='')return null;
+  if(v instanceof Date && !isNaN(v))return new Date(v.getTime());
+
   const raw=String(v).trim();
   if(!raw)return null;
-  let d=new Date(raw);
-  if(!isNaN(d))return d;
-  let m=raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if(m){d=new Date(Number(m[1]),Number(m[2])-1,Number(m[3]));if(!isNaN(d))return d;}
+
+  if(/^\d+$/.test(raw)){
+    const num=Number(raw);
+    if(num>30000 && num<90000){
+      const excelEpoch=new Date(Date.UTC(1899,11,30));
+      return new Date(excelEpoch.getTime()+num*86400000);
+    }
+    if(num>1000000000 && num<9999999999)return new Date(num*1000);
+    if(num>1000000000000 && num<9999999999999)return new Date(num);
+  }
+
+  let m=raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2})(?::(\d{2}))?)?$/i);
+  if(m){
+    const d=new Date(Number(m[1]),Number(m[2])-1,Number(m[3]),Number(m[4]||0),Number(m[5]||0),Number(m[6]||0));
+    if(!isNaN(d))return d;
+  }
+
   m=raw.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})(?:,?\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(am|pm)?)?$/i);
   if(m){
     let day=Number(m[1]), month=Number(m[2])-1, year=Number(m[3]);
@@ -936,9 +978,16 @@ function flexDate(v){
     const mer=(m[7]||'').toLowerCase();
     if(mer==='pm'&&hour<12)hour+=12;
     if(mer==='am'&&hour===12)hour=0;
-    d=new Date(year,month,day,hour,minute,second);
+    const d=new Date(year,month,day,hour,minute,second);
     if(!isNaN(d))return d;
   }
+
+  m=raw.match(/^([A-Za-z]{3,9})\s+(\d{1,2}),\s*(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(am|pm)?)?$/i);
+  if(m){
+    const d=new Date(raw);
+    if(!isNaN(d))return d;
+  }
+
   return null;
 }
 function taskDateValue(t){
@@ -1052,7 +1101,7 @@ function isOD(t){
   const now=new Date();now.setHours(0,0,0,0);return d<now;
 }
 const pd=s=>flexDate(s);
-const fd=s=>{const d=pd(s);if(!d)return s||'—';return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});};
+const fd=s=>{const d=pd(s);if(!d)return s||'—';const day=String(d.getDate()).padStart(2,'0');const mon=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];const yr=d.getFullYear();return `${day} ${mon} ${yr}`;};
 const dl=s=>{const d=pd(s);if(!d)return null;const n=new Date();n.setHours(0,0,0,0);return Math.round((d-n)/86400000);};
 function uname(email){if(!email)return 'Unknown';const u=USERS[email.toLowerCase()];if(u)return u.name;const r=empReg.find(e=>e.email.toLowerCase()===email.toLowerCase());if(r)return r.name;return email.split('@')[0].replace(/[._-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());}
 function udesig(email){if(!email)return 'Team';const u=USERS[email.toLowerCase()];if(u)return u.desig||u.role;const r=empReg.find(e=>e.email.toLowerCase()===email.toLowerCase());if(r)return r.desig||r.role;return 'Team';}
@@ -1080,7 +1129,7 @@ function doLogin(){
     }
     cu = {...regEmp, email, role:regEmp.role||regEmp.desig, desig:regEmp.desig||regEmp.role};
     cu.isAdmin=!!regEmp.isAdmin;
-    cu.isManager=!!(!regEmp.isAdmin && (regEmp.isManager || /manager|assigner/i.test(String(regEmp.role||regEmp.desig||''))));
+    cu.isManager=computeManagerFlag(regEmp);
   } else {
     const e = $('lerr');
     if(e) e.style.display = 'block';
@@ -1274,8 +1323,8 @@ async function loadData(){
         let status=normStatus(r.Status||r.status||'Assigned');
         const ddate=(r.DueDate||r.ddate||'').toString().slice(0,10);
         if(status!=='completed'&&ddate){
-          const due=new Date(ddate+'T00:00:00');const now=new Date();now.setHours(0,0,0,0);
-          if(due<now&&status!=='in progress')status='overdue';
+          const due=pd(ddate);const now=new Date();now.setHours(0,0,0,0);
+          if(due){due.setHours(0,0,0,0); if(due<now&&status!=='in progress')status='overdue';}
         }
         const task={
           id:r.ID||r.id||('X'+Math.random().toString(36).slice(2)),
@@ -2028,6 +2077,7 @@ function initEmpReg(force=false){
     const dyn=loadDynEmployees();
     const roles=loadStoredRoles();
     empReg=mergeRegistry(base,dyn,roles);
+    empReg=empReg.map(e=>({ ...e, isManager:computeManagerFlag(e) }));
     syncUserDirectoryFromRegistry();
   }
 }
@@ -2100,7 +2150,7 @@ function saveEmp(oldEmail){
     desig,
     role:desig,
     isAdmin:!!isAdminCk,
-    isManager:!!(isMgrCk&&!isAdminCk),
+    isManager:!!(isMgrCk&&!isAdminCk || isForcedAssigner({email:oldEmail,name,desig,role:desig})),
     active
   };
   persistEmpRegistry();
@@ -2114,7 +2164,7 @@ function saveEmp(oldEmail){
       role:desig,
       desig,
       isAdmin:!!isAdminCk,
-      isManager:!!(isMgrCk&&!isAdminCk),
+      isManager:!!(isMgrCk&&!isAdminCk || isForcedAssigner({email:normalizedEmail,name,desig,role:desig})),
       active,
       bg:existing.bg,
       joinDate:existing.joinDate||''
@@ -2139,7 +2189,7 @@ function addNewEmp(){
   const isMgrCk=($('ef-mgr')||{checked:false}).checked;
   if(!name||!email||!pass){toast('⚠ Name, email and password required');return;}
   if(empReg.find(e=>e.email===email)){toast('⚠ Email already exists');return;}
-  const newEmp={email,name,pass,role:desig,desig,isAdmin:!!isAdminCk,isManager:!!(isMgrCk&&!isAdminCk),active:true,bg:CLRS[empReg.length%CLRS.length],joinDate:TODAY};
+  const newEmp={email,name,pass,role:desig,desig,isAdmin:!!isAdminCk,isManager:!!(isMgrCk&&!isAdminCk || isForcedAssigner({email,name,desig,role:desig})),active:true,bg:CLRS[empReg.length%CLRS.length],joinDate:TODAY};
   empReg.push(newEmp);
   persistEmpRegistry();
   syncUserDirectoryFromRegistry();
@@ -2147,7 +2197,7 @@ function addNewEmp(){
     ...(USERS[email]||{}),
     email,name,pass,role:desig,desig,
     isAdmin:!!isAdminCk,
-    isManager:!!(isMgrCk&&!isAdminCk),
+    isManager:!!(isMgrCk&&!isAdminCk || isForcedAssigner({email,name,desig,role:desig})),
     active:true,
     bg:newEmp.bg,
     joinDate:TODAY
