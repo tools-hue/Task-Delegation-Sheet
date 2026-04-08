@@ -617,6 +617,18 @@ textarea.fc{resize:vertical;min-height:68px}
           </div>
         </div>
         <div class="sc">
+          <div class="sc-t">🔐 Self Password Change</div>
+          <div class="srow"><div><div class="sr-l">Change your login password</div><div class="sr-d">Every employee can update their own password from this portal.</div></div></div>
+          <div class="fr" style="margin-top:10px">
+            <div class="fg" style="margin:0"><label class="fl2">Current Password</label><input type="password" id="self-cur-pass" class="fc" placeholder="Enter current password"></div>
+            <div class="fg" style="margin:0"><label class="fl2">New Password</label><input type="password" id="self-new-pass" class="fc" placeholder="Enter new password"></div>
+          </div>
+          <div class="fg" style="margin-top:10px"><label class="fl2">Confirm New Password</label><input type="password" id="self-confirm-pass" class="fc" placeholder="Re-enter new password"></div>
+          <div style="display:flex;gap:8px;margin-top:4px">
+            <button class="btn bp bsm" onclick="changeOwnPassword()">🔐 Update Password</button>
+          </div>
+        </div>
+        <div class="sc">
           <div class="sc-t">📧 Email Notifications</div>
           <div class="srow"><div><div class="sr-l">Pending Task Hourly Alerts</div><div class="sr-d">Sent every hour for accepted &amp; pending tasks (from 01/04/2026) · Stops when task completed</div></div><span style="font-size:12px;color:var(--green);font-weight:700">✅ Active via Apps Script</span></div>
           <div class="srow"><div><div class="sr-l">Daily Report</div><div class="sr-d">Sent every day ~9 AM IST to admin</div></div><span style="font-size:12px;color:var(--green);font-weight:700">✅ Active via Apps Script</span></div>
@@ -738,16 +750,16 @@ const USERS = {
 
   // USERS
   'vishal.editor@upgromedia.com':    {pass:'Vishal@1002',     name:'Vishal Srivastava',     role:'Video Editor',       desig:'Video Editor',     isAdmin:false, isManager:false},
-  'ankit.seo@upgromedia.com':        {pass:'Ankit@1003',      name:'Ankit Prajapati',       role:'SEO Executive',      desig:'SEO',              isAdmin:false, isManager:false},
+  'ankit.seo@upgromedia.com':        {pass:'Ankit@1003',      name:'Ankit Prajapati',       role:'SEO Executive',      desig:'SEO',              isAdmin:false, isManager:true},
   'harsh.graphic@upgromedia.com':    {pass:'Harsh@1004',      name:'Harsh Kumar',           role:'Graphic Designer',   desig:'Graphic Designer', isAdmin:false, isManager:false},
   'harsh.editor@upgromedia.com':     {pass:'Harsh@1007',      name:'Harsh Verma',           role:'Video Editor',       desig:'Video Editor',     isAdmin:false, isManager:false},
   'palak.intern@upgromedia.com':     {pass:'Palak@1009',      name:'Palak Gupta',           role:'Intern',             desig:'Intern',           isAdmin:false, isManager:false},
-  'adarsh.web@upgromedia.com':       {pass:'Adarsh@1010',     name:'Adarsh Srivastava',     role:'Web Developer',      desig:'Web Developer',    isAdmin:false, isManager:false},
+  'adarsh.web@upgromedia.com':       {pass:'Adarsh@1010',     name:'Adarsh Srivastava',     role:'Web Developer',      desig:'Web Developer',    isAdmin:false, isManager:true},
   'arpit@upgromedia.com':            {pass:'Arpit@1011',      name:'Arpit Yadav',           role:'Team',               desig:'Team',             isAdmin:false, isManager:false},
   'junaid@upgromedia.com':           {pass:'Junaid@1014',     name:'Junaid',                role:'Google Ads',         desig:'Google Ads',       isAdmin:false, isManager:false},
   'chnadrakala.meta@upgromedia.com': {pass:'Chandrakala@1016',name:'Chandrakala Waldia',    role:'Meta Media Buyer',   desig:'Meta Media Buyer', isAdmin:false, isManager:false},
   'muskan.crm@upgromedia.com':       {pass:'Muskan@1018',     name:'Muskan Agarwal',        role:'CRM',                desig:'CRM',              isAdmin:false, isManager:false},
-  'aditya.googleads@upgromedia.com': {pass:'Aditya@1019',     name:'Aditya Sharma',         role:'Google Ads',         desig:'Google Ads',       isAdmin:false, isManager:false},
+  'aditya.googleads@upgromedia.com': {pass:'Aditya@1019',     name:'Aditya Sharma',         role:'Google Ads',         desig:'Google Ads',       isAdmin:false, isManager:true},
   'aditya.mis@upgromedia.com':       {pass:'Aditya@1020',     name:'Aditya',                role:'MIS',                desig:'MIS',              isAdmin:false, isManager:false},
   'anshikagupta@upgromedia.com':     {pass:'Anshika@1021',    name:'Anshika Gupta',         role:'CRM Executive',      desig:'CRM',              isAdmin:false, isManager:false},
   'nishant.meta@upgromedia.com':     {pass:'Nishant@1022',    name:'Nishant Arya',          role:'Meta Media Buyer',   desig:'Meta Media Buyer', isAdmin:false, isManager:false}
@@ -804,7 +816,8 @@ const FORCED_ASSIGNER_EMAILS=new Set([
   'ankit.seo@upgromedia.com',
   'adarsh.web@upgromedia.com',
   'surya.meta@upgromedia.com',
-  'shubhi.meta@upgromedia.com'
+  'shubhi.meta@upgromedia.com',
+  'aditya.googleads@upgromedia.com'
 ]);
 const FORCED_ASSIGNER_NAMES=new Set([
   'ankit',
@@ -812,7 +825,8 @@ const FORCED_ASSIGNER_NAMES=new Set([
   'surya',
   'surya pratap singh',
   'shubhi singh',
-  'adarsh srivastava'
+  'adarsh srivastava',
+  'aditya sharma'
 ]);
 function normEmail(v){return String(v||'').trim().toLowerCase();}
 function normName(v){return String(v||'').trim().toLowerCase().replace(/\s+/g,' ');}
@@ -2148,19 +2162,21 @@ function saveEmp(oldEmail){
   const idx=empReg.findIndex(e=>e.email===String(oldEmail).trim().toLowerCase());
   if(idx<0){toast('⚠ Employee not found');return;}
   const existing=empReg[idx];
+  const normalizedEmail=String(oldEmail).trim().toLowerCase();
+  const managerFlag=!!(isMgrCk || isForcedAssigner({email:normalizedEmail,name,desig,role:desig}));
   empReg[idx]={
     ...existing,
+    email:normalizedEmail,
     name,
     pass:pass||existing.pass,
     desig,
     role:desig,
     isAdmin:!!isAdminCk,
-    isManager:!!(isMgrCk&&!isAdminCk || isForcedAssigner({email:oldEmail,name,desig,role:desig})),
+    isManager:managerFlag,
     active
   };
   persistEmpRegistry();
   syncUserDirectoryFromRegistry();
-  const normalizedEmail=String(oldEmail).trim().toLowerCase();
   if(USERS[normalizedEmail]){
     USERS[normalizedEmail]={
       ...(USERS[normalizedEmail]||{}),
@@ -2169,7 +2185,7 @@ function saveEmp(oldEmail){
       role:desig,
       desig,
       isAdmin:!!isAdminCk,
-      isManager:!!(isMgrCk&&!isAdminCk || isForcedAssigner({email:normalizedEmail,name,desig,role:desig})),
+      isManager:managerFlag,
       active,
       bg:existing.bg,
       joinDate:existing.joinDate||''
@@ -2194,7 +2210,8 @@ function addNewEmp(){
   const isMgrCk=($('ef-mgr')||{checked:false}).checked;
   if(!name||!email||!pass){toast('⚠ Name, email and password required');return;}
   if(empReg.find(e=>e.email===email)){toast('⚠ Email already exists');return;}
-  const newEmp={email,name,pass,role:desig,desig,isAdmin:!!isAdminCk,isManager:!!(isMgrCk&&!isAdminCk || isForcedAssigner({email,name,desig,role:desig})),active:true,bg:CLRS[empReg.length%CLRS.length],joinDate:TODAY};
+  const managerFlag=!!(isMgrCk || isForcedAssigner({email,name,desig,role:desig}));
+  const newEmp={email,name,pass,role:desig,desig,isAdmin:!!isAdminCk,isManager:managerFlag,active:true,bg:CLRS[empReg.length%CLRS.length],joinDate:TODAY};
   empReg.push(newEmp);
   persistEmpRegistry();
   syncUserDirectoryFromRegistry();
@@ -2202,7 +2219,7 @@ function addNewEmp(){
     ...(USERS[email]||{}),
     email,name,pass,role:desig,desig,
     isAdmin:!!isAdminCk,
-    isManager:!!(isMgrCk&&!isAdminCk || isForcedAssigner({email,name,desig,role:desig})),
+    isManager:managerFlag,
     active:true,
     bg:newEmp.bg,
     joinDate:TODAY
