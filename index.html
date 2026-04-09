@@ -759,6 +759,25 @@ textarea.fc{resize:vertical;min-height:68px}
   </div>
 </div>
 
+<!-- DISCUSSION POINTS MODAL -->
+<div class="mov hidden" id="m-disc">
+  <div class="mo mo-lg" style="max-width:580px">
+    <div class="moh"><div class="mot">💬 Discussion Points</div><button class="mox" onclick="CM('m-disc')">✕</button></div>
+    <div class="mob2">
+      <input type="hidden" id="disc-mtg-id">
+      <div id="disc-mtg-info" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--text2)"></div>
+      <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">Add points jo meeting mein discuss hue:</div>
+      <div id="disc-points-wrap"></div>
+      <button class="btn bo bsm" onclick="addDiscPointRow()" style="margin-bottom:10px">➕ Add Point</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Ye points sheet mein save honge aur meeting card pe dikh jaayenge</div>
+    </div>
+    <div class="mof">
+      <button class="btn bo" onclick="CM('m-disc')">Cancel</button>
+      <button class="btn bp" onclick="saveDiscussionPoints()">💾 Save Points &amp; Sync to Sheet</button>
+    </div>
+  </div>
+</div>
+
 <!-- MEETING MODAL -->
 <div class="mov hidden" id="m-mtg">
   <div class="mo mo-lg" style="max-width:640px">
@@ -782,7 +801,7 @@ textarea.fc{resize:vertical;min-height:68px}
         </div>
       </div>
       <div class="fg" style="margin-top:10px"><label class="fl2">Location / Link</label><input type="text" id="mtg-loc" class="fc" placeholder="e.g. Conference Room A, or Google Meet link"></div>
-      <div class="fg" style="margin-top:10px"><label class="fl2">Agenda / Description *</label><textarea id="mtg-agenda" class="fc" rows="3" placeholder="Describe the meeting agenda, topics to be covered, goals..."></textarea></div>
+      <div class="fg" style="margin-top:10px"><label class="fl2">Agenda / Description <span style="font-weight:400;color:var(--muted)">(optional — fill later via Discussion Points)</span></label><textarea id="mtg-agenda" class="fc" rows="3" placeholder="Topics to be covered, goals, pre-meeting notes... (can be filled after meeting too)"></textarea></div>
       <!-- Attendee Multi-Select -->
       <div style="margin-top:12px">
         <label class="fl2">Select Attendees * <span style="font-weight:400;color:var(--muted)">(Multiple select)</span></label>
@@ -2637,22 +2656,61 @@ async function testConn(){
   // Setup trigger: run every 1 hour
   // In Apps Script: Triggers → Add Trigger → sendHourlyPendingAlerts → Time-based → Hour timer → Every hour
 
-  ── 4. MEETING INVITE EMAIL HANDLER ────────────────────────
-  Add this case inside your doPost(e) switch/if block:
+  ── 4. MEETING INVITE + DISCUSSION POINTS — COMPLETE HANDLER ──
+  Apne Apps Script ke doPost(e) function mein ye code add karo.
+  Pehle data parse karo (agar nahi hai to):
+    const data = JSON.parse(e.postData.contents);
 
-  case 'sendMeetingInvite': {
-    const to      = data.to;
-    const subject = data.subject;
-    const body    = data.body;
-    if(to && subject && body){
-      GmailApp.sendEmail(to, subject, body);
-      // Optionally log in a Meetings sheet:
-      const mSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Meetings');
-      if(mSheet){
-        mSheet.appendRow([data.meetingId, data.title, data.datetime, data.duration,
-          data.location, data.organizer, to, data.name, new Date().toLocaleString()]);
+  // ── MEETING INVITE (sabhi attendees ko ek hi call mein) ──
+  if(data.action === 'sendMeetingInvite'){
+    const emailList = data.emailList || [];  // [{email, name, body}]
+    const subject   = data.subject || 'Meeting Invite — UpGro Media';
+    let sent = 0;
+    emailList.forEach(item => {
+      try {
+        GmailApp.sendEmail(item.email, subject, item.body);
+        sent++;
+      } catch(err) {
+        Logger.log('Email failed for ' + item.email + ': ' + err);
       }
+    });
+    // Log to Meetings sheet
+    const mSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Meetings') ||
+                   SpreadsheetApp.getActiveSpreadsheet().insertSheet('Meetings');
+    // Header row (first time only)
+    if(mSheet.getLastRow() === 0){
+      mSheet.appendRow(['MeetingID','Title','DateTime','Duration','Location','Organizer',
+                        'AttendeeEmails','AttendeeCount','Agenda','Notes','SentAt']);
     }
+    const attEmails = (data.attendees||[]).map(a=>a.email).join(', ');
+    mSheet.appendRow([
+      data.meetingId, data.title, data.datetime, data.duration,
+      data.location||'', data.organizer,
+      attEmails, (data.attendees||[]).length,
+      data.agenda||'', data.notes||'',
+      new Date().toLocaleString()
+    ]);
+    return ContentService.createTextOutput(JSON.stringify({success:true,sent}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // ── DISCUSSION POINTS — save to sheet ──
+  if(data.action === 'saveMeetingDiscussion'){
+    const dSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('MeetingDiscussions') ||
+                   SpreadsheetApp.getActiveSpreadsheet().insertSheet('MeetingDiscussions');
+    if(dSheet.getLastRow() === 0){
+      dSheet.appendRow(['MeetingID','MeetingTitle','MeetingDate','Organizer',
+                        'AttendeeNames','PointNo','DiscussionPoint','DecidedBy','SavedBy','SavedAt']);
+    }
+    const attNames = (data.attendees||[]).map(a=>a.name).join(', ');
+    (data.discussionPoints||[]).forEach((p, i) => {
+      dSheet.appendRow([
+        data.meetingId, data.title, data.datetime, data.organizer,
+        attNames,
+        i+1, p.point, p.decidedBy||'', data.savedBy, data.savedAt
+      ]);
+    });
+    // Also update the Meetings sheet — find row by MeetingID and append discussion count
     return ContentService.createTextOutput(JSON.stringify({success:true}))
       .setMimeType(ContentService.MimeType.JSON);
   }
@@ -2710,8 +2768,16 @@ function renderMeetings(){
       <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">👥 Attendees (${(m.attendees||[]).length})</div>
       <div class="mtg-badges">${attBadges||'<span style="color:var(--muted);font-size:11px">No attendees</span>'}</div>
       ${m.notes?`<div style="font-size:11px;color:var(--muted);margin-top:6px;padding:6px 10px;background:var(--orange3);border-radius:6px">📌 ${m.notes}</div>`:''}
+      ${m.discussionPoints&&m.discussionPoints.length?`
+      <div style="margin-top:10px">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">💬 Discussion Points (${m.discussionPoints.length})</div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px">
+          ${m.discussionPoints.map((p,i)=>`<div style="display:flex;gap:8px;margin-bottom:${i<m.discussionPoints.length-1?'8':'0'}px;align-items:flex-start"><span style="font-size:11px;font-weight:700;color:var(--blue);min-width:20px">${i+1}.</span><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--text)">${p.point}</div>${p.decidedBy?`<div style="font-size:10px;color:var(--muted)">By: ${p.decidedBy} ${p.time?'· '+p.time:''}</div>`:''}</div></div>`).join('')}
+        </div>
+      </div>`:''}
       <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-        ${canAssign()?`<button class="btn bp bsm" onclick="resendMeetingMails('${m.id}')">📧 Resend Invites</button>`:''}
+        ${canAssign()?`<button class="btn bp bsm" onclick="resendMeetingMails('${m.id}')">📧 Resend Invites</button>
+        <button class="btn bo bsm" onclick="openDiscussionModal('${m.id}')">💬 ${m.discussionPoints&&m.discussionPoints.length?'Edit':'Add'} Discussion Points</button>`:''}
         <span style="font-size:10px;color:var(--muted)">By ${m.createdBy||'Admin'} · ${m.createdAt||''}</span>
       </div>
     </div>`;
@@ -2823,7 +2889,6 @@ async function saveMeeting(){
   const notes=($('mtg-notes')||{value:''}).value.trim();
   if(!title){toast('⚠ Meeting title required');return;}
   if(!date||!time){toast('⚠ Date and time required');return;}
-  if(!agenda){toast('⚠ Agenda required');return;}
   if(selectedAttendees.size===0){toast('⚠ Please select at least one attendee');return;}
   initEmpReg(true);
   const attendees=[...selectedAttendees].map(email=>{
@@ -2847,65 +2912,78 @@ async function saveMeeting(){
 }
 
 async function sendMeetingEmails(m, mode){
+  if(!SURL){
+    toast('⚠ Google Sheet URL not set — invites NOT sent. Go to Settings → paste URL first.');
+    return;
+  }
   const dt=new Date(m.datetime);
   const dateStr=dt.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   const timeStr=dt.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true});
-  for(const att of (m.attendees||[])){
+  const subject=`📅 ${mode==='updated'?'[Updated] ':''}Meeting Invite: ${m.title} — ${dateStr} at ${timeStr}`;
+
+  // Build per-attendee email bodies
+  const emailList=(m.attendees||[]).map(att=>{
     const otherAtts=(m.attendees||[]).filter(a=>a.email!==att.email);
     const coLines=otherAtts.map(a=>`  • ${a.name} (${a.desig})`).join('\n');
-    const emailBody=
+    const body=
 `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  📅  MEETING ${mode==='updated'?'UPDATE':'INVITATION'}
-  UpGro Media — Mission Control
+MEETING ${mode==='updated'?'UPDATE':'INVITATION'} — UpGro Media Mission Control
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Dear ${att.name},
 
 You ${mode==='updated'?'have been notified of an update to':'are cordially invited to'} the following meeting:
 
-┌─────────────────────────────────────┐
-  📌  ${m.title.toUpperCase()}
-└─────────────────────────────────────┘
+MEETING: ${m.title.toUpperCase()}
 
-  🗓  Date      :  ${dateStr}
-  ⏰  Time      :  ${timeStr}
-  ⏱  Duration  :  ${m.duration}
-${m.location?`  📍  Location  :  ${m.location}\n`:''}
-📋  AGENDA
-─────────────────────────────────────
+  Date      : ${dateStr}
+  Time      : ${timeStr}
+  Duration  : ${m.duration}
+${m.location?`  Location  : ${m.location}\n`:''}
+AGENDA
+---------------------------------------
 ${m.agenda}
 
-👥  ATTENDEES  (${m.attendees.length} people)
-─────────────────────────────────────
-  • ${att.name} (${att.desig})  ← YOU
+ATTENDEES (${m.attendees.length} people)
+---------------------------------------
+  • ${att.name} (${att.desig})  <- YOU
 ${coLines}
-
-${m.notes?`\n📌  ADDITIONAL NOTES\n─────────────────────────────────────\n${m.notes}\n`:''}
-─────────────────────────────────────
+${m.notes?`\nNOTES\n---------------------------------------\n${m.notes}\n`:''}
+---------------------------------------
 Organized by : ${m.createdBy}
-Sent via     : UpGro Media Mission Control
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Please be present on time. This is an official meeting invite.`;
+System       : UpGro Media Mission Control
+---------------------------------------
+Please be present on time.`;
+    return {email:att.email, name:att.name, body};
+  });
 
-    const payload={
-      action:'sendMeetingInvite',
-      to:att.email,
-      name:att.name,
-      subject:`📅 ${mode==='updated'?'[Updated] ':''}Meeting Invite: ${m.title} — ${dateStr} at ${timeStr}`,
-      body:emailBody,
-      meetingId:m.id,
-      title:m.title,
-      datetime:m.datetime,
-      duration:m.duration,
-      location:m.location||'',
-      agenda:m.agenda,
-      attendees:m.attendees,
-      organizer:m.createdBy
-    };
-    if(SURL){
-      try{ await fetch(SURL,{method:'POST',body:JSON.stringify(payload)}); }
-      catch(e){ console.warn('Meeting invite failed for',att.email,e); }
+  // Send all in one POST — Apps Script loops internally
+  const payload={
+    action:'sendMeetingInvite',
+    subject,
+    emailList,            // [{email, name, body}, ...]
+    meetingId:m.id,
+    title:m.title,
+    datetime:m.datetime,
+    duration:m.duration,
+    location:m.location||'',
+    agenda:m.agenda,
+    notes:m.notes||'',
+    attendees:m.attendees,
+    organizer:m.createdBy,
+    mode
+  };
+  try{
+    const res=await fetch(SURL,{method:'POST',body:JSON.stringify(payload),signal:AbortSignal.timeout(15000)});
+    const d=await res.json();
+    if(d.success){
+      toast('📧 Invites sent to '+emailList.length+' attendee(s) via Google Sheet!');
+    } else {
+      toast('⚠ Sheet responded but check Apps Script: '+(d.message||'unknown error'));
     }
+  } catch(e){
+    toast('❌ Email send failed — check Apps Script URL & permissions: '+e.message);
+    console.error('sendMeetingEmails error',e);
   }
 }
 
@@ -2914,6 +2992,86 @@ async function resendMeetingMails(id){
   const m=meetings.find(x=>x.id===id); if(!m)return;
   await sendMeetingEmails(m,'updated');
   toast('📧 Invites resent to '+(m.attendees||[]).length+' attendee(s)!');
+}
+
+function openDiscussionModal(id){
+  loadMeetings();
+  const m=meetings.find(x=>x.id===id); if(!m)return;
+  $('disc-mtg-id').value=id;
+  const info=$('disc-mtg-info');
+  if(info){
+    const dt=new Date(m.datetime);
+    info.innerHTML=`<strong>${m.title}</strong> &nbsp;·&nbsp; ${dt.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})} at ${dt.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true})}`;
+  }
+  const wrap=$('disc-points-wrap'); if(!wrap)return;
+  wrap.innerHTML='';
+  const pts=m.discussionPoints||[];
+  if(pts.length){
+    pts.forEach((p,i)=>addDiscPointRow(p.point,p.decidedBy,i));
+  } else {
+    addDiscPointRow('','',0);
+  }
+  $('m-disc').classList.remove('hidden');
+}
+
+function addDiscPointRow(point='',decidedBy='',idx){
+  const wrap=$('disc-points-wrap'); if(!wrap)return;
+  const n=wrap.children.length;
+  const row=document.createElement('div');
+  row.className='disc-row';
+  row.style.cssText='display:flex;gap:8px;margin-bottom:10px;align-items:flex-start';
+  row.innerHTML=`
+    <div style="flex-shrink:0;font-size:12px;font-weight:700;color:var(--blue);padding-top:10px;min-width:22px">${n+1}.</div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+      <input class="fc disc-point-text" placeholder="Discussion point / decision taken..." value="${(point||'').replace(/"/g,'&quot;')}" style="font-size:12px">
+      <input class="fc disc-point-by" placeholder="Decided by (optional)" value="${(decidedBy||'').replace(/"/g,'&quot;')}" style="font-size:11px;padding:5px 10px">
+    </div>
+    <button onclick="this.closest('.disc-row').remove();renumberDisc()" style="background:none;border:none;color:var(--red);font-size:16px;cursor:pointer;padding:8px 4px;flex-shrink:0">✕</button>`;
+  wrap.appendChild(row);
+}
+function renumberDisc(){
+  document.querySelectorAll('.disc-row').forEach((r,i)=>{
+    const num=r.querySelector('div');
+    if(num)num.textContent=(i+1)+'.';
+  });
+}
+
+async function saveDiscussionPoints(){
+  const id=($('disc-mtg-id')||{value:''}).value; if(!id)return;
+  loadMeetings();
+  const m=meetings.find(x=>x.id===id); if(!m)return;
+  const pts=[];
+  document.querySelectorAll('.disc-row').forEach(r=>{
+    const pt=(r.querySelector('.disc-point-text')||{value:''}).value.trim();
+    const by=(r.querySelector('.disc-point-by')||{value:''}).value.trim();
+    if(pt) pts.push({point:pt,decidedBy:by,time:new Date().toLocaleString('en-IN')});
+  });
+  m.discussionPoints=pts;
+  saveMeetings_local();
+  CM('m-disc');
+  renderMeetings();
+  // Sync to backend sheet
+  if(SURL&&pts.length){
+    try{
+      const payload={
+        action:'saveMeetingDiscussion',
+        meetingId:id,
+        title:m.title,
+        datetime:m.datetime,
+        organizer:m.createdBy,
+        attendees:m.attendees,
+        discussionPoints:pts,
+        savedBy:cu?cu.name:'Admin',
+        savedAt:new Date().toLocaleString('en-IN')
+      };
+      const res=await fetch(SURL,{method:'POST',body:JSON.stringify(payload),signal:AbortSignal.timeout(10000)});
+      const d=await res.json();
+      if(d.success) toast('✅ '+pts.length+' discussion point(s) saved & synced to sheet!');
+      else toast('⚠ Saved locally, sheet sync issue: '+(d.message||''));
+    }catch(e){ toast('⚠ Saved locally — sheet sync failed: '+e.message); }
+  } else {
+    toast('✅ '+pts.length+' discussion point(s) saved!');
+  }
 }
 
 function deleteMeeting(id){
