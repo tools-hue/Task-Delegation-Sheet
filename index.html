@@ -2554,174 +2554,229 @@ async function testConn(){
 
 </script>
 
-<!-- 
-=============================================================
-  GOOGLE APPS SCRIPT — PASTE IN YOUR .gs FILE
-=============================================================
+<!--
+=================================================================
+  UPGRO MEDIA — GOOGLE APPS SCRIPT (.gs) — COMPLETE READY CODE
+  Apne Apps Script mein EXISTING doPost function ke andar paste karo
+=================================================================
 
-  ── 1. TASK ASSIGNMENT EMAIL (with Work Quantity) ──────────
-  In your doPost(e) function, handle action='addTask' like this:
-  (The dashboard now sends emailBody + totalUnits in the payload)
+STEP 1 ── Apne .gs file mein "doPost" function dhundho
+STEP 2 ── const data = JSON.parse(e.postData.contents); ke baad
+          ye if-blocks paste karo
 
-  case 'addTask': {
-    // ... save task to sheet as usual ...
-    const empEmail = data.email;
-    const empName  = data.empName;
-    const totalUnits = data.totalUnits || 1;
-    // Send assignment email with quantity
-    const subject = '📋 New Task Assigned — UpGro Mission Control';
-    const body = data.emailBody ||
-      `Hi ${empName},\n\nYou have a new task assigned.\n\n`+
-      `Task: ${data.task}\nWork Quantity / Units: ${totalUnits}\n`+
-      `Due: ${data.ddate}\nPriority: ${data.priority}\nBy: ${data.by}\n\n`+
-      `UpGro Mission Control`;
-    GmailApp.sendEmail(empEmail, subject, body);
-    break;
-  }
+// ─────────────────────────────────────────────────────────────
+// MEETING INVITE — HTML Email sabhi attendees ko
+// ─────────────────────────────────────────────────────────────
+if(data.action === 'sendMeetingInvite'){
+  const attendeeList = data.attendeeList || [];
+  const subject = data.subject || 'Meeting Invite — UpGro Media';
+  let sent = 0;
 
-  ── 2. DELETE EMAIL ON TASK COMPLETION ─────────────────────
-  When submitWork or updateTask is called with deleteEmailOnComplete=true,
-  search Gmail for the task assignment email and trash it:
+  // Format datetime nicely
+  const dt = new Date(data.datetime);
+  const dateStr = dt.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const timeStr = dt.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true});
 
-  function deleteTaskAssignmentEmail(empEmail, taskName) {
+  // Send individual HTML email to each attendee
+  attendeeList.forEach(function(att) {
     try {
-      const query = `to:${empEmail} subject:"New Task Assigned" "${taskName.slice(0,30)}"`;
-      const threads = GmailApp.search(query, 0, 5);
-      threads.forEach(t => t.moveToTrash());
-      // Also delete hourly reminder emails for this task
-      const query2 = `to:${empEmail} subject:"Pending Tasks Reminder" "${taskName.slice(0,30)}"`;
-      const threads2 = GmailApp.search(query2, 0, 10);
-      threads2.forEach(t => t.moveToTrash());
-    } catch(e) { Logger.log('Email delete error: ' + e); }
-  }
+      const otherAtts = attendeeList.filter(function(a){ return a.email !== att.email; });
+      const otherRows = otherAtts.map(function(a){
+        return '<tr><td style="padding:7px 14px;font-size:13px;color:#334155;border-bottom:1px solid #F1F5F9">'+a.name+'</td>'
+              +'<td style="padding:7px 14px;font-size:12px;color:#64748B;border-bottom:1px solid #F1F5F9">'+a.desig+'</td></tr>';
+      }).join('');
 
-  In your doPost handler for submitWork / updateTask:
-  case 'submitWork':
-  case 'updateTask': {
-    // ... update sheet status to Completed ...
-    if(data.deleteEmailOnComplete && String(data.status||'').toLowerCase()==='completed'){
-      deleteTaskAssignmentEmail(data.email || data.empEmail, data.task);
-    }
-    break;
-  }
+      const htmlBody =
+        '<!DOCTYPE html><html><head><meta charset="UTF-8"></head>'
+        +'<body style="margin:0;padding:0;background:#F0F4F9;font-family:Arial,sans-serif">'
+        +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#F0F4F9;padding:28px 12px"><tr><td align="center">'
+        +'<table width="580" cellpadding="0" cellspacing="0" style="max-width:580px;width:100%;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.10)">'
 
-  ── 3. HOURLY PENDING ALERTS (only non-completed, with qty) ─
-  Tasks are auto-skipped from alerts once completed (since email
-  is deleted). But as backup, the alert also skips completed tasks:
+        // HEADER
+        +'<tr><td style="background:linear-gradient(135deg,#08192D,#122A45);padding:28px 32px;text-align:center">'
+        +'<div style="font-size:28px;margin-bottom:6px">📅</div>'
+        +'<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:3px;text-transform:uppercase;margin-bottom:6px">UpGro Media · Mission Control</div>'
+        +'<div style="font-size:20px;font-weight:800;color:#fff">'+(data.mode==='updated'?'Meeting Updated':'Meeting Invitation')+'</div>'
+        +'</td></tr>'
 
-  function sendHourlyPendingAlerts() {
-    const CUTOFF = new Date('2026-04-01');
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Tasks');
-    if(!sheet) return;
-    const data = sheet.getDataRange().getValues();
-    const headers = data[0];
-    const idxEmail    = headers.indexOf('AssignedTo_Email');
-    const idxTask     = headers.indexOf('Task');
-    const idxStatus   = headers.indexOf('Status');
-    const idxDue      = headers.indexOf('DueDate');
-    const idxTs       = headers.indexOf('Timestamp');
-    const idxUnitsT   = headers.indexOf('TotalUnits');
-    const idxUnitsD   = headers.indexOf('DoneUnits');
-    const idxUnitsP   = headers.indexOf('PendingUnits');
-    const pending = {};
-    for(let i=1;i<data.length;i++){
-      const row = data[i];
-      const ts = new Date(row[idxTs]);
-      if(ts < CUTOFF) continue;
-      const status = String(row[idxStatus]||'').toLowerCase();
-      if(status === 'completed') continue;  // ← skip completed = email disappears
-      const email = String(row[idxEmail]||'').toLowerCase();
-      if(!email) continue;
-      if(!pending[email]) pending[email] = [];
-      pending[email].push({
-        task:    row[idxTask],
-        status:  row[idxStatus],
-        due:     row[idxDue],
-        total:   row[idxUnitsT] || 1,
-        done:    row[idxUnitsD] || 0,
-        pend:    row[idxUnitsP] || (row[idxUnitsT] - row[idxUnitsD]) || 1
+        // GREETING
+        +'<tr><td style="padding:24px 32px 0"><p style="margin:0;font-size:15px;color:#334155">Dear <strong>'+att.name+'</strong>,</p>'
+        +'<p style="margin:10px 0 0;font-size:13px;color:#64748B;line-height:1.6">'
+        +'You '+(data.mode==='updated'?'have been notified of an update to':'are cordially invited to')+' the following meeting.</p></td></tr>'
+
+        // MEETING TITLE
+        +'<tr><td style="padding:18px 32px 0">'
+        +'<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-left:5px solid #0B84FF;border-radius:10px;padding:14px 18px">'
+        +'<div style="font-size:10px;font-weight:700;color:#1D4ED8;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">📌 Meeting</div>'
+        +'<div style="font-size:18px;font-weight:800;color:#0F172A">'+data.title+'</div>'
+        +'</div></td></tr>'
+
+        // DETAILS
+        +'<tr><td style="padding:16px 32px 0">'
+        +'<table width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFF;border:1px solid #E2E8F0;border-radius:10px;overflow:hidden">'
+        +'<tr style="background:#F1F5F9"><td colspan="2" style="padding:8px 14px;font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:1px">📋 Details</td></tr>'
+        +'<tr><td style="padding:9px 14px;font-size:12px;font-weight:700;color:#64748B;width:110px;border-bottom:1px solid #E2E8F0">🗓 Date</td>'
+        +'<td style="padding:9px 14px;font-size:13px;color:#0F172A;font-weight:600;border-bottom:1px solid #E2E8F0">'+dateStr+'</td></tr>'
+        +'<tr><td style="padding:9px 14px;font-size:12px;font-weight:700;color:#64748B;border-bottom:1px solid #E2E8F0">⏰ Time</td>'
+        +'<td style="padding:9px 14px;font-size:13px;color:#0F172A;font-weight:600;border-bottom:1px solid #E2E8F0">'+timeStr+'</td></tr>'
+        +'<tr><td style="padding:9px 14px;font-size:12px;font-weight:700;color:#64748B;'+(data.location?'border-bottom:1px solid #E2E8F0':'')+'">⏱ Duration</td>'
+        +'<td style="padding:9px 14px;font-size:13px;color:#0F172A;font-weight:600;'+(data.location?'border-bottom:1px solid #E2E8F0':'')+'">'+data.duration+'</td></tr>'
+        +(data.location?'<tr><td style="padding:9px 14px;font-size:12px;font-weight:700;color:#64748B">📍 Location</td>'
+        +'<td style="padding:9px 14px;font-size:13px;color:#0B84FF;font-weight:600">'+data.location+'</td></tr>':'')
+        +'</table></td></tr>'
+
+        // YOU ARE INVITED (highlighted)
+        +'<tr><td style="padding:14px 32px 0">'
+        +'<div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:10px;padding:12px 16px">'
+        +'<div style="font-size:10px;font-weight:700;color:#15803D;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">✅ You Are Invited</div>'
+        +'<div style="font-size:14px;font-weight:700;color:#0F172A">'+att.name+'</div>'
+        +'<div style="font-size:11px;color:#64748B">'+att.desig+' &nbsp;·&nbsp; '+att.email+'</div>'
+        +'</div></td></tr>'
+
+        // ALL ATTENDEES
+        +(attendeeList.length>1?
+          '<tr><td style="padding:14px 32px 0">'
+          +'<div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">👥 All Attendees ('+attendeeList.length+')</div>'
+          +'<table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E2E8F0;border-radius:10px;overflow:hidden">'
+          +'<tr style="background:#F8FAFF"><th style="padding:8px 14px;font-size:10px;font-weight:700;color:#64748B;text-align:left;text-transform:uppercase">Name</th>'
+          +'<th style="padding:8px 14px;font-size:10px;font-weight:700;color:#64748B;text-align:left;text-transform:uppercase">Role</th></tr>'
+          +'<tr style="background:#EFF6FF"><td style="padding:8px 14px;font-size:13px;color:#1D4ED8;font-weight:700;border-bottom:1px solid #F1F5F9">'+att.name+' ← YOU</td>'
+          +'<td style="padding:8px 14px;font-size:12px;color:#1D4ED8;border-bottom:1px solid #F1F5F9">'+att.desig+'</td></tr>'
+          +otherRows
+          +'</table></td></tr>'
+        :'')
+
+        // AGENDA
+        +(data.agenda?
+          '<tr><td style="padding:14px 32px 0">'
+          +'<div style="background:#FFFBEB;border:1px solid #FCD34D;border-radius:10px;padding:14px 18px">'
+          +'<div style="font-size:10px;font-weight:700;color:#B45309;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">📋 Agenda</div>'
+          +'<div style="font-size:13px;color:#334155;line-height:1.7;white-space:pre-line">'+data.agenda+'</div>'
+          +'</div></td></tr>'
+        :'')
+
+        // NOTES
+        +(data.notes?
+          '<tr><td style="padding:14px 32px 0">'
+          +'<div style="background:#F5F3FF;border:1px solid #C4B5FD;border-radius:10px;padding:14px 18px">'
+          +'<div style="font-size:10px;font-weight:700;color:#7C3AED;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">📌 Notes</div>'
+          +'<div style="font-size:13px;color:#334155;line-height:1.6">'+data.notes+'</div>'
+          +'</div></td></tr>'
+        :'')
+
+        // FOOTER
+        +'<tr><td style="background:#F8FAFF;border-top:1px solid #E2E8F0;padding:20px 32px;text-align:center;margin-top:20px">'
+        +'<div style="font-size:12px;font-weight:700;color:#334155;margin-bottom:3px">Organized by: '+data.organizer+'</div>'
+        +'<div style="font-size:11px;color:#94A3B8;margin-bottom:10px">Official meeting invite from UpGro Media Mission Control</div>'
+        +'<div style="font-size:20px">📊</div>'
+        +'<div style="font-size:10px;color:#CBD5E1;margin-top:4px">UpGro Media · upgromedia.com</div>'
+        +'</td></tr>'
+
+        +'</table></td></tr></table>'
+        +'</body></html>';
+
+      GmailApp.sendEmail(att.email, data.subject || subject, 'Please enable HTML to view this email.', {
+        htmlBody: htmlBody,
+        name: 'UpGro Media Mission Control'
       });
+      sent++;
+    } catch(err) {
+      Logger.log('Meeting invite FAILED for ' + att.email + ': ' + err.toString());
     }
-    Object.entries(pending).forEach(([email, tasks]) => {
-      const body = tasks.map(t =>
-        `• ${t.task}\n  Status: ${t.status} | Due: ${t.due} | Qty: ${t.done}/${t.total} done (${t.pend} pending)`
-      ).join('\n\n');
-      GmailApp.sendEmail(email,
-        '⏰ Pending Tasks Reminder — UpGro Mission Control',
-        `Hi,\n\nYou have ${tasks.length} pending task(s):\n\n${body}\n\nPlease complete them ASAP.\n\nUpGro Mission Control`
-      );
-    });
+  });
+
+  // Log to Meetings sheet
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var mSheet = ss.getSheetByName('Meetings');
+  if(!mSheet){ mSheet = ss.insertSheet('Meetings'); }
+  if(mSheet.getLastRow() === 0){
+    mSheet.appendRow(['MeetingID','Title','DateTime','Duration','Location',
+                      'Organizer','AttendeeNames','AttendeeEmails','AttendeeCount',
+                      'Agenda','Notes','Mode','EmailsSent','LoggedAt']);
   }
+  var attNames  = attendeeList.map(function(a){ return a.name; }).join(', ');
+  var attEmails = attendeeList.map(function(a){ return a.email; }).join(', ');
+  mSheet.appendRow([
+    data.meetingId, data.title, data.datetime, data.duration, data.location||'',
+    data.organizer, attNames, attEmails, attendeeList.length,
+    data.agenda||'', data.notes||'', data.mode||'new', sent,
+    new Date().toLocaleString()
+  ]);
 
-  // Setup trigger: run every 1 hour
-  // In Apps Script: Triggers → Add Trigger → sendHourlyPendingAlerts → Time-based → Hour timer → Every hour
+  return ContentService.createTextOutput(JSON.stringify({success:true, sent:sent}))
+    .setMimeType(ContentService.MimeType.JSON);
+}
 
-  ── 4. MEETING INVITE + DISCUSSION POINTS — COMPLETE HANDLER ──
-  Apne Apps Script ke doPost(e) function mein ye code add karo.
-  Pehle data parse karo (agar nahi hai to):
-    const data = JSON.parse(e.postData.contents);
-
-  // ── MEETING INVITE (sabhi attendees ko ek hi call mein) ──
-  if(data.action === 'sendMeetingInvite'){
-    // emailList = [{email, name, htmlBody, subject}, ...]
-    const emailList = data.emailList || [];
-    const subject   = data.subject || 'Meeting Invite — UpGro Media';
-    let sent = 0;
-    emailList.forEach(item => {
-      try {
-        // Send as HTML email (professional template with logo)
-        GmailApp.sendEmail(
-          item.email,
-          item.subject || subject,
-          'This is an HTML email. Please enable HTML to view it.',  // plaintext fallback
-          { htmlBody: item.htmlBody, name: 'UpGro Media Mission Control' }
-        );
-        sent++;
-      } catch(err) {
-        Logger.log('Meeting invite failed for ' + item.email + ': ' + err);
-      }
-    });
-    // ── Log to Meetings sheet ──
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    let mSheet = ss.getSheetByName('Meetings');
-    if(!mSheet){ mSheet = ss.insertSheet('Meetings'); }
-    if(mSheet.getLastRow() === 0){
-      mSheet.appendRow(['MeetingID','Title','DateTime','Duration','Location',
-                        'Organizer','AttendeeEmails','AttendeeCount','Agenda','Notes','SentAt','EmailsSent']);
-    }
-    const attEmails = (data.attendees||[]).map(a=>a.name+' <'+a.email+'>').join(', ');
-    mSheet.appendRow([
-      data.meetingId, data.title, data.datetime, data.duration,
-      data.location||'', data.organizer,
-      attEmails, (data.attendees||[]).length,
-      data.agenda||'', data.notes||'',
-      new Date().toLocaleString(), sent
+// ─────────────────────────────────────────────────────────────
+// MEETING DISCUSSION POINTS — Save to sheet
+// ─────────────────────────────────────────────────────────────
+if(data.action === 'saveMeetingDiscussion'){
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var dSheet = ss.getSheetByName('MeetingDiscussions');
+  if(!dSheet){ dSheet = ss.insertSheet('MeetingDiscussions'); }
+  if(dSheet.getLastRow() === 0){
+    dSheet.appendRow(['MeetingID','MeetingTitle','MeetingDate','Organizer',
+                      'AttendeeNames','PointNo','DiscussionPoint','DecidedBy','SavedBy','SavedAt']);
+  }
+  var attNames = (data.attendees||[]).map(function(a){ return a.name; }).join(', ');
+  (data.discussionPoints||[]).forEach(function(p, i){
+    dSheet.appendRow([
+      data.meetingId, data.title, data.datetime, data.organizer,
+      attNames, i+1, p.point, p.decidedBy||'', data.savedBy, data.savedAt
     ]);
-    return ContentService.createTextOutput(JSON.stringify({success:true, sent}))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
+  });
+  return ContentService.createTextOutput(JSON.stringify({success:true}))
+    .setMimeType(ContentService.MimeType.JSON);
+}
 
-  // ── DISCUSSION POINTS — save to sheet ──
-  if(data.action === 'saveMeetingDiscussion'){
-    const dSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('MeetingDiscussions') ||
-                   SpreadsheetApp.getActiveSpreadsheet().insertSheet('MeetingDiscussions');
-    if(dSheet.getLastRow() === 0){
-      dSheet.appendRow(['MeetingID','MeetingTitle','MeetingDate','Organizer',
-                        'AttendeeNames','PointNo','DiscussionPoint','DecidedBy','SavedBy','SavedAt']);
-    }
-    const attNames = (data.attendees||[]).map(a=>a.name).join(', ');
-    (data.discussionPoints||[]).forEach((p, i) => {
-      dSheet.appendRow([
-        data.meetingId, data.title, data.datetime, data.organizer,
-        attNames,
-        i+1, p.point, p.decidedBy||'', data.savedBy, data.savedAt
-      ]);
-    });
-    // Also update the Meetings sheet — find row by MeetingID and append discussion count
-    return ContentService.createTextOutput(JSON.stringify({success:true}))
-      .setMimeType(ContentService.MimeType.JSON);
+// ─────────────────────────────────────────────────────────────
+// TASK ASSIGNMENT EMAIL (with quantity)
+// ─────────────────────────────────────────────────────────────
+// In your addTask handler, add:
+//   GmailApp.sendEmail(data.email, '📋 New Task Assigned', data.emailBody||'', {name:'UpGro Media'});
+
+// ─────────────────────────────────────────────────────────────
+// HOURLY PENDING ALERTS — trigger every 1 hour
+// ─────────────────────────────────────────────────────────────
+function sendHourlyPendingAlerts() {
+  var CUTOFF = new Date('2026-04-01');
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Tasks');
+  if(!sheet) return;
+  var rows = sheet.getDataRange().getValues();
+  var h = rows[0];
+  var iEmail=h.indexOf('AssignedTo_Email'),iTask=h.indexOf('Task'),
+      iStatus=h.indexOf('Status'),iDue=h.indexOf('DueDate'),iTs=h.indexOf('Timestamp'),
+      iTotal=h.indexOf('TotalUnits'),iDone=h.indexOf('DoneUnits'),iPend=h.indexOf('PendingUnits');
+  var pending={};
+  for(var i=1;i<rows.length;i++){
+    var r=rows[i];
+    if(new Date(r[iTs])<CUTOFF) continue;
+    if(String(r[iStatus]||'').toLowerCase()==='completed') continue;
+    var email=String(r[iEmail]||'').toLowerCase(); if(!email) continue;
+    if(!pending[email]) pending[email]=[];
+    pending[email].push({task:r[iTask],status:r[iStatus],due:r[iDue],
+      total:r[iTotal]||1,done:r[iDone]||0,pend:r[iPend]||0});
   }
-=============================================================
+  Object.keys(pending).forEach(function(email){
+    var tasks=pending[email];
+    var body=tasks.map(function(t){
+      return '• '+t.task+'
+  Status: '+t.status+' | Due: '+t.due+' | Qty: '+t.done+'/'+t.total+' done';
+    }).join('
+
+');
+    GmailApp.sendEmail(email,'⏰ Pending Tasks — UpGro Media',
+      'Hi,
+
+You have '+tasks.length+' pending task(s):
+
+'+body+'
+
+UpGro Mission Control');
+  });
+}
+// Trigger: Apps Script → Triggers → sendHourlyPendingAlerts → Time → Every hour
+=================================================================
 -->
 
 <script>
@@ -2920,172 +2975,26 @@ async function saveMeeting(){
 
 async function sendMeetingEmails(m, mode){
   if(!SURL){
-    toast('⚠ Google Sheet URL set nahi hai — Settings mein URL daalo pehle!');
+    toast('⚠ Settings mein Google Sheet URL daalo pehle!');
     return;
   }
   const dt=new Date(m.datetime);
   const dateStr=dt.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   const timeStr=dt.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true});
-  const subject=`${mode==='updated'?'[UPDATED] ':''}Meeting Invite: ${m.title} | ${dateStr} at ${timeStr} | UpGro Media`;
-  const LOGO_B64=`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wgARCADIAMgDASIAAhEBAxEB/8QAHAABAQADAQEBAQAAAAAAAAAAAAcFBggEAQID/8QAGwEBAQADAQEBAAAAAAAAAAAAAAUDBAYHAgH/2gAMAwEAAhADEAAAAeqQAAAAAAAAAAAAAAAAAAADG/n3kvBzFqcj0TpjfuUur9mGG/ygAAAAAAAAGMjVa5S383vwW703j/ZMLb9S22v5gG1EAAAAAAAA8fmgOibe7tWt7f4tfpaNYJBX6fnASaoAAAAAAA1XLi2rF6FF9Pp/HlPFt1PJdOduiudej8to1fkFfj1gkVgAAAAAAEa3/mHB03gtcs6f+9uGfPvz0rwy6869Fc6yK1Gr8gr8esEisAAAAABqsVrPMua57Ns3T2fmzN+ieduieq8thnz78ryrrzr0VzrIrUavyCvx6wSKwAAAAAE+hnQMN6OZVvD7vDnlTfonnbonLihnz78ryrrzr0VzrIrUavyCvx6wSKwAAAAAGmQ28x3seR3/AMOZ8ersyromG3bLihHzK/Ksuw869HQiVV2+vy6oyKgSqoAAAAAGs67nNZ0eqwNciWO1L3Qkfxf6+sf8rjMsI+bf5Z5qGeZ0P+pBX9qCGacAAAAABhYb0Z59S/Etd6W5e1rmx/M3Ysmlzfkrzof5lz0Uq+5ZZ0wq/wA+55gZdAAAAAAABw33JJDnal7/AJknsM7FmJidr2f9ku6Rm1JAAAAAAAAAAAAAAAAAP//EACsQAAEEAQIEBQQDAAAAAAAAAAUCAwQGAQA1BzA0QBESExQVFiEyNjFQYP/aAAgBAQABBQL/AAcmfGh4lXgWxlOfFPaEcSswyNgLOu5zlWavC9+c7Qm+qMPzbCGMFyiy0nXDmF9+0OrwgPJk5ezVgGDcyz09uXHqsDI4H2SpkdOXysOMzZLK6ceixfV1SceEvtDS8NkX5GX1Cqs5IHapXWdmSJMCopKdkjMBQcPEDWPARqldZ2Jg8gQ47fGGUmTUg3KjwspyK3M3tOqV1nY3x5LMh11TyqfU0+Qtugrcze06pXWdgdPMA4xIk+WlRYnk0D2gtugrcze06pXWc6yyHIouRZJzCX5EgnJkAFh06B7QW3QVuZvadUrrOddXfRBZyp1dBGNJVduq0D2gtugrcze06pXWc68pyoBGjYZxSPwu3VaB7QW3QVuZvadUrrOdbdn1SPwu3VaB7QW3QVuZvadUrrOdbdn1SPwu3VaB7QW3QVuZvadUrrOdZmHJAr4idqoRHoqLdCflSfiJ2g7amhZMXMcIjRcxsgXQp0Z8RO1UYUiLK51leWwCost6YKAkZT1wyUh4zFnR5yTxmeUOS3DFQlKJxW2Wpsd958vBjOpVhaeda/17h5s9d/dx4tovbArXwt2r/wB7wUu3tpV7exJiRRH0wEr9aZMiOHc1bsXnGoaiAqv2XNZapMN6YYiFMB7TXvUO24w1IrFmsR/6oVdmlRx8yFkjXhNjVXx/D8Y7Eh89yO09n+NVU0h/iKUv7IW1KxjKWmWmtXqwOVoEVMEYwhbDS1Yz447FvPsLSvPv7TxOlLlWbh5ggJiOh25NC4nfam8TVxFReFS1xzHYp4dxvTVw8jeS009myrr1fWFjucI2VMWOnNWITa6i3aNVimYrRD+h/8QAOREAAAQDAwgGCQUAAAAAAAAAAQIDBQAEERIhQQYTMDFRYXHBFTM0gbHwFCIjQESRoeHxJDI1QmL/2gAIAQMBAT8B90IW2YC1pEtkccwAZdYO6/6/aH9vlWxRNBCojSo1+mjk2OdepwpEDCVMP3G86xhN2bmo6bYQ1QLdWtacR80h6mvTJ9VQNVaB3XaLJ6Qmn2YELFlIo3m5Bv8ACMqMpSMqINTTcOJtnD/W0cOOpsERlgEd+hUUIiW2cboyfaRehzoD7INY7dweboyhyqRkQBnZfVALhMH1Au/aP5h460vCGvswaFrybF5C1MXI+NMA5jDnlOgIi0tNyZAoIh4F3b8fH4jv5w8daXhDX2YNAzZNGdpj0yZPZQJv1jyDaPy3ZVZSFXkjSrYNEtVQxwoG7x4Qz9abhHxHfzh460vCGvswaB0eppOV6LSGhBvHfu4XQb+LDzjDP1puEfEd/OHjrS8Ia+zBoHUhzL1AMIMQ3RoFpf8AeGkhiqmtBhGaPn62cecO5DGULZDCG0BLLAA6BEheglT0vth4BE+2y8yuJlBslImUbg4xLNqLeorMF9cATtlqG3b8oUkVXNSWJNpZsTV9YLN91QuCE2mSEFFzLDmiiBa0vEce6HGTFvmjyxhrT86CQck5dA8pMp2yGGuul8IvaC55hWZLQDEAoFvwwrzgX/8AU2817KxYs1/rxgj+kgohmEaESrdW+8Bx74knRNBM6EwlbIYbWul8T84afmTzJ9Zvf//EADMRAAECBAEICAcBAAAAAAAAAAIBAwAEBREhEhQwMTNBcYETIjI0RFFhwRU1QJHR4fCh/9oACAECAQE/AfpFWyXg6gidkYlXTeRSLRhOyslLETwoRbk/t0OMPTF3yS18fL7RLB0bSJoqiDEg0iqdzXUkUSlZ8azU1iibvP8AUVTCaXloWmjeLIBLrE8ZSPUNOtFNo5vos7PY+Sfn2SKLsi4xVe9Ly0K1FZE7tdqPhboAk5N9ol1fmPD8vaKLsi4xVe9Ly0DlTCUl+hbG7i+mqKPT1bnUWZTra/8AL/eK1sh4x4fl7RRdkXGKr3peWgpEgyRZ4eJak9IH5qv9uitbIeMeH5e0UXZFxiq96XloKS4Ay9iXfAmPxRSvh+orBiTQ5K746VvN7ZSavaKOYi0WUu+KmqFMqqaAlXOUT0hp4gGyY3WDeJ1BDVjZYR0WUNW1vbdCvuYDk4w050oIegdZUiQwWywUsQoCB5xmvUtfG97wsqpIWUWKw4wpKhCtlhptGgQE+v8A/8QAQBAAAQMCAgUJBAgEBwAAAAAAAQIDBAAREiEFMXJzsRATIjJAQVFhwTBScZEUFSMzNEKS0URQoeFgY4Gis/Dx/9oACAEBAAY/Av8AAd3322ttVqsha5CvBtP70CRY+HZXPoZQJH5cYypbUiS62oGxQnoW+VXJuait26IVjV/pn2WQ6g2WhBIq5eT+gVzrmHEBbEE2vySpZHg2nifTsssqNhzZqwyRX2qsLCBiVbWryoPQWw2+2m3Np1LH71HbUnC4oY1fE9jIL7YI7ioUpxclsJTmelWEXbipPRb8fM1iV1eNP7Hr2WWVaucVxrwT4U9PkXbZSgqbT3r/ALckjY9eyKfkKwoHzPkKeethC1FQT4VF51N0FxPRPfnUrdnkkbHr2JtCmi5jF8jVzGX+qudeNkjqNjUmruix901F3qeNS92eSRsevYo5PuHKrmm58sBRObTfh5mpe9VxqLvU8al7s8kjY9ew43Ok6rqNDWqlPvqxLOodw8hWJfW8KibAqXvVcai71PGpe7PJI2PX26ltLLa8QzFfi3CrwvWJxS33lZDvNMGR984nFh93kibAqXvVcai71PGpe7PJI2PX261a+kmvFRqQ+4kKfRYJPu66jbB5ImwKl71XGou9TxqXuzySNj19usDM401c5rqX8U+tRtg8kTYFS96rjUXep41L3Z5JGx6+3VtDkl/FPrUbYPJE2BUveq41F3qeNS92eSRsevt1bQ5JfxT61G2DyRNgVL3quNRd6njUvdnkkbHr7dSGkKcViGSRX4R79BqVzzS2rlNsQt40wWWVuAJzwi9fhHv0GoyFpKVBGYNSVJjOqSXCQQmoylRnUpDiSSU+dSUIBUooNgK/CPfoNPl5lbYKPzC3t5bjayhYTkpJsRnTq33VvK50i6zfuFPsrkOrZCnOgVZUsGUzdvrDGOjRVHeQ8BrwKvX1Xo9wtAHCSk2ue/OmFuyzJaX3YioHxGdNOOPtspdTiTzirXpbTbyFuI6yUnMVzTstltz3VLFApNwe8e3m7HrT2+PAVI23amMP4ubxuK6Jt30YbSiWiSjPww3FSNt2nGXdFc4G1lIUtev/AG1oh0JwBbalYfDq1LntvqckOMd+oGpct5a+euQg377XqTGUbpaIUjyvf9vbyo6OutGXxp+JJirKseK2og0/pNaCho4rHxJqbJU0p1AW4CEd2dL0gGylpJKj5ZWAr6xS1zkdairyz1iorMaK4FIJy1k3rQraxhWhopI87JpUdPWWwAPjapkB6OvniTh7rG1s6fkOpKOfIwg+A/8AewdNtK7e8L8k2GtrDdb6QSddj/amNBNQAvGptKnEuYcJV5W8xRxWw+dfZoSi/ui1KmsNNPOpcSnC7qzqDJgaO+sHnijG2lVsII10FLbSojvIrLsWk9MD+A0qnGf8talg8P61orS5/j9KqwbtCkBPE/KtEaLdakyYJRzq40XrunP9q0427ElxoTX2sNEtNiB0sv6Cn9OuuuuaQdl4FqK8iPOtB71r/jNaPjSnpX2z3RhxBnI1ZH/vfWn4IQ7HjNLBRGdViLWZy7Fp5CpK1jSysSuj92cRIt860ClMlaBok4k9H7w3BN/lUZ8SHYM2N91IZ1in0v6QkaTcfN1rkHgKfjI0tLbgrXziI35UH1qFBXJUymMpKgtKb3sLVEX9Jchyoi8bT7edtX7Cpsv6c7MXKAx88M7+N/5F/8QAKRABAAEDAgUEAwADAAAAAAAAAREAITFR8BBBcYGhMEBhkbHB0VBg4f/aAAgBAQABPyH/AEOJNzYp8q+f5hTTxEq5e1gDZN0vik1izxpEKdqTKsrUqS7a/sB39rJCBpMNJgA5v8KPmrTl1xwlx4V7UF8O41hQctadiRRqMP7Q09QIDy2vSiEDSHJfoQdvZq26EJKMdUgV+jNd3Jr9j8UqLFRFCANvalugfmVeljFCV5iE1+PyoIILFeJ9o5GUnN0ObT1u0ZuaXiORYQz8UAwgIg6cPE+yOxlnBF66B4jfxTrACLP9+anNLBQ963TRW06cPE+yZF7Gq9SH6GlBvZ7c/Y+K3DVW6aK2nTh4n2KT2Iy5+j5rDzoYeQaVaF8NHDW4aq3TRW06cPE+uOtBnhzWUJik69ya5oFLMLkcX4nm8dbhqrdNFbTpw8T66BiUR91IGWVMVCeRuj5tmto1463DVW6aK2nTh4n1xIyRnesqDnpw62jXjrcNVbporadOHifXbfrx62jXjrcNVbporadOHifXbfrx62jXjrcNVbporadOHifXMpK3jnhAWIXjlRZGRPC/CAtDgcI048UKJNOXECAQoTLwpV4QCFwC8mfXm1fwAYaKSSPYYL0A8MemFi1D9ErTQYZva9Nx6EUOtZB30kSnIC+NKacLfE4k5G+SgXAhIoHn1KNd8ivVrVaACdaCIaRJE9fw34cJW66tJ1dxMYqjTSFlXXS1Xtz+9oC6E9IsSTQXpSWSYooAaCoJGE7tIYExYC46ytPrnpyXD78vXjYlE+4/FWzHJWiER6VLrAmF4NYvWfFMgc6chnK+rtf40ocGuFG+8m7HapICLpsMB0q7OGsAWkjCccWE81NRDLKkg9JqFaEsN6/f8PYEF/BGFAAAgORUxjMjNGIjRVDedQtNeYEzzooChcwoVjtHL6qGJh1B0I8qx52ZnH7W+KxJLOp3oAUI8z2TWrCLYoKJddzdmBRAC+fAQHOPrLSDGm0Am/ux+6m77BdYHO96TBYoHVyABYyFICfsVLPd6IWWuJ6eyIfJMbS2qHwpy8gBvNaJfKlmkvNfJOf2Ue4s2MRFyCPmo54wDrW/Jbl3o20wFPvO9HG2Cybda3/ChpOyMizYzKv+C//aAAwDAQACAAMAAAAQ8888888888888888888841G8888888888dE/888888888L2+888888884pxq8888888885ZCq88888888xKDCq888888885qDCq88888888uqLPs38888888Q+MzAV8888888e9voG988888888sMAE888888888888888888//EACURAQABBAEDBAMBAAAAAAAAAAERACExQWEwUbFxgaHwEECRwf/aAAgBAwEBPxD9SdRJCWwTtb270KAN4N3oo8qdNKVC3YEABh126YZG2QXwd0waywU10E3AzTOVmYtjAWJlSPYWI9Yn36RSsabtw3X8F3QlARoGuEW1/goRCVfJ6LiEN1IwPECS5S73ceq1REL0pe42md8zCsj7XLXy3z0bzyRXDNKmjWjBfAUmMMYYtf1uxa/4L7XLXy3z0EKsoIJXSzYEwKW2aQdaHYiMuxbHD+vtcn4X2uWvlvnoG5GXMzgk9mm3NiK+R/uvtcn4X2uWvlvnoC1pDAu2riLsRfPVPinITZW2RxaLyPAXdGLDLn16CUCBTF4wTmKca2xM3la14KhMPjsyhGJPLTQ8IddRFemECJe76EHCAXkMHAXlT5uwEviRAMask89CCjkBMG5BzBa1FaEJuJYSzm4CWpERINq49Gbt4xbmjSXMTUkbi0KYh9qjeKCSByDI2EoMYTBoAA9gL7z+/wD/xAAnEQEAAQMDAwQDAQEAAAAAAAABEQAhQTFRYTCBoXGRsfBAwfHR4f/aAAgBAgEBPxD8SQhMUojd7eP+1H+EwR5/XTYIW8Cts7DL7XqC1WALh2bRpvrfMr6xL3v0m+BGEzlvY8uhlAvBW3Nb8MGfTUgTSPgdEDKMf2mrBkhIwbsNuN6lLSKmbWeB/pa1fe4K8P4HRiEMUNiSJd+D3tQqVtlrpM8tjBrewVvtcFeH8DoRHvYUMGAbl1Zg7uzN+vg3hYF7p4edPrcNFb7XBXh/A6CoIG5pDJzfXGK8f9a+tw0VvtcFeH8DoMgjLVDBViFms205o9F4I4aMgcyh6JyQwU9skGnodC41pfLR0ZKXfSkZc2jtt71Exwum14btHTExYmwY70RhE/zoQdUjSbUmUolbZzH6o8TGfTarv0N4tZMdqi7hGk2pAJD8/wD/xAAqEAEAAQMEAQMDBAMAAAAAAAABEQAhMUFRYfBAIDCBEHHBkaGx0VBg4f/aAAgBAQABPxD/AENHA2TJwLL8VfScEMuhYPxNLhLSlaXJ48XWBS3Mu5ClhZByVDC0YAwoJfM08z5WRytT9YokCy4fFAXYwQASMNmjwdKCBQ4LEBjDETGBbx8RWFBn3f6f1vilvzXglID7qh805nRbVzf6of1rANgmgudmL4gQUMVgBgAWfsdEgNCOFgDRsXhkZAUgZEWzSDvwDGgip0AlpXfZNc48rQxgSyopptjD/wAc0Q42AgCHik9vLV0DmphJGfHLzTVigQAYew/Oi10CAAgDBXSbPEEzaHfR6g/bLALTl8fxZhbS3zSEkkoaSH8NaBcZBAGg+nSbPCFlgGQQi40wMMDKtik5fMsbobqCVd4ACaebkDwcfb0NHOk2eE4koiy6uZTgcDYoNKFqemk6jRlvY9ABo50mzwWZgMADq7Oq+JUKasiLiXwA/VbsqtCDnJ8c3n+K6Lb0wGjnSbPfHeFjA3E1IEBn35eKnziV0Ivmwb1Cko5GwWG4ljBOWui29MBo50mz30DRIcS6qfLCt1disgVCxeFKA5RIWWfoL0W3pgNHOk2e+gUMGWpmMF9A2P7rpNvrF6Lb0wGjnSbPB+6Tb6xei29MBo50mzwfuk2+sXotvTAaOdJs98+hRzhcwV278UsMU2iSiS8SfrRbX7ivhgtXbvxSEi4DaI4aRjWeTRELjQ6aiyRVSwFLhD0sWAMtdu/FCwc+QWBT3wcbXIhkLllqYlJEvBSxK25o8Q7+ORsEQRa1EIwRAEOggvqhRj7SRuCDbDmp3NMYUVYwRlLMgNAETk4ATEI/AlSnzNnsJEwSRuUDFAtHEBtUIOYVbYLb5owvDiWESyeFTY+xj7hhSBYbSz8VOgG0uBCyov4d6eUhBczD/FXLTShIkCQGy5zUI94QOLBITGDGKCAWNDupYHKzFWxdqxqccQy4N2j3xjnBWxAxuvfSMSfgRZXQUE80hEIhgoZi1E5s1BcTCT9VwDJOKhaI5MTO0DBdM5p5qfYCkYLkYoNlh5kgAN5Jcr3KYWtRADAcGqddKmTIYYgSWYRxSEBFRACuhAo0p4ZDgvIICJnjNSMgMUcbgSjclhPAyLqs+xRijbGgCAKPkIyXaUZblxSReFc8I7BObLZpuSQUWazNop2h5UDlZeiUu0toqEOi9D7wE68ssEAtpS2KvJqjhvZElBkaRJE8JQE2aQtvHcalam9UhHH7BSmRRZJpBYLwUvT8TJbCmxghKJVpOGoZHTqWq4tFinNFpMUJk8/uN4ETKygUIlbpmdwFLAIWYrPhF79S5ZGLbxjvTYvlcjjNtpz2pWd32ELIICSQgreFGBPFGi+GVASUwYiiuIniSSYMMVEWVRSFOcmIIgSSttRnMErEFsrsIiPJG/Ot7BtJVjjU2v8A4H//2Q==`;
+  const subject=(mode==='updated'?'[UPDATED] ':'')+'Meeting Invite: '+m.title+' | '+dateStr+' at '+timeStr+' | UpGro Media';
 
-  // Build per-attendee HTML email bodies
-  const emailList=(m.attendees||[]).map(att=>{
-    const otherAtts=(m.attendees||[]).filter(a=>a.email!==att.email);
-    const coRows=otherAtts.map(a=>`
-      <tr>
-        <td style="padding:6px 12px;font-size:13px;color:#334155;border-bottom:1px solid #F1F5F9">
-          <span style="display:inline-block;width:28px;height:28px;border-radius:50%;background:#0B84FF;color:#fff;font-size:10px;font-weight:700;text-align:center;line-height:28px;margin-right:8px;vertical-align:middle">${ini(a.name)}</span>
-          ${a.name}
-        </td>
-        <td style="padding:6px 12px;font-size:12px;color:#64748B;border-bottom:1px solid #F1F5F9">${a.desig}</td>
-      </tr>`).join('');
+  // Build simple per-attendee data — NO heavy base64 in payload
+  // Apps Script builds the full HTML email server-side
+  const attendeeList=(m.attendees||[]).map(att=>({
+    email:att.email,
+    name:att.name,
+    desig:att.desig||att.role||'Team'
+  }));
 
-    const htmlBody=`<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Meeting Invite — UpGro Media</title></head>
-<body style="margin:0;padding:0;background:#F0F4F9;font-family:'Segoe UI',Arial,sans-serif">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#F0F4F9;padding:32px 16px">
-  <tr><td align="center">
-    <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.10)">
-
-      <!-- HEADER -->
-      <tr>
-        <td style="background:linear-gradient(135deg,#08192D 0%,#0D2137 60%,#122A45 100%);padding:28px 36px;text-align:center">
-          <img src="${LOGO_B64}" alt="UpGro Media" width="72" height="72" style="border-radius:12px;background:#fff;padding:6px;display:block;margin:0 auto 14px">
-          <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:3px;text-transform:uppercase;margin-bottom:6px">UpGro Media · Mission Control</div>
-          <div style="font-size:22px;font-weight:800;color:#ffffff;letter-spacing:-0.3px">${mode==='updated'?'📅 Meeting Updated':'📅 Meeting Invitation'}</div>
-        </td>
-      </tr>
-
-      <!-- GREETING -->
-      <tr>
-        <td style="padding:28px 36px 0">
-          <p style="margin:0;font-size:15px;color:#334155">Dear <strong>${att.name}</strong>,</p>
-          <p style="margin:12px 0 0;font-size:14px;color:#64748B;line-height:1.6">
-            You ${mode==='updated'?'have been notified of an update to':'are cordially invited to'} the following meeting. Please review the details below and mark your calendar accordingly.
-          </p>
-        </td>
-      </tr>
-
-      <!-- MEETING TITLE BANNER -->
-      <tr>
-        <td style="padding:20px 36px">
-          <div style="background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border:1px solid #BFDBFE;border-radius:12px;padding:18px 22px;border-left:5px solid #0B84FF">
-            <div style="font-size:10px;font-weight:700;color:#1D4ED8;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">📌 Meeting Title</div>
-            <div style="font-size:19px;font-weight:800;color:#0F172A">${m.title}</div>
-          </div>
-        </td>
-      </tr>
-
-      <!-- DETAILS TABLE -->
-      <tr>
-        <td style="padding:0 36px 20px">
-          <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8FAFF;border:1px solid #E2E8F0;border-radius:12px;overflow:hidden">
-            <tr style="background:#F1F5F9">
-              <td colspan="2" style="padding:10px 16px;font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:1.2px">📋 Meeting Details</td>
-            </tr>
-            <tr>
-              <td style="padding:10px 16px;font-size:12px;font-weight:700;color:#64748B;width:120px;border-bottom:1px solid #E2E8F0">🗓 Date</td>
-              <td style="padding:10px 16px;font-size:13px;color:#0F172A;font-weight:600;border-bottom:1px solid #E2E8F0">${dateStr}</td>
-            </tr>
-            <tr>
-              <td style="padding:10px 16px;font-size:12px;font-weight:700;color:#64748B;border-bottom:1px solid #E2E8F0">⏰ Time</td>
-              <td style="padding:10px 16px;font-size:13px;color:#0F172A;font-weight:600;border-bottom:1px solid #E2E8F0">${timeStr}</td>
-            </tr>
-            <tr>
-              <td style="padding:10px 16px;font-size:12px;font-weight:700;color:#64748B;border-bottom:${m.location?'1px solid #E2E8F0':'none'}">⏱ Duration</td>
-              <td style="padding:10px 16px;font-size:13px;color:#0F172A;font-weight:600;border-bottom:${m.location?'1px solid #E2E8F0':'none'}">${m.duration}</td>
-            </tr>
-            ${m.location?`<tr>
-              <td style="padding:10px 16px;font-size:12px;font-weight:700;color:#64748B">📍 Location</td>
-              <td style="padding:10px 16px;font-size:13px;color:#0B84FF;font-weight:600">${m.location}</td>
-            </tr>`:''}
-          </table>
-        </td>
-      </tr>
-
-      <!-- AGENDA -->
-      ${m.agenda?`<tr>
-        <td style="padding:0 36px 20px">
-          <div style="background:#FFFBEB;border:1px solid #FCD34D;border-radius:12px;padding:16px 20px">
-            <div style="font-size:10px;font-weight:700;color:#B45309;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px">📋 Agenda</div>
-            <div style="font-size:13px;color:#334155;line-height:1.7;white-space:pre-line">${m.agenda}</div>
-          </div>
-        </td>
-      </tr>`:''}
-
-      <!-- YOU ARE INVITED -->
-      <tr>
-        <td style="padding:0 36px 20px">
-          <div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:12px;padding:14px 20px;display:flex;align-items:center">
-            <div style="font-size:10px;font-weight:700;color:#15803D;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px">✅ You Are Invited</div>
-            <div style="display:flex;align-items:center;gap:10px">
-              <div style="width:38px;height:38px;border-radius:50%;background:#0B84FF;color:#fff;font-size:13px;font-weight:700;text-align:center;line-height:38px;flex-shrink:0">${ini(att.name)}</div>
-              <div>
-                <div style="font-size:14px;font-weight:700;color:#0F172A">${att.name}</div>
-                <div style="font-size:11px;color:#64748B">${att.desig} &nbsp;·&nbsp; ${att.email}</div>
-              </div>
-            </div>
-          </div>
-        </td>
-      </tr>
-
-      <!-- ALL ATTENDEES -->
-      <tr>
-        <td style="padding:0 36px 20px">
-          <div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px">👥 All Attendees (${m.attendees.length})</div>
-          <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E2E8F0;border-radius:10px;overflow:hidden">
-            <tr style="background:#F8FAFF">
-              <th style="padding:8px 12px;font-size:10px;font-weight:700;color:#64748B;text-align:left;text-transform:uppercase;letter-spacing:.8px">Name</th>
-              <th style="padding:8px 12px;font-size:10px;font-weight:700;color:#64748B;text-align:left;text-transform:uppercase;letter-spacing:.8px">Designation</th>
-            </tr>
-            <tr style="background:#EFF6FF">
-              <td style="padding:8px 12px;font-size:13px;color:#1D4ED8;font-weight:700;border-bottom:1px solid #F1F5F9">
-                <span style="display:inline-block;width:26px;height:26px;border-radius:50%;background:#0B84FF;color:#fff;font-size:9px;font-weight:700;text-align:center;line-height:26px;margin-right:8px;vertical-align:middle">${ini(att.name)}</span>
-                ${att.name} ← YOU
-              </td>
-              <td style="padding:8px 12px;font-size:12px;color:#1D4ED8;border-bottom:1px solid #F1F5F9">${att.desig}</td>
-            </tr>
-            ${coRows}
-          </table>
-        </td>
-      </tr>
-
-      <!-- NOTES -->
-      ${m.notes?`<tr>
-        <td style="padding:0 36px 20px">
-          <div style="background:#F5F3FF;border:1px solid #C4B5FD;border-radius:10px;padding:14px 18px">
-            <div style="font-size:10px;font-weight:700;color:#7C3AED;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px">📌 Additional Notes</div>
-            <div style="font-size:13px;color:#334155;line-height:1.6">${m.notes}</div>
-          </div>
-        </td>
-      </tr>`:''}
-
-      <!-- FOOTER -->
-      <tr>
-        <td style="background:#F8FAFF;border-top:1px solid #E2E8F0;padding:20px 36px;text-align:center">
-          <div style="font-size:12px;font-weight:700;color:#334155;margin-bottom:4px">Organized by: ${m.createdBy}</div>
-          <div style="font-size:11px;color:#94A3B8">This is an official meeting invite from UpGro Media Mission Control</div>
-          <div style="margin-top:12px">
-            <img src="${LOGO_B64}" alt="UpGro Media" width="36" height="36" style="border-radius:8px;opacity:0.6">
-          </div>
-          <div style="font-size:10px;color:#CBD5E1;margin-top:6px">UpGro Media · Mission Control · upgromedia.com</div>
-        </td>
-      </tr>
-
-    </table>
-  </td></tr>
-</table>
-</body></html>`;
-    return {email:att.email, name:att.name, htmlBody, subject};
-  });
-
-  // Send all in ONE POST — Apps Script handles the loop server-side
   const payload={
     action:'sendMeetingInvite',
     subject,
-    emailList,
+    attendeeList,          // lightweight - just email/name/desig
     meetingId:m.id,
     title:m.title,
     datetime:m.datetime,
@@ -3093,21 +3002,28 @@ async function sendMeetingEmails(m, mode){
     location:m.location||'',
     agenda:m.agenda||'',
     notes:m.notes||'',
-    attendees:m.attendees,
-    organizer:m.createdBy,
+    organizer:m.createdBy||cu.name,
     mode
   };
+
   try{
-    toast('📤 Sending invites to '+emailList.length+' attendee(s)...');
-    const res=await fetch(SURL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout(30000)});
-    const d=await res.json();
+    toast('📤 Sending invites to '+attendeeList.length+' attendee(s)...');
+    // NO Content-Type header — avoids CORS preflight block on Apps Script
+    const res=await fetch(SURL,{
+      method:'POST',
+      body:JSON.stringify(payload),
+      signal:AbortSignal.timeout(30000)
+    });
+    const txt=await res.text();
+    let d;
+    try{ d=JSON.parse(txt); }catch(e){ d={success:false,message:'Bad response: '+txt.slice(0,100)}; }
     if(d.success){
-      toast('✅ Invites sent to '+d.sent+'/'+emailList.length+' attendee(s)!');
+      toast('✅ Invites sent to '+attendeeList.length+' attendee(s)!');
     } else {
-      toast('⚠ Apps Script error: '+(d.message||'check script logs'));
+      toast('⚠ Email issue: '+(d.message||'check Apps Script logs'));
     }
   } catch(ex){
-    toast('❌ Network error: '+ex.message+' — check Settings URL');
+    toast('❌ Failed: '+ex.message);
     console.error('sendMeetingEmails',ex);
   }
 }
@@ -3116,7 +3032,6 @@ async function resendMeetingMails(id){
   loadMeetings();
   const m=meetings.find(x=>x.id===id); if(!m)return;
   await sendMeetingEmails(m,'updated');
-  toast('📧 Invites resent to '+(m.attendees||[]).length+' attendee(s)!');
 }
 
 function openDiscussionModal(id){
