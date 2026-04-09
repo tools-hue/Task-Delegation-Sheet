@@ -325,7 +325,27 @@ textarea.fc{resize:vertical;min-height:68px}
 @media(max-width:1200px){.kg{grid-template-columns:repeat(3,1fr)}.g3{grid-template-columns:1fr 1fr}.g21{grid-template-columns:1fr}}
 @media(max-width:900px){.kg{grid-template-columns:repeat(2,1fr)}.g2,.g3,.eg{grid-template-columns:1fr}}
 @media(max-width:768px){
-  html,body{overflow:auto}#app{height:auto;min-height:100vh}#main{height:100vh;overflow-y:auto}.pages{overflow:visible;height:auto}
+  /* MEETINGS */
+.mtg-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;margin-bottom:10px;border-left:4px solid var(--blue);transition:all .15s}
+.mtg-card:hover{box-shadow:var(--sh1);transform:translateX(2px)}
+.mtg-card.past{border-left-color:var(--muted2);opacity:.8}
+.mtg-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+.mtg-title{font-size:14px;font-weight:700;color:var(--text)}
+.mtg-meta{display:flex;gap:10px;font-size:11px;color:var(--muted);flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.mtg-badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.mtg-att{display:inline-flex;align-items:center;gap:4px;background:var(--blue3);color:var(--blue);font-size:10px;font-weight:700;padding:3px 9px;border-radius:14px}
+.mtg-att-av{width:16px;height:16px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#fff}
+.att-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;cursor:pointer;border:1px solid var(--border);background:var(--surface);transition:all .12s;user-select:none}
+.att-row:hover{border-color:var(--blue);background:var(--blue3)}
+.att-row.sel{border-color:var(--blue);background:var(--blue3)}
+.att-row.sel .att-chk{background:var(--blue);border-color:var(--blue);color:#fff}
+.att-chk{width:16px;height:16px;border-radius:4px;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;transition:all .12s}
+.att-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.att-info{flex:1;min-width:0}
+.att-name{font-size:11px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.att-role{font-size:9px;color:var(--muted)}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:var(--navy);color:#fff;font-size:10px;font-weight:600;border-radius:12px}
+.chip-x{cursor:pointer;opacity:.6;font-size:11px;margin-left:2px}.chip-x:hover{opacity:1}#app{height:auto;min-height:100vh}#main{height:100vh;overflow-y:auto}.pages{overflow:visible;height:auto}
   #sb{position:fixed;top:0;left:0;height:100vh;z-index:200;width:var(--sw)!important;transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1)}
   #sb.mob{transform:translateX(0)}.sbok{display:block}#sb:not(.mob)~.sbok{display:none}
   #mtog{display:flex}.sb-tog{display:none}.tb-sync{display:none}
@@ -380,6 +400,7 @@ textarea.fc{resize:vertical;min-height:68px}
       <div class="ni" id="ni-alltasks" onclick="nav('alltasks')"><span class="ico">📋</span><span class="lbl">All Tasks</span><span class="nbdg" id="nb-all" style="display:none"></span><span class="ni-tip">All Tasks</span></div>
       <div class="ni" id="ni-analytics" onclick="nav('analytics')"><span class="ico">📈</span><span class="lbl">Analytics</span><span class="ni-tip">Analytics</span></div>
       <div class="ni" id="ni-employees" onclick="nav('employees')"><span class="ico">👥</span><span class="lbl">Employees</span><span class="ni-tip">Employees</span></div>
+      <div class="ni" id="ni-meetings" onclick="nav('meetings')"><span class="ico">📅</span><span class="lbl">Meetings</span><span class="ni-tip">Meetings</span></div>
       <div class="sb-sec">Resources</div>
       <div class="ni" onclick="nav('forms')"><span class="ico">📝</span><span class="lbl">Forms &amp; Links</span><span class="ni-tip">Forms &amp; Links</span></div>
       <div class="sb-sec">System</div>
@@ -599,6 +620,24 @@ textarea.fc{resize:vertical;min-height:68px}
         </div>
       </div>
 
+      <!-- MEETINGS -->
+      <div class="pg" id="pg-meetings">
+        <div class="ph">
+          <div class="ph-l"><div class="ph-t">📅 Meetings</div><div class="ph-s">Schedule meetings, select attendees, send professional email invites</div></div>
+          <div class="ph-r" id="mtg-ph-r"></div>
+        </div>
+        <!-- Active Meetings List -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="ch">
+            <div class="ct">Upcoming &amp; Recent Meetings</div>
+            <span class="cbdg" id="mtg-cnt">0 meetings</span>
+          </div>
+          <div id="mtg-list" class="cb" style="padding:14px 18px">
+            <div style="text-align:center;padding:28px;color:var(--muted)"><div style="font-size:36px;margin-bottom:8px">📅</div><div style="font-weight:600">No meetings scheduled yet</div><div style="font-size:12px;margin-top:4px">Click "+ Schedule Meeting" to create one</div></div>
+          </div>
+        </div>
+      </div>
+
       <!-- SETTINGS -->
       <div class="pg" id="pg-settings">
         <div class="ph"><div class="ph-l"><div class="ph-t">Settings</div><div class="ph-s">Configure your dashboard</div></div></div>
@@ -720,6 +759,54 @@ textarea.fc{resize:vertical;min-height:68px}
   </div>
 </div>
 
+<!-- MEETING MODAL -->
+<div class="mov hidden" id="m-mtg">
+  <div class="mo mo-lg" style="max-width:640px">
+    <div class="moh"><div class="mot" id="m-mtg-t">📅 Schedule Meeting</div><button class="mox" onclick="CM('m-mtg')">✕</button></div>
+    <div class="mob2">
+      <input type="hidden" id="mtg-id">
+      <div class="fg"><label class="fl2">Meeting Title *</label><input type="text" id="mtg-title" class="fc" placeholder="e.g. Weekly Strategy Sync, Q2 Review, Client Brief"></div>
+      <div class="fr">
+        <div class="fg" style="margin:0"><label class="fl2">Date *</label><input type="date" id="mtg-date" class="fc"></div>
+        <div class="fg" style="margin:0"><label class="fl2">Time *</label><input type="time" id="mtg-time" class="fc"></div>
+        <div class="fg" style="margin:0"><label class="fl2">Duration</label>
+          <select id="mtg-dur" class="fc">
+            <option value="15 minutes">15 minutes</option>
+            <option value="30 minutes" selected>30 minutes</option>
+            <option value="45 minutes">45 minutes</option>
+            <option value="1 hour">1 hour</option>
+            <option value="1.5 hours">1.5 hours</option>
+            <option value="2 hours">2 hours</option>
+            <option value="3 hours">3 hours</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg" style="margin-top:10px"><label class="fl2">Location / Link</label><input type="text" id="mtg-loc" class="fc" placeholder="e.g. Conference Room A, or Google Meet link"></div>
+      <div class="fg" style="margin-top:10px"><label class="fl2">Agenda / Description *</label><textarea id="mtg-agenda" class="fc" rows="3" placeholder="Describe the meeting agenda, topics to be covered, goals..."></textarea></div>
+      <!-- Attendee Multi-Select -->
+      <div style="margin-top:12px">
+        <label class="fl2">Select Attendees * <span style="font-weight:400;color:var(--muted)">(Multiple select)</span></label>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-top:6px">
+          <input type="text" id="mtg-att-q" class="fc" placeholder="🔍 Search attendees..." oninput="filterMtgAttendees()" style="margin-bottom:8px">
+          <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">
+            <button class="btn bo bxs" onclick="selectAllAttendees()">✅ Select All</button>
+            <button class="btn bo bxs" onclick="clearAllAttendees()">✕ Clear All</button>
+            <span id="mtg-sel-count" style="font-size:11px;color:var(--blue);font-weight:700;padding:3px 8px;background:var(--blue3);border-radius:8px;align-self:center">0 selected</span>
+          </div>
+          <div id="mtg-att-list" style="max-height:220px;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:4px"></div>
+        </div>
+        <!-- Selected chips -->
+        <div id="mtg-chips" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px"></div>
+      </div>
+      <div class="fg" style="margin-top:10px"><label class="fl2">Additional Notes (optional)</label><textarea id="mtg-notes" class="fc" rows="2" placeholder="Preparation required, documents to bring, etc."></textarea></div>
+    </div>
+    <div class="mof">
+      <button class="btn bo" onclick="CM('m-mtg')">Cancel</button>
+      <button class="btn bp" onclick="saveMeeting()">📧 Save &amp; Send Invites</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ════════════════════════════════════════════════════════════════
 //  UPGRO MEDIA MISSION CONTROL v5.0
@@ -767,7 +854,7 @@ const USERS = {
 
 const CLRS=['#0B84FF','#E53935','#00B67A','#F59E0B','#7C3AED','#0E9F8E','#EA580C','#DB2777','#64748B','#D97706','#1565C0','#16A34A','#9333EA','#0891B2'];
 const DESIG_OPTS=['MIS','Executive Assistant','Web Developer','Graphic Designer','Video Editor','CRM','Meta Media Buyer','Google Ads','SEO Executive','SEO','Founder','CEO','HR','Accountant','Intern','Content Writer','Social Media Manager','Performance Marketer','Team Lead','Other'];
-const PAGE_TITLES={dash:'Dashboard',mytasks:'My Tasks',alltasks:'All Tasks',analytics:'Analytics',employees:'Employees',forms:'Forms & Links',settings:'Settings'};
+const PAGE_TITLES={dash:'Dashboard',mytasks:'My Tasks',alltasks:'All Tasks',analytics:'Analytics',employees:'Employees',forms:'Forms & Links',meetings:'Meetings',settings:'Settings'};
 const DATA_START = new Date('2026-04-01T00:00:00'); // Data & email from this date
 
 // ── STATE ─────────────────────────────────────────────────────
@@ -1220,21 +1307,25 @@ function updateSidebarVis(){
   const niAn=$('ni-analytics');
   const niEmp=$('ni-employees');
   const sec=$('sb-mgmt-sec');
+  const niMtg=$('ni-meetings');
   if(isAdmin()){
     if(niAll)niAll.style.display='';
     if(niAn)niAn.style.display='';
     if(niEmp)niEmp.style.display='';
+    if(niMtg)niMtg.style.display='';
     if(sec)sec.style.display='';
   } else if(isManager()){
     if(niAll)niAll.style.display='';
     if(niAn)niAn.style.display='';
     if(niEmp)niEmp.style.display='none';
+    if(niMtg)niMtg.style.display='';
     if(sec)sec.style.display='';
   } else {
     if(niAll)niAll.style.display='none';
     if(niAn)niAn.style.display='none';
     if(niEmp)niEmp.style.display='none';
-    if(sec)sec.style.display='none';
+    if(niMtg)niMtg.style.display='';  // all users can see meetings they're invited to
+    if(sec)sec.style.display='';
   }
 }
 
@@ -1267,6 +1358,14 @@ function renderPageButtons(){
   }
   // DS add btn
   renderDSAddBtn();
+  // Meetings page add button
+  const mphR=$('mtg-ph-r');
+  if(mphR){
+    mphR.innerHTML='';
+    if(canAssign()){
+      const bm=document.createElement('button');bm.className='btn bp bsm';bm.textContent='+ Schedule Meeting';bm.onclick=openAddMeeting;mphR.appendChild(bm);
+    }
+  }
 }
 
 function updateClock(){const el=$('tb-clk');if(el)el.textContent=new Date().toLocaleTimeString('en-IN',{hour12:false});}
@@ -1322,6 +1421,7 @@ function nav(page){
   if(page==='mytasks'){renderMyTasks();populateSubSel();}
   if(page==='alltasks')renderAllTasks();
   if(page==='forms'){renderFormLinks();renderDataSheets();}
+  if(page==='meetings'){loadMeetings();renderMeetings();}
   closeSB();
   const pages=$('pages');if(pages)pages.scrollTo(0,0);
 }
@@ -2536,8 +2636,295 @@ async function testConn(){
 
   // Setup trigger: run every 1 hour
   // In Apps Script: Triggers → Add Trigger → sendHourlyPendingAlerts → Time-based → Hour timer → Every hour
+
+  ── 4. MEETING INVITE EMAIL HANDLER ────────────────────────
+  Add this case inside your doPost(e) switch/if block:
+
+  case 'sendMeetingInvite': {
+    const to      = data.to;
+    const subject = data.subject;
+    const body    = data.body;
+    if(to && subject && body){
+      GmailApp.sendEmail(to, subject, body);
+      // Optionally log in a Meetings sheet:
+      const mSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Meetings');
+      if(mSheet){
+        mSheet.appendRow([data.meetingId, data.title, data.datetime, data.duration,
+          data.location, data.organizer, to, data.name, new Date().toLocaleString()]);
+      }
+    }
+    return ContentService.createTextOutput(JSON.stringify({success:true}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 =============================================================
 -->
+
+<script>
+// ════════════════════════════════════════════════════════════════
+//  MEETINGS
+// ════════════════════════════════════════════════════════════════
+let meetings = [];
+let selectedAttendees = new Set();
+
+function loadMeetings(){
+  try{ const v=localStorage.getItem('upgro_meetings_v1'); meetings=v?JSON.parse(v):[]; }catch(e){ meetings=[]; }
+}
+function saveMeetings_local(){
+  try{ localStorage.setItem('upgro_meetings_v1',JSON.stringify(meetings)); }catch(e){}
+}
+
+function renderMeetings(){
+  loadMeetings();
+  const cont=$('mtg-list'); if(!cont)return;
+  const cnt=$('mtg-cnt'); if(cnt)cnt.textContent=meetings.length+' meeting'+(meetings.length!==1?'s':'');
+  if(!meetings.length){
+    cont.innerHTML='<div style="text-align:center;padding:28px;color:var(--muted)"><div style="font-size:36px;margin-bottom:8px">📅</div><div style="font-weight:600">No meetings scheduled yet</div><div style="font-size:12px;margin-top:4px">Click "+ Schedule Meeting" to create one</div></div>';
+    return;
+  }
+  const sorted=[...meetings].sort((a,b)=>new Date(b.datetime)-new Date(a.datetime));
+  const now=new Date();
+  cont.innerHTML=sorted.map(m=>{
+    const dt=new Date(m.datetime);
+    const isPast=dt<now;
+    const dateStr=dt.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const timeStr=dt.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true});
+    const attBadges=(m.attendees||[]).map((a,i)=>`<span class="mtg-att"><span class="mtg-att-av" style="background:${CLRS[i%CLRS.length]}">${ini(a.name)}</span>${a.name.split(' ')[0]}</span>`).join('');
+    return `<div class="mtg-card${isPast?' past':''}">
+      <div class="mtg-head">
+        <div style="flex:1">
+          <div class="mtg-title">📅 ${m.title}</div>
+          <div class="mtg-meta">
+            <span>🗓 ${dateStr}</span>
+            <span>⏰ ${timeStr}</span>
+            <span>⏱ ${m.duration||'30 minutes'}</span>
+            ${m.location?`<span>📍 ${m.location}</span>`:''}
+            <span style="font-weight:700;color:${isPast?'var(--muted)':'var(--green)'}">● ${isPast?'Concluded':'Upcoming'}</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:5px;flex-shrink:0">
+          ${canAssign()?`<button class="btn bo bxs" onclick="openEditMeeting('${m.id}')">✏</button>
+          <button class="btn bd bxs" onclick="deleteMeeting('${m.id}')">🗑</button>`:''}
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text2);background:var(--bg);padding:8px 12px;border-radius:8px;margin-bottom:10px;line-height:1.6;white-space:pre-line">${m.agenda}</div>
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">👥 Attendees (${(m.attendees||[]).length})</div>
+      <div class="mtg-badges">${attBadges||'<span style="color:var(--muted);font-size:11px">No attendees</span>'}</div>
+      ${m.notes?`<div style="font-size:11px;color:var(--muted);margin-top:6px;padding:6px 10px;background:var(--orange3);border-radius:6px">📌 ${m.notes}</div>`:''}
+      <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        ${canAssign()?`<button class="btn bp bsm" onclick="resendMeetingMails('${m.id}')">📧 Resend Invites</button>`:''}
+        <span style="font-size:10px;color:var(--muted)">By ${m.createdBy||'Admin'} · ${m.createdAt||''}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function buildAttendeeList(filterQ=''){
+  initEmpReg(true);
+  const cont=$('mtg-att-list'); if(!cont)return;
+  const q=filterQ.toLowerCase();
+  const list=empReg.filter(e=>e.active!==false&&(e.name.toLowerCase().includes(q)||e.email.toLowerCase().includes(q)));
+  cont.innerHTML=list.map((e)=>{
+    const sel=selectedAttendees.has(e.email);
+    const idx=empReg.findIndex(x=>x.email===e.email);
+    const bg=CLRS[idx%CLRS.length];
+    const badge=e.isAdmin?'<span style="font-size:8px;background:var(--blue);color:#fff;padding:1px 5px;border-radius:6px;margin-left:3px">Admin</span>':
+                e.isManager?'<span style="font-size:8px;background:var(--purple);color:#fff;padding:1px 5px;border-radius:6px;margin-left:3px">Mgr</span>':'';
+    return `<div class="att-row${sel?' sel':''}" onclick="toggleAttendee('${e.email}','${e.name.replace(/'/g,"\\'")}')">
+      <div class="att-chk">${sel?'✓':''}</div>
+      <div class="att-av" style="background:${bg}">${ini(e.name)}</div>
+      <div class="att-info">
+        <div class="att-name">${e.name}${badge}</div>
+        <div class="att-role">${e.desig||e.role}</div>
+      </div>
+    </div>`;
+  }).join('');
+  updateSelCount();
+  renderChips();
+}
+
+function toggleAttendee(email,name){
+  if(selectedAttendees.has(email)) selectedAttendees.delete(email);
+  else selectedAttendees.add(email);
+  const q=($('mtg-att-q')||{value:''}).value;
+  buildAttendeeList(q);
+}
+function selectAllAttendees(){
+  initEmpReg(true);
+  empReg.filter(e=>e.active!==false).forEach(e=>selectedAttendees.add(e.email));
+  const q=($('mtg-att-q')||{value:''}).value;
+  buildAttendeeList(q);
+}
+function clearAllAttendees(){
+  selectedAttendees.clear();
+  const q=($('mtg-att-q')||{value:''}).value;
+  buildAttendeeList(q);
+}
+function filterMtgAttendees(){
+  const q=($('mtg-att-q')||{value:''}).value;
+  buildAttendeeList(q);
+}
+function updateSelCount(){
+  const el=$('mtg-sel-count');
+  if(el)el.textContent=selectedAttendees.size+' selected';
+}
+function renderChips(){
+  const cont=$('mtg-chips'); if(!cont)return;
+  initEmpReg(true);
+  cont.innerHTML=[...selectedAttendees].map(email=>{
+    const e=empReg.find(x=>x.email===email);
+    const name=e?e.name:email;
+    return `<span class="chip"><span style="width:16px;height:16px;border-radius:50%;background:${CLRS[empReg.indexOf(e)%CLRS.length]};display:inline-flex;align-items:center;justify-content:center;font-size:7px;font-weight:700">${ini(name)}</span> ${name.split(' ')[0]} <span class="chip-x" onclick="removeChip('${email}')">✕</span></span>`;
+  }).join('');
+}
+function removeChip(email){
+  selectedAttendees.delete(email);
+  const q=($('mtg-att-q')||{value:''}).value;
+  buildAttendeeList(q);
+}
+
+function openAddMeeting(){
+  $('m-mtg-t').textContent='📅 Schedule New Meeting';
+  $('mtg-id').value='';
+  ['mtg-title','mtg-loc','mtg-agenda','mtg-notes'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  const dateEl=$('mtg-date'); if(dateEl)dateEl.value=TODAY;
+  const timeEl=$('mtg-time'); if(timeEl){ const h=new Date().getHours(); timeEl.value=String(h+1<24?h+1:h).padStart(2,'0')+':00'; }
+  const durEl=$('mtg-dur'); if(durEl)durEl.value='30 minutes';
+  selectedAttendees.clear();
+  const aqEl=$('mtg-att-q'); if(aqEl)aqEl.value='';
+  $('m-mtg').classList.remove('hidden');
+  buildAttendeeList();
+}
+function openEditMeeting(id){
+  const m=meetings.find(x=>x.id===id); if(!m)return;
+  $('m-mtg-t').textContent='✏ Edit Meeting';
+  $('mtg-id').value=m.id;
+  $('mtg-title').value=m.title||'';
+  const dt=new Date(m.datetime);
+  $('mtg-date').value=dt.toISOString().split('T')[0];
+  $('mtg-time').value=dt.toTimeString().slice(0,5);
+  const durEl=$('mtg-dur'); if(durEl)durEl.value=m.duration||'30 minutes';
+  $('mtg-loc').value=m.location||'';
+  $('mtg-agenda').value=m.agenda||'';
+  $('mtg-notes').value=m.notes||'';
+  selectedAttendees=new Set((m.attendees||[]).map(a=>a.email));
+  const aqEl=$('mtg-att-q'); if(aqEl)aqEl.value='';
+  $('m-mtg').classList.remove('hidden');
+  buildAttendeeList();
+}
+
+async function saveMeeting(){
+  const id=($('mtg-id')||{value:''}).value;
+  const title=($('mtg-title')||{value:''}).value.trim();
+  const date=($('mtg-date')||{value:''}).value;
+  const time=($('mtg-time')||{value:''}).value;
+  const dur=($('mtg-dur')||{value:'30 minutes'}).value;
+  const loc=($('mtg-loc')||{value:''}).value.trim();
+  const agenda=($('mtg-agenda')||{value:''}).value.trim();
+  const notes=($('mtg-notes')||{value:''}).value.trim();
+  if(!title){toast('⚠ Meeting title required');return;}
+  if(!date||!time){toast('⚠ Date and time required');return;}
+  if(!agenda){toast('⚠ Agenda required');return;}
+  if(selectedAttendees.size===0){toast('⚠ Please select at least one attendee');return;}
+  initEmpReg(true);
+  const attendees=[...selectedAttendees].map(email=>{
+    const e=empReg.find(x=>x.email===email);
+    return {email,name:e?e.name:email,desig:e?e.desig||e.role:'Team'};
+  });
+  const datetime=date+'T'+time;
+  const mtgObj={
+    id:id||'MTG_'+Date.now(),
+    title,datetime,duration:dur,location:loc,agenda,notes,
+    attendees,createdBy:cu?cu.name:'Admin',createdAt:new Date().toLocaleString('en-IN')
+  };
+  loadMeetings();
+  if(id){ const idx=meetings.findIndex(x=>x.id===id); if(idx>=0)meetings[idx]=mtgObj; else meetings.unshift(mtgObj); }
+  else meetings.unshift(mtgObj);
+  saveMeetings_local();
+  CM('m-mtg');
+  renderMeetings();
+  await sendMeetingEmails(mtgObj, id?'updated':'new');
+  toast('✅ Meeting saved & invites sent to '+attendees.length+' attendee(s)!');
+}
+
+async function sendMeetingEmails(m, mode){
+  const dt=new Date(m.datetime);
+  const dateStr=dt.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const timeStr=dt.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true});
+  for(const att of (m.attendees||[])){
+    const otherAtts=(m.attendees||[]).filter(a=>a.email!==att.email);
+    const coLines=otherAtts.map(a=>`  • ${a.name} (${a.desig})`).join('\n');
+    const emailBody=
+`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📅  MEETING ${mode==='updated'?'UPDATE':'INVITATION'}
+  UpGro Media — Mission Control
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Dear ${att.name},
+
+You ${mode==='updated'?'have been notified of an update to':'are cordially invited to'} the following meeting:
+
+┌─────────────────────────────────────┐
+  📌  ${m.title.toUpperCase()}
+└─────────────────────────────────────┘
+
+  🗓  Date      :  ${dateStr}
+  ⏰  Time      :  ${timeStr}
+  ⏱  Duration  :  ${m.duration}
+${m.location?`  📍  Location  :  ${m.location}\n`:''}
+📋  AGENDA
+─────────────────────────────────────
+${m.agenda}
+
+👥  ATTENDEES  (${m.attendees.length} people)
+─────────────────────────────────────
+  • ${att.name} (${att.desig})  ← YOU
+${coLines}
+
+${m.notes?`\n📌  ADDITIONAL NOTES\n─────────────────────────────────────\n${m.notes}\n`:''}
+─────────────────────────────────────
+Organized by : ${m.createdBy}
+Sent via     : UpGro Media Mission Control
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Please be present on time. This is an official meeting invite.`;
+
+    const payload={
+      action:'sendMeetingInvite',
+      to:att.email,
+      name:att.name,
+      subject:`📅 ${mode==='updated'?'[Updated] ':''}Meeting Invite: ${m.title} — ${dateStr} at ${timeStr}`,
+      body:emailBody,
+      meetingId:m.id,
+      title:m.title,
+      datetime:m.datetime,
+      duration:m.duration,
+      location:m.location||'',
+      agenda:m.agenda,
+      attendees:m.attendees,
+      organizer:m.createdBy
+    };
+    if(SURL){
+      try{ await fetch(SURL,{method:'POST',body:JSON.stringify(payload)}); }
+      catch(e){ console.warn('Meeting invite failed for',att.email,e); }
+    }
+  }
+}
+
+async function resendMeetingMails(id){
+  loadMeetings();
+  const m=meetings.find(x=>x.id===id); if(!m)return;
+  await sendMeetingEmails(m,'updated');
+  toast('📧 Invites resent to '+(m.attendees||[]).length+' attendee(s)!');
+}
+
+function deleteMeeting(id){
+  if(!confirm('Delete this meeting? Attendees will not be notified.'))return;
+  loadMeetings();
+  meetings=meetings.filter(x=>x.id!==id);
+  saveMeetings_local();
+  renderMeetings();
+  toast('🗑 Meeting deleted');
+}
+</script>
 
 </body>
 </html>
