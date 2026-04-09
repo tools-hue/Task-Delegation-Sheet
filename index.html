@@ -492,7 +492,7 @@ textarea.fc{resize:vertical;min-height:68px}
         </div>
         <div class="card">
           <div class="ch"><div class="ct">Task List</div><span class="cbdg" id="at-cnt">0 tasks</span></div>
-          <div class="tw"><table class="tbl"><thead><tr><th>#</th><th>Task</th><th>Assigned To</th><th>By</th><th>Assign Date</th><th>Due Date</th><th>Status</th><th>Priority</th><th>Actions</th></tr></thead><tbody id="at-body"></tbody></table></div>
+          <div class="tw"><table class="tbl"><thead><tr><th>#</th><th>Task</th><th>Qty (Done/Total)</th><th>Assigned To</th><th>By</th><th>Assign Date</th><th>Due Date</th><th>Status</th><th>Priority</th><th>Actions</th></tr></thead><tbody id="at-body"></tbody></table></div>
           <div id="at-nil" style="text-align:center;padding:40px;color:var(--muted);display:none"><div style="font-size:36px;margin-bottom:8px">📋</div><div style="font-weight:600">No tasks found</div></div>
         </div>
       </div>
@@ -1291,7 +1291,8 @@ function refillEmpDropdown(){
   list.forEach(e => {
     const o = document.createElement('option');
     o.value = e.email;
-    o.textContent = e.name + ' (' + e.desig + ')';
+    const roleTag = e.isAdmin ? '[Admin] ' : e.isManager ? '[Manager] ' : '';
+    o.textContent = roleTag + e.name + ' (' + e.desig + ')';
     sel.appendChild(o);
   });
 }
@@ -1421,23 +1422,23 @@ function buildUI(){
 // ── COUNTERS ──────────────────────────────────────────────────
 function renderCounters(tasks, containerId){
   const el=$(containerId);if(!el)return;
-  const byName={};
-  tasks.forEach(t=>{
-    const n=uname(t.email);
-    if(!byName[n])byName[n]={name:n,total:0,done:0};
-    byName[n].total++;
-    if(t.status==='completed')byName[n].done++;
-  });
   const assigned=tasks.length;
   const done=tasks.filter(t=>t.status==='completed').length;
   const inprog=tasks.filter(t=>t.status==='in progress').length;
   const over=tasks.filter(t=>isOD(t)).length;
   const pending=tasks.filter(t=>t.status==='assigned').length;
-  let html=`<div class="tctr tctr-blue" style="cursor:pointer" onclick="openTaskDrillView('top-total')"><div class="tctr-v">${assigned}</div><div class="tctr-l">Total Assigned</div></div>
+  // Total work units (quantity) across all tasks
+  const totalUnitsAll=tasks.reduce((s,t)=>s+Math.max(1,Number(t.totalUnits||1)),0);
+  const doneUnitsAll=tasks.reduce((s,t)=>s+Math.max(0,Number(t.doneUnits||0)),0);
+  const pendingUnitsAll=tasks.reduce((s,t)=>s+Math.max(0,Number(t.pendingUnits||Math.max(0,(Number(t.totalUnits||1)-Number(t.doneUnits||0))))),0);
+  let html=`<div class="tctr tctr-blue" style="cursor:pointer" onclick="openTaskDrillView('top-total')"><div class="tctr-v">${assigned}</div><div class="tctr-l">Total Tasks</div></div>
     <div class="tctr tctr-green" style="cursor:pointer" onclick="openTaskDrillView('top-completed')"><div class="tctr-v">${done}</div><div class="tctr-l">Completed</div></div>
     <div class="tctr tctr-orange" style="cursor:pointer" onclick="openTaskDrillView('top-progress')"><div class="tctr-v">${inprog}</div><div class="tctr-l">In Progress</div></div>
     <div class="tctr tctr-red" style="cursor:pointer" onclick="openTaskDrillView('top-overdue')"><div class="tctr-v">${over}</div><div class="tctr-l">Overdue</div></div>
-    <div class="tctr tctr-purple" style="cursor:pointer" onclick="openTaskDrillView('top-pending')"><div class="tctr-v">${pending}</div><div class="tctr-l">Pending Accept</div></div>`;
+    <div class="tctr tctr-purple" style="cursor:pointer" onclick="openTaskDrillView('top-pending')"><div class="tctr-v">${pending}</div><div class="tctr-l">Pending Accept</div></div>
+    <div class="tctr" style="border-top:3px solid var(--blue)"><div class="tctr-v" style="color:var(--blue)">${totalUnitsAll}</div><div class="tctr-l">Total Units</div></div>
+    <div class="tctr" style="border-top:3px solid var(--green)"><div class="tctr-v" style="color:var(--green)">${doneUnitsAll}</div><div class="tctr-l">Units Done</div></div>
+    <div class="tctr" style="border-top:3px solid var(--orange)"><div class="tctr-v" style="color:var(--orange)">${pendingUnitsAll}</div><div class="tctr-l">Units Pending</div></div>`;
   const taskNameCount={};
   tasks.forEach(t=>{const k=(t.task||'').slice(0,30);taskNameCount[k]=(taskNameCount[k]||0)+1;});
   const topTasks=Object.entries(taskNameCount).sort((a,b)=>b[1]-a[1]).slice(0,3);
@@ -1613,7 +1614,9 @@ function renderMyTasks(){
       <div class="tc-top"><div class="tc-task">${t.task}</div><span class="pill ${sc}">${st}</span></div>
       <div class="tc-meta"><span>👤 By: ${t.by||'Admin'}</span><span>📅 Assign: ${fd(t.adate)}</span><span>🕐 Due: ${fd(t.ddate)}</span>
         ${d!==null?`<span style="color:${d<0?'var(--red)':d===0?'var(--orange)':'var(--muted)'}}">${d<0?Math.abs(d)+'d overdue':d===0?'Due today':'in '+d+' days'}</span>`:''}
-        <span>⚡ ${t.priority.charAt(0).toUpperCase()+t.priority.slice(1)}</span><span>🔢 ${Number(t.doneUnits||0)}/${Number(t.totalUnits||1)} done</span>${t.driveLink?`<a href="${t.driveLink}" target="_blank" rel="noopener noreferrer">🎞 Drive</a>`:''}</div>
+        <span>⚡ ${t.priority.charAt(0).toUpperCase()+t.priority.slice(1)}</span>
+        <span style="font-weight:700;color:var(--blue);background:var(--blue3);padding:2px 8px;border-radius:8px">🔢 Qty: ${Number(t.doneUnits||0)}/${Number(t.totalUnits||1)} done &nbsp;|&nbsp; ${Number(t.pendingUnits||Math.max(0,(Number(t.totalUnits||1)-Number(t.doneUnits||0))))} pending</span>
+        ${t.driveLink?`<a href="${t.driveLink}" target="_blank" rel="noopener noreferrer">🎞 Drive</a>`:''}</div>
       <div class="tc-acts">${acts.join('')}</div>
     </div>`;
   }).join('');
@@ -1667,7 +1670,8 @@ function renderAllTasks(){
     const d=dl(t.ddate);
     const tr=document.createElement('tr');
     tr.innerHTML=`<td style="color:var(--muted2);font-size:11px">${i+1}</td>
-      <td style="max-width:320px;white-space:normal;font-weight:600">${t.task.slice(0,100)}${t.task.length>100?'...':''}<div style="font-size:10px;color:var(--muted);margin-top:4px">🔢 ${Number(t.doneUnits||0)}/${Number(t.totalUnits||1)} done · ${Number(t.pendingUnits||Math.max(0,(Number(t.totalUnits||1)-Number(t.doneUnits||0))))} pending${t.driveLink?` · <a href="${t.driveLink}" target="_blank" rel="noopener noreferrer">Drive</a>`:''}</div></td>
+      <td style="max-width:260px;white-space:normal;font-weight:600">${t.task.slice(0,100)}${t.task.length>100?'...':''}${t.driveLink?`<div style="font-size:10px;margin-top:3px"><a href="${t.driveLink}" target="_blank" rel="noopener noreferrer">Drive ↗</a></div>`:''}</td>
+      <td style="text-align:center"><div style="font-weight:700;color:var(--blue);font-size:14px">${Number(t.doneUnits||0)}/${Number(t.totalUnits||1)}</div><div style="font-size:10px;color:var(--orange)">${Number(t.pendingUnits||Math.max(0,(Number(t.totalUnits||1)-Number(t.doneUnits||0))))} left</div></td>
       <td><div style="font-weight:600">${uname(t.email)}</div><div style="font-size:10px;color:var(--muted)">${udesig(t.email)}</div></td>
       <td style="color:var(--muted)">${t.by||'—'}</td>
       <td>${fd(t.adate)}</td>
@@ -1706,7 +1710,7 @@ async function qDone(id){
   const t=allTasks.find(x=>x.id===id);
   if(t){t.status='completed';t.completedAt=now;}
   buildUI();toast('✅ Task marked complete!');
-  try{await fetch(SURL,{method:'POST',body:JSON.stringify({action:'updateTask',id,status:'Completed'})});}
+  try{await fetch(SURL,{method:'POST',body:JSON.stringify({action:'updateTask',id,status:'Completed',deleteEmailOnComplete:true})});}
   catch(e){toast('⚠ Sheet sync failed — saved locally');}
 }
 
@@ -1769,12 +1773,12 @@ async function saveTask(){
       }
       toast('✅ Task updated!');
     } else {
-      const payload={action:'addTask',task,email,empName:uname(email),by:cu.name,adate,ddate,priority:pri,notes:note,references,adCopy,totalUnits,doneUnits:0,pendingUnits:totalUnits,driveLink:''};
+      const payload={action:'addTask',task,email,empName:uname(email),by:cu.name,adate,ddate,priority:pri,notes:note,references,adCopy,totalUnits,doneUnits:0,pendingUnits:totalUnits,driveLink:'',sendEmail:true,emailBody:`Hi ${uname(email)},\n\nYou have been assigned a new task.\n\n📋 Task: ${task}\n🔢 Work Quantity / Units: ${totalUnits}\n📅 Assign Date: ${adate}\n🕐 Due Date: ${ddate}\n⚡ Priority: ${pri}\n👤 Assigned By: ${cu.name}\n\n📎 References:\n${references}\n\n📝 Ad Script / Ad Copy:\n${adCopy}\n\n${note?`📌 Notes:\n${note}\n\n`:''}Please accept and complete this task on time.\n\nUpGro Mission Control`};
       const res=await fetch(SURL,{method:'POST',body:JSON.stringify(payload)});
       const d=await res.json();
       if(d.id){
         allTasks.push({id:d.id,task,email,empName:uname(email),by:cu.name,adate,ddate,priority:pri.toLowerCase(),status:'assigned',ts:new Date().toLocaleString('en-IN'),acceptedAt:'',completedAt:'',notes:note,references,adCopy,driveLink:'',totalUnits,doneUnits:0,pendingUnits:totalUnits,desig:udesig(email),_source:'tasks'});
-        toast('✅ Task assigned to '+uname(email)+' + email sent!');
+        toast('✅ Task assigned to '+uname(email)+' + email sent (Qty: '+totalUnits+')');
       }
     }
     CM('m-add');buildUI();
@@ -1805,7 +1809,7 @@ async function submitWork(){
   if(t){t.status=newStatus;if(newStatus==='completed')t.completedAt=now;t.driveLink=driveLink||t.driveLink||'';t.doneUnits=updatedDone;t.pendingUnits=updatedPending;}
   buildUI();
   try{
-    await fetch(SURL,{method:'POST',body:JSON.stringify({action:'submitWork',taskId,email:cu.email,empName:cu.name,task:t?t.task:'',status:newStatus==='completed'?'Completed':'In Progress',notes,driveLink,doneUnits,updatedDoneUnits:updatedDone,pendingUnits:updatedPending,totalUnits,id:taskId,adate:t?t.adate:'',ddate:t?t.ddate:'',by:t?t.by:'',ts:t?t.ts:''})});
+    await fetch(SURL,{method:'POST',body:JSON.stringify({action:'submitWork',taskId,email:cu.email,empName:cu.name,task:t?t.task:'',status:newStatus==='completed'?'Completed':'In Progress',notes,driveLink,doneUnits,updatedDoneUnits:updatedDone,pendingUnits:updatedPending,totalUnits,id:taskId,adate:t?t.adate:'',ddate:t?t.ddate:'',by:t?t.by:'',ts:t?t.ts:'',deleteEmailOnComplete:newStatus==='completed'})});
     toast('✅ Work submitted successfully!');
     const sn=$('sub-notes');if(sn)sn.value='';
     const sdl=$('sub-drive-link');if(sdl)sdl.value='';
@@ -2435,11 +2439,56 @@ async function testConn(){
 =============================================================
   GOOGLE APPS SCRIPT — PASTE IN YOUR .gs FILE
 =============================================================
-  Add this function to your Apps Script for hourly pending alerts.
-  It emails employees every hour for tasks that are:
-  - accepted (in progress) or overdue
-  - created ON OR AFTER 01/04/2026
-  - NOT completed
+
+  ── 1. TASK ASSIGNMENT EMAIL (with Work Quantity) ──────────
+  In your doPost(e) function, handle action='addTask' like this:
+  (The dashboard now sends emailBody + totalUnits in the payload)
+
+  case 'addTask': {
+    // ... save task to sheet as usual ...
+    const empEmail = data.email;
+    const empName  = data.empName;
+    const totalUnits = data.totalUnits || 1;
+    // Send assignment email with quantity
+    const subject = '📋 New Task Assigned — UpGro Mission Control';
+    const body = data.emailBody ||
+      `Hi ${empName},\n\nYou have a new task assigned.\n\n`+
+      `Task: ${data.task}\nWork Quantity / Units: ${totalUnits}\n`+
+      `Due: ${data.ddate}\nPriority: ${data.priority}\nBy: ${data.by}\n\n`+
+      `UpGro Mission Control`;
+    GmailApp.sendEmail(empEmail, subject, body);
+    break;
+  }
+
+  ── 2. DELETE EMAIL ON TASK COMPLETION ─────────────────────
+  When submitWork or updateTask is called with deleteEmailOnComplete=true,
+  search Gmail for the task assignment email and trash it:
+
+  function deleteTaskAssignmentEmail(empEmail, taskName) {
+    try {
+      const query = `to:${empEmail} subject:"New Task Assigned" "${taskName.slice(0,30)}"`;
+      const threads = GmailApp.search(query, 0, 5);
+      threads.forEach(t => t.moveToTrash());
+      // Also delete hourly reminder emails for this task
+      const query2 = `to:${empEmail} subject:"Pending Tasks Reminder" "${taskName.slice(0,30)}"`;
+      const threads2 = GmailApp.search(query2, 0, 10);
+      threads2.forEach(t => t.moveToTrash());
+    } catch(e) { Logger.log('Email delete error: ' + e); }
+  }
+
+  In your doPost handler for submitWork / updateTask:
+  case 'submitWork':
+  case 'updateTask': {
+    // ... update sheet status to Completed ...
+    if(data.deleteEmailOnComplete && String(data.status||'').toLowerCase()==='completed'){
+      deleteTaskAssignmentEmail(data.email || data.empEmail, data.task);
+    }
+    break;
+  }
+
+  ── 3. HOURLY PENDING ALERTS (only non-completed, with qty) ─
+  Tasks are auto-skipped from alerts once completed (since email
+  is deleted). But as backup, the alert also skips completed tasks:
 
   function sendHourlyPendingAlerts() {
     const CUTOFF = new Date('2026-04-01');
@@ -2447,27 +2496,41 @@ async function testConn(){
     if(!sheet) return;
     const data = sheet.getDataRange().getValues();
     const headers = data[0];
-    const idxEmail = headers.indexOf('AssignedTo_Email');
-    const idxTask = headers.indexOf('Task');
-    const idxStatus = headers.indexOf('Status');
-    const idxDue = headers.indexOf('DueDate');
-    const idxTs = headers.indexOf('Timestamp');
+    const idxEmail    = headers.indexOf('AssignedTo_Email');
+    const idxTask     = headers.indexOf('Task');
+    const idxStatus   = headers.indexOf('Status');
+    const idxDue      = headers.indexOf('DueDate');
+    const idxTs       = headers.indexOf('Timestamp');
+    const idxUnitsT   = headers.indexOf('TotalUnits');
+    const idxUnitsD   = headers.indexOf('DoneUnits');
+    const idxUnitsP   = headers.indexOf('PendingUnits');
     const pending = {};
     for(let i=1;i<data.length;i++){
       const row = data[i];
       const ts = new Date(row[idxTs]);
-      if(ts < CUTOFF) continue; // Skip old tasks
+      if(ts < CUTOFF) continue;
       const status = String(row[idxStatus]||'').toLowerCase();
-      if(status === 'completed') continue;
+      if(status === 'completed') continue;  // ← skip completed = email disappears
       const email = String(row[idxEmail]||'').toLowerCase();
       if(!email) continue;
       if(!pending[email]) pending[email] = [];
-      pending[email].push({task:row[idxTask],status:row[idxStatus],due:row[idxDue]});
+      pending[email].push({
+        task:    row[idxTask],
+        status:  row[idxStatus],
+        due:     row[idxDue],
+        total:   row[idxUnitsT] || 1,
+        done:    row[idxUnitsD] || 0,
+        pend:    row[idxUnitsP] || (row[idxUnitsT] - row[idxUnitsD]) || 1
+      });
     }
     Object.entries(pending).forEach(([email, tasks]) => {
-      const body = tasks.map(t=>`• ${t.task} | Status: ${t.status} | Due: ${t.due}`).join('\n');
-      GmailApp.sendEmail(email, '⏰ Pending Tasks Reminder — UpGro Mission Control',
-        `Hi,\n\nYou have ${tasks.length} pending task(s):\n\n${body}\n\nPlease complete them at the earliest.\n\nUpGro Mission Control`);
+      const body = tasks.map(t =>
+        `• ${t.task}\n  Status: ${t.status} | Due: ${t.due} | Qty: ${t.done}/${t.total} done (${t.pend} pending)`
+      ).join('\n\n');
+      GmailApp.sendEmail(email,
+        '⏰ Pending Tasks Reminder — UpGro Mission Control',
+        `Hi,\n\nYou have ${tasks.length} pending task(s):\n\n${body}\n\nPlease complete them ASAP.\n\nUpGro Mission Control`
+      );
     });
   }
 
