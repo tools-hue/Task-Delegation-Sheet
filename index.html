@@ -101,6 +101,25 @@ button,input,select,textarea{font-family:'Inter',sans-serif;font-size:13px}
 #sb.col .su-inf{opacity:0;width:0}
 .su-out{background:none;border:none;color:rgba(255,255,255,.2);font-size:15px;cursor:pointer;padding:4px;border-radius:6px;flex-shrink:0;line-height:1}
 .su-out:hover{color:var(--red);background:rgba(229,57,53,.1)}
+
+.su{position:relative}
+.su-main{display:flex;align-items:center;gap:9px;flex:1;min-width:0;cursor:pointer;padding:2px 0}
+.su-av{overflow:hidden;background:linear-gradient(135deg,#2563eb,#60a5fa);box-shadow:0 8px 20px rgba(37,99,235,.24);border:2px solid rgba(255,255,255,.14)}
+.su-av img{width:100%;height:100%;object-fit:cover;display:block}
+.su-menu-btn{width:28px;height:28px;border-radius:50%;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.05);color:rgba(255,255,255,.75);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;font-size:15px;flex-shrink:0}
+.su-menu-btn:hover{background:rgba(255,255,255,.12);color:#fff}
+.su-dd{position:absolute;left:10px;right:10px;bottom:58px;background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:0 18px 50px rgba(15,23,42,.26);padding:10px;display:none;z-index:400}
+.su-dd.open{display:block;animation:fadeUp .16s ease}
+.su-top{display:flex;align-items:center;gap:10px;padding:8px 8px 12px;border-bottom:1px solid #eef2f7;margin-bottom:8px}
+.su-top-av{width:44px;height:44px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;flex-shrink:0;background:linear-gradient(135deg,#2563eb,#60a5fa)}
+.su-top-av img{width:100%;height:100%;object-fit:cover;display:block}
+.su-top-name{font-size:13px;font-weight:700;color:var(--text)}
+.su-top-role{font-size:11px;color:var(--muted)}
+.su-dd-btn{width:100%;display:flex;align-items:center;gap:10px;border:none;background:#fff;color:var(--text);padding:10px 12px;border-radius:12px;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s;text-align:left}
+.su-dd-btn:hover{background:var(--bg);color:var(--blue)}
+.su-dd-btn.danger:hover{background:#FEF2F2;color:var(--red)}
+#profile-pic-input{display:none}
+
 #sb.col .su-out{display:none}
 
 /* MAIN */
@@ -407,10 +426,24 @@ textarea.fc{resize:vertical;min-height:68px}
       <div class="ni" onclick="nav('settings')"><span class="ico">⚙</span><span class="lbl">Settings</span><span class="ni-tip">Settings</span></div>
     </div>
     <div class="sb-foot">
-      <div class="su">
-        <div class="su-av" id="sb-av">?</div>
-        <div class="su-inf"><div class="su-name" id="sb-name">—</div><div class="su-role" id="sb-role">—</div></div>
-        <button class="su-out" title="Logout" onclick="logout()">⏏</button>
+      <div class="su" id="sidebar-profile">
+        <div class="su-main" onclick="toggleProfileMenu(event)">
+          <div class="su-av" id="sb-av">?</div>
+          <div class="su-inf"><div class="su-name" id="sb-name">—</div><div class="su-role" id="sb-role">—</div></div>
+        </div>
+        <button class="su-menu-btn" title="Profile options" onclick="toggleProfileMenu(event)">⋮</button>
+        <div class="su-dd" id="profile-dd">
+          <div class="su-top">
+            <div class="su-top-av" id="profile-dd-av">?</div>
+            <div>
+              <div class="su-top-name" id="profile-dd-name">—</div>
+              <div class="su-top-role" id="profile-dd-role">—</div>
+            </div>
+          </div>
+          <button class="su-dd-btn" onclick="triggerProfilePicUpload()">🖼️ Set Profile Picture</button>
+          <button class="su-dd-btn" onclick="removeProfilePhoto()">🗑️ Remove Profile Picture</button>
+          <button class="su-dd-btn danger" onclick="logout()">↪ Logout</button>
+        </div>
       </div>
     </div>
   </nav>
@@ -1439,7 +1472,8 @@ function buildTaskMailHtml(mode,payload){
         +'<div style="margin-top:6px;font-size:11px;color:#94a3b8">Official work notification mail · UpGro Media</div>'
       +'</div>'
     +'</td></tr>'
-    +'</table></td></tr></table></body></html>';
+    +'</table></td></tr></table><input type="file" id="profile-pic-input" accept="image/*" onchange="handleProfilePicUpload(event)">
+</body></html>';
 }
 
 function buildMeetingMailHtml(data){
@@ -1565,7 +1599,58 @@ function doLogin(){
   initApp();
 }
 
-function logout(){
+
+function profilePhotoKey(){return 'UPGRO_PROFILE_PHOTO_'+((cu&&cu.email)||'guest').toLowerCase();}
+function getProfilePhoto(){try{return localStorage.getItem(profilePhotoKey())||'';}catch(e){return '';}}
+function setProfilePhoto(dataUrl){try{localStorage.setItem(profilePhotoKey(),dataUrl||'');}catch(e){}}
+function clearProfilePhoto(){try{localStorage.removeItem(profilePhotoKey());}catch(e){}}
+function getRoleLabel(){return cu?(cu.isAdmin?'👑 Admin':cu.isManager?'🔀 Manager':(cu.role||'Team')):'Team';}
+function avatarMarkup(name,img){
+  const safeName=escapeHtml((name||'?').trim()||'?');
+  if(img) return '<img src="'+img+'" alt="'+safeName+'">';
+  return safeName.split(/\s+/).filter(Boolean).slice(0,2).map(s=>s[0]).join('').toUpperCase()||'?';
+}
+function updateSidebarProfile(bg){
+  const safeBg=bg||CLRS[Math.max(0,Object.keys(USERS).indexOf((cu&&cu.email)||''))%CLRS.length]||'#2563eb';
+  const img=getProfilePhoto();
+  const av=$('sb-av'); if(av){ av.style.background=safeBg; av.innerHTML=avatarMarkup(cu&&cu.name,img); }
+  const ddAv=$('profile-dd-av'); if(ddAv){ ddAv.style.background=safeBg; ddAv.innerHTML=avatarMarkup(cu&&cu.name,img); }
+  const ddName=$('profile-dd-name'); if(ddName) ddName.textContent=(cu&&cu.name)||'—';
+  const ddRole=$('profile-dd-role'); if(ddRole) ddRole.textContent=getRoleLabel();
+}
+function toggleProfileMenu(ev){
+  if(ev) ev.stopPropagation();
+  const dd=$('profile-dd'); if(!dd) return;
+  dd.classList.toggle('open');
+}
+function closeProfileMenu(){ const dd=$('profile-dd'); if(dd) dd.classList.remove('open'); }
+function triggerProfilePicUpload(){ closeProfileMenu(); const inp=$('profile-pic-input'); if(inp) inp.click(); }
+function handleProfilePicUpload(event){
+  const file=event&&event.target&&event.target.files&&event.target.files[0];
+  if(!file) return;
+  if(!/^image\//i.test(file.type)){ toast('Please select an image file'); return; }
+  const r=new FileReader();
+  r.onload=function(){
+    setProfilePhoto(r.result||'');
+    updateSidebarProfile();
+    toast('Profile picture updated');
+  };
+  r.readAsDataURL(file);
+  event.target.value='';
+}
+function removeProfilePhoto(){
+  clearProfilePhoto();
+  updateSidebarProfile();
+  closeProfileMenu();
+  toast('Profile picture removed');
+}
+document.addEventListener('click',function(ev){
+  const wrap=$('sidebar-profile');
+  if(!wrap) return;
+  if(!wrap.contains(ev.target)) closeProfileMenu();
+});
+
+function logout(){closeProfileMenu();
   clearCurrentSession();
   cu=null;allTasks=[];statusOverrides.clear();
   Object.values(charts).forEach(c=>{try{c.destroy()}catch(e){}});charts={};
@@ -1583,9 +1668,9 @@ function initApp(){
   dataSheets=loadDS();
   const ci=Math.max(0,Object.keys(USERS).indexOf(cu.email));
   const bg=CLRS[ci%CLRS.length];
-  const av=$('sb-av');if(av){av.textContent=ini(cu.name);av.style.background=bg;}
   const sn=$('sb-name');if(sn)sn.textContent=cu.name;
   const sr=$('sb-role');if(sr)sr.textContent=cu.isAdmin?'👑 Admin':cu.isManager?'🔀 Manager':cu.role;
+  updateSidebarProfile(bg);
 
   // Sidebar visibility
   updateSidebarVis();
