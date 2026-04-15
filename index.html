@@ -118,7 +118,16 @@ button,input,select,textarea{font-family:'Inter',sans-serif;font-size:13px}
 .su-dd-btn{width:100%;display:flex;align-items:center;gap:10px;border:none;background:#fff;color:var(--text);padding:10px 12px;border-radius:12px;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s;text-align:left}
 .su-dd-btn:hover{background:var(--bg);color:var(--blue)}
 .su-dd-btn.danger:hover{background:#FEF2F2;color:var(--red)}
+
 #profile-pic-input{display:none}
+.prof-set{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:4px 0}
+.prof-set-av{width:72px;height:72px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;background:linear-gradient(135deg,#2563eb,#60a5fa);box-shadow:0 12px 28px rgba(37,99,235,.22);border:3px solid #fff}
+.prof-set-av img{width:100%;height:100%;object-fit:cover;display:block}
+.prof-set-meta{flex:1;min-width:220px}
+.prof-set-name{font-size:16px;font-weight:800;color:var(--text)}
+.prof-set-role{font-size:12px;color:var(--muted);margin-top:2px}
+.prof-set-hint{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
+
 
 #sb.col .su-out{display:none}
 
@@ -691,7 +700,24 @@ textarea.fc{resize:vertical;min-height:68px}
             <button class="btn bo bsm" onclick="testConn()">🔍 Test Connection</button>
           </div>
         </div>
+        
         <div class="sc">
+          <div class="sc-t">🖼️ Profile Picture</div>
+          <div class="srow"><div><div class="sr-l">Your sidebar profile</div><div class="sr-d">Set your profile picture from settings. It will show in the sidebar and profile menu.</div></div></div>
+          <div class="prof-set">
+            <div class="prof-set-av" id="settings-prof-av">?</div>
+            <div class="prof-set-meta">
+              <div class="prof-set-name" id="settings-prof-name">—</div>
+              <div class="prof-set-role" id="settings-prof-role">—</div>
+              <div class="prof-set-hint">Use a square image for the best result. Your picture is saved in this browser.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+            <button class="btn bp bsm" onclick="triggerProfilePicUpload()">🖼️ Add / Change Profile Picture</button>
+            <button class="btn bo bsm" onclick="removeProfilePhoto()">🗑️ Remove Picture</button>
+          </div>
+        </div>
+<div class="sc">
           <div class="sc-t">🔐 Self Password Change</div>
           <div class="srow"><div><div class="sr-l">Change your login password</div><div class="sr-d">Every employee can update their own password from this portal.</div></div></div>
           <div class="fr" style="margin-top:10px">
@@ -875,6 +901,7 @@ textarea.fc{resize:vertical;min-height:68px}
   </div>
 </div>
 
+<input type="file" id="profile-pic-input" accept="image/*" onchange="handleProfilePicUpload(event)" style="display:none">
 <script>
 // ════════════════════════════════════════════════════════════════
 //  UPGRO MEDIA MISSION CONTROL v5.0
@@ -1472,8 +1499,7 @@ function buildTaskMailHtml(mode,payload){
         +'<div style="margin-top:6px;font-size:11px;color:#94a3b8">Official work notification mail · UpGro Media</div>'
       +'</div>'
     +'</td></tr>'
-    +'</table></td></tr></table><input type="file" id="profile-pic-input" accept="image/*" onchange="handleProfilePicUpload(event)">
-</body></html>';
+    +'</table></td></tr></table></body></html>';
 }
 
 function buildMeetingMailHtml(data){
@@ -1610,6 +1636,15 @@ function avatarMarkup(name,img){
   if(img) return '<img src="'+img+'" alt="'+safeName+'">';
   return safeName.split(/\s+/).filter(Boolean).slice(0,2).map(s=>s[0]).join('').toUpperCase()||'?';
 }
+
+function refreshProfileSettingsCard(bg){
+  const safeBg=bg||CLRS[Math.max(0,Object.keys(USERS).indexOf((cu&&cu.email)||''))%CLRS.length]||'#2563eb';
+  const img=getProfilePhoto();
+  const av=$('settings-prof-av'); if(av){ av.style.background=safeBg; av.innerHTML=avatarMarkup(cu&&cu.name,img); }
+  const nm=$('settings-prof-name'); if(nm) nm.textContent=(cu&&cu.name)||'—';
+  const rl=$('settings-prof-role'); if(rl) rl.textContent=getRoleLabel();
+}
+
 function updateSidebarProfile(bg){
   const safeBg=bg||CLRS[Math.max(0,Object.keys(USERS).indexOf((cu&&cu.email)||''))%CLRS.length]||'#2563eb';
   const img=getProfilePhoto();
@@ -1617,6 +1652,7 @@ function updateSidebarProfile(bg){
   const ddAv=$('profile-dd-av'); if(ddAv){ ddAv.style.background=safeBg; ddAv.innerHTML=avatarMarkup(cu&&cu.name,img); }
   const ddName=$('profile-dd-name'); if(ddName) ddName.textContent=(cu&&cu.name)||'—';
   const ddRole=$('profile-dd-role'); if(ddRole) ddRole.textContent=getRoleLabel();
+  refreshProfileSettingsCard(safeBg);
 }
 function toggleProfileMenu(ev){
   if(ev) ev.stopPropagation();
@@ -1624,7 +1660,7 @@ function toggleProfileMenu(ev){
   dd.classList.toggle('open');
 }
 function closeProfileMenu(){ const dd=$('profile-dd'); if(dd) dd.classList.remove('open'); }
-function triggerProfilePicUpload(){ closeProfileMenu(); const inp=$('profile-pic-input'); if(inp) inp.click(); }
+function triggerProfilePicUpload(){ closeProfileMenu(); const inp=$('profile-pic-input'); if(inp){ try{ inp.value=''; }catch(e){} inp.click(); } }
 function handleProfilePicUpload(event){
   const file=event&&event.target&&event.target.files&&event.target.files[0];
   if(!file) return;
