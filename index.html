@@ -101,6 +101,11 @@ button,input,select,textarea{font-family:'Inter',sans-serif;font-size:13px}
 #sb.col .su-inf{opacity:0;width:0}
 .su-out{background:none;border:none;color:rgba(255,255,255,.2);font-size:15px;cursor:pointer;padding:4px;border-radius:6px;flex-shrink:0;line-height:1}
 .su-out:hover{color:var(--red);background:rgba(229,57,53,.1)}
+.sb-logout-direct{margin-top:8px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 12px;border:none;border-radius:10px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 10px 24px rgba(220,38,38,.22);transition:transform .15s,box-shadow .15s,opacity .15s}
+.sb-logout-direct:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(220,38,38,.28);opacity:.98}
+#sb.col .sb-logout-direct{padding:10px 0}
+#sb.col .sb-logout-direct .txt{display:none}
+
 
 .su{position:relative}
 .su-main{display:flex;align-items:center;gap:9px;flex:1;min-width:0;cursor:pointer;padding:2px 0}
@@ -454,6 +459,10 @@ textarea.fc{resize:vertical;min-height:68px}
           <button class="su-dd-btn danger" onclick="logout()">↪ Logout</button>
         </div>
       </div>
+      <button class="sb-logout-direct" onclick="logout()" title="Logout">
+        <span>↪</span>
+        <span class="txt">Logout</span>
+      </button>
     </div>
   </nav>
   <div class="sbok" id="sbok" onclick="closeSB()"></div>
@@ -953,7 +962,7 @@ const PAGE_TITLES={dash:'Dashboard',mytasks:'My Tasks',alltasks:'All Tasks',anal
 const DATA_START = new Date('2026-04-01T00:00:00'); // Data & email from this date
 
 // ── STATE ─────────────────────────────────────────────────────
-let cu=null, allTasks=[], empReg=[], formLinks=[], dataSheets=[], charts={}, notifications=[];
+let cu=null, allTasks=[], empReg=[], formLinks=[], dataSheets=[], charts={}, notifications=[], sheetEmpReg=[];
 let activeEmpF=null, dateRange='all', drillData=[], editTaskId=null, editEmpEmail=null;
 const TODAY=new Date().toISOString().split('T')[0];
 const statusOverrides=new Map();
@@ -1052,6 +1061,41 @@ function isForcedAssigner(rec){
   if(name==='adarsh srivastava' && /web developer/i.test(String(rec.desig||rec.role||'')))return true;
   return false;
 }
+
+function parseEmployeeRow(row, i=0){
+  if(!row) return null;
+  const email = normEmail(row.email||row.Email||row.EmployeeEmail||row.Employee_Email||row.LoginEmail||row.UserEmail||'');
+  const name = String(row.name||row.Name||row.EmployeeName||row.Employee_Name||row.FullName||'').trim();
+  if(!email && !name) return null;
+  const desig = String(row.desig||row.Designation||row.designation||row.RoleName||row.Department||row.role||row.Role||'Team').trim() || 'Team';
+  const role = String(row.role||row.Role||row.Designation||row.designation||desig).trim() || desig;
+  const pass = String(row.pass||row.Password||row.password||'').trim();
+  const rec = {
+    email: email || '',
+    name: name || uname(email || ''),
+    pass,
+    role,
+    desig,
+    isAdmin: String(row.isAdmin ?? row.IsAdmin ?? '').toLowerCase()==='true' || false,
+    isManager: String(row.isManager ?? row.IsManager ?? '').toLowerCase()==='true' || /manager|assigner/i.test(role+' '+desig),
+    active: !['false','inactive','0','no'].includes(String(row.active ?? row.Active ?? row.Status ?? 'true').trim().toLowerCase()),
+    bg: row.bg || CLRS[i%CLRS.length],
+    joinDate: String(row.joinDate||row.JoinDate||'').trim()
+  };
+  rec.isAdmin = !!(row.isAdmin===true || row.IsAdmin===true || String(row.isAdmin ?? row.IsAdmin ?? '').trim().toLowerCase()==='true');
+  rec.isManager = !!(row.isManager===true || row.IsManager===true || rec.isManager);
+  return rec;
+}
+function taskBelongsToCurrentUser(t){
+  if(!t || !cu) return false;
+  const taskEmail = normEmail(t.email||t.assignedEmail||'');
+  const userEmail = normEmail(cu.email||'');
+  if(taskEmail && userEmail && taskEmail===userEmail) return true;
+  const taskName = normName(t.assignedToLabel||t.empName||t.assignedTo||uname(taskEmail)||'');
+  const userName = normName(cu.name||uname(userEmail)||'');
+  return !!(taskName && userName && taskName===userName);
+}
+
 function computeManagerFlag(rec){
   if(!rec || rec.isAdmin)return false;
   return !!(rec.isManager || isForcedAssigner(rec) || /manager|assigner/i.test(String(rec.role||rec.desig||'')));
@@ -1088,7 +1132,7 @@ function restoreCurrentSession(){
     if(!raw)return false;
     const sess=JSON.parse(raw)||{};
     if(!sess.email)return false;
-    initEmpReg(true);
+    try{ initEmpReg(true); }catch(_e){ console.error(_e); }
     const fresh=getStoredEmployee(sess.email);
     if(!fresh||fresh.active===false)return false;
     cu={...fresh,email:fresh.email,role:fresh.role||fresh.desig,desig:fresh.desig||fresh.role};
@@ -1100,7 +1144,7 @@ function emitEmpSync(){
 }
 function mergeRegistry(base,dyn,roles){
   const map=new Map();
-  [...base,...dyn].forEach((e,i)=>{
+  [...base,...sheetEmpReg,...dyn].forEach((e,i)=>{
     if(!e||!e.email)return;
     const email=String(e.email).trim().toLowerCase();
     const prev=map.get(email)||{};
@@ -1686,12 +1730,19 @@ document.addEventListener('click',function(ev){
   if(!wrap.contains(ev.target)) closeProfileMenu();
 });
 
-function logout(){closeProfileMenu();
-  clearCurrentSession();
-  cu=null;allTasks=[];statusOverrides.clear();
-  Object.values(charts).forEach(c=>{try{c.destroy()}catch(e){}});charts={};
-  $('app').classList.add('hidden');$('lp').classList.remove('hidden');
-  const el=$('lem');if(el)el.value='';const ep=$('lpw');if(ep)ep.value='';
+function logout(){
+  try{ closeProfileMenu(); }catch(e){}
+  try{ clearCurrentSession(); }catch(e){}
+  try{ sessionStorage.clear(); }catch(e){}
+  try{ cu=null; allTasks=[]; meetings=[]; formsLinks=[]; employees=[]; if(statusOverrides&&statusOverrides.clear) statusOverrides.clear(); }catch(e){}
+  try{ Object.values(charts||{}).forEach(c=>{try{c.destroy()}catch(e){}}); charts={}; }catch(e){}
+  const app=$('app'), lp=$('lp');
+  if(app) app.classList.add('hidden');
+  if(lp) lp.classList.remove('hidden');
+  const el=$('lem'); if(el) el.value='';
+  const ep=$('lpw'); if(ep) ep.value='';
+  const er=$('lerr'); if(er) er.style.display='none';
+  try{ window.scrollTo(0,0); }catch(e){}
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -1877,7 +1928,7 @@ function nav(page){
   const ttl=$('tb-ttl');if(ttl)ttl.textContent=PAGE_TITLES[page]||page;
   if(page==='analytics')reRenderCharts();
   if(page==='employees'){initEmpReg();renderEmpList();}
-  if(page==='mytasks'){renderMyTasks();populateSubSel();}
+  if(page==='mytasks'){initEmpReg();renderMyTasks();populateSubSel();}
   if(page==='alltasks')renderAllTasks();
   if(page==='forms'){renderFormLinks();renderDataSheets();}
   if(page==='meetings'){loadMeetings();renderMeetings();}
@@ -1957,6 +2008,17 @@ async function loadData(){
       if(sync)sync.textContent='🟢 Live · '+new Date().toLocaleTimeString('en-IN',{hour12:false})+' · '+allTasks.length+' tasks';
       if(cst){cst.className='cok';cst.textContent='✅ Connected';}
     }
+    try{
+      const er=await fetch(SURL+'?action=getEmployees',{signal:AbortSignal.timeout(12000)});
+      const ej=await er.json();
+      const rawEmployees = Array.isArray(ej.employees) ? ej.employees : Array.isArray(ej.data) ? ej.data : Array.isArray(ej.rows) ? ej.rows : [];
+      sheetEmpReg = rawEmployees.map((r,i)=>parseEmployeeRow(r,i)).filter(Boolean);
+      if(sheetEmpReg.length){
+        try{ initEmpReg(true); }catch(_e){ console.error(_e); }
+        refillEmpDropdown();
+        if(cu) rehydrateCurrentUser(true);
+      }
+    }catch(e){ sheetEmpReg = sheetEmpReg || []; }
     try{const r2=await fetch(SURL+'?action=getFormLinks');const j2=await r2.json();if(j2.links)formLinks=j2.links;}catch(e){}
     if(cu)pollNotifications();
   }catch(e){
@@ -2059,7 +2121,7 @@ function applyEmpF(tasks){
     if(activeEmpF)return merged.filter(t=>quickNameKey(t.assignedTo||t.name||uname(t.email),t.email)===activeEmpF);
     return merged;
   }
-  return tasks.filter(t=>t.email===cu.email);
+  return tasks.filter(t=>taskBelongsToCurrentUser(t));
 }
 function applyDateF(tasks){
   const now=new Date();now.setHours(0,0,0,0);
@@ -2108,7 +2170,7 @@ function buildEmpPills(tasks){
   });
   const sorted=Object.values(map).sort((a,b)=>a.label.localeCompare(b.label));
   const cont=$('emp-pills');if(!cont)return;
-  cont.innerHTML='';
+  cont.innerHTML=''; if(!empReg.length){ cont.innerHTML='<div style="padding:16px;color:var(--muted)">No employee data found yet. Sync or load from sheet.</div>'; }
   const all=document.createElement('span');
   all.className='efp'+(activeEmpF===null?' act':'');
   all.textContent='🌐 All';
@@ -2167,14 +2229,14 @@ function renderEOTY(tasks){
 }
 
 function renderBadges(tasks){
-  const my=tasks.filter(t=>t.email===cu.email&&t.status!=='completed');
+  const my=tasks.filter(t=>taskBelongsToCurrentUser(t)&&t.status!=='completed');
   const over=tasks.filter(t=>isOD(t));
   const nb=$('nb-my');if(nb){nb.textContent=my.length||'';nb.style.display=my.length?'':'none';}
   if(canAssign()){const nb2=$('nb-all');if(nb2){nb2.textContent=over.length||'';nb2.style.display=over.length?'':'none';}}
 }
 
 function renderDashTasks(){
-  const tasks=sortTasksNewestFirst(allTasks.filter(t=>t.email===cu.email&&t.status!=='completed')).slice(0,6);
+  const tasks=sortTasksNewestFirst(allTasks.filter(t=>taskBelongsToCurrentUser(t)&&t.status!=='completed')).slice(0,6);
   const el=$('dash-tasks');if(!el)return;
   if(!tasks.length){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted)">✅ No pending tasks — great job!</div>';return;}
   el.innerHTML=tasks.map(t=>{
@@ -2197,7 +2259,7 @@ function renderDashTasks(){
 //  MY TASKS
 // ════════════════════════════════════════════════════════════════
 function renderMyTasks(){
-  let tasks=sortTasksNewestFirst(allTasks.filter(t=>t.email===cu.email));
+  let tasks=sortTasksNewestFirst(allTasks.filter(t=>taskBelongsToCurrentUser(t)));
   const sf=($('mt-sf')||{value:''}).value;
   const q=($('mt-q')||{value:''}).value.toLowerCase();
   if(sf==='overdue')tasks=tasks.filter(t=>isOD(t));
@@ -2231,8 +2293,8 @@ function renderMyTasks(){
 
 function populateSubSel(){
   const sel=$('sub-task');if(!sel)return;
-  const mine=allTasks.filter(t=>t.email===cu.email&&t.status!=='completed');
-  sel.innerHTML='<option value="">— Select task —</option>';
+  const mine=allTasks.filter(t=>taskBelongsToCurrentUser(t)&&t.status!=='completed');
+  sel.innerHTML='<option value="">— Select task —</option>'; if(!mine.length){ sel.innerHTML += '<option value="" disabled>No assigned tasks found for your account</option>'; }
   mine.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=getTaskDisplayName(t).slice(0,80)+(t.totalUnits&&t.totalUnits>1?` · ${t.pendingUnits||t.totalUnits} pending`:'' );sel.appendChild(o);});
   refreshSubTaskMeta();
 }
@@ -2742,7 +2804,9 @@ function initEmpReg(force=false){
     const dyn=loadDynEmployees();
     const roles=loadStoredRoles();
     empReg=mergeRegistry(base,dyn,roles);
-    empReg=empReg.map(e=>({ ...e, isManager:computeManagerFlag(e) }));
+    empReg=empReg
+      .map(e=>({ ...e, isManager:computeManagerFlag(e), active:e.active!==false }))
+      .filter(e=>e && (e.email || e.name));
     syncUserDirectoryFromRegistry();
   }
 }
@@ -2755,8 +2819,10 @@ function renderEmpList(){
     const total=empReg.length, active=empReg.filter(e=>e.active!==false).length, inactive=empReg.filter(e=>e.active===false).length, admins=empReg.filter(e=>e.isAdmin).length, managers=empReg.filter(e=>computeManagerFlag(e)).length;
     counters.innerHTML=`<div class="tctr tctr-blue"><div class="tctr-v">${total}</div><div class="tctr-l">Total Employees</div></div><div class="tctr tctr-green"><div class="tctr-v">${active}</div><div class="tctr-l">Active</div></div><div class="tctr tctr-red"><div class="tctr-v">${inactive}</div><div class="tctr-l">Inactive</div></div><div class="tctr tctr-purple"><div class="tctr-v">${admins}</div><div class="tctr-l">Admins</div></div><div class="tctr tctr-orange"><div class="tctr-v">${managers}</div><div class="tctr-l">Assigners</div></div>`;
   }
-  cont.innerHTML='';
-  empReg.filter(e=>(normalizeDisplayName(e.name,e.email,e.desig).toLowerCase().includes(q)||e.email.toLowerCase().includes(q)||String(e.role||'').toLowerCase().includes(q)||String(e.desig||'').toLowerCase().includes(q))).forEach(e=>{
+  cont.innerHTML=''; if(!empReg.length){ cont.innerHTML='<div style="padding:16px;color:var(--muted)">No employee data found yet. Sync or load from sheet.</div>'; }
+  const filteredEmp = empReg.filter(e=>(normalizeDisplayName(e.name,e.email,e.desig).toLowerCase().includes(q)||e.email.toLowerCase().includes(q)||String(e.role||'').toLowerCase().includes(q)||String(e.desig||'').toLowerCase().includes(q)));
+  if(!filteredEmp.length){ cont.innerHTML='<div style="padding:16px;color:var(--muted)">No employees matched your search.</div>'; return; }
+  filteredEmp.forEach(e=>{
     const div=document.createElement('div');div.className='ei'+(editEmpEmail===e.email?' act':'');
     div.onclick=()=>selectEmp(e.email);
     const roleBadge=e.isAdmin?'<span class="role-badge rb-admin">Admin</span>':e.isManager?'<span class="role-badge rb-manager">Manager</span>':'';
