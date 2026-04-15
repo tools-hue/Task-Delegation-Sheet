@@ -678,7 +678,7 @@ textarea.fc{resize:vertical;min-height:68px}
           <div class="srow" style="align-items:flex-end">
             <div style="flex:1">
               <div class="sr-l">Mail Format Test</div>
-              <div class="sr-d">Assign task aur meeting dono ka preview ya test mail apne email par bhej kar check karein.</div>
+              <div class="sr-d">Assign task aur meeting dono ka preview ya test mail apne email par bhej kar check karein. Task complete hone par mail id delete nahi hogi.</div>
               <input type="email" id="test-mail-email" class="fc" placeholder="test@upgromedia.com" style="margin-top:8px">
             </div>
           </div>
@@ -903,6 +903,37 @@ let SURL=localStorage.getItem('ugv4_url')||localStorage.getItem('upgro_url')||''
 
 // ── UTILS ─────────────────────────────────────────────────────
 const ini=n=>(n||'?').trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2);
+function normalizeQuickName(name,email=''){
+  let n=String(name||'').replace(/\s+/g,' ').trim();
+  const em=String(email||'').trim().toLowerCase();
+  if(!n && em) n=uname(em)||'';
+  const low=n.toLowerCase();
+  if(em.includes('adarsh')||low==='adarsh'||low.includes('adarsh singh')) return 'Adarsh Singh (MIS)';
+  if(low.includes('adarsh srivastava')) return 'Adarsh Srivastava (Web)';
+  if(low==='ritu' || low.startsWith('ritu ')) return 'Ritu';
+  if(low==='harsh' || low.startsWith('harsh ')) return 'Harsh';
+  if(low==='vikas' || low.startsWith('vikas ')) return 'Vikas';
+  if(low==='vishal' || low.startsWith('vishal ')) return 'Vishal';
+  if(low==='chandrakala' || low.startsWith('chandrakala ')) return 'Chandrakala';
+  if(low==='abhishek' || low.startsWith('abhishek ')) return 'Abhishek';
+  if(low==='ankit' || low.startsWith('ankit ')) return 'Ankit';
+  if(low==='neeraj' || low.startsWith('neeraj ')) return 'Neeraj';
+  if(low==='muskan' || low.startsWith('muskan ')) return 'Muskan';
+  if(low==='dhiraj' || low.startsWith('dhiraj ')) return 'Dhiraj';
+  if(low==='surya' || low.startsWith('surya ')) return 'Surya';
+  if(low==='subhi' || low.startsWith('shubhi ') || low==='shubhi') return 'Shubhi';
+  if(low==='arpit' || low.startsWith('arpit ')) return 'Arpit';
+  if(low==='aditya' || low.startsWith('aditya ')) return 'Aditya';
+  if(low==='dharmendra' || low.startsWith('dharmendra ')) return 'Dharmendra';
+  return n ? n.replace(/\b\w/g,c=>c.toUpperCase()) : '';
+}
+function quickNameKey(name,email=''){
+  const n=normalizeQuickName(name,email).toLowerCase();
+  if(n.includes('adarsh singh')) return 'adarsh-singh-mis';
+  if(n.includes('adarsh srivastava')) return 'adarsh-srivastava-web';
+  return n.replace(/\([^)]*\)/g,'').replace(/[^a-z0-9]/g,'');
+}
+
 const CM=id=>document.getElementById(id).classList.add('hidden');
 const $=id=>document.getElementById(id);
 const toast=msg=>{const el=document.createElement('div');el.className='toast';el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),2700);};
@@ -1275,6 +1306,11 @@ function pickTaskName(row,email=''){
   if(backup && !isEmailLike(backup)) return backup.slice(0,140);
   return '';
 }
+
+function getTaskMailLabel(t){
+  const em=String((t&& (t.email||t.assignedEmail||t.empEmail))||'').trim();
+  return em||'-';
+}
 function getTaskDisplayName(t){
   const raw=String((t&&t.task)||'').trim();
   if(raw && !isEmailLike(raw)) return raw;
@@ -1292,6 +1328,7 @@ function ensureTaskMeta(t){
   if(t.pendingUnits !== pending) t.pendingUnits = pending;
   t.changeCount=Math.max(0,Number(t.changeCount||0)||0);
   t.taskCode=t.taskCode||t.taskId||t.id||generateTaskId();
+  t.email=String(t.email||t.assignedEmail||t.empEmail||'').trim().toLowerCase();
   t.assignedToLabel=normalizeDisplayName(t.empName||uname(t.email),t.email,t.desig);
   t.assignedByLabel=displayAssignedBy(t.by||'');
   return t;
@@ -1655,6 +1692,33 @@ function nav(page){
   const pages=$('pages');if(pages)pages.scrollTo(0,0);
 }
 
+
+function numOrNull(v){
+  if(v===undefined||v===null) return null;
+  const s=String(v).trim();
+  if(!s) return null;
+  const n=Number(s);
+  return Number.isFinite(n) ? n : null;
+}
+function firstNum(obj, keys){
+  for(const k of keys){
+    if(obj && Object.prototype.hasOwnProperty.call(obj,k)){
+      const n=numOrNull(obj[k]);
+      if(n!==null) return n;
+    }
+  }
+  return null;
+}
+function readTotalUnits(r){
+  return firstNum(r, ['TotalUnits','totalUnits','WorkCount','workCount','Count','count','Qty','qty','Quantity','quantity','AssignedQty','assignedQty','Units','units']);
+}
+function readDoneUnits(r){
+  return firstNum(r, ['DoneUnits','doneUnits','SubmitQty','submitQty','SubmittedQty','submittedQty','CompletedQty','completedQty','DoneQty','doneQty']);
+}
+function readPendingUnits(r){
+  return firstNum(r, ['PendingUnits','pendingUnits','PendingQty','pendingQty','RemainingQty','remainingQty','BalanceQty','balanceQty']);
+}
+
 // ════════════════════════════════════════════════════════════════
 //  DATA LOAD
 // ════════════════════════════════════════════════════════════════
@@ -1790,7 +1854,7 @@ function renderCounters(tasks, containerId){
 // ════════════════════════════════════════════════════════════════
 function applyEmpF(tasks){
   if(isAdmin()){
-    if(activeEmpF)return tasks.filter(t=>t.email===activeEmpF);
+    if(activeEmpF)return tasks.filter(t=>quickNameKey(t.assignedTo||t.name||uname(t.email),t.email)===activeEmpF);
     return tasks;
   }
   if(isManager()){
@@ -1799,7 +1863,7 @@ function applyEmpF(tasks){
     const map=new Map();
     mine.concat(assigned).forEach(t=>map.set(t.id||JSON.stringify(t),t));
     const merged=Array.from(map.values());
-    if(activeEmpF)return merged.filter(t=>t.email===activeEmpF);
+    if(activeEmpF)return merged.filter(t=>quickNameKey(t.assignedTo||t.name||uname(t.email),t.email)===activeEmpF);
     return merged;
   }
   return tasks.filter(t=>t.email===cu.email);
@@ -1838,20 +1902,32 @@ function setRange(r,btn){
   }
   buildUI();
 }
-function setEmpF(email,el){activeEmpF=email;document.querySelectorAll('.efp').forEach(p=>p.classList.remove('act'));if(el)el.classList.add('act');buildUI();}
+function setEmpF(key,el){activeEmpF=key;document.querySelectorAll('.efp').forEach(p=>p.classList.remove('act'));if(el)el.classList.add('act');buildUI();}
 function buildEmpPills(tasks){
   if(!canAssign())return;
   const map={};
-  tasks.forEach(t=>{if(t.email){if(!map[t.email])map[t.email]={email:t.email,name:uname(t.email),cnt:0};map[t.email].cnt++;}});
-  const sorted=Object.values(map).sort((a,b)=>b.cnt-a.cnt);
+  tasks.forEach(t=>{
+    const label=normalizeQuickName(t.assignedTo||t.name||uname(t.email),t.email);
+    const key=quickNameKey(label,t.email);
+    if(!label || !key) return;
+    if(!map[key]) map[key]={key,label,cnt:0,email:t.email||''};
+    map[key].cnt++;
+  });
+  const sorted=Object.values(map).sort((a,b)=>a.label.localeCompare(b.label));
   const cont=$('emp-pills');if(!cont)return;
   cont.innerHTML='';
-  const all=document.createElement('span');all.className='efp'+(activeEmpF===null?' act':'');all.textContent='🌐 All';all.onclick=()=>setEmpF(null,all);cont.appendChild(all);
+  const all=document.createElement('span');
+  all.className='efp'+(activeEmpF===null?' act':'');
+  all.textContent='🌐 All';
+  all.onclick=()=>setEmpF(null,all);
+  cont.appendChild(all);
   sorted.forEach((e,i)=>{
     const bg=CLRS[i%CLRS.length];
-    const sp=document.createElement('span');sp.className='efp'+(activeEmpF===e.email?' act':'');
-    sp.innerHTML='<span class="efav" style="background:'+bg+'">'+ini(e.name)+'</span>'+e.name.split(' ')[0];
-    sp.onclick=()=>setEmpF(e.email,sp);cont.appendChild(sp);
+    const sp=document.createElement('span');
+    sp.className='efp'+(activeEmpF===e.key?' act':'');
+    sp.innerHTML='<span class="efav" style="background:'+bg+'">'+ini(e.label)+'</span>'+e.label;
+    sp.onclick=()=>setEmpF(e.key,sp);
+    cont.appendChild(sp);
   });
 }
 
@@ -2015,7 +2091,7 @@ function renderAllTasks(){
       <td style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--blue)">${taskUiId(t)}</td>
       <td style="max-width:260px;white-space:normal;font-weight:600"><div title="${escapeHtml(getTaskDisplayName(t))}">${escapeHtml(getTaskDisplayName(t).slice(0,100))}${getTaskDisplayName(t).length>100?'...':''}</div>${t.driveLink?`<div style="font-size:10px;margin-top:3px"><a href="${t.driveLink}" target="_blank" rel="noopener noreferrer">Drive ↗</a></div>`:''}</td>
       <td style="text-align:center"><div style="font-weight:700;color:var(--blue);font-size:12px">${t.pendingUnits} Pending / ${t.doneUnits} Submit</div><div style="font-size:10px;color:var(--muted)">Work Count ${Number(t.totalUnits||1)}</div></td>
-      <td><div style="font-weight:600">${t.assignedToLabel||normalizeDisplayName(t.empName,t.email,t.desig)}</div><div style="font-size:10px;color:var(--muted)">${t.desig||udesig(t.email)}</div></td>
+      <td><div style="font-weight:600">${t.assignedToLabel||normalizeDisplayName(t.empName,t.email,t.desig)}</div><div style="font-size:10px;color:var(--muted)">${escapeHtml(getTaskMailLabel(t))} • ${t.desig||udesig(t.email)}</div></td>
       <td style="color:var(--muted)">${t.assignedByLabel||displayAssignedBy(t.by||'—')}</td>
       <td>${fd(t.adate)}</td>
       <td>${fd(t.ddate)}<div style="font-size:10px;color:${d!==null&&d<0?'var(--red)':'var(--muted)'}">${d===null?'':d<0?Math.abs(d)+'d late':d===0?'Today':'in '+d+'d'}</div></td>
@@ -2054,7 +2130,7 @@ async function qDone(id){
   const t=allTasks.find(x=>x.id===id);
   if(t){t.status='completed';t.completedAt=now;}
   buildUI();toast('✅ Task marked complete!');
-  try{await fetch(SURL,{method:'POST',body:JSON.stringify({action:'updateTask',id,status:'Completed',deleteEmailOnComplete:true})});}
+  try{await fetch(SURL,{method:'POST',body:JSON.stringify({action:'updateTask',id,status:'Completed',deleteEmailOnComplete:false,keepEmail:true,preserveEmail:true})});}
   catch(e){toast('⚠ Sheet sync failed — saved locally');}
 }
 
@@ -2182,7 +2258,7 @@ async function submitWork(){
   if(t){t.status=newStatus;if(newStatus==='completed')t.completedAt=now;t.driveLink=driveLink||t.driveLink||'';t.doneUnits=updatedDone;t.pendingUnits=updatedPending; ensureTaskMeta(t);}
   buildUI();
   try{
-    await fetch(SURL,{method:'POST',body:JSON.stringify({action:'submitWork',taskId,taskCode:t?taskUiId(t):taskId,email:cu.email,empName:cu.name,task:t?getTaskDisplayName(t):'',status:newStatus==='completed'?'Completed':'In Progress',notes,driveLink,doneUnits,updatedDoneUnits:updatedDone,pendingUnits:updatedPending,totalUnits,id:taskId,adate:t?t.adate:'',ddate:t?t.ddate:'',by:t?t.by:'',ts:t?t.ts:'',changeCount:t?Number(t.changeCount||0):0,countSummary:t?getTaskQtySummary(t):`${updatedPending} Pending / ${updatedDone} Submit`,emailHtml:buildTaskMailHtml('submission',{...(t||{}),taskCode:t?taskUiId(t):taskId,assignedToLabel:t?(t.assignedToLabel||normalizeDisplayName(t.empName,t.email,t.desig)):cu.name,assignedByLabel:t?(t.assignedByLabel||displayAssignedBy(t.by)):displayAssignedBy(''),status:newStatus==='completed'?'Completed':'In Progress',doneUnits:updatedDone,pendingUnits:updatedPending,totalUnits,notes,driveLink,countSummary:`${updatedPending} Pending / ${updatedDone} Submit`,changeLabel:t?getTaskChangeLabel(t):'0 Times Changed'}),deleteEmailOnComplete:newStatus==='completed'})});
+    await fetch(SURL,{method:'POST',body:JSON.stringify({action:'submitWork',taskId,taskCode:t?taskUiId(t):taskId,email:cu.email,empName:cu.name,task:t?getTaskDisplayName(t):'',workName:t?getTaskDisplayName(t):'',status:newStatus==='completed'?'Completed':'In Progress',notes,driveLink,doneUnits,updatedDoneUnits:updatedDone,pendingUnits:updatedPending,totalUnits,id:taskId,adate:t?t.adate:'',ddate:t?t.ddate:'',by:t?t.by:'',ts:t?t.ts:'',changeCount:t?Number(t.changeCount||0):0,countSummary:t?getTaskQtySummary(t):`${updatedPending} Pending / ${updatedDone} Submit`,emailHtml:buildTaskMailHtml('submission',{...(t||{}),taskCode:t?taskUiId(t):taskId,assignedToLabel:t?(t.assignedToLabel||normalizeDisplayName(t.empName,t.email,t.desig)):cu.name,assignedByLabel:t?(t.assignedByLabel||displayAssignedBy(t.by)):displayAssignedBy(''),status:newStatus==='completed'?'Completed':'In Progress',doneUnits:updatedDone,pendingUnits:updatedPending,totalUnits,notes,driveLink,countSummary:`${updatedPending} Pending / ${updatedDone} Submit`,changeLabel:t?getTaskChangeLabel(t):'0 Times Changed'}),deleteEmailOnComplete:false,keepEmail:true,preserveEmail:true})});
     toast('✅ Work submitted successfully!');
     const sn=$('sub-notes');if(sn)sn.value='';
     const sdl=$('sub-drive-link');if(sdl)sdl.value='';
@@ -2216,7 +2292,7 @@ function drillStat(type){
       return `<div style="background:var(--bg);border-radius:8px;padding:12px 14px;margin-bottom:8px;border:1px solid var(--border)">
         <div style="font-weight:600;margin-bottom:5px">${getTaskDisplayName(t)}</div>
         <div style="font-size:11px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap;align-items:center">
-          <span>👤 ${uname(t.email)}</span><span>📅 Due: ${fd(t.ddate)}</span>
+          <span>👤 ${uname(t.email)}</span><span>✉ ${escapeHtml(getTaskMailLabel(t))}</span><span>📅 Due: ${fd(t.ddate)}</span>
           ${d!==null?`<span style="color:${d<0?'var(--red)':'var(--muted)'}">${d<0?Math.abs(d)+'d overdue':d===0?'Today':'in '+d+'d'}</span>`:''}
           <span class="pill ${ov?'po':t.status==='completed'?'pc':t.status==='in progress'?'pp':'pa'}">${ov?'Overdue':{assigned:'Assigned','in progress':'In Progress',completed:'Completed'}[t.status]||t.status}</span>
         </div></div>`;
@@ -2812,7 +2888,10 @@ async function testConn(){
       const cst=$('conn-st');if(cst){cst.className='cok';cst.textContent='✅ Connected';}
       setTimeout(loadData,400);
     } else if(st) st.textContent='❌ Response error: '+JSON.stringify(d);
-  }catch(e){if(st)st.textContent='❌ Failed: '+e.message;}
+  }catch(e){
+    if(st)st.textContent='❌ Failed: '+e.message;
+    const cst=$('conn-st');if(cst){cst.className='cno';cst.textContent='⭕ Not Connected';}
+  }
 }
 
 </script>
