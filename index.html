@@ -1064,26 +1064,28 @@ function isForcedAssigner(rec){
 
 function parseEmployeeRow(row, i=0){
   if(!row) return null;
-  const email = normEmail(row.email||row.Email||row.EmployeeEmail||row.Employee_Email||row.LoginEmail||row.UserEmail||'');
-  const name = String(row.name||row.Name||row.EmployeeName||row.Employee_Name||row.FullName||'').trim();
+  const email = normEmail(
+    row.email||row.Email||row['Email Address']||row['Employee Email']||row.EmployeeEmail||row.Employee_Email||row.LoginEmail||row.UserEmail||''
+  );
+  const name = String(
+    row.name||row.Name||row['Full Name']||row.EmployeeName||row['Employee Name']||row.Employee_Name||row.FullName||''
+  ).trim();
   if(!email && !name) return null;
-  const desig = String(row.desig||row.Designation||row.designation||row.RoleName||row.Department||row.role||row.Role||'Team').trim() || 'Team';
-  const role = String(row.role||row.Role||row.Designation||row.designation||desig).trim() || desig;
-  const pass = String(row.pass||row.Password||row.password||'').trim();
+  const desig = String(row.desig||row.Designation||row.designation||row['Designation']||row.RoleName||row.Department||row.role||row.Role||'Team').trim() || 'Team';
+  const role = String(row.role||row.Role||row['Role']||row.Designation||row.designation||desig).trim() || desig;
+  const pass = String(row.pass||row.Password||row.password||row['Password']||'').trim();
   const rec = {
     email: email || '',
     name: name || uname(email || ''),
     pass,
     role,
     desig,
-    isAdmin: String(row.isAdmin ?? row.IsAdmin ?? '').toLowerCase()==='true' || false,
-    isManager: String(row.isManager ?? row.IsManager ?? '').toLowerCase()==='true' || /manager|assigner/i.test(role+' '+desig),
+    isAdmin: String(row.isAdmin ?? row.IsAdmin ?? row['Is Admin'] ?? '').toLowerCase()==='true' || false,
+    isManager: String(row.isManager ?? row.IsManager ?? row['Is Manager'] ?? '').toLowerCase()==='true' || /manager|assigner/i.test(role+' '+desig),
     active: !['false','inactive','0','no'].includes(String(row.active ?? row.Active ?? row.Status ?? 'true').trim().toLowerCase()),
     bg: row.bg || CLRS[i%CLRS.length],
-    joinDate: String(row.joinDate||row.JoinDate||'').trim()
+    joinDate: String(row.joinDate||row.JoinDate||row['Join Date']||'').trim()
   };
-  rec.isAdmin = !!(row.isAdmin===true || row.IsAdmin===true || String(row.isAdmin ?? row.IsAdmin ?? '').trim().toLowerCase()==='true');
-  rec.isManager = !!(row.isManager===true || row.IsManager===true || rec.isManager);
   return rec;
 }
 function taskBelongsToCurrentUser(t){
@@ -1130,6 +1132,55 @@ function loadStoredRoles(){
 }
 function saveStoredRoles(obj){
   try{localStorage.setItem(ROLE_STORE_KEY,JSON.stringify(obj));}catch(e){}
+}
+
+async function fetchEmployeesFromServer(){
+  if(!SURL) return [];
+  try{
+    const res = await fetch(SURL+'?action=getEmployees',{signal:AbortSignal.timeout(12000)});
+    const j = await res.json();
+    const rows = Array.isArray(j.employees) ? j.employees : Array.isArray(j.data) ? j.data : Array.isArray(j.rows) ? j.rows : [];
+    sheetEmpReg = rows.map((r,i)=>parseEmployeeRow(r,i)).filter(Boolean);
+    initEmpReg(true);
+    syncUserDirectoryFromRegistry();
+    return sheetEmpReg;
+  }catch(err){
+    console.error('fetchEmployeesFromServer failed', err);
+    return [];
+  }
+}
+async function syncEmployeeToServer(emp, action='upsertEmployee'){
+  if(!SURL || !emp) return false;
+  const payload = {
+    action,
+    email: emp.email,
+    Email: emp.email,
+    'Email Address': emp.email,
+    name: emp.name,
+    Name: emp.name,
+    'Full Name': emp.name,
+    pass: emp.pass,
+    Password: emp.pass,
+    role: emp.role,
+    Role: emp.role,
+    desig: emp.desig,
+    Designation: emp.desig,
+    isAdmin: !!emp.isAdmin,
+    IsAdmin: !!emp.isAdmin,
+    isManager: !!emp.isManager,
+    IsManager: !!emp.isManager,
+    active: emp.active!==false,
+    Active: emp.active!==false,
+    joinDate: emp.joinDate||'',
+    JoinDate: emp.joinDate||''
+  };
+  try{
+    await fetch(SURL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
+    return true;
+  }catch(err){
+    console.error('syncEmployeeToServer failed', err);
+    return false;
+  }
 }
 function saveCurrentSession(){
   try{if(cu&&cu.email)localStorage.setItem(SESSION_STORE_KEY,JSON.stringify({email:cu.email,ts:Date.now()}));}
@@ -1761,32 +1812,55 @@ function saveDS_local(arr){try{localStorage.setItem('upgro_ds_v1',JSON.stringify
 //  LOGIN
 // ════════════════════════════════════════════════════════════════
 function togglePwd(){const i=$('lpw');i.type=i.type==='password'?'text':'password';}
-function doLogin(){
+async function doLogin(){
   const email = ($('lem') || {value:''}).value.trim().toLowerCase();
   const pass = ($('lpw') || {value:''}).value;
-  initEmpReg(true);
-  const regEmp=empReg.find(e=>e.email===email);
+  const errBox = $('lerr');
+  if(!email || !pass){
+    if(errBox){ errBox.textContent='❌ Email and password required.'; errBox.style.display='block'; }
+    return;
+  }
 
-  if(regEmp){
-    if(regEmp.pass !== pass){
-      const e = $('lerr');
-      if(e) e.style.display = 'block';
-      cu = null;
-      return;
-    }
-    cu = {...regEmp, email, role:regEmp.role||regEmp.desig, desig:regEmp.desig||regEmp.role};
-    cu.isAdmin=!!regEmp.isAdmin;
-    cu.isManager=computeManagerFlag(regEmp);
-  } else {
-    const e = $('lerr');
-    if(e) e.style.display = 'block';
+  const resolveLocalEmployee = ()=>{
+    try{ initEmpReg(true); }catch(_e){}
+    return (typeof getStoredEmployee==='function' ? getStoredEmployee(email) : null)
+      || empReg.find(e=>String(e.email||'').trim().toLowerCase()===email)
+      || (USERS[email] ? {
+          email,
+          name: USERS[email].name || uname(email),
+          pass: USERS[email].pass || '',
+          role: USERS[email].role || USERS[email].desig || 'Team',
+          desig: USERS[email].desig || USERS[email].role || 'Team',
+          isAdmin: !!USERS[email].isAdmin,
+          isManager: !!USERS[email].isManager,
+          active: USERS[email].active!==false,
+          bg: USERS[email].bg || '#2563eb',
+          joinDate: USERS[email].joinDate || ''
+        } : null);
+  };
+
+  let regEmp = resolveLocalEmployee();
+  if((!regEmp || String(regEmp.pass||'') !== String(pass)) && SURL){
+    await fetchEmployeesFromServer();
+    regEmp = resolveLocalEmployee();
+  }
+
+  if(!regEmp || String(regEmp.pass||'') !== String(pass)){
+    if(errBox){ errBox.textContent='❌ Wrong email or password.'; errBox.style.display='block'; }
+    cu = null;
+    return;
+  }
+  if(regEmp.active===false){
+    if(errBox){ errBox.textContent='❌ This employee account is inactive.'; errBox.style.display='block'; }
     cu = null;
     return;
   }
 
-  const e = $('lerr');
-  if(e) e.style.display = 'none';
+  cu = {...regEmp, email, role:regEmp.role||regEmp.desig, desig:regEmp.desig||regEmp.role};
+  cu.isAdmin=!!regEmp.isAdmin;
+  cu.isManager=computeManagerFlag(regEmp);
 
+  if(errBox) errBox.style.display = 'none';
   saveCurrentSession();
   $('lp').classList.add('hidden');
   $('app').classList.remove('hidden');
@@ -3078,7 +3152,7 @@ function selectNewEmp(){
   </div>
   <button class="btn bs" style="width:100%" onclick="addNewEmp()">✅ Add Employee</button>`;
 }
-function saveEmp(oldEmail){
+async function saveEmp(oldEmail){
   initEmpReg(true);
   const name=($('ef-n')||{value:''}).value.trim();
   const pass=($('ef-p')||{value:''}).value.trim();
@@ -3129,7 +3203,7 @@ function saveEmp(oldEmail){
   refillEmpDropdown();
   buildUI();
 }
-function addNewEmp(){
+async function addNewEmp(){
   initEmpReg(true);
   const name=($('ef-n')||{value:''}).value.trim();
   const email=($('ef-e')||{value:''}).value.trim().toLowerCase();
@@ -3138,13 +3212,14 @@ function addNewEmp(){
   const roleVal=(($('ef-r')||{value:''}).value||desig).trim()||desig;
   const isAdminCk=($('ef-admin')||{checked:false}).checked;
   const isMgrCk=($('ef-mgr')||{checked:false}).checked;
+  const emailRx=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if(!name||!email||!pass){toast('⚠ Name, email and password required');return;}
-  if(empReg.find(e=>e.email===email)){toast('⚠ Email already exists');return;}
+  if(!emailRx.test(email)){toast('⚠ Please enter a valid email address');return;}
+  if(empReg.find(e=>String(e.email||'').trim().toLowerCase()===email)){toast('⚠ Email already exists');return;}
   const managerFlag=!!(isMgrCk || isForcedAssigner({email,name,desig,role:roleVal}));
   const newEmp={email,name,pass,role:roleVal,desig,isAdmin:!!isAdminCk,isManager:managerFlag,active:true,bg:CLRS[empReg.length%CLRS.length],joinDate:TODAY};
-  empReg.push(newEmp);
-  persistEmpRegistry();
-  syncUserDirectoryFromRegistry();
+
+  empReg=[...empReg,newEmp];
   USERS[email]={
     ...(USERS[email]||{}),
     email,name,pass,role:roleVal,desig,
@@ -3154,14 +3229,20 @@ function addNewEmp(){
     bg:newEmp.bg,
     joinDate:TODAY
   };
+  persistEmpRegistry();
+  syncUserDirectoryFromRegistry();
+  try{ localStorage.setItem(EMP_STORE_KEY, JSON.stringify(loadDynEmployees())); }catch(_e){}
   emitEmpSync();
+
+  const synced=await syncEmployeeToServer(newEmp,'upsertEmployee');
+  initEmpReg(true);
   renderEmpList();
   selectEmp(email);
   refillEmpDropdown();
   buildUI();
-  toast('✅ Employee added: '+name);
+  toast(synced ? ('✅ Employee added: '+name) : ('✅ Employee added locally: '+name+' (sheet sync failed)'));
 }
-function delEmp(email){
+async function delEmp(email){
   if(!confirm('Remove '+email+'? Task history will remain.'))return;
   initEmpReg(true);
   empReg=empReg.filter(e=>e.email!==String(email).trim().toLowerCase());
@@ -3170,6 +3251,7 @@ function delEmp(email){
   persistEmpRegistry();
   syncUserDirectoryFromRegistry();
   emitEmpSync();
+  await syncEmployeeToServer({email:String(email).trim().toLowerCase()},'deleteEmployee');
   if(cu&&cu.email===String(email).trim().toLowerCase()) rehydrateCurrentUser(true);
   const fp=$('emp-fp');if(fp)fp.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:32px;margin-bottom:8px">✓</div><div style="font-weight:600">Employee removed</div></div>';
   toast('🗑 Employee removed');renderEmpList();refillEmpDropdown();buildUI();
