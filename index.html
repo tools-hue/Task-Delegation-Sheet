@@ -1088,12 +1088,24 @@ function parseEmployeeRow(row, i=0){
 }
 function taskBelongsToCurrentUser(t){
   if(!t || !cu) return false;
-  const taskEmail = normEmail(t.email||t.assignedEmail||'');
   const userEmail = normEmail(cu.email||'');
-  if(taskEmail && userEmail && taskEmail===userEmail) return true;
-  const taskName = normName(t.assignedToLabel||t.empName||t.assignedTo||uname(taskEmail)||'');
-  const userName = normName(cu.name||uname(userEmail)||'');
-  return !!(taskName && userName && taskName===userName);
+  const possibleTaskEmails = [
+    t.email,t.assignedEmail,t.assignedToEmail,t.empEmail,t.employeeEmail,t.AssignedTo_Email,t.AssignedToEmail,
+    t['Assigned To Email'],t['Employee Email'],t.mail,t.Email
+  ].map(normEmail).filter(Boolean);
+  if(userEmail && possibleTaskEmails.includes(userEmail)) return true;
+
+  const possibleTaskNames = [
+    t.assignedToLabel,t.empName,t.assignedTo,t.assignedUser,t.employeeName,t.EmployeeName,t.AssignedTo_Name,
+    t['Assigned To Name'],t['Assigned To'],t.Name,
+    (possibleTaskEmails[0] ? uname(possibleTaskEmails[0]) : '')
+  ].map(v=>normName(v||'')).filter(Boolean);
+
+  const userNames = [
+    cu.name, uname(userEmail), cu.empName, cu.assignedTo
+  ].map(v=>normName(v||'')).filter(Boolean);
+
+  return userNames.some(un=>possibleTaskNames.includes(un));
 }
 
 function computeManagerFlag(rec){
@@ -1400,6 +1412,78 @@ function isEmailLike(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').t
 function firstUsefulLine(v){
   return String(v||'').split(/\r?\n/).map(s=>s.trim()).find(s=>s && !/^https?:\/\//i.test(s))||'';
 }
+
+function firstFilled(obj, keys){
+  for(const k of keys){
+    if(obj && Object.prototype.hasOwnProperty.call(obj,k) && obj[k]!==undefined && obj[k]!==null && String(obj[k]).trim()!==''){
+      return obj[k];
+    }
+  }
+  return '';
+}
+function taskStableId(row){
+  const raw = firstFilled(row,['ID','id','TaskID','taskId','taskCode','task_code']);
+  if(String(raw||'').trim()) return String(raw).trim();
+  const mail = normEmail(firstFilled(row,['AssignedTo_Email','AssignedToEmail','assignedToEmail','EmployeeEmail','empEmail','email','Assigned Email','Assigned To Email','UserEmail']));
+  const work = pickTaskName(row, mail) || 'work';
+  const ad = String(firstFilled(row,['AssignDate','adate','assignDate','Assign Date'])||'').slice(0,10);
+  return 'TASK-'+btoa(unescape(encodeURIComponent(`${work}__${mail}__${ad}`))).replace(/[^A-Z0-9]/ig,'').slice(0,18).toUpperCase();
+}
+function parseTaskRow(r){
+  const email = normEmail(firstFilled(r,['AssignedTo_Email','AssignedToEmail','assignedToEmail','EmployeeEmail','empEmail','employeeEmail','email','AssignedEmail','UserEmail','Assigned To Email','Employee Email','Mail','Email']));
+  const assignedName = String(firstFilled(r,['AssignedTo_Name','AssignedToName','assignedToName','empName','EmployeeName','employeeName','assignedTo','Assigned To Name','Assigned To','User Name','Name'])||'').trim();
+  const assignedBy = String(firstFilled(r,['AssignedBy','AssignedBy_Name','AssignedByName','assignedBy','by','createdBy','Assigned By','Assigned By Name'])||'').trim();
+  let status = normStatus(firstFilled(r,['Status','status','TaskStatus','taskStatus']) || 'Assigned');
+  const ddate = String(firstFilled(r,['DueDate','ddate','dueDate','Due Date'])||'').slice(0,10);
+  if(status!=='completed'&&ddate){
+    const due=pd(ddate); const now=new Date(); now.setHours(0,0,0,0);
+    if(due){ due.setHours(0,0,0,0); if(due<now && status!=='in progress') status='overdue'; }
+  }
+  const totalUnitsRaw=readTotalUnits(r);
+  const doneUnitsRaw=readDoneUnits(r);
+  const pendingUnitsRaw=readPendingUnits(r);
+  const derivedTotal=Math.max(1, Number(totalUnitsRaw ?? pendingUnitsRaw ?? 1) || 1);
+  const derivedDone=Math.max(0, Math.min(derivedTotal, Number(doneUnitsRaw ?? 0) || 0));
+  const derivedPending=pendingUnitsRaw==='' || pendingUnitsRaw===null || pendingUnitsRaw===undefined
+    ? Math.max(0, derivedTotal-derivedDone)
+    : Math.max(0, Math.min(derivedTotal, Number(pendingUnitsRaw)||0));
+
+  return ensureTaskMeta({
+    id: taskStableId(r),
+    task: pickTaskName(r,email),
+    WorkName: firstFilled(r,['WorkName','TaskName','Title','Task','task','Work','Name']),
+    TaskName: firstFilled(r,['TaskName','WorkName','Title','Task','task','Work','Name']),
+    by: assignedBy,
+    assignedBy,
+    email,
+    assignedToEmail: email,
+    AssignedTo_Email: email,
+    empEmail: email,
+    employeeEmail: email,
+    empName: assignedName || uname(email),
+    assignedTo: assignedName || uname(email),
+    AssignedTo_Name: assignedName || uname(email),
+    desig: firstFilled(r,['Designation','desig','designation','Role','role']) || udesig(email) || '',
+    adate: String(firstFilled(r,['AssignDate','adate','assignDate','Assign Date'])||'').slice(0,10),
+    ddate,
+    ts: firstFilled(r,['Timestamp','ts','createdAt','CreatedAt','Created At']) || '',
+    status,
+    priority: String(firstFilled(r,['Priority','priority'])||'medium').toLowerCase(),
+    acceptedAt: firstFilled(r,['AcceptedAt','acceptedAt']) || '',
+    completedAt: firstFilled(r,['CompletedAt','completedAt']) || '',
+    notes: firstFilled(r,['Notes','notes']) || '',
+    references: firstFilled(r,['References','references']) || '',
+    adCopy: firstFilled(r,['AdScript','AdCopy','adCopy','Ad Script']) || '',
+    driveLink: firstFilled(r,['DriveLink','driveLink','Drive Link']) || '',
+    totalUnits: derivedTotal,
+    doneUnits: derivedDone,
+    pendingUnits: derivedPending,
+    taskCode: firstFilled(r,['TaskID','taskCode','taskId','ID','id']) || taskStableId(r),
+    taskId: firstFilled(r,['TaskID','taskId','taskCode','ID','id']) || taskStableId(r),
+    changeCount: Number(firstFilled(r,['ChangeCount','changeCount'])||0)||0,
+    _source: r._source || 'tasks'
+  });
+}
 function pickTaskName(row,email=''){
   const candidates=[row&&row.WorkName,row&&row.TaskName,row&&row.Title,row&&row.Task,row&&row.task,row&&row.Work,row&&row.Name];
   for(const c of candidates){
@@ -1432,9 +1516,13 @@ function ensureTaskMeta(t){
   if(t.pendingUnits !== pending) t.pendingUnits = pending;
   t.changeCount=Math.max(0,Number(t.changeCount||0)||0);
   t.taskCode=t.taskCode||t.taskId||t.id||generateTaskId();
-  t.email=String(t.email||t.assignedEmail||t.empEmail||'').trim().toLowerCase();
-  t.assignedToLabel=normalizeDisplayName(t.empName||uname(t.email),t.email,t.desig);
-  t.assignedByLabel=displayAssignedBy(t.by||'');
+  t.email=String(t.email||t.assignedEmail||t.assignedToEmail||t.empEmail||t.employeeEmail||t.AssignedTo_Email||t['Assigned To Email']||t['Employee Email']||'').trim().toLowerCase();
+  t.assignedToEmail=t.assignedToEmail||t.email;
+  t.empEmail=t.empEmail||t.email;
+  t.empName=t.empName||t.assignedTo||t.assignedToName||t.AssignedTo_Name||t['Assigned To Name']||uname(t.email);
+  t.assignedTo=t.assignedTo||t.empName;
+  t.assignedToLabel=normalizeDisplayName(t.empName||t.assignedTo||uname(t.email),t.email,t.desig);
+  t.assignedByLabel=displayAssignedBy(t.by||t.assignedBy||'');
   return t;
 }
 function getTaskChangeLabel(t){
@@ -1976,9 +2064,17 @@ async function loadData(){
     if(j.tasks&&Array.isArray(j.tasks)){
       const idMap={};
       j.tasks.forEach(r=>{
-        const email=(r.AssignedTo_Email||r.email||'').trim().toLowerCase();
+        const email = normEmail(
+          r.AssignedTo_Email||r.AssignedToEmail||r.EmployeeEmail||r.empEmail||r.email||r.AssignedEmail||r.UserEmail||''
+        );
+        const assignedName = String(
+          r.AssignedTo_Name||r.AssignedToName||r.empName||r.EmployeeName||r.employeeName||r.assignedTo||''
+        ).trim();
+        const assignedBy = String(
+          r.AssignedBy||r.AssignedBy_Name||r.AssignedByName||r.by||r.createdBy||''
+        ).trim();
         let status=normStatus(r.Status||r.status||'Assigned');
-        const ddate=(r.DueDate||r.ddate||'').toString().slice(0,10);
+        const ddate=(r.DueDate||r.ddate||r.dueDate||'').toString().slice(0,10);
         if(status!=='completed'&&ddate){
           const due=pd(ddate);const now=new Date();now.setHours(0,0,0,0);
           if(due){due.setHours(0,0,0,0); if(due<now&&status!=='in progress')status='overdue';}
@@ -1990,10 +2086,16 @@ async function loadData(){
         const derivedDone=Math.max(0, Math.min(derivedTotal, Number(doneUnitsRaw ?? 0) || 0));
         const derivedPending=pendingUnitsRaw===null ? Math.max(0, derivedTotal-derivedDone) : Math.max(0, Math.min(derivedTotal, Number(pendingUnitsRaw)||0));
         const task={
-          id:r.ID||r.id||r.TaskID||r.taskId||r.taskCode||('X'+Math.random().toString(36).slice(2)),
-          task:pickTaskName(r,email),by:r.AssignedBy||r.AssignedBy_Name||r.by||'',email,
-          empName:r.AssignedTo_Name||r.empName||r.EmployeeName||uname(email),desig:r.Designation||r.desig||udesig(email)||'',
-          adate:(r.AssignDate||r.adate||'').toString().slice(0,10),ddate,ts:r.Timestamp||r.ts||'',
+          id:r.ID||r.id||r.TaskID||r.taskId||r.taskCode||r.task_code||('X'+Math.random().toString(36).slice(2)),
+          task:pickTaskName(r,email),
+          by:assignedBy,
+          email,
+          assignedToEmail: email,
+          empEmail: email,
+          empName: assignedName || uname(email),
+          assignedTo: assignedName || uname(email),
+          desig:r.Designation||r.desig||r.designation||udesig(email)||'',
+          adate:(r.AssignDate||r.adate||r.assignDate||'').toString().slice(0,10),ddate,ts:r.Timestamp||r.ts||r.createdAt||'',
           status,priority:(r.Priority||r.priority||'medium').toLowerCase(),
           acceptedAt:r.AcceptedAt||'',completedAt:r.CompletedAt||'',notes:r.Notes||r.notes||'',
           references:r.References||r.references||'',adCopy:r.AdScript||r.AdCopy||r.adCopy||'',driveLink:r.DriveLink||r.driveLink||'',
@@ -2113,7 +2215,7 @@ function applyEmpF(tasks){
     return tasks;
   }
   if(isManager()){
-    const mine=tasks.filter(t=>t.email===cu.email);
+    const mine=tasks.filter(t=>taskBelongsToCurrentUser(t));
     const assigned=tasks.filter(t=>t.by===cu.name);
     const map=new Map();
     mine.concat(assigned).forEach(t=>map.set(t.id||JSON.stringify(t),t));
@@ -2275,7 +2377,7 @@ function renderMyTasks(){
     const sc=ov?'po':{assigned:'pa','in progress':'pp',completed:'pc'}[t.status]||'pa';
     const d=dl(t.ddate);
     const acts=[];
-    if(t.status==='assigned')acts.push(`<button class="btn bp bsm" onclick="qAccept('${t.id}','${t.task.replace(/'/g,"\\'")}','${t.email}','${t.adate}','${t.ddate}')">▶ Accept</button>`);
+    if(['assigned','overdue'].includes(normStatus(t.status)))acts.push(`<button class="btn bp bsm" onclick="qAccept('${t.id}','${t.task.replace(/'/g,"\\'")}','${t.email}','${t.adate}','${t.ddate}')">▶ Accept</button>`);
     if(t.status!=='completed')acts.push(`<button class="btn bs bsm" onclick="qDone('${t.id}')">✓ Mark Done</button>`);
     acts.push(`<button class="btn bo bsm" onclick="openEditTask('${t.id}')">✏ Edit</button>`);
     return `<div class="${cls}">
@@ -2293,7 +2395,7 @@ function renderMyTasks(){
 
 function populateSubSel(){
   const sel=$('sub-task');if(!sel)return;
-  const mine=allTasks.filter(t=>taskBelongsToCurrentUser(t)&&t.status!=='completed');
+  const mine=sortTasksNewestFirst(allTasks.filter(t=>taskBelongsToCurrentUser(t)&&normStatus(t.status)!=='completed'));
   sel.innerHTML='<option value="">— Select task —</option>'; if(!mine.length){ sel.innerHTML += '<option value="" disabled>No assigned tasks found for your account</option>'; }
   mine.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=getTaskDisplayName(t).slice(0,80)+(t.totalUnits&&t.totalUnits>1?` · ${t.pendingUnits||t.totalUnits} pending`:'' );sel.appendChild(o);});
   refreshSubTaskMeta();
@@ -2374,8 +2476,26 @@ async function qAccept(id,task,email,adate,ddate){
   const t=allTasks.find(x=>x.id===id);
   if(t){t.status='in progress';t.acceptedAt=now;}
   buildUI();toast('✅ Task accepted!');
-  try{await fetch(SURL,{method:'POST',body:JSON.stringify({action:'acceptTask',id,task,email,empName:uname(email),adate,ddate})});}
-  catch(e){toast('⚠ Sheet sync failed — saved locally');}
+  try{
+    await fetch(SURL,{method:'POST',body:JSON.stringify({
+      action:'acceptTask',
+      id,
+      task,
+      email: normEmail(email),
+      AssignedTo_Email: normEmail(email),
+      assignedToEmail: normEmail(email),
+      EmployeeEmail: normEmail(email),
+      'Assigned To Email': normEmail(email),
+      AssignedTo_Name: t?.assignedToLabel || t?.empName || uname(email),
+      assignedTo: t?.assignedToLabel || t?.empName || uname(email),
+      empName: t?.assignedToLabel || t?.empName || uname(email),
+      EmployeeName: t?.assignedToLabel || t?.empName || uname(email),
+      'Assigned To Name': t?.assignedToLabel || t?.empName || uname(email),
+      adate,AssignDate:adate,ddate,DueDate:ddate,
+      acceptedAt: now, AcceptedAt: now,
+      status:'In Progress', Status:'In Progress'
+    })});
+  }catch(e){toast('⚠ Sheet sync failed — saved locally');}
 }
 
 async function qDone(id){
@@ -2397,7 +2517,7 @@ async function delTask(id){
     allTasks=allTasks.filter(t=>t.id!==id);
     statusOverrides.delete(id);
     toast('🗑 Task deleted');buildUI();
-  }catch(e){toast('❌ '+e.message);}
+  }catch(e){toast('❌ '+(e?.message||'Task save failed'));}
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -2463,15 +2583,15 @@ async function saveTask(){
         by:t?.by||cu.name,
         changeCount:(Number(t?.changeCount||0)||0)+1
       });
-      const payload={action:'updateTask',id:editTaskId,taskId:updatedTask.taskCode,taskCode:updatedTask.taskCode,task:getTaskDisplayName({task}),workName:getTaskDisplayName({task}),email,empName:uname(email),priority:pri,adate,ddate,notes:note,references,adCopy,totalUnits,pendingUnits:updatedTask.pendingUnits,doneUnits:updatedTask.doneUnits,changeCount:updatedTask.changeCount,assignedBy:updatedTask.by,sendEmail:true,emailHtml:buildTaskMailHtml('update',{...updatedTask,assignedToLabel:updatedTask.assignedToLabel,assignedByLabel:updatedTask.assignedByLabel,countSummary:getTaskQtySummary(updatedTask),changeLabel:getTaskChangeLabel(updatedTask),status:updatedTask.status||'Assigned'})};
+      const payload={action:'updateTask',id:editTaskId,taskId:updatedTask.taskCode,taskCode:updatedTask.taskCode,TaskID:updatedTask.taskCode,task:getTaskDisplayName({task}),TaskName:getTaskDisplayName({task}),workName:getTaskDisplayName({task}),WorkName:getTaskDisplayName({task}),email,AssignedTo_Email:email,assignedToEmail:email,empEmail:email,EmployeeEmail:email,'Assigned To Email':email,AssignedTo_Name:updatedTask.assignedToLabel,assignedTo:updatedTask.assignedToLabel,empName:updatedTask.assignedToLabel,EmployeeName:updatedTask.assignedToLabel,'Assigned To Name':updatedTask.assignedToLabel,priority:pri,Priority:pri,adate,AssignDate:adate,ddate,DueDate:ddate,notes:note,Notes:note,references,References:references,adCopy,AdCopy:adCopy,AdScript:adCopy,totalUnits,Count:totalUnits,pendingUnits:updatedTask.pendingUnits,PendingQty:updatedTask.pendingUnits,doneUnits:updatedTask.doneUnits,DoneQty:updatedTask.doneUnits,changeCount:updatedTask.changeCount,ChangeCount:updatedTask.changeCount,assignedBy:updatedTask.by,AssignedBy:updatedTask.by,AssignedBy_Name:updatedTask.assignedByLabel,'Assigned By Name':updatedTask.assignedByLabel,status:'Assigned',Status:'Assigned',Timestamp:new Date().toLocaleString('en-IN'),sendEmail:true,emailHtml:buildTaskMailHtml('update',{...updatedTask,assignedToLabel:updatedTask.assignedToLabel,assignedByLabel:updatedTask.assignedByLabel,countSummary:getTaskQtySummary(updatedTask),changeLabel:getTaskChangeLabel(updatedTask),status:updatedTask.status||'Assigned'})};
       await fetch(SURL,{method:'POST',body:JSON.stringify(payload)});
       const idx=allTasks.findIndex(x=>x.id===editTaskId);
       if(idx>=0) allTasks[idx]=updatedTask;
-      toast('✅ Task updated!');
+      toast('✅ Task updated!'); setTimeout(()=>{try{loadData()}catch(e){}},700);
     } else {
       const taskCode=generateTaskId();
-      const newTask=ensureTaskMeta({id:taskCode,taskCode,taskId:taskCode,task,email,empName:uname(email),by:cu.name,adate,ddate,priority:pri.toLowerCase(),status:'assigned',ts:new Date().toLocaleString('en-IN'),acceptedAt:'',completedAt:'',notes:note,references,adCopy,driveLink:'',totalUnits,doneUnits:0,pendingUnits:totalUnits,desig:udesig(email),changeCount:0,_source:'tasks'});
-      const payload={action:'addTask',taskId:taskCode,taskCode,task:getTaskDisplayName({task}),workName:getTaskDisplayName({task}),email,empName:uname(email),by:cu.name,adate,ddate,priority:pri,notes:note,references,adCopy,totalUnits,doneUnits:0,pendingUnits:totalUnits,changeCount:0,driveLink:'',sendEmail:true,emailBody:`Task ID: ${taskCode}
+      const newTask=ensureTaskMeta({id:taskCode,taskCode,taskId:taskCode,task,email,assignedToEmail:email,empEmail:email,empName:uname(email),assignedTo:uname(email),by:cu.name,assignedBy:cu.name,adate,ddate,priority:pri.toLowerCase(),status:'assigned',ts:new Date().toLocaleString('en-IN'),acceptedAt:'',completedAt:'',notes:note,references,adCopy,driveLink:'',totalUnits,doneUnits:0,pendingUnits:totalUnits,desig:udesig(email),changeCount:0,_source:'tasks'});
+      const payload={action:'addTask',taskId:taskCode,taskCode,TaskID:taskCode,task:getTaskDisplayName({task}),TaskName:getTaskDisplayName({task}),workName:getTaskDisplayName({task}),WorkName:getTaskDisplayName({task}),email,AssignedTo_Email:email,assignedToEmail:email,empEmail:email,EmployeeEmail:email,'Assigned To Email':email,AssignedTo_Name:newTask.assignedToLabel,assignedTo:newTask.assignedToLabel,empName:newTask.assignedToLabel,EmployeeName:newTask.assignedToLabel,'Assigned To Name':newTask.assignedToLabel,by:cu.name,assignedBy:cu.name,AssignedBy:cu.name,AssignedBy_Name:newTask.assignedByLabel,'Assigned By Name':newTask.assignedByLabel,adate,AssignDate:adate,ddate,DueDate:ddate,priority:pri,Priority:pri,notes:note,Notes:note,references,References:references,adCopy,AdCopy:adCopy,AdScript:adCopy,totalUnits,Count:totalUnits,doneUnits:0,DoneQty:0,pendingUnits:totalUnits,PendingQty:totalUnits,changeCount:0,ChangeCount:0,driveLink:'',DriveLink:'',status:'Assigned',Status:'Assigned',Timestamp:new Date().toLocaleString('en-IN'),sendEmail:true,emailBody:`Task ID: ${taskCode}
 Task: ${getTaskDisplayName({task})}
 Assigned To: ${newTask.assignedToLabel}
 Assigned By: ${displayAssignedBy(cu.name)}
@@ -2480,13 +2600,18 @@ Status: Assigned`,emailHtml:buildTaskMailHtml('assign',{...newTask,assignedToLab
       const res=await fetch(SURL,{method:'POST',body:JSON.stringify(payload)});
       let d={};
       try{ d=await res.json(); }catch(e){}
-      newTask.id=d.id||taskCode;
-      allTasks.push(newTask);
-      toast('✅ Task assigned to '+newTask.assignedToLabel+' · '+taskCode);
+      const savedTask = ensureTaskMeta({
+        ...newTask,
+        ...(d.task||d.row||{}),
+        id:d.id||d.taskId||d.TaskID||taskCode
+      });
+      newTask.id=savedTask.id;
+      allTasks.push(savedTask);
+      toast('✅ Task assigned to '+newTask.assignedToLabel+' · '+taskCode); setTimeout(()=>{try{loadData()}catch(e){}},700);
     }
     editTaskId=null;
     CM('m-add');populateTaskFilterOptions();buildUI();
-  }catch(e){toast('❌ '+e.message);}
+  }catch(e){toast('❌ '+(e?.message||'Task save failed'));}
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -3043,7 +3168,7 @@ async function saveFL(){
       }
       CM('m-fl');renderFormLinks();toast('✅ '+(1+extra.length)+' link(s) saved!');
     } else toast('❌ '+d.message);
-  }catch(e){toast('❌ '+e.message);}
+  }catch(e){toast('❌ '+(e?.message||'Task save failed'));}
 }
 async function delFL(id){
   if(!confirm('Delete this link?'))return;
