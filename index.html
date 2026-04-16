@@ -517,7 +517,7 @@ textarea.fc{resize:vertical;min-height:68px}
           <div class="ph-l"><div class="ph-t">My Tasks</div><div class="ph-s">Your assigned work items</div></div>
           <div class="ph-r" id="mt-ph-r">
             <select id="mt-sf" class="fc" style="width:auto;padding:6px 10px" onchange="renderMyTasks()"><option value="">All Status</option><option value="assigned">Assigned</option><option value="in progress">In Progress</option><option value="overdue">Overdue</option><option value="completed">Completed</option></select>
-            <input class="si" id="mt-q" placeholder="Search tasks..." oninput="renderMyTasks()">
+            <input class="si" id="mt-q" placeholder="Search by Work Name or Task ID..." oninput="renderMyTasks()">
           </div>
         </div>
         <div class="task-counters" id="mt-counters"></div>
@@ -525,7 +525,7 @@ textarea.fc{resize:vertical;min-height:68px}
           <div class="ch"><div class="ct">📤 Submit Completed Work</div></div>
           <div class="cb">
             <div class="fr" style="margin-bottom:10px">
-              <div class="fg" style="margin:0"><label class="fl2">Select Task *</label><select id="sub-task" class="fc" onchange="refreshSubTaskMeta()"><option value="">— Select task —</option></select></div>
+              <div class="fg" style="margin:0"><label class="fl2">Select Task *</label><select id="sub-task" class="fc" onchange="refreshSubTaskMeta()"><option value="">— Select task by Work Name / Task ID —</option></select></div>
               <div class="fg" style="margin:0"><label class="fl2">Status</label><select id="sub-stat" class="fc"><option value="Completed">✅ Completed</option><option value="In Progress">⚡ Still In Progress</option></select></div>
             </div>
             <div id="sub-meta" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:var(--text2)"></div>
@@ -545,7 +545,7 @@ textarea.fc{resize:vertical;min-height:68px}
         <div class="ph">
           <div class="ph-l"><div class="ph-t">All Tasks</div><div class="ph-s" id="at-sub">Loading...</div></div>
           <div class="ph-r" id="at-ph-r">
-            <input class="si" id="at-q" placeholder="Search tasks..." oninput="renderAllTasks()">
+            <input class="si" id="at-q" placeholder="Search by Work Name or Task ID..." oninput="renderAllTasks()">
             <select id="at-sf" class="fc" style="width:auto;padding:6px 10px" onchange="renderAllTasks()"><option value="">All Status</option><option value="assigned">Assigned</option><option value="in progress">In Progress</option><option value="completed">Completed</option><option value="overdue">Overdue</option></select>
             <select id="at-assigned-to" class="fc" style="width:auto;padding:6px 10px;min-width:190px" onchange="renderAllTasks()"><option value="">Assigned To — All</option></select>
             <select id="at-assigned-by" class="fc" style="width:auto;padding:6px 10px;min-width:190px" onchange="renderAllTasks()"><option value="">Assigned By — All</option></select>
@@ -1234,7 +1234,7 @@ function handleRoleStorageSync(){
   if((!cu||!cu.email))restoreCurrentSession();
   rehydrateCurrentUser(true);
   buildUI();
-  processAutoAccepts();
+  // auto-accept disabled; users must accept manually;
 }
 function flexDate(v){
   if(v===null||v===undefined||v==='')return null;
@@ -1334,46 +1334,13 @@ function parseTaskTimestamp(t){
   return pd(raw.slice(0,10))||pd(t.adate)||null;
 }
 async function autoAcceptTask(task){
-  if(!task||!task.id||task.status!=='assigned')return false;
-  const nowStr=new Date().toLocaleString('en-IN');
-  statusOverrides.set(task.id,{status:'in progress',acceptedAt:nowStr,autoAccepted:true});
-  const live=allTasks.find(x=>x.id===task.id);
-  if(live){live.status='in progress';live.acceptedAt=nowStr;live.autoAccepted=true;}
-  try{
-    if(SURL){
-      await fetch(SURL,{method:'POST',body:JSON.stringify({action:'acceptTask',id:task.id,task:task.task,email:task.email,empName:uname(task.email),adate:task.adate,ddate:task.ddate,autoAccepted:true,acceptedBy:'system-auto-accept',rule:'20min'})});
-    }
-    return true;
-  }catch(e){
-    console.warn('Auto accept sync failed',task.id,e);
-    return false;
-  }
+  return false;
 }
+
 async function processAutoAccepts(){
-  if(autoAcceptBusy||!allTasks||!allTasks.length)return;
-  autoAcceptBusy=true;
-  let changed=0;
-  try{
-    const now=Date.now();
-    const pending=allTasks.filter(t=>t.status==='assigned');
-    for(const task of pending){
-      const assignedAt=parseTaskTimestamp(task);
-      if(!assignedAt)continue;
-      const ageMin=(now-assignedAt.getTime())/60000;
-      if(ageMin>=AUTO_ACCEPT_MINUTES){
-        const ok=await autoAcceptTask(task);
-        if(ok)changed++;
-      }
-    }
-  }finally{
-    autoAcceptBusy=false;
-  }
-  if(changed>0){
-    buildUI();
-    toast(`⏱ ${changed} pending task${changed>1?'s':''} auto-accepted after ${AUTO_ACCEPT_MINUTES} min`);
-    setTimeout(loadData,350);
-  }
+  return false;
 }
+
 
 function normStatus(raw){
   if(!raw)return 'assigned';
@@ -1492,15 +1459,20 @@ function isCountLikeText(v){
 function pickTaskName(row,email=''){
   const candidates=[
     row&&row.WorkName,row&&row.TaskName,row&&row.Title,row&&row.Task,row&&row.task,
-    row&&row.Work,row&&row.Name,row&&row.workName,row&&row.taskName,row&&row.title,
-    row&&row.work_label,row&&row.label,row&&row.Subject
+    row&&row.Work,row&&row.WorkTitle,row&&row.TaskTitle,row&&row.Description,row&&row.description,
+    row&&row.WorkDetail,row&&row.TaskDetail,row&&row.Activity,row&&row.Project,row&&row.ProjectName,
+    row&&row.Requirement,row&&row.Subject,row&&row.workName,row&&row.taskName,row&&row.title,
+    row&&row.work_label,row&&row.label
   ];
   for(const c of candidates){
     const val=String(c||'').trim();
-    if(val && !isEmailLike(val) && !isCountLikeText(val)) return val;
+    if(val && !isEmailLike(val) && !isCountLikeText(val) && !/^(assigned|in progress|completed|overdue)$/i.test(val)) return val;
   }
-  const backup=firstUsefulLine((row&&row.AdScript)||(row&&row.AdCopy)||(row&&row.adCopy)||(row&&row.Notes)||(row&&row.notes)||'');
-  if(backup && !isEmailLike(backup) && !isCountLikeText(backup)) return backup.slice(0,140);
+  const backup=firstUsefulLine(
+    (row&&row.WorkDetail)||(row&&row.TaskDetail)||(row&&row.Description)||(row&&row.description)||
+    (row&&row.AdScript)||(row&&row.AdCopy)||(row&&row.adCopy)||(row&&row.Notes)||(row&&row.notes)||''
+  );
+  if(backup && !isEmailLike(backup) && !isCountLikeText(backup) && !/^(assigned|in progress|completed|overdue)$/i.test(backup)) return backup.slice(0,140);
   return '';
 }
 
@@ -1509,10 +1481,18 @@ function getTaskMailLabel(t){
   return em||'-';
 }
 function getTaskDisplayName(t){
-  const raw=String((t&&t.task)||'').trim();
-  if(raw && !isEmailLike(raw) && !isCountLikeText(raw)) return raw;
+  const direct = [
+    t&&t.task, t&&t.WorkName, t&&t.TaskName, t&&t.workName, t&&t.taskName,
+    t&&t.Title, t&&t.title, t&&t.Description, t&&t.description,
+    t&&t.WorkDetail, t&&t.TaskDetail, t&&t.Activity, t&&t.ProjectName,
+    t&&t.Requirement, t&&t.notes, t&&t.adCopy
+  ];
+  for(const item of direct){
+    const raw=String(item||'').trim();
+    if(raw && !isEmailLike(raw) && !isCountLikeText(raw) && !/^(assigned|in progress|completed|overdue|done)$/i.test(raw)) return raw.slice(0,140);
+  }
   const alt=pickTaskName(t||{},t&&t.email||'');
-  if(alt) return alt;
+  if(alt && !isCountLikeText(alt)) return alt;
   const code = String((t&& (t.taskCode||t.taskId||t.id)) || '').trim();
   return code ? `Work ${code}` : 'Untitled Work';
 }
@@ -1540,10 +1520,24 @@ function getTaskChangeLabel(t){
   const c=Math.max(0,Number(t.changeCount||0)||0);
   return c>0?`${c} Time${c>1?'s':''} Changed`:'0 Times Changed';
 }
+
+function shouldShowAccept(t){
+  if(!t) return false;
+  const s = normStatus(t.status);
+  const hasAccepted = !!(t.acceptedAt || t.AcceptedAt || t.autoAccepted);
+  return s==='assigned' || ((s==='in progress' || s==='overdue') && !hasAccepted);
+}
+function shouldShowDone(t){
+  if(!t) return false;
+  const s = normStatus(t.status);
+  const hasAccepted = !!(t.acceptedAt || t.AcceptedAt || t.autoAccepted);
+  return s==='completed' ? false : ((s==='in progress' || s==='overdue') && hasAccepted);
+}
 function getTaskQtySummary(t){
   ensureTaskMeta(t);
-  return `${t.pendingUnits} Pending / ${t.doneUnits} Submit`;
+  return `${t.pendingUnits} Pending / ${t.doneUnits} Submit / Total ${t.totalUnits}`;
 }
+
 function taskFingerprint(task,email){
   return `${normName(getTaskDisplayName({task}))}__${normEmail(email)}`;
 }
@@ -1877,7 +1871,7 @@ function initApp(){
   updateClock();setInterval(updateClock,1000);
   loadData();
   setInterval(()=>{if(cu)pollNotifications();},60000);
-  setInterval(()=>{processAutoAccepts();},60000);
+  
   window.removeEventListener('storage',handleRoleStorageSync);
   window.addEventListener('storage',(ev)=>{ if(!ev || !ev.key || [ROLE_STORE_KEY,EMP_SYNC_KEY,SESSION_STORE_KEY].includes(ev.key)) handleRoleStorageSync(); });
   window.addEventListener('focus',()=>handleRoleStorageSync(),{once:false});
@@ -2138,7 +2132,7 @@ async function loadData(){
     if(sync)sync.textContent='🔴 Offline — '+e.message.slice(0,40);
     statusOverrides.forEach((ov,id)=>{const t=allTasks.find(x=>x.id===id);if(t)Object.assign(t,ov);});
   }
-  await processAutoAccepts();
+  await // auto-accept disabled; users must accept manually;
   populateTaskFilterOptions();
   buildUI();
 }
@@ -2349,7 +2343,7 @@ function renderBadges(tasks){
 }
 
 function renderDashTasks(){
-  const tasks=sortTasksNewestFirst(allTasks.filter(t=>taskBelongsToCurrentUser(t)&&t.status!=='completed')).slice(0,6);
+  let tasks=sortTasksNewestFirst(allTasks.filter(t=>taskBelongsToCurrentUser(t)&&t.status!=='completed')); const dq=(($('dash-task-q')||{value:''}).value||'').toLowerCase().trim(); if(dq) tasks=tasks.filter(t=>getTaskDisplayName(t).toLowerCase().includes(dq)||taskUiId(t).toLowerCase().includes(dq)||String(t.notes||'').toLowerCase().includes(dq)); tasks=tasks.slice(0,6);
   const el=$('dash-tasks');if(!el)return;
   if(!tasks.length){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted)">✅ No pending tasks — great job!</div>';return;}
   el.innerHTML=tasks.map(t=>{
@@ -2360,10 +2354,10 @@ function renderDashTasks(){
     const d=dl(t.ddate);
     const ds=d===null?'':d<0?`<span style="color:var(--red)">${Math.abs(d)}d overdue</span>`:d===0?'<span style="color:var(--orange)">Due today</span>':`in ${d}d`;
     return `<div class="${cls}">
-      <div class="tc-top"><div><div class="tc-task">${getTaskDisplayName(t).slice(0,100)}${getTaskDisplayName(t).length>100?'...':''}</div><div style="margin-top:4px;font-size:11px;color:var(--blue);font-weight:700">🔢 ${getTaskQtySummary(t)}</div></div><span class="pill ${sc}">${st}</span></div>
+      <div class="tc-top"><div><div class="tc-task">${getTaskDisplayName(t).slice(0,100)}${getTaskDisplayName(t).length>100?'...':''}</div><div style="margin-top:4px;font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-weight:700">🆔 ${taskUiId(t)}</div><div style="margin-top:4px;font-size:11px;color:var(--blue);font-weight:700">🔢 ${getTaskQtySummary(t)}</div></div><span class="pill ${sc}">${st}</span></div>
       <div class="tc-meta"><span>📅 Due: ${fd(t.ddate)}</span>${ds?`<span>${ds}</span>`:''}<span>⚡ ${t.priority}</span></div>
-      <div class="tc-acts">${t.status==='assigned'?`<button class="btn bp bxs" onclick="qAccept('${t.id}','${t.task.replace(/'/g,"\\'")}','${t.email}','${t.adate}','${t.ddate}')">▶ Accept</button>`:''}
-        <button class="btn bs bxs" onclick="qDone('${t.id}')">✓ Done</button></div>
+      <div class="tc-acts">${shouldShowAccept(t)?`<button class="btn bp bxs" onclick="qAccept('${t.id}','${getTaskDisplayName(t).replace(/'/g,"\\'")}','${t.email}','${t.adate}','${t.ddate}')">▶ Accept</button>`:''}
+        ${shouldShowDone(t)?`<button class="btn bs bxs" onclick="qDone('${t.id}')">✓ Done</button>`:''}</div>
     </div>`;
   }).join('');
 }
@@ -2374,26 +2368,26 @@ function renderDashTasks(){
 function renderMyTasks(){
   let tasks=sortTasksNewestFirst(allTasks.filter(t=>taskBelongsToCurrentUser(t)));
   const sf=($('mt-sf')||{value:''}).value;
-  const q=($('mt-q')||{value:''}).value.toLowerCase();
+  const q=($('mt-q')||{value:''}).value.toLowerCase().trim();
   if(sf==='overdue')tasks=tasks.filter(t=>isOD(t));
   else if(sf)tasks=tasks.filter(t=>t.status===sf);
-  if(q)tasks=tasks.filter(t=>getTaskDisplayName(t).toLowerCase().includes(q));
+  if(q)tasks=tasks.filter(t=>getTaskDisplayName(t).toLowerCase().includes(q)||taskUiId(t).toLowerCase().includes(q)||String(t.notes||'').toLowerCase().includes(q));
   renderCounters(tasks,'mt-counters');
   const el=$('mt-list');if(!el)return;
   if(!tasks.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:36px;margin-bottom:8px">📋</div><div style="font-weight:600">No tasks found</div></div>';return;}
   el.innerHTML=tasks.map(t=>{
     const ov=isOD(t);
     const cls=ov?'tc tov':t.status==='completed'?'tc tcc':t.status==='in progress'?'tc tp':'tc ta';
-    const st=ov?'Overdue':{assigned:'Assigned','in progress':'In Progress',completed:'Completed'}[t.status]||t.status;
-    const sc=ov?'po':{assigned:'pa','in progress':'pp',completed:'pc'}[t.status]||'pa';
+    const st=shouldShowAccept(t)?'Assigned':ov?'Overdue':{assigned:'Assigned','in progress':'In Progress',completed:'Completed'}[normStatus(t.status)]||normStatus(t.status);
+    const sc=shouldShowAccept(t)?'pa':ov?'po':{assigned:'pa','in progress':'pp',completed:'pc'}[normStatus(t.status)]||'pa';
     const d=dl(t.ddate);
     const acts=[];
-    if(['assigned','overdue'].includes(normStatus(t.status)))acts.push(`<button class="btn bp bsm" onclick="qAccept('${t.id}','${t.task.replace(/'/g,"\\'")}','${t.email}','${t.adate}','${t.ddate}')">▶ Accept</button>`);
-    if(t.status!=='completed')acts.push(`<button class="btn bs bsm" onclick="qDone('${t.id}')">✓ Mark Done</button>`);
+    if(shouldShowAccept(t))acts.push(`<button class="btn bp bsm" onclick="qAccept('${t.id}','${getTaskDisplayName(t).replace(/'/g,"\\'")}','${t.email}','${t.adate}','${t.ddate}')">▶ Accept</button>`);
+    if(shouldShowDone(t))acts.push(`<button class="btn bs bsm" onclick="qDone('${t.id}')">✓ Mark Done</button>`);
     acts.push(`<button class="btn bo bsm" onclick="openEditTask('${t.id}')">✏ Edit</button>`);
     return `<div class="${cls}">
-      <div class="tc-top"><div><div class="tc-task">${getTaskDisplayName(t)}</div><div style="margin-top:4px;font-size:11px;color:var(--blue);font-weight:700">🔢 ${getTaskQtySummary(t)}</div></div><span class="pill ${sc}">${st}</span></div>
-      <div class="tc-meta"><span>🆔 ${taskUiId(t)}</span><span>👤 By: ${t.assignedByLabel||displayAssignedBy(t.by||'Admin')}</span><span>📅 Assign: ${fd(t.adate)}</span><span>🕐 Due: ${fd(t.ddate)}</span>
+      <div class="tc-top"><div><div class="tc-task">${getTaskDisplayName(t)}</div><div style="margin-top:4px;font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-weight:700">🆔 ${taskUiId(t)}</div><div style="margin-top:4px;font-size:11px;color:var(--blue);font-weight:700">🔢 ${getTaskQtySummary(t)}</div></div><span class="pill ${sc}">${st}</span></div>
+      <div class="tc-meta"><span>👤 By: ${t.assignedByLabel||displayAssignedBy(t.by||'Admin')}</span><span>📅 Assign: ${fd(t.adate)}</span><span>🕐 Due: ${fd(t.ddate)}</span>
         ${d!==null?`<span style="color:${d<0?'var(--red)':d===0?'var(--orange)':'var(--muted)'}}">${d<0?Math.abs(d)+'d overdue':d===0?'Due today':'in '+d+' days'}</span>`:''}
         <span>⚡ ${t.priority.charAt(0).toUpperCase()+t.priority.slice(1)}</span>
         <span style="font-weight:700;color:var(--blue);background:var(--blue3);padding:2px 8px;border-radius:8px">🔢 ${getTaskQtySummary(t)}</span>
@@ -2407,7 +2401,7 @@ function renderMyTasks(){
 function populateSubSel(){
   const sel=$('sub-task');if(!sel)return;
   const mine=sortTasksNewestFirst(allTasks.filter(t=>taskBelongsToCurrentUser(t)&&normStatus(t.status)!=='completed'));
-  sel.innerHTML='<option value="">— Select task —</option>'; if(!mine.length){ sel.innerHTML += '<option value="" disabled>No assigned tasks found for your account</option>'; }
+  sel.innerHTML='<option value="">— Select task by Work Name / Task ID —</option>'; if(!mine.length){ sel.innerHTML += '<option value="" disabled>No assigned tasks found for your account</option>'; }
   mine.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=getTaskDisplayName(t).slice(0,80)+(t.totalUnits&&t.totalUnits>1?` · ${t.pendingUnits||t.totalUnits} pending`:'' );sel.appendChild(o);});
   refreshSubTaskMeta();
 }
@@ -2450,8 +2444,8 @@ function renderAllTasks(){
   if(nil)nil.style.display='none';
   tasks.slice(0,300).forEach((t,i)=>{
     const ov=isOD(t);
-    const st=ov?'Overdue':{assigned:'Assigned','in progress':'In Progress',completed:'Completed'}[t.status]||t.status;
-    const sc=ov?'po':{assigned:'pa','in progress':'pp',completed:'pc'}[t.status]||'pa';
+    const st=shouldShowAccept(t)?'Assigned':ov?'Overdue':{assigned:'Assigned','in progress':'In Progress',completed:'Completed'}[normStatus(t.status)]||normStatus(t.status);
+    const sc=shouldShowAccept(t)?'pa':ov?'po':{assigned:'pa','in progress':'pp',completed:'pc'}[normStatus(t.status)]||'pa';
     const pc={low:'plow',medium:'pmed',high:'phi',urgent:'purg'}[t.priority]||'pmed';
     const d=dl(t.ddate);
     const tr=document.createElement('tr');
@@ -2469,8 +2463,8 @@ function renderAllTasks(){
       <td class="acts-td"></td>`;
     const cell=tr.querySelector('.acts-td');
     const wrap=document.createElement('div');wrap.style.cssText='display:flex;gap:4px;flex-wrap:wrap';
-    if(['assigned','overdue'].includes(normStatus(t.status))){const b=document.createElement('button');b.className='btn bp bxs';b.textContent='▶';b.title='Accept';b.onclick=()=>qAccept(t.id,getTaskDisplayName(t),t.email,t.adate,t.ddate);wrap.appendChild(b);}
-    if(t.status!=='completed'){const b=document.createElement('button');b.className='btn bs bxs';b.textContent='✓';b.title='Complete';b.onclick=()=>qDone(t.id);wrap.appendChild(b);}
+    if(shouldShowAccept(t)){const b=document.createElement('button');b.className='btn bp bxs';b.textContent='▶';b.title='Accept';b.onclick=()=>qAccept(t.id,getTaskDisplayName(t),t.email,t.adate,t.ddate);wrap.appendChild(b);}
+    if(shouldShowDone(t)){const b=document.createElement('button');b.className='btn bs bxs';b.textContent='✓';b.title='Complete';b.onclick=()=>qDone(t.id);wrap.appendChild(b);}
     const be=document.createElement('button');be.className='btn bo bxs';be.textContent='✏';be.onclick=()=>openEditTask(t.id);wrap.appendChild(be);
     if(canAssign()&&t._source!=='form'){const bd=document.createElement('button');bd.className='btn bd bxs';bd.textContent='🗑';bd.onclick=()=>delTask(t.id);wrap.appendChild(bd);}
     cell.appendChild(wrap);tbody.appendChild(tr);
