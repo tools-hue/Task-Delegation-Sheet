@@ -1156,7 +1156,7 @@ function emitEmpSync(){
 }
 function mergeRegistry(base,dyn,roles){
   const map=new Map();
-  [...base,...sheetEmpReg,...dyn].forEach((e,i)=>{
+  [...base,...(Array.isArray(sheetEmpReg)?sheetEmpReg:[]),...dyn].forEach((e,i)=>{
     if(!e||!e.email)return;
     const email=String(e.email).trim().toLowerCase();
     const prev=map.get(email)||{};
@@ -1230,7 +1230,7 @@ function rehydrateCurrentUser(forceUI=false){
   }
 }
 function handleRoleStorageSync(){
-  initEmpReg(true);
+  try{ initEmpReg(true); }catch(err){ console.error('initEmpReg login error', err); sheetEmpReg=[]; initEmpReg(true); }
   if((!cu||!cu.email))restoreCurrentSession();
   rehydrateCurrentUser(true);
   buildUI();
@@ -1338,7 +1338,16 @@ async function autoAcceptTask(task){
 }
 
 async function processAutoAccepts(){
-  return false;
+  const pending = allTasks.filter(t=>taskBelongsToCurrentUser(t)&&shouldShowAccept(t));
+  const now = Date.now();
+  for(const t of pending){
+    const ts = parseTaskTimestamp(t);
+    if(!ts) continue;
+    if(now - ts.getTime() >= 20*60*1000){
+      await qAccept(t.id,getTaskDisplayName(t),t.email,t.adate,t.ddate,true);
+    }
+  }
+  return true;
 }
 
 
@@ -1347,6 +1356,7 @@ function normStatus(raw){
   const s=String(raw).trim().toLowerCase().replace(/[-_]/g,' ');
   if(s==='completed'||s==='done'||s==='finished')return 'completed';
   if(s==='in progress'||s==='inprogress'||s==='started'||s==='working')return 'in progress';
+  if(s==='rejected'||s==='declined'||s==='reject')return 'rejected';
   if(s==='overdue'||s==='late'||s==='past due')return 'overdue';
   return 'assigned';
 }
@@ -1451,6 +1461,11 @@ function parseTaskRow(r){
     _source: r._source || 'tasks'
   });
 }
+function isTaskCodeLike(v){
+  const s=String(v||'').trim();
+  return /^T?\d{8,}$/.test(s) || /^work\s+t?\d{8,}$/i.test(s);
+}
+
 function isCountLikeText(v){
   const s=String(v||'').trim();
   return !!s && /^\d+$/.test(s);
@@ -1458,21 +1473,24 @@ function isCountLikeText(v){
 
 function pickTaskName(row,email=''){
   const candidates=[
-    row&&row.WorkName,row&&row.TaskName,row&&row.Title,row&&row.Task,row&&row.task,
-    row&&row.Work,row&&row.WorkTitle,row&&row.TaskTitle,row&&row.Description,row&&row.description,
-    row&&row.WorkDetail,row&&row.TaskDetail,row&&row.Activity,row&&row.Project,row&&row.ProjectName,
-    row&&row.Requirement,row&&row.Subject,row&&row.workName,row&&row.taskName,row&&row.title,
-    row&&row.work_label,row&&row.label
+    row&&row.WorkName,row&&row['Work Name'],row&&row.TaskName,row&&row['Task Name'],row&&row.Title,row&&row.Task,row&&row.task,
+    row&&row.Work,row&&row['Work'],row&&row.WorkTitle,row&&row['Work Title'],row&&row.TaskTitle,row&&row['Task Title'],
+    row&&row.Description,row&&row.description,row&&row['Description'],row&&row.WorkDetail,row&&row['Work Detail'],
+    row&&row.TaskDetail,row&&row['Task Detail'],row&&row.Activity,row&&row['Activity'],row&&row.Project,row&&row.ProjectName,
+    row&&row['Project Name'],row&&row.Requirement,row&&row['Requirement'],row&&row.Subject,row&&row['Subject'],
+    row&&row.workName,row&&row.taskName,row&&row.title,row&&row.work_label,row&&row.label
   ];
   for(const c of candidates){
     const val=String(c||'').trim();
-    if(val && !isEmailLike(val) && !isCountLikeText(val) && !/^(assigned|in progress|completed|overdue)$/i.test(val)) return val;
+    if(val && !isEmailLike(val) && !isCountLikeText(val) && !/^(assigned|in progress|completed|overdue|done|rejected)$/i.test(val)) return val;
   }
   const backup=firstUsefulLine(
-    (row&&row.WorkDetail)||(row&&row.TaskDetail)||(row&&row.Description)||(row&&row.description)||
-    (row&&row.AdScript)||(row&&row.AdCopy)||(row&&row.adCopy)||(row&&row.Notes)||(row&&row.notes)||''
+    (row&&row.WorkDetail)||(row&&row['Work Detail'])||(row&&row.TaskDetail)||(row&&row['Task Detail'])||
+    (row&&row.Description)||(row&&row.description)||(row&&row['Description'])||
+    (row&&row.AdScript)||(row&&row['Ad Script'])||(row&&row.AdCopy)||(row&&row['Ad Copy'])||
+    (row&&row.adCopy)||(row&&row.Notes)||(row&&row['Notes'])||(row&&row.notes)||''
   );
-  if(backup && !isEmailLike(backup) && !isCountLikeText(backup) && !/^(assigned|in progress|completed|overdue)$/i.test(backup)) return backup.slice(0,140);
+  if(backup && !isEmailLike(backup) && !isCountLikeText(backup) && !/^(assigned|in progress|completed|overdue|done|rejected)$/i.test(backup)) return backup.slice(0,140);
   return '';
 }
 
@@ -1481,25 +1499,37 @@ function getTaskMailLabel(t){
   return em||'-';
 }
 function getTaskDisplayName(t){
+  const taskIdGuess = String((t&& (t.taskCode||t.taskId||t.id)) || '').trim().toLowerCase();
   const direct = [
-    t&&t.task, t&&t.WorkName, t&&t.TaskName, t&&t.workName, t&&t.taskName,
-    t&&t.Title, t&&t.title, t&&t.Description, t&&t.description,
-    t&&t.WorkDetail, t&&t.TaskDetail, t&&t.Activity, t&&t.ProjectName,
-    t&&t.Requirement, t&&t.notes, t&&t.adCopy
+    t&&t.primaryWorkName, t&&t.workName, t&&t.WorkName, t&&t['Work Name'],
+    t&&t.taskName, t&&t.TaskName, t&&t['Task Name'], t&&t.TaskTitle, t&&t['Task Title'],
+    t&&t.WorkTitle, t&&t['Work Title'], t&&t.Title, t&&t.title, t&&t.task, t&&t.Task
   ];
   for(const item of direct){
     const raw=String(item||'').trim();
-    if(raw && !isEmailLike(raw) && !isCountLikeText(raw) && !/^(assigned|in progress|completed|overdue|done)$/i.test(raw)) return raw.slice(0,140);
+    const low=raw.toLowerCase();
+    if(raw && !isEmailLike(raw) && !isCountLikeText(raw) && !isTaskCodeLike(raw) && low!==taskIdGuess && low!==('work '+taskIdGuess).trim()) return raw.slice(0,140);
+  }
+  const detail = [
+    t&&t.Description, t&&t['Description'], t&&t.description,
+    t&&t.WorkDetail, t&&t['Work Detail'], t&&t.TaskDetail, t&&t['Task Detail'],
+    t&&t.Activity, t&&t.ProjectName, t&&t['Project Name'], t&&t.Requirement
+  ];
+  for(const item of detail){
+    const raw=String(item||'').trim();
+    if(raw && !isEmailLike(raw) && !isCountLikeText(raw) && !isTaskCodeLike(raw)) return raw.slice(0,140);
   }
   const alt=pickTaskName(t||{},t&&t.email||'');
-  if(alt && !isCountLikeText(alt)) return alt;
+  if(alt && !isCountLikeText(alt) && !isTaskCodeLike(alt)) return alt;
   const code = String((t&& (t.taskCode||t.taskId||t.id)) || '').trim();
   return code ? `Work ${code}` : 'Untitled Work';
 }
 function taskUiId(t){return t.taskCode||t.taskId||t.id||'—';}
 function ensureTaskMeta(t){
   if(!t)return t;
-  t.task=getTaskDisplayName(t);
+  const explicitWorkName = String(t.primaryWorkName||t.workName||t.WorkName||t['Work Name']||t.taskName||t.TaskName||t['Task Name']||'').trim();
+  t.task=getTaskDisplayName({...t, primaryWorkName: explicitWorkName || t.task});
+  t.primaryWorkName = explicitWorkName || t.task;
   const total=Math.max(1,Number(t.totalUnits||1)||1);
   const done=Math.max(0,Math.min(total,Number(t.doneUnits||0)||0));
   const pending=Math.max(0, total-done);
@@ -1514,6 +1544,7 @@ function ensureTaskMeta(t){
   t.assignedTo=t.assignedTo||t.empName;
   t.assignedToLabel=normalizeDisplayName(t.empName||t.assignedTo||uname(t.email),t.email,t.desig);
   t.assignedByLabel=displayAssignedBy(t.by||t.assignedBy||'');
+  t.rejectReason=t.rejectReason||t.RejectReason||'';
   return t;
 }
 function getTaskChangeLabel(t){
@@ -1525,13 +1556,13 @@ function shouldShowAccept(t){
   if(!t) return false;
   const s = normStatus(t.status);
   const hasAccepted = !!(t.acceptedAt || t.AcceptedAt || t.autoAccepted);
-  return s==='assigned' || ((s==='in progress' || s==='overdue') && !hasAccepted);
+  return (s==='assigned' || s==='overdue' || s==='in progress') && !hasAccepted && s!=='rejected' && s!=='completed';
 }
 function shouldShowDone(t){
   if(!t) return false;
   const s = normStatus(t.status);
   const hasAccepted = !!(t.acceptedAt || t.AcceptedAt || t.autoAccepted);
-  return s==='completed' ? false : ((s==='in progress' || s==='overdue') && hasAccepted);
+  return s!=='completed' && s!=='rejected' && ((s==='in progress' || s==='overdue') && hasAccepted);
 }
 function getTaskQtySummary(t){
   ensureTaskMeta(t);
@@ -2066,20 +2097,21 @@ async function loadData(){
   try{
     const res=await fetch(SURL+'?action=getTasks',{signal:AbortSignal.timeout(15000)});
     const j=await res.json();
-    if(j.tasks&&Array.isArray(j.tasks)){
+    const taskRows = Array.isArray(j.tasks)?j.tasks:Array.isArray(j.data)?j.data:Array.isArray(j.rows)?j.rows:Array.isArray(j.result)?j.result:[];
+    if(taskRows.length){
       const idMap={};
-      j.tasks.forEach(r=>{
+      taskRows.forEach(r=>{
         const email = normEmail(
-          r.AssignedTo_Email||r.AssignedToEmail||r.EmployeeEmail||r.empEmail||r.email||r.AssignedEmail||r.UserEmail||''
+          r.AssignedTo_Email||r['Assigned To Email']||r.AssignedToEmail||r.EmployeeEmail||r['Employee Email']||r.empEmail||r.email||r.AssignedEmail||r.UserEmail||''
         );
         const assignedName = String(
-          r.AssignedTo_Name||r.AssignedToName||r.empName||r.EmployeeName||r.employeeName||r.assignedTo||''
+          r.AssignedTo_Name||r['Assigned To Name']||r.AssignedToName||r.empName||r.EmployeeName||r.employeeName||r.assignedTo||''
         ).trim();
         const assignedBy = String(
-          r.AssignedBy||r.AssignedBy_Name||r.AssignedByName||r.by||r.createdBy||''
+          r.AssignedBy||r['Assigned By']||r.AssignedBy_Name||r['Assigned By Name']||r.AssignedByName||r.by||r.createdBy||''
         ).trim();
         let status=normStatus(r.Status||r.status||'Assigned');
-        const ddate=(r.DueDate||r.ddate||r.dueDate||'').toString().slice(0,10);
+        const ddate=(r.DueDate||r['Due Date']||r.ddate||r.dueDate||'').toString().slice(0,10);
         if(status!=='completed'&&ddate){
           const due=pd(ddate);const now=new Date();now.setHours(0,0,0,0);
           if(due){due.setHours(0,0,0,0); if(due<now&&status!=='in progress')status='overdue';}
@@ -2092,7 +2124,7 @@ async function loadData(){
         const derivedPending=pendingUnitsRaw===null ? Math.max(0, derivedTotal-derivedDone) : Math.max(0, Math.min(derivedTotal, Number(pendingUnitsRaw)||0));
         const task={
           id:r.ID||r.id||r.TaskID||r.taskId||r.taskCode||r.task_code||('X'+Math.random().toString(36).slice(2)),
-          task:pickTaskName(r,email),
+          task:pickTaskName(r,email), primaryWorkName:String(r.primaryWorkName||r.WorkName||r['Work Name']||r.TaskName||r['Task Name']||r.taskName||r.workName||'').trim(), workName:String(r.WorkName||r['Work Name']||r.workName||'').trim(), taskName:String(r.TaskName||r['Task Name']||r.taskName||'').trim(),
           by:assignedBy,
           email,
           assignedToEmail: email,
@@ -2100,10 +2132,10 @@ async function loadData(){
           empName: assignedName || uname(email),
           assignedTo: assignedName || uname(email),
           desig:r.Designation||r.desig||r.designation||udesig(email)||'',
-          adate:(r.AssignDate||r.adate||r.assignDate||'').toString().slice(0,10),ddate,ts:r.Timestamp||r.ts||r.createdAt||'',
+          adate:(r.AssignDate||r['Assign Date']||r.adate||r.assignDate||'').toString().slice(0,10),ddate,ts:r.Timestamp||r.ts||r.createdAt||'',
           status,priority:(r.Priority||r.priority||'medium').toLowerCase(),
-          acceptedAt:r.AcceptedAt||'',completedAt:r.CompletedAt||'',notes:r.Notes||r.notes||'',
-          references:r.References||r.references||'',adCopy:r.AdScript||r.AdCopy||r.adCopy||'',driveLink:r.DriveLink||r.driveLink||'',
+          acceptedAt:r.AcceptedAt||r['Accepted At']||'',completedAt:r.CompletedAt||r['Completed At']||'',rejectedAt:r.RejectedAt||r['Rejected At']||'',rejectReason:r.RejectReason||r['Reject Reason']||'',notes:r.Notes||r['Notes']||r.notes||'',
+          references:r.References||r['References']||r.references||'',adCopy:r.AdScript||r['Ad Script']||r.AdCopy||r['Ad Copy']||r.adCopy||'',driveLink:r.DriveLink||r['Drive Link']||r.driveLink||'',
           totalUnits:derivedTotal,doneUnits:derivedDone,pendingUnits:derivedPending,
           taskCode:r.TaskID||r.taskCode||r.taskId||r.ID||r.id||'',taskId:r.TaskID||r.taskId||r.taskCode||r.ID||r.id||'',
           _source:r._source||'tasks'
@@ -2114,6 +2146,7 @@ async function loadData(){
       statusOverrides.forEach((ov,id)=>{const t=allTasks.find(x=>x.id===id);if(t)Object.assign(t,ov);});
       if(sync)sync.textContent='🟢 Live · '+new Date().toLocaleTimeString('en-IN',{hour12:false})+' · '+allTasks.length+' tasks';
       if(cst){cst.className='cok';cst.textContent='✅ Connected';}
+      try{ if(cu) processAutoAccepts(); }catch(_e){}
     }
     try{
       const er=await fetch(SURL+'?action=getEmployees',{signal:AbortSignal.timeout(12000)});
@@ -2343,20 +2376,33 @@ function renderBadges(tasks){
 }
 
 function renderDashTasks(){
-  let tasks=sortTasksNewestFirst(allTasks.filter(t=>taskBelongsToCurrentUser(t)&&t.status!=='completed')); const dq=(($('dash-task-q')||{value:''}).value||'').toLowerCase().trim(); if(dq) tasks=tasks.filter(t=>getTaskDisplayName(t).toLowerCase().includes(dq)||taskUiId(t).toLowerCase().includes(dq)||String(t.notes||'').toLowerCase().includes(dq)); tasks=tasks.slice(0,6);
+  let tasks=sortTasksNewestFirst(allTasks.filter(t=>taskBelongsToCurrentUser(t)&&normStatus(t.status)!=='completed'&&normStatus(t.status)!=='rejected'));
+  const dq=(($('dash-task-q')||{value:''}).value||'').toLowerCase().trim();
+  if(dq) tasks=tasks.filter(t=>getTaskDisplayName(t).toLowerCase().includes(dq)||taskUiId(t).toLowerCase().includes(dq)||String(t.notes||'').toLowerCase().includes(dq)||String(t.references||'').toLowerCase().includes(dq)||String(t.adCopy||'').toLowerCase().includes(dq));
+  tasks=tasks.slice(0,6);
   const el=$('dash-tasks');if(!el)return;
   if(!tasks.length){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted)">✅ No pending tasks — great job!</div>';return;}
   el.innerHTML=tasks.map(t=>{
     const ov=isOD(t);
-    const cls=ov?'tc tov':t.status==='in progress'?'tc tp':'tc ta';
-    const st=ov?'Overdue':t.status==='in progress'?'In Progress':'Assigned';
-    const sc=ov?'po':t.status==='in progress'?'pp':'pa';
+    const cls=ov?'tc tov':shouldShowDone(t)?'tc tp':'tc ta';
+    const st=shouldShowAccept(t)?'Assigned':ov?'Overdue':shouldShowDone(t)?'In Progress':'Assigned';
+    const sc=shouldShowAccept(t)?'pa':ov?'po':shouldShowDone(t)?'pp':'pa';
     const d=dl(t.ddate);
     const ds=d===null?'':d<0?`<span style="color:var(--red)">${Math.abs(d)}d overdue</span>`:d===0?'<span style="color:var(--orange)">Due today</span>':`in ${d}d`;
+    const refs=escapeHtml(t.references||'');
+    const copy=escapeHtml(t.adCopy||'');
+    const notes=escapeHtml(t.notes||'');
     return `<div class="${cls}">
-      <div class="tc-top"><div><div class="tc-task">${getTaskDisplayName(t).slice(0,100)}${getTaskDisplayName(t).length>100?'...':''}</div><div style="margin-top:4px;font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-weight:700">🆔 ${taskUiId(t)}</div><div style="margin-top:4px;font-size:11px;color:var(--blue);font-weight:700">🔢 ${getTaskQtySummary(t)}</div></div><span class="pill ${sc}">${st}</span></div>
+      <div class="tc-top"><div style="flex:1">
+        <div class="tc-task">${escapeHtml(getTaskDisplayName(t))}</div>
+        <div style="margin-top:4px;font-size:11px;color:var(--muted);font-weight:700">🆔 ${taskUiId(t)}</div>
+        <div style="margin-top:4px;font-size:11px;color:var(--blue);font-weight:700">🔢 ${getTaskQtySummary(t)}</div>
+        ${refs?`<div style="margin-top:7px;font-size:11px;color:var(--text2);line-height:1.5"><b>References:</b> ${refs}</div>`:''}
+        ${copy?`<div style="margin-top:5px;font-size:11px;color:var(--text2);line-height:1.5"><b>Ad Copy:</b> ${copy}</div>`:''}
+        ${notes?`<div style="margin-top:5px;font-size:11px;color:var(--text2);line-height:1.5"><b>Notes:</b> ${notes}</div>`:''}
+      </div><span class="pill ${sc}">${st}</span></div>
       <div class="tc-meta"><span>📅 Due: ${fd(t.ddate)}</span>${ds?`<span>${ds}</span>`:''}<span>⚡ ${t.priority}</span></div>
-      <div class="tc-acts">${shouldShowAccept(t)?`<button class="btn bp bxs" onclick="qAccept('${t.id}','${getTaskDisplayName(t).replace(/'/g,"\\'")}','${t.email}','${t.adate}','${t.ddate}')">▶ Accept</button>`:''}
+      <div class="tc-acts">${shouldShowAccept(t)?`<button class="btn bp bxs" onclick="qAccept('${t.id}','${escapeHtml(getTaskDisplayName(t)).replace(/'/g,"\\'")}','${t.email}','${t.adate}','${t.ddate}')">▶ Accept</button><button class="btn bd bxs" onclick="qReject('${t.id}')">✕ Reject</button>`:''}
         ${shouldShowDone(t)?`<button class="btn bs bxs" onclick="qDone('${t.id}')">✓ Done</button>`:''}</div>
     </div>`;
   }).join('');
@@ -2370,30 +2416,37 @@ function renderMyTasks(){
   const sf=($('mt-sf')||{value:''}).value;
   const q=($('mt-q')||{value:''}).value.toLowerCase().trim();
   if(sf==='overdue')tasks=tasks.filter(t=>isOD(t));
-  else if(sf)tasks=tasks.filter(t=>t.status===sf);
-  if(q)tasks=tasks.filter(t=>getTaskDisplayName(t).toLowerCase().includes(q)||taskUiId(t).toLowerCase().includes(q)||String(t.notes||'').toLowerCase().includes(q));
+  else if(sf)tasks=tasks.filter(t=>normStatus(t.status)===sf);
+  if(q)tasks=tasks.filter(t=>getTaskDisplayName(t).toLowerCase().includes(q)||taskUiId(t).toLowerCase().includes(q)||String(t.notes||'').toLowerCase().includes(q)||String(t.references||'').toLowerCase().includes(q)||String(t.adCopy||'').toLowerCase().includes(q));
   renderCounters(tasks,'mt-counters');
   const el=$('mt-list');if(!el)return;
   if(!tasks.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:36px;margin-bottom:8px">📋</div><div style="font-weight:600">No tasks found</div></div>';return;}
   el.innerHTML=tasks.map(t=>{
     const ov=isOD(t);
-    const cls=ov?'tc tov':t.status==='completed'?'tc tcc':t.status==='in progress'?'tc tp':'tc ta';
-    const st=shouldShowAccept(t)?'Assigned':ov?'Overdue':{assigned:'Assigned','in progress':'In Progress',completed:'Completed'}[normStatus(t.status)]||normStatus(t.status);
-    const sc=shouldShowAccept(t)?'pa':ov?'po':{assigned:'pa','in progress':'pp',completed:'pc'}[normStatus(t.status)]||'pa';
+    const ns=normStatus(t.status);
+    const cls=ns==='rejected'?'tc':ov?'tc tov':ns==='completed'?'tc tcc':shouldShowDone(t)?'tc tp':'tc ta';
+    const st=ns==='rejected'?'Rejected':shouldShowAccept(t)?'Assigned':ov?'Overdue':shouldShowDone(t)?'In Progress':'Completed';
+    const sc=ns==='rejected'?'po':shouldShowAccept(t)?'pa':ov?'po':shouldShowDone(t)?'pp':'pc';
     const d=dl(t.ddate);
     const acts=[];
-    if(shouldShowAccept(t))acts.push(`<button class="btn bp bsm" onclick="qAccept('${t.id}','${getTaskDisplayName(t).replace(/'/g,"\\'")}','${t.email}','${t.adate}','${t.ddate}')">▶ Accept</button>`);
-    if(shouldShowDone(t))acts.push(`<button class="btn bs bsm" onclick="qDone('${t.id}')">✓ Mark Done</button>`);
+    if(shouldShowAccept(t)) acts.push(`<button class="btn bp bsm" onclick="qAccept('${t.id}','${escapeHtml(getTaskDisplayName(t)).replace(/'/g,"\\'")}','${t.email}','${t.adate}','${t.ddate}')">▶ Accept</button>`);
+    if(shouldShowAccept(t)) acts.push(`<button class="btn bd bsm" onclick="qReject('${t.id}')">✕ Reject</button>`);
+    if(shouldShowDone(t)) acts.push(`<button class="btn bs bsm" onclick="qDone('${t.id}')">✓ Mark Done</button>`);
     acts.push(`<button class="btn bo bsm" onclick="openEditTask('${t.id}')">✏ Edit</button>`);
+    const refs=escapeHtml(t.references||'');
+    const copy=escapeHtml(t.adCopy||'');
+    const notes=escapeHtml(t.notes||'');
     return `<div class="${cls}">
-      <div class="tc-top"><div><div class="tc-task">${getTaskDisplayName(t)}</div><div style="margin-top:4px;font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-weight:700">🆔 ${taskUiId(t)}</div><div style="margin-top:4px;font-size:11px;color:var(--blue);font-weight:700">🔢 ${getTaskQtySummary(t)}</div></div><span class="pill ${sc}">${st}</span></div>
-      <div class="tc-meta"><span>👤 By: ${t.assignedByLabel||displayAssignedBy(t.by||'Admin')}</span><span>📅 Assign: ${fd(t.adate)}</span><span>🕐 Due: ${fd(t.ddate)}</span>
-        ${d!==null?`<span style="color:${d<0?'var(--red)':d===0?'var(--orange)':'var(--muted)'}}">${d<0?Math.abs(d)+'d overdue':d===0?'Due today':'in '+d+' days'}</span>`:''}
-        <span>⚡ ${t.priority.charAt(0).toUpperCase()+t.priority.slice(1)}</span>
-        <span style="font-weight:700;color:var(--blue);background:var(--blue3);padding:2px 8px;border-radius:8px">🔢 ${getTaskQtySummary(t)}</span>
-        <span style="font-weight:700;color:var(--purple);background:var(--purple3);padding:2px 8px;border-radius:8px">🛠 ${getTaskChangeLabel(t)}</span>
-        ${t.driveLink?`<a href="${t.driveLink}" target="_blank" rel="noopener noreferrer">🎞 Drive</a>`:''}</div>
-      <div class="tc-acts">${acts.join('')}</div>
+      <div class="tc-top"><div style="flex:1">
+        <div class="tc-task">${escapeHtml(getTaskDisplayName(t))}</div>
+        <div style="margin-top:4px;font-size:11px;color:var(--muted);font-weight:700">🆔 ${taskUiId(t)}</div>
+        <div style="margin-top:4px;font-size:11px;color:var(--blue);font-weight:700">🔢 ${getTaskQtySummary(t)}</div>
+        ${refs?`<div style="margin-top:7px;font-size:11px;color:var(--text2);line-height:1.5"><b>References:</b> ${refs}</div>`:''}
+        ${copy?`<div style="margin-top:5px;font-size:11px;color:var(--text2);line-height:1.5"><b>Ad Copy:</b> ${copy}</div>`:''}
+        ${notes?`<div style="margin-top:5px;font-size:11px;color:var(--text2);line-height:1.5"><b>Notes:</b> ${notes}</div>`:''}
+      </div><span class="pill ${sc}">${st}</span></div>
+      <div class="tc-meta"><span>👤 By: ${t.assignedByLabel||displayAssignedBy(t.by||'Admin')}</span><span>📅 Assign: ${fd(t.adate)}</span><span>🕐 Due: ${fd(t.ddate)}</span>${d===null?'':d<0?`<span style="color:var(--red)">${Math.abs(d)}d overdue</span>`:d===0?'<span style="color:var(--orange)">Due today</span>':`<span>in ${d}d</span>`}${t.rejectReason?`<span style="color:var(--red)">Reason: ${escapeHtml(t.rejectReason)}</span>`:''}</div>
+      <div class="tc-acts">${acts.join(' ')}</div>
     </div>`;
   }).join('');
 }
@@ -2474,13 +2527,13 @@ function renderAllTasks(){
 // ════════════════════════════════════════════════════════════════
 //  TASK ACTIONS
 // ════════════════════════════════════════════════════════════════
-async function qAccept(id,task,email,adate,ddate){
+async function qAccept(id,task,email,adate,ddate,isAuto=false){
   if(!SURL){toast('⚠ Connect Google Sheet in Settings');return;}
   const now=new Date().toLocaleString('en-IN');
-  statusOverrides.set(id,{status:'in progress',acceptedAt:now});
+  statusOverrides.set(id,{status:'in progress',acceptedAt:now,autoAccepted:isAuto});
   const t=allTasks.find(x=>x.id===id);
-  if(t){t.status='in progress';t.acceptedAt=now;}
-  buildUI();toast('✅ Task accepted!');
+  if(t){t.status='in progress';t.acceptedAt=now;t.autoAccepted=!!isAuto;}
+  buildUI();toast(isAuto?'⏱ Auto accepted after 20 min':'✅ Task accepted!');
   try{
     await fetch(SURL,{method:'POST',body:JSON.stringify({
       action:'acceptTask',
@@ -2498,11 +2551,36 @@ async function qAccept(id,task,email,adate,ddate){
       'Assigned To Name': t?.assignedToLabel || t?.empName || uname(email),
       adate,AssignDate:adate,ddate,DueDate:ddate,
       acceptedAt: now, AcceptedAt: now,
+      autoAccepted: !!isAuto, AutoAccepted: !!isAuto,
+      tatStartAt: now, TatStartAt: now,
       status:'In Progress', Status:'In Progress'
     })});
   }catch(e){toast('⚠ Sheet sync failed — saved locally');}
 }
 
+
+async function qReject(id){
+  if(!SURL){toast('⚠ Connect Google Sheet in Settings');return;}
+  const reason=(prompt('Reject reason likho:','')||'').trim();
+  if(!reason){toast('⚠ Reject reason required');return;}
+  const now=new Date().toLocaleString('en-IN');
+  statusOverrides.set(id,{status:'rejected',rejectedAt:now,rejectReason:reason});
+  const t=allTasks.find(x=>x.id===id);
+  if(t){t.status='rejected';t.rejectedAt=now;t.rejectReason=reason;}
+  buildUI();toast('⛔ Task rejected');
+  try{
+    await fetch(SURL,{method:'POST',body:JSON.stringify({
+      action:'rejectTask',
+      id,
+      RejectReason: reason,
+      rejectReason: reason,
+      rejectedAt: now,
+      RejectedAt: now,
+      status:'Rejected',
+      Status:'Rejected'
+    })});
+  }catch(e){toast('⚠ Sheet sync failed — saved locally');}
+}
 async function qDone(id){
   if(!SURL){toast('⚠ Connect Google Sheet in Settings');return;}
   const now=new Date().toLocaleString('en-IN');
@@ -2550,6 +2628,7 @@ function openEditTask(id){
 }
 async function saveTask(){
   const task=($('add-task')||{value:''}).value.trim();
+  const exactWorkName = task;
   const email=($('add-emp')||{value:''}).value;
   const pri=($('add-pri')||{value:'Medium'}).value;
   const adate=($('add-ad')||{value:''}).value;
@@ -2588,15 +2667,15 @@ async function saveTask(){
         by:t?.by||cu.name,
         changeCount:(Number(t?.changeCount||0)||0)+1
       });
-      const payload={action:'updateTask',id:editTaskId,taskId:updatedTask.taskCode,taskCode:updatedTask.taskCode,TaskID:updatedTask.taskCode,task:getTaskDisplayName({task}),TaskName:getTaskDisplayName({task}),workName:getTaskDisplayName({task}),WorkName:getTaskDisplayName({task}),email,AssignedTo_Email:email,assignedToEmail:email,empEmail:email,EmployeeEmail:email,'Assigned To Email':email,AssignedTo_Name:updatedTask.assignedToLabel,assignedTo:updatedTask.assignedToLabel,empName:updatedTask.assignedToLabel,EmployeeName:updatedTask.assignedToLabel,'Assigned To Name':updatedTask.assignedToLabel,priority:pri,Priority:pri,adate,AssignDate:adate,ddate,DueDate:ddate,notes:note,Notes:note,references,References:references,adCopy,AdCopy:adCopy,AdScript:adCopy,totalUnits,Count:totalUnits,pendingUnits:updatedTask.pendingUnits,PendingQty:updatedTask.pendingUnits,doneUnits:updatedTask.doneUnits,DoneQty:updatedTask.doneUnits,changeCount:updatedTask.changeCount,ChangeCount:updatedTask.changeCount,assignedBy:updatedTask.by,AssignedBy:updatedTask.by,AssignedBy_Name:updatedTask.assignedByLabel,'Assigned By Name':updatedTask.assignedByLabel,status:'Assigned',Status:'Assigned',Timestamp:new Date().toLocaleString('en-IN'),sendEmail:true,emailHtml:buildTaskMailHtml('update',{...updatedTask,assignedToLabel:updatedTask.assignedToLabel,assignedByLabel:updatedTask.assignedByLabel,countSummary:getTaskQtySummary(updatedTask),changeLabel:getTaskChangeLabel(updatedTask),status:updatedTask.status||'Assigned'})};
+      const payload={action:'updateTask',id:editTaskId,taskId:updatedTask.taskCode,taskCode:updatedTask.taskCode,TaskID:updatedTask.taskCode,task:exactWorkName,Task:exactWorkName,TaskName:exactWorkName,TaskTitle:exactWorkName,taskName:exactWorkName,workName:exactWorkName,WorkName:exactWorkName,['Work Name']:exactWorkName,['Task Name']:exactWorkName,['Work Title']:exactWorkName,['Task Title']:exactWorkName,email,AssignedTo_Email:email,assignedToEmail:email,empEmail:email,EmployeeEmail:email,'Assigned To Email':email,AssignedTo_Name:updatedTask.assignedToLabel,assignedTo:updatedTask.assignedToLabel,empName:updatedTask.assignedToLabel,EmployeeName:updatedTask.assignedToLabel,'Assigned To Name':updatedTask.assignedToLabel,priority:pri,Priority:pri,adate,AssignDate:adate,ddate,DueDate:ddate,notes:note,Notes:note,Description:note,['Work Detail']:note,WorkDetail:note,references,References:references,adCopy,AdCopy:adCopy,AdScript:adCopy,['Ad Copy']:adCopy,totalUnits,Count:totalUnits,pendingUnits:updatedTask.pendingUnits,PendingQty:updatedTask.pendingUnits,doneUnits:updatedTask.doneUnits,DoneQty:updatedTask.doneUnits,changeCount:updatedTask.changeCount,ChangeCount:updatedTask.changeCount,assignedBy:updatedTask.by,AssignedBy:updatedTask.by,AssignedBy_Name:updatedTask.assignedByLabel,'Assigned By Name':updatedTask.assignedByLabel,status:'Assigned',Status:'Assigned',Timestamp:new Date().toLocaleString('en-IN'),sendEmail:true,emailHtml:buildTaskMailHtml('update',{...updatedTask,assignedToLabel:updatedTask.assignedToLabel,assignedByLabel:updatedTask.assignedByLabel,countSummary:getTaskQtySummary(updatedTask),changeLabel:getTaskChangeLabel(updatedTask),status:updatedTask.status||'Assigned'})};
       await fetch(SURL,{method:'POST',body:JSON.stringify(payload)});
       const idx=allTasks.findIndex(x=>x.id===editTaskId);
       if(idx>=0) allTasks[idx]=updatedTask;
       toast('✅ Task updated!'); setTimeout(()=>{try{loadData()}catch(e){}},700);
     } else {
       const taskCode=generateTaskId();
-      const newTask=ensureTaskMeta({id:taskCode,taskCode,taskId:taskCode,task,email,assignedToEmail:email,empEmail:email,empName:uname(email),assignedTo:uname(email),by:cu.name,assignedBy:cu.name,adate,ddate,priority:pri.toLowerCase(),status:'assigned',ts:new Date().toLocaleString('en-IN'),acceptedAt:'',completedAt:'',notes:note,references,adCopy,driveLink:'',totalUnits,doneUnits:0,pendingUnits:totalUnits,desig:udesig(email),changeCount:0,_source:'tasks'});
-      const payload={action:'addTask',taskId:taskCode,taskCode,TaskID:taskCode,task:getTaskDisplayName({task}),TaskName:getTaskDisplayName({task}),workName:getTaskDisplayName({task}),WorkName:getTaskDisplayName({task}),email,AssignedTo_Email:email,assignedToEmail:email,empEmail:email,EmployeeEmail:email,'Assigned To Email':email,AssignedTo_Name:newTask.assignedToLabel,assignedTo:newTask.assignedToLabel,empName:newTask.assignedToLabel,EmployeeName:newTask.assignedToLabel,'Assigned To Name':newTask.assignedToLabel,by:cu.name,assignedBy:cu.name,AssignedBy:cu.name,AssignedBy_Name:newTask.assignedByLabel,'Assigned By Name':newTask.assignedByLabel,adate,AssignDate:adate,ddate,DueDate:ddate,priority:pri,Priority:pri,notes:note,Notes:note,references,References:references,adCopy,AdCopy:adCopy,AdScript:adCopy,totalUnits,Count:totalUnits,doneUnits:0,DoneQty:0,pendingUnits:totalUnits,PendingQty:totalUnits,changeCount:0,ChangeCount:0,driveLink:'',DriveLink:'',status:'Assigned',Status:'Assigned',Timestamp:new Date().toLocaleString('en-IN'),sendEmail:true,emailBody:`Task ID: ${taskCode}
+      const newTask=ensureTaskMeta({id:taskCode,taskCode,taskId:taskCode,task, email,assignedToEmail:email,empEmail:email,empName:uname(email),assignedTo:uname(email),by:cu.name,assignedBy:cu.name,adate,ddate,priority:pri.toLowerCase(),status:'assigned',ts:new Date().toLocaleString('en-IN'),acceptedAt:'',completedAt:'',notes:note,references,adCopy,driveLink:'',totalUnits,doneUnits:0,pendingUnits:totalUnits,desig:udesig(email),changeCount:0,_source:'tasks'});
+      const payload={action:'addTask',taskId:taskCode,taskCode,TaskID:taskCode,task:exactWorkName,Task:exactWorkName,TaskName:exactWorkName,TaskTitle:exactWorkName,taskName:exactWorkName,workName:exactWorkName,WorkName:exactWorkName,['Work Name']:exactWorkName,['Task Name']:exactWorkName,['Work Title']:exactWorkName,['Task Title']:exactWorkName,email,AssignedTo_Email:email,assignedToEmail:email,empEmail:email,EmployeeEmail:email,'Assigned To Email':email,AssignedTo_Name:newTask.assignedToLabel,assignedTo:newTask.assignedToLabel,empName:newTask.assignedToLabel,EmployeeName:newTask.assignedToLabel,'Assigned To Name':newTask.assignedToLabel,by:cu.name,assignedBy:cu.name,AssignedBy:cu.name,AssignedBy_Name:newTask.assignedByLabel,'Assigned By Name':newTask.assignedByLabel,adate,AssignDate:adate,ddate,DueDate:ddate,priority:pri,Priority:pri,notes:note,Notes:note,Description:note,['Work Detail']:note,WorkDetail:note,references,References:references,adCopy,AdCopy:adCopy,AdScript:adCopy,['Ad Copy']:adCopy,totalUnits,Count:totalUnits,doneUnits:0,DoneQty:0,pendingUnits:totalUnits,PendingQty:totalUnits,changeCount:0,ChangeCount:0,driveLink:'',DriveLink:'',status:'Assigned',Status:'Assigned',Timestamp:new Date().toLocaleString('en-IN'),sendEmail:true,emailBody:`Task ID: ${taskCode}
 Task: ${getTaskDisplayName({task})}
 Assigned To: ${newTask.assignedToLabel}
 Assigned By: ${displayAssignedBy(cu.name)}
