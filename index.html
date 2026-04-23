@@ -1525,24 +1525,62 @@ function isCountLikeText(v){
 
 function pickTaskName(row,email=''){
   const candidates=[
-    row&&row.WorkName,row&&row['Work Name'],row&&row.TaskName,row&&row['Task Name'],row&&row.Title,row&&row.Task,row&&row.task,
-    row&&row.Work,row&&row['Work'],row&&row.WorkTitle,row&&row['Work Title'],row&&row.TaskTitle,row&&row['Task Title'],
-    row&&row.Description,row&&row.description,row&&row['Description'],row&&row.WorkDetail,row&&row['Work Detail'],
-    row&&row.TaskDetail,row&&row['Task Detail'],row&&row.Activity,row&&row['Activity'],row&&row.Project,row&&row.ProjectName,
-    row&&row['Project Name'],row&&row.Requirement,row&&row['Requirement'],row&&row.Subject,row&&row['Subject'],
-    row&&row.workName,row&&row.taskName,row&&row.title,row&&row.work_label,row&&row.label
+    row&&row.WorkName, row&&row['Work Name'], row&&row['work name'], row&&row['WORK NAME'],
+    row&&row.TaskName, row&&row['Task Name'], row&&row['task name'], row&&row['TASK NAME'],
+    row&&row.Title, row&&row.title, row&&row['Title'],
+    row&&row.Task, row&&row.task, row&&row['Task'],
+    row&&row.Work, row&&row.work, row&&row['Work'],
+    row&&row.WorkTitle, row&&row['Work Title'],
+    row&&row.TaskTitle, row&&row['Task Title'],
+    row&&row.Description, row&&row.description,
+    row&&row.WorkDetail, row&&row['Work Detail'],
+    row&&row.Activity, row&&row.Project, row&&row.ProjectName,
+    row&&row.Subject, row&&row.workName, row&&row.taskName,
+    row&&row.primaryWorkName, row&&row.label
   ];
   for(const c of candidates){
     const val=String(c||'').trim();
-    if(val && !isEmailLike(val) && !isCountLikeText(val) && !/^(assigned|in progress|completed|overdue|done|rejected)$/i.test(val)) return val;
+    if(val && !isEmailLike(val) && !isCountLikeText(val) && !isTaskCodeLike(val) &&
+       !/^(assigned|in progress|completed|overdue|done|rejected|low|medium|high|urgent)$/i.test(val))
+      return val.slice(0,140);
   }
+
+  // ── SMART FALLBACK: saare row fields scan karo ──
+  if(row && typeof row === 'object'){
+    const skipKeys=new Set([
+      'ID','id','TaskID','taskId','taskCode','task_code','_source',
+      'email','Email','AssignedTo_Email','EmployeeEmail','empEmail','assignedToEmail','UserEmail',
+      'AssignedTo_Name','AssignedToName','empName','EmployeeName','assignedTo',
+      'AssignedBy','AssignedByName','AssignedBy_Name','by','createdBy',
+      'Status','status','Priority','priority',
+      'Timestamp','ts','createdAt','AssignDate','adate','DueDate','ddate',
+      'AcceptedAt','CompletedAt','RejectedAt','RejectReason','DriveLink','driveLink',
+      'TotalUnits','totalUnits','DoneUnits','doneUnits','PendingUnits','pendingUnits',
+      'ChangeCount','changeCount','Count','count','IsAdmin','isAdmin','IsManager','isManager'
+    ]);
+    for(const [key,val] of Object.entries(row)){
+      if(skipKeys.has(key)) continue;
+      const s=String(val||'').trim();
+      if(s.length<4 || s.length>300) continue;
+      if(isEmailLike(s)) continue;
+      if(isCountLikeText(s)) continue;
+      if(isTaskCodeLike(s)) continue;
+      if(/^(assigned|in progress|completed|overdue|done|rejected|low|medium|high|urgent|true|false|yes|no)$/i.test(s)) continue;
+      if(/^\d{4}-\d{2}-\d{2}/.test(s)) continue;
+      if(/^https?:\/\//i.test(s)) continue;
+      if(/^\d{1,2}\/\d{1,2}\/\d{4}/.test(s)) continue;
+      return s.slice(0,140);
+    }
+  }
+
   const backup=firstUsefulLine(
-    (row&&row.WorkDetail)||(row&&row['Work Detail'])||(row&&row.TaskDetail)||(row&&row['Task Detail'])||
-    (row&&row.Description)||(row&&row.description)||(row&&row['Description'])||
-    (row&&row.AdScript)||(row&&row['Ad Script'])||(row&&row.AdCopy)||(row&&row['Ad Copy'])||
-    (row&&row.adCopy)||(row&&row.Notes)||(row&&row['Notes'])||(row&&row.notes)||''
+    (row&&row.WorkDetail)||(row&&row['Work Detail'])||(row&&row.TaskDetail)||
+    (row&&row['Task Detail'])||(row&&row.Description)||(row&&row.description)||
+    (row&&row.AdScript)||(row&&row['Ad Script'])||(row&&row.AdCopy)||
+    (row&&row.Notes)||(row&&row.notes)||''
   );
-  if(backup && !isEmailLike(backup) && !isCountLikeText(backup) && !/^(assigned|in progress|completed|overdue|done|rejected)$/i.test(backup)) return backup.slice(0,140);
+  if(backup && !isEmailLike(backup) && !isCountLikeText(backup) && !isTaskCodeLike(backup))
+    return backup.slice(0,140);
   return '';
 }
 
