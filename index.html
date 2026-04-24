@@ -526,12 +526,15 @@ textarea.fc{resize:vertical;min-height:68px}
           <div class="cb">
             <div class="fr" style="margin-bottom:10px">
               <div class="fg" style="margin:0"><label class="fl2">Select Task *</label><select id="sub-task" class="fc" onchange="refreshSubTaskMeta()"><option value="">— Select task by Work Name / Task ID —</option></select></div>
-              <div class="fg" style="margin:0"><label class="fl2">Status</label><select id="sub-stat" class="fc"><option value="Completed">✅ Completed</option><option value="In Progress">⚡ Still In Progress</option></select></div>
             </div>
             <div id="sub-meta" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:var(--text2)"></div>
             <div class="fr" style="margin-bottom:10px">
               <div class="fg" style="margin:0"><label class="fl2">Done Units</label><input type="number" id="sub-done-units" class="fc" min="0" step="1" value="1"></div>
-              <div class="fg" style="margin:0"><label class="fl2">Edited Video Drive Link</label><input type="url" id="sub-drive-link" class="fc" placeholder="https://drive.google.com/..."/></div>
+              <div class="fg" style="margin:0"><label class="fl2">Status</label><select id="sub-stat" class="fc"><option value="Completed">✅ Completed</option><option value="In Progress">⚡ Still In Progress</option></select></div>
+            </div>
+            <div class="fg" style="margin-bottom:10px">
+              <label class="fl2" style="color:var(--blue)">🔗 Drive Link — Submit Your Work <span style="font-weight:400;color:var(--muted)">(edited video / completed work ka link daalo)</span></label>
+              <input type="url" id="sub-drive-link" class="fc" placeholder="https://drive.google.com/..." style="border-color:var(--blue);color:var(--blue);font-weight:600"/>
             </div>
             <div class="fg"><label class="fl2">Notes / Remarks</label><textarea id="sub-notes" class="fc" placeholder="Describe what you completed, add links or comments..."></textarea></div>
             <button class="btn bs" onclick="submitWork()">📤 Submit Work</button>
@@ -785,10 +788,14 @@ textarea.fc{resize:vertical;min-height:68px}
       </div>
       <div class="fr" style="margin-top:10px">
         <div class="fg" style="margin:0"><label class="fl2">Total Units / Count *</label><input type="number" id="add-units" class="fc" min="1" step="1" value="1" placeholder="e.g. 17"></div>
-        <div class="fg" style="margin:0"><label class="fl2">References *</label><textarea id="add-ref" class="fc" rows="2" placeholder="Drive links, reference reels, inspirations, source file links..."></textarea></div>
+        <div class="fg" style="margin:0"><label class="fl2">References <span style="font-weight:400;color:var(--muted)">(optional)</span></label><textarea id="add-ref" class="fc" rows="2" placeholder="Reference reels, inspirations, source links..."></textarea></div>
       </div>
-      <div class="fg" style="margin-top:10px"><label class="fl2">Ad Script / Ad Copy *</label><textarea id="add-copy" class="fc" rows="3" placeholder="Paste script / ad copy / instructions here..."></textarea></div>
-      <div class="fg" style="margin-top:10px"><label class="fl2">Notes (optional)</label><textarea id="add-note" class="fc" rows="2" placeholder="Additional notes..."></textarea></div>
+      <div class="fg" style="margin-top:10px">
+        <label class="fl2">🔗 Drive Link <span style="font-weight:400;color:var(--muted)">(optional — source files, brief, assets)</span></label>
+        <input type="url" id="add-drive-link" class="fc" placeholder="https://drive.google.com/..." style="color:var(--blue)">
+      </div>
+      <div class="fg" style="margin-top:10px"><label class="fl2">Ad Script / Ad Copy <span style="font-weight:400;color:var(--muted)">(optional)</span></label><textarea id="add-copy" class="fc" rows="3" placeholder="Paste script / ad copy / instructions here..."></textarea></div>
+      <div class="fg" style="margin-top:10px"><label class="fl2">Notes <span style="font-weight:400;color:var(--muted)">(optional)</span></label><textarea id="add-note" class="fc" rows="2" placeholder="Additional notes..."></textarea></div>
     </div>
     <div class="mof"><button class="btn bo" onclick="CM('m-add')">Cancel</button><button class="btn bp" onclick="saveTask()">💾 Save Task</button></div>
   </div>
@@ -2722,7 +2729,7 @@ async function delTask(id){
 function openAddTask(){
   editTaskId=null;
   const t=$('m-add-t');if(t)t.textContent='📋 Assign New Task';
-  ['add-task','add-dd','add-note','add-ref','add-copy'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  ['add-task','add-dd','add-note','add-ref','add-copy','add-drive-link'].forEach(id=>{const el=$(id);if(el)el.value='';})
   const units=$('add-units');if(units)units.value='1';
   const empSel=$('add-emp');if(empSel)empSel.value='';
   const pri=$('add-pri');if(pri)pri.value='Medium';
@@ -2733,7 +2740,7 @@ function openEditTask(id){
   const t=allTasks.find(x=>x.id===id);if(!t)return;
   editTaskId=id;
   const ti=$('m-add-t');if(ti)ti.textContent='✏ Edit Task';
-  const fields={['add-task']:getTaskDisplayName(t),['add-emp']:t.email,['add-ad']:t.adate,['add-dd']:t.ddate,['add-note']:t.notes||'',['add-ref']:t.references||'',['add-copy']:t.adCopy||''};
+  const fields={['add-task']:getTaskDisplayName(t),['add-emp']:t.email,['add-ad']:t.adate,['add-dd']:t.ddate,['add-note']:t.notes||'',['add-ref']:t.references||'',['add-copy']:t.adCopy||'',['add-drive-link']:t.driveLink||''};
   Object.entries(fields).forEach(([k,v])=>{const el=$(k);if(el)el.value=v;});
   const pri=$('add-pri');if(pri)pri.value=t.priority.charAt(0).toUpperCase()+t.priority.slice(1);
   const units=$('add-units');if(units)units.value=String(Number(t.totalUnits||1)||1);
@@ -2749,11 +2756,10 @@ async function saveTask(){
   const note=($('add-note')||{value:''}).value.trim();
   const references=($('add-ref')||{value:''}).value.trim();
   const adCopy=($('add-copy')||{value:''}).value.trim();
+  const driveLink=($('add-drive-link')||{value:''}).value.trim();
   const totalUnits=Math.max(1,parseInt((($('add-units')||{value:'1'}).value||'1'),10)||1);
   if(!task){toast('⚠ Work name / task name required');return;}
   if(!email){toast('⚠ Please select an employee');return;}
-  if(!references){toast('⚠ References required');return;}
-  if(!adCopy){toast('⚠ Ad Script / Ad Copy required');return;}
   if(!SURL){toast('⚠ Connect Google Sheet in Settings');return;}
   try{
     const existingDuplicate=allTasks.find(x=>!editTaskId && taskFingerprint(getTaskDisplayName(x),x.email)===taskFingerprint(getTaskDisplayName({task}),email) && normStatus(x.status)!=='completed');
@@ -2772,7 +2778,7 @@ async function saveTask(){
         email,
         empName:uname(email),
         priority:pri.toLowerCase(),
-        adate, ddate, notes:note, references, adCopy,
+        adate, ddate, notes:note, references, adCopy, driveLink,
         totalUnits,
         doneUnits,
         pendingUnits:Math.max(0,totalUnits-doneUnits),
@@ -2780,15 +2786,15 @@ async function saveTask(){
         by:t?.by||cu.name,
         changeCount:(Number(t?.changeCount||0)||0)+1
       });
-      const payload={action:'updateTask',id:editTaskId,taskId:updatedTask.taskCode,taskCode:updatedTask.taskCode,TaskID:updatedTask.taskCode,task:exactWorkName,Task:exactWorkName,TaskName:exactWorkName,TaskTitle:exactWorkName,taskName:exactWorkName,workName:exactWorkName,WorkName:exactWorkName,['Work Name']:exactWorkName,['Task Name']:exactWorkName,['Work Title']:exactWorkName,['Task Title']:exactWorkName,email,AssignedTo_Email:email,assignedToEmail:email,empEmail:email,EmployeeEmail:email,'Assigned To Email':email,AssignedTo_Name:updatedTask.assignedToLabel,assignedTo:updatedTask.assignedToLabel,empName:updatedTask.assignedToLabel,EmployeeName:updatedTask.assignedToLabel,'Assigned To Name':updatedTask.assignedToLabel,priority:pri,Priority:pri,adate,AssignDate:adate,ddate,DueDate:ddate,notes:note,Notes:note,Description:note,['Work Detail']:note,WorkDetail:note,references,References:references,adCopy,AdCopy:adCopy,AdScript:adCopy,['Ad Copy']:adCopy,totalUnits,Count:totalUnits,pendingUnits:updatedTask.pendingUnits,PendingQty:updatedTask.pendingUnits,doneUnits:updatedTask.doneUnits,DoneQty:updatedTask.doneUnits,changeCount:updatedTask.changeCount,ChangeCount:updatedTask.changeCount,assignedBy:updatedTask.by,AssignedBy:updatedTask.by,AssignedBy_Name:updatedTask.assignedByLabel,'Assigned By Name':updatedTask.assignedByLabel,status:'Assigned',Status:'Assigned',Timestamp:new Date().toLocaleString('en-IN'),sendEmail:true,emailHtml:buildTaskMailHtml('update',{...updatedTask,assignedToLabel:updatedTask.assignedToLabel,assignedByLabel:updatedTask.assignedByLabel,countSummary:getTaskQtySummary(updatedTask),changeLabel:getTaskChangeLabel(updatedTask),status:updatedTask.status||'Assigned'})};
+      const payload={action:'updateTask',id:editTaskId,taskId:updatedTask.taskCode,taskCode:updatedTask.taskCode,TaskID:updatedTask.taskCode,task:exactWorkName,Task:exactWorkName,TaskName:exactWorkName,TaskTitle:exactWorkName,taskName:exactWorkName,workName:exactWorkName,WorkName:exactWorkName,['Work Name']:exactWorkName,['Task Name']:exactWorkName,['Work Title']:exactWorkName,['Task Title']:exactWorkName,email,AssignedTo_Email:email,assignedToEmail:email,empEmail:email,EmployeeEmail:email,'Assigned To Email':email,AssignedTo_Name:updatedTask.assignedToLabel,assignedTo:updatedTask.assignedToLabel,empName:updatedTask.assignedToLabel,EmployeeName:updatedTask.assignedToLabel,'Assigned To Name':updatedTask.assignedToLabel,priority:pri,Priority:pri,adate,AssignDate:adate,ddate,DueDate:ddate,notes:note,Notes:note,Description:note,['Work Detail']:note,WorkDetail:note,references,References:references,adCopy,AdCopy:adCopy,AdScript:adCopy,['Ad Copy']:adCopy,driveLink,DriveLink:driveLink,totalUnits,Count:totalUnits,pendingUnits:updatedTask.pendingUnits,PendingQty:updatedTask.pendingUnits,doneUnits:updatedTask.doneUnits,DoneQty:updatedTask.doneUnits,changeCount:updatedTask.changeCount,ChangeCount:updatedTask.changeCount,assignedBy:updatedTask.by,AssignedBy:updatedTask.by,AssignedBy_Name:updatedTask.assignedByLabel,'Assigned By Name':updatedTask.assignedByLabel,status:'Assigned',Status:'Assigned',Timestamp:new Date().toLocaleString('en-IN'),sendEmail:true,emailHtml:buildTaskMailHtml('update',{...updatedTask,assignedToLabel:updatedTask.assignedToLabel,assignedByLabel:updatedTask.assignedByLabel,countSummary:getTaskQtySummary(updatedTask),changeLabel:getTaskChangeLabel(updatedTask),status:updatedTask.status||'Assigned'})};
       await fetch(SURL,{method:'POST',body:JSON.stringify(payload)});
       const idx=allTasks.findIndex(x=>x.id===editTaskId);
       if(idx>=0) allTasks[idx]=updatedTask;
       toast('✅ Task updated!'); setTimeout(()=>{try{loadData()}catch(e){}},700);
     } else {
       const taskCode=generateTaskId();
-      const newTask=ensureTaskMeta({id:taskCode,taskCode,taskId:taskCode,task, email,assignedToEmail:email,empEmail:email,empName:uname(email),assignedTo:uname(email),by:cu.name,assignedBy:cu.name,adate,ddate,priority:pri.toLowerCase(),status:'assigned',ts:new Date().toLocaleString('en-IN'),acceptedAt:'',completedAt:'',notes:note,references,adCopy,driveLink:'',totalUnits,doneUnits:0,pendingUnits:totalUnits,desig:udesig(email),changeCount:0,_source:'tasks'});
-      const payload={action:'addTask',taskId:taskCode,taskCode,TaskID:taskCode,task:exactWorkName,Task:exactWorkName,TaskName:exactWorkName,TaskTitle:exactWorkName,taskName:exactWorkName,workName:exactWorkName,WorkName:exactWorkName,['Work Name']:exactWorkName,['Task Name']:exactWorkName,['Work Title']:exactWorkName,['Task Title']:exactWorkName,email,AssignedTo_Email:email,assignedToEmail:email,empEmail:email,EmployeeEmail:email,'Assigned To Email':email,AssignedTo_Name:newTask.assignedToLabel,assignedTo:newTask.assignedToLabel,empName:newTask.assignedToLabel,EmployeeName:newTask.assignedToLabel,'Assigned To Name':newTask.assignedToLabel,by:cu.name,assignedBy:cu.name,AssignedBy:cu.name,AssignedBy_Name:newTask.assignedByLabel,'Assigned By Name':newTask.assignedByLabel,adate,AssignDate:adate,ddate,DueDate:ddate,priority:pri,Priority:pri,notes:note,Notes:note,Description:note,['Work Detail']:note,WorkDetail:note,references,References:references,adCopy,AdCopy:adCopy,AdScript:adCopy,['Ad Copy']:adCopy,totalUnits,Count:totalUnits,doneUnits:0,DoneQty:0,pendingUnits:totalUnits,PendingQty:totalUnits,changeCount:0,ChangeCount:0,driveLink:'',DriveLink:'',status:'Assigned',Status:'Assigned',Timestamp:new Date().toLocaleString('en-IN'),sendEmail:true,emailBody:`Task ID: ${taskCode}
+      const newTask=ensureTaskMeta({id:taskCode,taskCode,taskId:taskCode,task, email,assignedToEmail:email,empEmail:email,empName:uname(email),assignedTo:uname(email),by:cu.name,assignedBy:cu.name,adate,ddate,priority:pri.toLowerCase(),status:'assigned',ts:new Date().toLocaleString('en-IN'),acceptedAt:'',completedAt:'',notes:note,references,adCopy,driveLink:driveLink||'',totalUnits,doneUnits:0,pendingUnits:totalUnits,desig:udesig(email),changeCount:0,_source:'tasks'});
+      const payload={action:'addTask',taskId:taskCode,taskCode,TaskID:taskCode,task:exactWorkName,Task:exactWorkName,TaskName:exactWorkName,TaskTitle:exactWorkName,taskName:exactWorkName,workName:exactWorkName,WorkName:exactWorkName,['Work Name']:exactWorkName,['Task Name']:exactWorkName,['Work Title']:exactWorkName,['Task Title']:exactWorkName,email,AssignedTo_Email:email,assignedToEmail:email,empEmail:email,EmployeeEmail:email,'Assigned To Email':email,AssignedTo_Name:newTask.assignedToLabel,assignedTo:newTask.assignedToLabel,empName:newTask.assignedToLabel,EmployeeName:newTask.assignedToLabel,'Assigned To Name':newTask.assignedToLabel,by:cu.name,assignedBy:cu.name,AssignedBy:cu.name,AssignedBy_Name:newTask.assignedByLabel,'Assigned By Name':newTask.assignedByLabel,adate,AssignDate:adate,ddate,DueDate:ddate,priority:pri,Priority:pri,notes:note,Notes:note,Description:note,['Work Detail']:note,WorkDetail:note,references,References:references,adCopy,AdCopy:adCopy,AdScript:adCopy,['Ad Copy']:adCopy,totalUnits,Count:totalUnits,doneUnits:0,DoneQty:0,pendingUnits:totalUnits,PendingQty:totalUnits,changeCount:0,ChangeCount:0,driveLink:driveLink||'',DriveLink:driveLink||'',status:'Assigned',Status:'Assigned',Timestamp:new Date().toLocaleString('en-IN'),sendEmail:true,emailBody:`Task ID: ${taskCode}
 Task: ${getTaskDisplayName({task})}
 Assigned To: ${newTask.assignedToLabel}
 Assigned By: ${displayAssignedBy(cu.name)}
