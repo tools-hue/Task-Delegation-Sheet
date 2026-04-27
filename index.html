@@ -3013,23 +3013,11 @@ function buildEmpStats(tasks){
 }
 
 function renderCharts(tasks){
-  // ✅ FIX: destroy old charts cleanly, no animation flash
   Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}});charts={};
   const es=buildEmpStats(tasks),nm=es.map(e=>e.short);
-  // ✅ FIX: No animation = no blinking
   const ANIM={duration:0};
   const OPT={responsive:true,maintainAspectRatio:false,animation:ANIM};
-  if(anKpi){
-    const tot=tasks.length,comp=tasks.filter(t=>t.status==='completed').length,ov=tasks.filter(t=>isOD(t)).length,ip=tasks.filter(t=>t.status==='in progress').length;
-    const cwd=tasks.filter(t=>t.status==='completed'&&t.ddate&&t.completedAt);let ot=0;
-    cwd.forEach(t=>{const due=pd(t.ddate);const p=t.completedAt.split(' ')[0].split('/');const cd=p.length===3?new Date(`${p[2]}-${p[1]}-${p[0]}`):null;if(due&&cd&&cd<=due)ot++;});
-    const otPct=cwd.length?Math.round(ot/cwd.length*100):0;
-    anKpi.innerHTML=[
-      ['📋','Total',tot,'#0B84FF'],['✅','Completed',comp,'#00B67A'],['⚡','In Progress',ip,'#F59E0B'],
-      ['🔴','Overdue',ov,'#E53935'],['⏱','On-Time %',otPct+'%','#7C3AED'],['👥','Employees',es.length,'#0E9F8E']
-    ].map(([ico,lbl,val,clr])=>`<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center;box-shadow:var(--sh0)"><div style="font-size:18px">${ico}</div><div style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:${clr};line-height:1.2">${val}</div><div style="font-size:10px;color:var(--muted);font-weight:600">${lbl}</div></div>`).join('');
-  }
-  const F={family:"'Inter',sans-serif"};
+  const F={"family":"'Inter',sans-serif"};
   if(!es.length){
     ['c-perf','c-score','c-work','c-week','c-stat','c-pri','c-24h','c-dept'].forEach(id=>{
       const cv=$(id);if(!cv)return;
@@ -3042,8 +3030,17 @@ function renderCharts(tasks){
     const eb=$('emp-bars');if(eb)eb.innerHTML='';
     return;
   }
-  // KPI Ribbon
   const anKpi=$('an-kpi');
+  if(anKpi){
+    const tot=tasks.length,comp=tasks.filter(t=>t.status==='completed').length,ov=tasks.filter(t=>isOD(t)).length,ip=tasks.filter(t=>t.status==='in progress').length;
+    const cwd=tasks.filter(t=>t.status==='completed'&&t.ddate&&t.completedAt);let ot=0;
+    cwd.forEach(t=>{const due=pd(t.ddate);try{const s=String(t.completedAt||'').replace(',','').trim();const m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);const cd=m?new Date(Number(m[3]),Number(m[2])-1,Number(m[1])):new Date(s);if(due&&cd&&!isNaN(cd)&&cd<=due)ot++;}catch(e){}});
+    const otPct=cwd.length?Math.round(ot/cwd.length*100):0;
+    anKpi.innerHTML=[
+      ['📋','Total',tot,'#0B84FF'],['✅','Completed',comp,'#00B67A'],['⚡','In Progress',ip,'#F59E0B'],
+      ['🔴','Overdue',ov,'#E53935'],['⏱','On-Time %',otPct+'%','#7C3AED'],['👥','Employees',es.length,'#0E9F8E']
+    ].map(([ico,lbl,val,clr])=>`<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center;box-shadow:var(--sh0)"><div style="font-size:18px">${ico}</div><div style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:${clr};line-height:1.2">${val}</div><div style="font-size:10px;color:var(--muted);font-weight:600">${lbl}</div></div>`).join('');
+  }
   function grd(ctx,c1,c2){const g=ctx.createLinearGradient(0,0,0,280);g.addColorStop(0,c1);g.addColorStop(1,c2);return g;}
 
   // PERF
