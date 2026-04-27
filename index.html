@@ -490,18 +490,18 @@ textarea.fc{resize:vertical;min-height:68px}
         <!-- Task Counters -->
         <div class="task-counters" id="dash-counters"></div>
         <div class="kg">
-          <div class="kc kbl" onclick="kpiNav('all','')"><div class="ki">📋</div><div class="kl">Total Tasks</div><div class="kv" id="k-tot">—</div><div class="kh">Click to view all</div></div>
-          <div class="kc kgr" onclick="kpiNav('all','completed')"><div class="ki">✅</div><div class="kl">Done Today</div><div class="kv" id="k-td">—</div><div class="kh">Completed today</div></div>
-          <div class="kc kor" onclick="kpiNav('all','in progress')"><div class="ki">⚡</div><div class="kl">In Progress</div><div class="kv" id="k-ip">—</div><div class="kh">Click to filter</div></div>
-          <div class="kc krd" onclick="kpiNav('all','overdue')"><div class="ki">🔴</div><div class="kl">Overdue</div><div class="kv" id="k-ov">—</div><div class="kh">Click to filter</div></div>
-          <div class="kc kpu" onclick="kpiNav('all','assigned')"><div class="ki">📌</div><div class="kl">Awaiting Accept</div><div class="kv" id="k-aw">—</div><div class="kh">Click to filter</div></div>
+          <div class="kc kbl" onclick="drillStat('total')"><div class="ki">📋</div><div class="kl">Total Tasks</div><div class="kv" id="k-tot">—</div><div class="kh">All assigned</div></div>
+          <div class="kc kgr" onclick="drillStat('today')"><div class="ki">✅</div><div class="kl">Done Today</div><div class="kv" id="k-td">—</div><div class="kh">Completed today</div></div>
+          <div class="kc kor" onclick="drillStat('prog')"><div class="ki">⚡</div><div class="kl">In Progress</div><div class="kv" id="k-ip">—</div><div class="kh">Active work</div></div>
+          <div class="kc krd" onclick="drillStat('over')"><div class="ki">🔴</div><div class="kl">Overdue</div><div class="kv" id="k-ov">—</div><div class="kh">Past due date</div></div>
+          <div class="kc kpu" onclick="drillStat('await')"><div class="ki">📌</div><div class="kl">Awaiting Accept</div><div class="kv" id="k-aw">—</div><div class="kh">Not accepted yet</div></div>
         </div>
         <div class="kg">
-          <div class="kc kte" onclick="kpiNav('month','completed')"><div class="ki">🏆</div><div class="kl">Done This Month</div><div class="kv" id="k-mo">—</div><div class="kh">Click to filter</div></div>
-          <div class="kc kgo" onclick="kpiNav('year','completed')"><div class="ki">🌟</div><div class="kl">Done This Year</div><div class="kv" id="k-yr">—</div><div class="kh">Click to filter</div></div>
-          <div class="kc kgr" onclick="nav('analytics')"><div class="ki">⏱</div><div class="kl">On-Time Rate</div><div class="kv" id="k-ot">—</div><div class="kh">See analytics</div></div>
-          <div class="kc kbl" onclick="nav('analytics')"><div class="ki">⏰</div><div class="kl">Avg TAT (hrs)</div><div class="kv" id="k-tat">—</div><div class="kh">See analytics</div></div>
-          <div class="kc kor" onclick="kpiNav('all','in progress')"><div class="ki">⏳</div><div class="kl">In Progress</div><div class="kv" id="k-pg2">—</div><div class="kh">Click to filter</div></div>
+          <div class="kc kte" onclick="drillStat('month')"><div class="ki">🏆</div><div class="kl">Done This Month</div><div class="kv" id="k-mo">—</div><div class="kh">Monthly total</div></div>
+          <div class="kc kgo" onclick="drillStat('year')"><div class="ki">🌟</div><div class="kl">Done This Year</div><div class="kv" id="k-yr">—</div><div class="kh">Annual total</div></div>
+          <div class="kc kgr"><div class="ki">⏱</div><div class="kl">On-Time Rate</div><div class="kv" id="k-ot">—</div><div class="kh">Delivery accuracy</div></div>
+          <div class="kc kbl"><div class="ki">⏰</div><div class="kl">Avg TAT (hrs)</div><div class="kv" id="k-tat">—</div><div class="kh">Turnaround time</div></div>
+          <div class="kc kor"><div class="ki">⏳</div><div class="kl">In Progress</div><div class="kv" id="k-pg2">—</div><div class="kh">Accepted &amp; working</div></div>
         </div>
         <div class="eg">
           <div class="ec day"><div class="ec-lbl">🏅 Employee of the Day</div><div class="ec-ico">🏆</div><div id="eo-d" class="ec-nil">—</div><div id="eo-dp" class="ec-pts"></div></div>
@@ -534,11 +534,11 @@ textarea.fc{resize:vertical;min-height:68px}
               <div class="fg" style="margin:0"><label class="fl2">Status</label><select id="sub-stat" class="fc"><option value="Completed">✅ Completed</option><option value="In Progress">⚡ Still In Progress</option></select></div>
             </div>
             <div class="fg" style="margin-bottom:10px">
-              <label class="fl2" style="color:var(--blue)">🔗 Drive Links — Submit Your Work</label>
+              <label class="fl2" style="color:var(--blue)">🔗 Drive Links — Submit Your Work <span style="font-weight:400;color:var(--muted)">(ek ya multiple links add karo)</span></label>
               <div id="sub-drive-links-wrap">
                 <div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">
                   <input type="url" id="sub-drive-link" class="fc" placeholder="https://drive.google.com/... (primary link)" style="border-color:var(--blue);color:var(--blue);font-weight:600;flex:1"/>
-                  <button class="btn bo bxs" onclick="addExtraDriveLink()" title="Add another link" style="padding:8px 12px;white-space:nowrap">+ Add Link</button>
+                  <button class="btn bo bsm" onclick="addExtraDriveLink()" style="white-space:nowrap;padding:8px 12px">+ Add Link</button>
                 </div>
                 <div id="sub-extra-drive-links"></div>
               </div>
@@ -714,20 +714,9 @@ textarea.fc{resize:vertical;min-height:68px}
               <div id="url-st" style="font-size:12px;color:var(--muted);margin-top:6px"></div>
             </div>
           </div>
-          <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap">
-            <button class="btn bp bsm" onclick="saveURL()">🔐 Save URL</button>
+          <div style="display:flex;gap:8px;margin-top:4px">
+            <button class="btn bp bsm" onclick="saveURL()">💾 Save URL</button>
             <button class="btn bo bsm" onclick="testConn()">🔍 Test Connection</button>
-            <button class="btn bd bsm" onclick="clearSheetURL()">🗑 Delete URL</button>
-          </div>
-        </div>
-        <div class="sc" id="pin-mgmt-sc">
-          <div class="sc-t">🔐 Security PIN (2FA)</div>
-          <div class="srow"><div><div class="sr-l">Sheet URL is PIN-protected</div><div class="sr-d">PIN: 8840 (default). Only admins can change or view the current PIN. All users need PIN to save/delete Sheet URL.</div></div></div>
-          <div id="pin-admin-wrap" style="display:none;margin-top:8px">
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button class="btn bp bsm" onclick="adminChangePIN()">🔄 Change PIN</button>
-              <button class="btn bo bsm" onclick="adminViewPIN()">👁 View Current PIN</button>
-            </div>
           </div>
         </div>
         
@@ -806,10 +795,14 @@ textarea.fc{resize:vertical;min-height:68px}
       </div>
       <div class="fr" style="margin-top:10px">
         <div class="fg" style="margin:0"><label class="fl2">Total Units / Count *</label><input type="number" id="add-units" class="fc" min="1" step="1" value="1" placeholder="e.g. 17"></div>
-        <div class="fg" style="margin:0"><label class="fl2">References *</label><textarea id="add-ref" class="fc" rows="2" placeholder="Drive links, reference reels, inspirations, source file links..."></textarea></div>
+        <div class="fg" style="margin:0"><label class="fl2">References <span style="font-weight:400;color:var(--muted)">(optional)</span></label><textarea id="add-ref" class="fc" rows="2" placeholder="Reference reels, inspirations, source file links..."></textarea></div>
       </div>
-      <div class="fg" style="margin-top:10px"><label class="fl2">Ad Script / Ad Copy *</label><textarea id="add-copy" class="fc" rows="3" placeholder="Paste script / ad copy / instructions here..."></textarea></div>
-      <div class="fg" style="margin-top:10px"><label class="fl2">Notes (optional)</label><textarea id="add-note" class="fc" rows="2" placeholder="Additional notes..."></textarea></div>
+      <div class="fg" style="margin-top:10px">
+        <label class="fl2">🔗 Drive Link <span style="font-weight:400;color:var(--muted)">(optional — source files, brief, assets)</span></label>
+        <input type="url" id="add-drive-link" class="fc" placeholder="https://drive.google.com/..." style="color:var(--blue)">
+      </div>
+      <div class="fg" style="margin-top:10px"><label class="fl2">Ad Script / Ad Copy <span style="font-weight:400;color:var(--muted)">(optional)</span></label><textarea id="add-copy" class="fc" rows="3" placeholder="Paste script / ad copy / instructions here..."></textarea></div>
+      <div class="fg" style="margin-top:10px"><label class="fl2">Notes <span style="font-weight:400;color:var(--muted)">(optional)</span></label><textarea id="add-note" class="fc" rows="2" placeholder="Additional notes..."></textarea></div>
     </div>
     <div class="mof"><button class="btn bo" onclick="CM('m-add')">Cancel</button><button class="btn bp" onclick="saveTask()">💾 Save Task</button></div>
   </div>
@@ -994,28 +987,17 @@ let SURL=localStorage.getItem('ugv4_url')||localStorage.getItem('upgro_url')||''
 
 // ── UTILS ─────────────────────────────────────────────────────
 const ini=n=>(n||'?').trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2);
-// ✅ FIX: email-primary disambiguation — no more Harsh/Adarsh mixing
 function normalizeQuickName(name,email=''){
   let n=String(name||'').replace(/\s+/g,' ').trim();
   const em=String(email||'').trim().toLowerCase();
   if(!n && em) n=uname(em)||'';
   const low=n.toLowerCase();
-  // ── Email-based disambiguation FIRST (most reliable) ──
-  if(em==='adarsh.web@upgromedia.com')       return 'Adarsh Srivastava (Web)';
-  if(em==='adarsh.mis@upgromedia.com')       return 'Adarsh Singh (MIS)';
-  if(em==='harsh.graphic@upgromedia.com')    return 'Harsh Kumar';
-  if(em==='harsh.editor@upgromedia.com')     return 'Harsh Verma';
-  if(em==='vishal.editor@upgromedia.com')    return 'Vishal Srivastava';
-  if(em==='aditya.mis@upgromedia.com')       return 'Aditya (MIS)';
-  if(em==='aditya.googleads@upgromedia.com') return 'Aditya Sharma';
-  // ── Name-based fallbacks ──
-  if(low.includes('adarsh srivastava'))  return 'Adarsh Srivastava (Web)';
-  if(low.includes('adarsh singh'))       return 'Adarsh Singh (MIS)';
-  if(em.includes('adarsh'))             return 'Adarsh Singh (MIS)';
-  if(low.includes('harsh kumar'))       return 'Harsh Kumar';
-  if(low.includes('harsh verma'))       return 'Harsh Verma';
+  if(em.includes('adarsh')||low==='adarsh'||low.includes('adarsh singh')) return 'Adarsh Singh (MIS)';
+  if(low.includes('adarsh srivastava')) return 'Adarsh Srivastava (Web)';
   if(low==='ritu' || low.startsWith('ritu ')) return 'Ritu';
+  if(low==='harsh' || low.startsWith('harsh ')) return 'Harsh';
   if(low==='vikas' || low.startsWith('vikas ')) return 'Vikas';
+  if(low==='vishal' || low.startsWith('vishal ')) return 'Vishal';
   if(low==='chandrakala' || low.startsWith('chandrakala ')) return 'Chandrakala';
   if(low==='abhishek' || low.startsWith('abhishek ')) return 'Abhishek';
   if(low==='ankit' || low.startsWith('ankit ')) return 'Ankit';
@@ -1025,18 +1007,14 @@ function normalizeQuickName(name,email=''){
   if(low==='surya' || low.startsWith('surya ')) return 'Surya';
   if(low==='subhi' || low.startsWith('shubhi ') || low==='shubhi') return 'Shubhi';
   if(low==='arpit' || low.startsWith('arpit ')) return 'Arpit';
+  if(low==='aditya' || low.startsWith('aditya ')) return 'Aditya';
   if(low==='dharmendra' || low.startsWith('dharmendra ')) return 'Dharmendra';
-  if(low==='vishal' || low.startsWith('vishal ')) return n.replace(/\b\w/g,c=>c.toUpperCase());
   return n ? n.replace(/\b\w/g,c=>c.toUpperCase()) : '';
 }
-// ✅ FIX: email-prefix as unique key — no collisions
 function quickNameKey(name,email=''){
-  const em=String(email||'').trim().toLowerCase();
-  // Email prefix is unique and reliable
-  if(em && em.indexOf('@')>0) return em.split('@')[0].replace(/[^a-z0-9]/g,'-');
   const n=normalizeQuickName(name,email).toLowerCase();
-  if(n.includes('adarsh singh'))       return 'adarsh-mis';
-  if(n.includes('adarsh srivastava'))  return 'adarsh-web';
+  if(n.includes('adarsh singh')) return 'adarsh-singh-mis';
+  if(n.includes('adarsh srivastava')) return 'adarsh-srivastava-web';
   return n.replace(/\([^)]*\)/g,'').replace(/[^a-z0-9]/g,'');
 }
 
@@ -1397,18 +1375,6 @@ function openTaskDrillView(kind,label){
   else if(kind==='task-name'){ setRange('all'); if(q)q.value=label||''; }
   if(canAssign()) nav('alltasks'); else nav('mytasks');
 }
-// ✅ NEW: KPI tile navigation with date range + status filter
-function kpiNav(range, statusVal){
-  const status=$('at-sf');
-  const q=$('at-q');
-  if(q)q.value='';
-  activeEmpF=null;
-  document.querySelectorAll('.efp').forEach(p=>p.classList.remove('act'));
-  const allP=document.querySelector('.efp'); if(allP)allP.classList.add('act');
-  if(status)status.value=statusVal||'';
-  setRange(range);
-  if(canAssign()) nav('alltasks'); else nav('mytasks');
-}
 
 
 function parseTaskTimestamp(t){
@@ -1468,38 +1434,16 @@ function isOD(t){
 const pd=s=>flexDate(s);
 const fd=s=>{const d=pd(s);if(!d)return s||'—';const day=String(d.getDate()).padStart(2,'0');const mon=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];const yr=d.getFullYear();return `${day} ${mon} ${yr}`;};
 const dl=s=>{const d=pd(s);if(!d)return null;const n=new Date();n.setHours(0,0,0,0);return Math.round((d-n)/86400000);};
-function uname(email){
-  if(!email)return 'Unknown';
-  const em=String(email).trim().toLowerCase();
-  const u=USERS[em];if(u)return u.name;
-  const r=empReg.find(e=>String(e.email||'').trim().toLowerCase()===em);if(r)return r.name;
-  // Fallback: format email prefix as name
-  return em.split('@')[0].replace(/[._-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
-}
-function udesig(email){
-  if(!email)return 'Team';
-  const em=String(email).trim().toLowerCase();
-  const u=USERS[em];if(u)return u.desig||u.role;
-  const r=empReg.find(e=>String(e.email||'').trim().toLowerCase()===em);if(r)return r.desig||r.role;
-  return 'Team';
-}
+function uname(email){if(!email)return 'Unknown';const u=USERS[email.toLowerCase()];if(u)return u.name;const r=empReg.find(e=>e.email.toLowerCase()===email.toLowerCase());if(r)return r.name;return email.split('@')[0].replace(/[._-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());}
+function udesig(email){if(!email)return 'Team';const u=USERS[email.toLowerCase()];if(u)return u.desig||u.role;const r=empReg.find(e=>e.email.toLowerCase()===email.toLowerCase());if(r)return r.desig||r.role;return 'Team';}
 
 function titleCaseWords(v){return String(v||'').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase());}
 function normalizeDisplayName(name,email='',desig=''){
-  const em=String(email||'').trim().toLowerCase();
-  const nm=normName(name||uname(em)||'');
-  // ✅ Email-based lookup first (most reliable, case-insensitive)
-  if(em==='adarsh.web@upgromedia.com'||em.startsWith('adarsh.web')) return 'Adarsh Srivastava (Web)';
-  if(em==='adarsh.mis@upgromedia.com'||em.startsWith('adarsh.mis')) return 'Adarsh Singh (MIS)';
-  if(em==='harsh.graphic@upgromedia.com') return 'Harsh Kumar';
-  if(em==='harsh.editor@upgromedia.com')  return 'Harsh Verma';
-  if(em==='aditya.mis@upgromedia.com')    return 'Aditya (MIS)';
-  // Name-based fallbacks
-  if(nm==='adarsh srivastava') return 'Adarsh Srivastava (Web)';
-  if(nm==='adarsh singh')      return 'Adarsh Singh (MIS)';
-  // Look up in empReg by email for full name
-  if(em){const r=empReg.find(e=>String(e.email||'').toLowerCase()===em);if(r&&r.name)return titleCaseWords(r.name);}
-  return titleCaseWords(name||uname(em)||'Unknown');
+  const nm=normName(name||uname(email)||'');
+  const d=String(desig||udesig(email)||'').trim();
+  if(normEmail(email)==='adarsh.web@upgromedia.com'||(nm==='adarsh srivastava'&&/web/i.test(d)))return 'Adarsh Srivastava (Web)';
+  if(normEmail(email)==='adarsh.mis@upgromedia.com'||(nm==='adarsh singh'&&/mis/i.test(d)))return 'Adarsh Singh (MIS)';
+  return titleCaseWords(name||uname(email)||'Unknown');
 }
 function displayAssignedBy(v){
   const nm=normName(v);
@@ -2080,13 +2024,26 @@ function initApp(){
   refillEmpDropdown();
   const ad=$('add-ad');if(ad)ad.value=TODAY;
   const ui=$('url-in');if(ui&&SURL)ui.value=SURL;
-  // Show admin PIN section
-  const pinWrap=$('pin-admin-wrap');if(pinWrap)pinWrap.style.display=isAdmin()?'block':'none';
 
   renderDSAddBtn();
   updateClock();setInterval(updateClock,1000);
   loadData();
   setInterval(()=>{if(cu)pollNotifications();},60000);
+
+  // ✅ FIX 6: Auto-logout after 3 hours of inactivity
+  const IDLE_TIMEOUT_MS = 3 * 60 * 60 * 1000; // 3 hours
+  let _lastActivity = Date.now();
+  const _resetIdle = ()=>{ _lastActivity = Date.now(); };
+  ['mousemove','keydown','click','scroll','touchstart'].forEach(ev=>{
+    document.addEventListener(ev, _resetIdle, {passive:true});
+  });
+  setInterval(()=>{
+    if(!cu) return;
+    if(Date.now() - _lastActivity > IDLE_TIMEOUT_MS){
+      toast('⏱ Session expired — logging out due to inactivity');
+      setTimeout(()=>logout(), 1500);
+    }
+  }, 60000); // check every minute
   
   window.removeEventListener('storage',handleRoleStorageSync);
   window.addEventListener('storage',(ev)=>{ if(!ev || !ev.key || [ROLE_STORE_KEY,EMP_SYNC_KEY,SESSION_STORE_KEY].includes(ev.key)) handleRoleStorageSync(); });
@@ -2190,27 +2147,31 @@ function populateTaskFilterOptions(){
   }
 }
 function refillEmpDropdown(){
+  // ✅ FIX: Always ensure empReg is populated before building dropdown
+  initEmpReg(true);
   const sel = $('add-emp');
   if(!sel) return;
 
   sel.innerHTML = '<option value="">— Select Employee —</option>';
-  const all = [...empReg];
 
   let list = [];
   if(isAdmin()){
-    list = all;
+    list = [...empReg];
   } else if(isManager()){
-    // Managers can assign to team + other managers, but not admins
-    list = all.filter(e => !e.isAdmin);
+    list = empReg.filter(e => !e.isAdmin);
   } else {
     list = [];
   }
 
+  // ✅ FIX: Sort by name so list is readable, not blank
+  list = list.filter(e => e.name && e.email).sort((a,b)=>a.name.localeCompare(b.name));
+
   list.forEach(e => {
     const o = document.createElement('option');
     o.value = e.email;
-    const roleTag = e.isAdmin ? '[Admin] ' : e.isManager ? '[Manager] ' : '';
-    o.textContent = roleTag + e.name + ' (' + e.desig + ')';
+    const roleTag = e.isAdmin ? '👑 ' : e.isManager ? '🔀 ' : '';
+    const displayName = normalizeDisplayName(e.name, e.email, e.desig) || e.name || e.email;
+    o.textContent = roleTag + displayName + ' — ' + (e.desig || e.role || 'Team');
     sel.appendChild(o);
   });
 }
@@ -2434,41 +2395,39 @@ function renderCounters(tasks, containerId){
 // ════════════════════════════════════════════════════════════════
 function applyEmpF(tasks){
   if(isAdmin()){
-    if(activeEmpF) return tasks.filter(t=>{
-      const em=String(t.email||t.assignedToEmail||t.empEmail||'').toLowerCase();
-      const empKey=em.indexOf('@')>0 ? em.split('@')[0].replace(/[^a-z0-9]/g,'-') : '';
-      return empKey===activeEmpF || quickNameKey(t.assignedTo||t.name||uname(t.email),t.email)===activeEmpF;
-    });
+    if(activeEmpF){
+      return tasks.filter(t=>{
+        const em=String(t.email||t.assignedToEmail||t.empEmail||'').toLowerCase();
+        const empKey=em.indexOf('@')>0 ? em.split('@')[0].replace(/[^a-z0-9]/g,'-') : '';
+        return empKey===activeEmpF || quickNameKey(t.assignedTo||t.empName||uname(t.email),t.email)===activeEmpF;
+      });
+    }
     return tasks;
   }
   if(isManager()){
-    const mine=tasks.filter(t=>taskBelongsToCurrentUser(t));
-    const assigned=tasks.filter(t=>t.by===cu.name);
-    const map=new Map();
-    mine.concat(assigned).forEach(t=>map.set(t.id||JSON.stringify(t),t));
-    const merged=Array.from(map.values());
-    if(activeEmpF) return merged.filter(t=>{
-      const em=String(t.email||t.assignedToEmail||t.empEmail||'').toLowerCase();
-      const empKey=em.indexOf('@')>0 ? em.split('@')[0].replace(/[^a-z0-9]/g,'-') : '';
-      return empKey===activeEmpF || quickNameKey(t.assignedTo||t.name||uname(t.email),t.email)===activeEmpF;
-    });
-    return merged;
+    // ✅ FIX: Manager sees tasks they assigned + tasks assigned to them
+    const merged=tasks.filter(t=>t.by===cu.name || taskBelongsToCurrentUser(t));
+    const uniq=new Map();merged.forEach(t=>uniq.set(t.id||JSON.stringify(t),t));
+    const final=Array.from(uniq.values());
+    if(activeEmpF){
+      return final.filter(t=>{
+        const em=String(t.email||t.assignedToEmail||t.empEmail||'').toLowerCase();
+        const empKey=em.indexOf('@')>0 ? em.split('@')[0].replace(/[^a-z0-9]/g,'-') : '';
+        return empKey===activeEmpF || quickNameKey(t.assignedTo||t.empName||uname(t.email),t.email)===activeEmpF;
+      });
+    }
+    return final;
   }
+  // Regular user: only their own tasks
   return tasks.filter(t=>taskBelongsToCurrentUser(t));
 }
 function applyDateF(tasks){
   const now=new Date();now.setHours(0,0,0,0);
   const endToday=new Date(now);endToday.setHours(23,59,59,999);
-  const todayISO=new Date().toISOString().split('T')[0]; // "2026-04-24"
   if(dateRange==='all')return sortTasksNewestFirst(tasks);
   if(dateRange==='today')return sortTasksNewestFirst(tasks.filter(t=>{
-    // Match by adate string or timestamp today
-    const adateStr=String(t.adate||'').slice(0,10);
-    if(adateStr===todayISO) return true;
-    const ts=parseTaskTimestamp(t);
-    if(ts){const tsISO=new Date(ts.getTime()-ts.getTimezoneOffset()*60000).toISOString().slice(0,10);if(tsISO===todayISO)return true;}
-    const d=taskDateValue(t);
-    return d&&d>=now&&d<=endToday;
+    const d=taskDateValue(t); if(!d) return false;
+    return d>=now&&d<=endToday;
   }));
   if(dateRange==='week'){const w=new Date(now);w.setDate(now.getDate()-6);return sortTasksNewestFirst(tasks.filter(t=>{const d=taskDateValue(t);return d&&d>=w&&d<=endToday;}));}
   if(dateRange==='month'){const m=new Date(now.getFullYear(),now.getMonth(),1);return sortTasksNewestFirst(tasks.filter(t=>{const d=taskDateValue(t);return d&&d>=m&&d<=endToday;}));}
@@ -2501,12 +2460,10 @@ function buildEmpPills(tasks){
   if(!canAssign())return;
   const map={};
   tasks.forEach(t=>{
-    const em=String(t.email||t.assignedToEmail||t.empEmail||'').toLowerCase();
-    const key=em.indexOf('@')>0 ? em.split('@')[0].replace(/[^a-z0-9]/g,'-') : quickNameKey(t.assignedTo||t.name||uname(t.email),t.email);
-    if(!key) return;
-    const label=normalizeDisplayName(t.empName||t.assignedTo||uname(t.email),t.email,t.desig)||normalizeQuickName(t.empName||uname(t.email),t.email);
-    if(!label) return;
-    if(!map[key]) map[key]={key,label,cnt:0,email:em||''};
+    const label=normalizeQuickName(t.assignedTo||t.name||uname(t.email),t.email);
+    const key=quickNameKey(label,t.email);
+    if(!label || !key) return;
+    if(!map[key]) map[key]={key,label,cnt:0,email:t.email||''};
     map[key].cnt++;
   });
   const sorted=Object.values(map).sort((a,b)=>a.label.localeCompare(b.label));
@@ -2530,22 +2487,6 @@ function buildEmpPills(tasks){
 // ════════════════════════════════════════════════════════════════
 //  STATS
 // ════════════════════════════════════════════════════════════════
-// ✅ FIX: Parse completedAt correctly — handles "24/04/2026, 12:06:11" format
-function parseCompletedDate(v){
-  if(!v) return null;
-  const s=String(v).replace(',','').trim();
-  // Try "DD/MM/YYYY HH:MM:SS" format (Indian locale)
-  const m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if(m) return new Date(Number(m[3]),Number(m[2])-1,Number(m[1]));
-  // Try ISO or other formats
-  const d=new Date(s);
-  if(!isNaN(d)) return d;
-  return null;
-}
-function completedDateISO(v){
-  const d=parseCompletedDate(v); if(!d) return '';
-  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-}
 function renderStats(tasks){
   const now=new Date();now.setHours(0,0,0,0);
   const m=new Date(now.getFullYear(),now.getMonth(),1);
@@ -2553,7 +2494,8 @@ function renderStats(tasks){
   const comp=tasks.filter(t=>t.status==='completed');
   const compToday=tasks.filter(t=>{
     if(t.status!=='completed'||!t.completedAt)return false;
-    return completedDateISO(t.completedAt)===TODAY;
+    const p=t.completedAt.split(' ')[0].split('/');
+    return p.length===3&&`${p[2]}-${p[1]}-${p[0]}`===TODAY;
   });
   const sv=(id,v)=>{const el=$(id);if(el)el.textContent=v;};
   sv('k-tot',tasks.length);sv('k-td',compToday.length);
@@ -2565,10 +2507,10 @@ function renderStats(tasks){
   sv('k-pg2',tasks.filter(t=>t.status==='in progress').length);
   const cwd=comp.filter(t=>t.ddate&&t.completedAt);
   let ot=0;
-  cwd.forEach(t=>{const due=pd(t.ddate);const cd=parseCompletedDate(t.completedAt);if(due&&cd&&cd<=due)ot++;});
+  cwd.forEach(t=>{const due=pd(t.ddate);const p=t.completedAt.split(' ')[0].split('/');const cd=p.length===3?new Date(`${p[2]}-${p[1]}-${p[0]}`):null;if(due&&cd&&cd<=due)ot++;});
   sv('k-ot',(cwd.length?Math.round(ot/cwd.length*100):0)+'%');
   let hrs=0,tc=0;
-  comp.forEach(t=>{const a=pd(t.adate);const c=parseCompletedDate(t.completedAt);if(a&&c&&c>=a){hrs+=(c-a)/3600000;tc++;}});
+  comp.forEach(t=>{const a=pd(t.adate);const p=t.completedAt?t.completedAt.split(' ')[0].split('/'):[];const c=p.length===3?new Date(`${p[2]}-${p[1]}-${p[0]}`):null;if(a&&c&&c>=a){hrs+=(c-a)/3600000;tc++;}});
   sv('k-tat',tc?Math.round(hrs/tc):'—');
 }
 
@@ -2577,7 +2519,7 @@ function renderEOTY(tasks){
   const m=new Date(now.getFullYear(),now.getMonth(),1);
   const y=new Date(now.getFullYear(),0,1);
   function top(arr){const sc={},nm={};arr.filter(t=>t.status==='completed').forEach(t=>{if(!t.email)return;sc[t.email]=(sc[t.email]||0)+1;nm[t.email]=uname(t.email);});const e=Object.entries(sc).sort((a,b)=>b[1]-a[1])[0];return e?{name:nm[e[0]],pts:e[1]}:null;}
-  const todayT=tasks.filter(t=>{if(t.status!=='completed'||!t.completedAt)return false;return completedDateISO(t.completedAt)===TODAY;});
+  const todayT=tasks.filter(t=>{if(t.status!=='completed'||!t.completedAt)return false;const p=t.completedAt.split(' ')[0].split('/');return p.length===3&&`${p[2]}-${p[1]}-${p[0]}`===TODAY;});
   function setE(nid,pid,d){const ne=$(nid),pe=$(pid);if(!ne)return;if(d){ne.textContent=d.name;ne.className='ec-name';if(pe)pe.textContent=d.pts+' tasks completed';}else{ne.textContent='—';ne.className='ec-nil';if(pe)pe.textContent='';}}
   setE('eo-d','eo-dp',top(todayT));
   setE('eo-m','eo-mp',top(tasks.filter(t=>pd(t.adate)>=m)));
@@ -2722,7 +2664,7 @@ function renderAllTasks(){
       <td style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--blue)">${taskUiId(t)}</td>
       <td style="max-width:260px;white-space:normal;font-weight:600"><div title="${escapeHtml(getTaskDisplayName(t))}">${escapeHtml(getTaskDisplayName(t).slice(0,100))}${getTaskDisplayName(t).length>100?'...':''}</div>${t.driveLink?`<div style="font-size:10px;margin-top:3px"><a href="${t.driveLink}" target="_blank" rel="noopener noreferrer">Drive ↗</a></div>`:''}</td>
       <td style="text-align:center"><div style="font-weight:700;color:var(--blue);font-size:12px">${t.pendingUnits} Pending / ${t.doneUnits} Submit</div><div style="font-size:10px;color:var(--muted)">Work Count ${Number(t.totalUnits||1)}</div></td>
-      <td><div style="font-weight:600">${t.assignedToLabel||normalizeDisplayName(t.empName||uname(t.email),t.email,t.desig)}</div><div style="font-size:10px;color:var(--muted)">${escapeHtml(t.email||'')} • ${t.desig||udesig(t.email)}</div></td>
+      <td><div style="font-weight:600">${t.assignedToLabel||normalizeDisplayName(t.empName,t.email,t.desig)}</div><div style="font-size:10px;color:var(--muted)">${escapeHtml(getTaskMailLabel(t))} • ${t.desig||udesig(t.email)}</div></td>
       <td style="color:var(--muted)">${t.assignedByLabel||displayAssignedBy(t.by||'—')}</td>
       <td>${fd(t.adate)}</td>
       <td>${fd(t.ddate)}<div style="font-size:10px;color:${d!==null&&d<0?'var(--red)':'var(--muted)'}">${d===null?'':d<0?Math.abs(d)+'d late':d===0?'Today':'in '+d+'d'}</div></td>
@@ -2825,7 +2767,7 @@ async function delTask(id){
 function openAddTask(){
   editTaskId=null;
   const t=$('m-add-t');if(t)t.textContent='📋 Assign New Task';
-  ['add-task','add-dd','add-note','add-ref','add-copy'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  ['add-task','add-dd','add-note','add-ref','add-copy','add-drive-link'].forEach(id=>{const el=$(id);if(el)el.value='';});
   const units=$('add-units');if(units)units.value='1';
   const empSel=$('add-emp');if(empSel)empSel.value='';
   const pri=$('add-pri');if(pri)pri.value='Medium';
@@ -2836,7 +2778,7 @@ function openEditTask(id){
   const t=allTasks.find(x=>x.id===id);if(!t)return;
   editTaskId=id;
   const ti=$('m-add-t');if(ti)ti.textContent='✏ Edit Task';
-  const fields={['add-task']:getTaskDisplayName(t),['add-emp']:t.email,['add-ad']:t.adate,['add-dd']:t.ddate,['add-note']:t.notes||'',['add-ref']:t.references||'',['add-copy']:t.adCopy||''};
+  const fields={['add-task']:getTaskDisplayName(t),['add-emp']:t.email,['add-ad']:t.adate,['add-dd']:t.ddate,['add-note']:t.notes||'',['add-ref']:t.references||'',['add-copy']:t.adCopy||'',['add-drive-link']:t.driveLink||''};
   Object.entries(fields).forEach(([k,v])=>{const el=$(k);if(el)el.value=v;});
   const pri=$('add-pri');if(pri)pri.value=t.priority.charAt(0).toUpperCase()+t.priority.slice(1);
   const units=$('add-units');if(units)units.value=String(Number(t.totalUnits||1)||1);
@@ -2852,11 +2794,10 @@ async function saveTask(){
   const note=($('add-note')||{value:''}).value.trim();
   const references=($('add-ref')||{value:''}).value.trim();
   const adCopy=($('add-copy')||{value:''}).value.trim();
+  const driveLink=($('add-drive-link')||{value:''}).value.trim();
   const totalUnits=Math.max(1,parseInt((($('add-units')||{value:'1'}).value||'1'),10)||1);
   if(!task){toast('⚠ Work name / task name required');return;}
   if(!email){toast('⚠ Please select an employee');return;}
-  if(!references){toast('⚠ References required');return;}
-  if(!adCopy){toast('⚠ Ad Script / Ad Copy required');return;}
   if(!SURL){toast('⚠ Connect Google Sheet in Settings');return;}
   try{
     const existingDuplicate=allTasks.find(x=>!editTaskId && taskFingerprint(getTaskDisplayName(x),x.email)===taskFingerprint(getTaskDisplayName({task}),email) && normStatus(x.status)!=='completed');
@@ -2890,8 +2831,8 @@ async function saveTask(){
       toast('✅ Task updated!'); setTimeout(()=>{try{loadData()}catch(e){}},700);
     } else {
       const taskCode=generateTaskId();
-      const newTask=ensureTaskMeta({id:taskCode,taskCode,taskId:taskCode,task, email,assignedToEmail:email,empEmail:email,empName:uname(email),assignedTo:uname(email),by:cu.name,assignedBy:cu.name,adate,ddate,priority:pri.toLowerCase(),status:'assigned',ts:new Date().toLocaleString('en-IN'),acceptedAt:'',completedAt:'',notes:note,references,adCopy,driveLink:'',totalUnits,doneUnits:0,pendingUnits:totalUnits,desig:udesig(email),changeCount:0,_source:'tasks'});
-      const payload={action:'addTask',taskId:taskCode,taskCode,TaskID:taskCode,task:exactWorkName,Task:exactWorkName,TaskName:exactWorkName,TaskTitle:exactWorkName,taskName:exactWorkName,workName:exactWorkName,WorkName:exactWorkName,['Work Name']:exactWorkName,['Task Name']:exactWorkName,['Work Title']:exactWorkName,['Task Title']:exactWorkName,email,AssignedTo_Email:email,assignedToEmail:email,empEmail:email,EmployeeEmail:email,'Assigned To Email':email,AssignedTo_Name:newTask.assignedToLabel,assignedTo:newTask.assignedToLabel,empName:newTask.assignedToLabel,EmployeeName:newTask.assignedToLabel,'Assigned To Name':newTask.assignedToLabel,by:cu.name,assignedBy:cu.name,AssignedBy:cu.name,AssignedBy_Name:newTask.assignedByLabel,'Assigned By Name':newTask.assignedByLabel,adate,AssignDate:adate,ddate,DueDate:ddate,priority:pri,Priority:pri,notes:note,Notes:note,Description:note,['Work Detail']:note,WorkDetail:note,references,References:references,adCopy,AdCopy:adCopy,AdScript:adCopy,['Ad Copy']:adCopy,totalUnits,Count:totalUnits,doneUnits:0,DoneQty:0,pendingUnits:totalUnits,PendingQty:totalUnits,changeCount:0,ChangeCount:0,driveLink:'',DriveLink:'',status:'Assigned',Status:'Assigned',Timestamp:new Date().toLocaleString('en-IN'),sendEmail:true,emailBody:`Task ID: ${taskCode}
+      const newTask=ensureTaskMeta({id:taskCode,taskCode,taskId:taskCode,task, email,assignedToEmail:email,empEmail:email,empName:uname(email),assignedTo:uname(email),by:cu.name,assignedBy:cu.name,adate,ddate,priority:pri.toLowerCase(),status:'assigned',ts:new Date().toLocaleString('en-IN'),acceptedAt:'',completedAt:'',notes:note,references,adCopy,driveLink:driveLink||'',totalUnits,doneUnits:0,pendingUnits:totalUnits,desig:udesig(email),changeCount:0,_source:'tasks'});
+      const payload={action:'addTask',taskId:taskCode,taskCode,TaskID:taskCode,task:exactWorkName,Task:exactWorkName,TaskName:exactWorkName,TaskTitle:exactWorkName,taskName:exactWorkName,workName:exactWorkName,WorkName:exactWorkName,['Work Name']:exactWorkName,['Task Name']:exactWorkName,['Work Title']:exactWorkName,['Task Title']:exactWorkName,email,AssignedTo_Email:email,assignedToEmail:email,empEmail:email,EmployeeEmail:email,'Assigned To Email':email,AssignedTo_Name:newTask.assignedToLabel,assignedTo:newTask.assignedToLabel,empName:newTask.assignedToLabel,EmployeeName:newTask.assignedToLabel,'Assigned To Name':newTask.assignedToLabel,by:cu.name,assignedBy:cu.name,AssignedBy:cu.name,AssignedBy_Name:newTask.assignedByLabel,'Assigned By Name':newTask.assignedByLabel,adate,AssignDate:adate,ddate,DueDate:ddate,priority:pri,Priority:pri,notes:note,Notes:note,Description:note,['Work Detail']:note,WorkDetail:note,references,References:references,adCopy,AdCopy:adCopy,AdScript:adCopy,['Ad Copy']:adCopy,totalUnits,Count:totalUnits,doneUnits:0,DoneQty:0,pendingUnits:totalUnits,PendingQty:totalUnits,changeCount:0,ChangeCount:0,driveLink:driveLink||'',DriveLink:driveLink||'',status:'Assigned',Status:'Assigned',Timestamp:new Date().toLocaleString('en-IN'),sendEmail:true,emailBody:`Task ID: ${taskCode}
 Task: ${getTaskDisplayName({task})}
 Assigned To: ${newTask.assignedToLabel}
 Assigned By: ${displayAssignedBy(cu.name)}
@@ -2915,28 +2856,26 @@ Status: Assigned`,emailHtml:buildTaskMailHtml('assign',{...newTask,assignedToLab
 }
 
 // ════════════════════════════════════════════════════════════════
-//  SUBMIT WORK — Multiple drive links + correct unit tracking
+//  SUBMIT WORK
 // ════════════════════════════════════════════════════════════════
 function addExtraDriveLink(){
   const cont=$('sub-extra-drive-links');if(!cont)return;
   const idx=cont.children.length+2;
   const div=document.createElement('div');
   div.style.cssText='display:flex;gap:6px;margin-bottom:6px;align-items:center';
-  div.innerHTML=`<input type="url" class="fc sub-extra-link" placeholder="https://drive.google.com/... (link ${idx})" style="flex:1;border-color:var(--blue)">
-    <button onclick="this.closest('div').remove()" style="background:none;border:none;color:var(--red);font-size:16px;cursor:pointer;padding:6px">✕</button>`;
+  div.innerHTML=`<input type="url" class="fc sub-extra-link" placeholder="https://drive.google.com/... (link ${idx})" style="flex:1;border-color:var(--blue);color:var(--blue)"><button onclick="this.closest('div').remove()" style="background:none;border:none;color:var(--red);font-size:16px;cursor:pointer;padding:4px 8px">✕</button>`;
   cont.appendChild(div);
 }
 function getAllDriveLinks(){
   const primary=($('sub-drive-link')||{value:''}).value.trim();
   const extras=[...document.querySelectorAll('.sub-extra-link')].map(el=>el.value.trim()).filter(Boolean);
-  const all=[primary,...extras].filter(Boolean);
-  return all.join(', ');
+  return [primary,...extras].filter(Boolean).join(', ');
 }
 async function submitWork(){
   const taskId=($('sub-task')||{value:''}).value;
   const status=($('sub-stat')||{value:'Completed'}).value;
   const notes=($('sub-notes')||{value:''}).value.trim();
-  const driveLink=getAllDriveLinks(); // ✅ Multiple drive links combined
+  const driveLink=getAllDriveLinks();
   let doneUnits=Math.max(1,parseInt((($('sub-done-units')||{value:'1'}).value||'1'),10)||1);
   if(!taskId){toast('⚠ Please select a task first');return;}
   if(!SURL){toast('⚠ Connect Google Sheet in Settings');return;}
@@ -2944,9 +2883,8 @@ async function submitWork(){
   const totalUnits=Math.max(1,Number(t?.totalUnits||1)||1);
   const currentDone=Math.max(0,Number(t?.doneUnits||0)||0);
   const currentPending=Math.max(0,Number(t?.pendingUnits||Math.max(0,totalUnits-currentDone))||0);
-  // ✅ Allow user to submit exact doneUnits (don't cap at pending)
-  doneUnits=Math.max(1,Math.min(doneUnits, totalUnits));
-  const updatedDone=Math.min(totalUnits, currentDone+doneUnits);
+  doneUnits=Math.min(Math.max(1,doneUnits),Math.max(1,currentPending||1));
+  const updatedDone=Math.min(totalUnits,currentDone+doneUnits);
   const updatedPending=Math.max(0,totalUnits-updatedDone);
   const now=new Date().toLocaleString('en-IN');
   const newStatus=(status==='Completed'||updatedPending===0)?'completed':'in progress';
@@ -2955,7 +2893,7 @@ async function submitWork(){
   buildUI();
   try{
     await fetch(SURL,{method:'POST',body:JSON.stringify({action:'submitWork',taskId,taskCode:t?taskUiId(t):taskId,email:cu.email,empName:cu.name,task:t?getTaskDisplayName(t):'',workName:t?getTaskDisplayName(t):'',status:newStatus==='completed'?'Completed':'In Progress',notes,driveLink,doneUnits,updatedDoneUnits:updatedDone,pendingUnits:updatedPending,totalUnits,id:taskId,adate:t?t.adate:'',ddate:t?t.ddate:'',by:t?t.by:'',ts:t?t.ts:'',changeCount:t?Number(t.changeCount||0):0,countSummary:t?getTaskQtySummary(t):`${updatedPending} Pending / ${updatedDone} Submit`,emailHtml:buildTaskMailHtml('submission',{...(t||{}),taskCode:t?taskUiId(t):taskId,assignedToLabel:t?(t.assignedToLabel||normalizeDisplayName(t.empName,t.email,t.desig)):cu.name,assignedByLabel:t?(t.assignedByLabel||displayAssignedBy(t.by)):displayAssignedBy(''),status:newStatus==='completed'?'Completed':'In Progress',doneUnits:updatedDone,pendingUnits:updatedPending,totalUnits,notes,driveLink,countSummary:`${updatedPending} Pending / ${updatedDone} Submit`,changeLabel:t?getTaskChangeLabel(t):'0 Times Changed'}),deleteEmailOnComplete:false,keepEmail:true,preserveEmail:true})});
-    toast('✅ Work submitted! Done: '+updatedDone+'/'+totalUnits+', Pending: '+updatedPending);
+    toast('✅ Work submitted successfully!');
     const sn=$('sub-notes');if(sn)sn.value='';
     const sdl=$('sub-drive-link');if(sdl)sdl.value='';
     const extraWrap=$('sub-extra-drive-links');if(extraWrap)extraWrap.innerHTML='';
@@ -2975,7 +2913,7 @@ function drillStat(type){
   const fns={
     total:()=>true, over:t=>isOD(t),
     prog:t=>t.status==='in progress', await:t=>t.status==='assigned',
-    today:t=>{if(t.status!=='completed'||!t.completedAt)return false;return completedDateISO(t.completedAt)===TODAY;},
+    today:t=>{if(t.status!=='completed'||!t.completedAt)return false;const p=t.completedAt.split(' ')[0].split('/');return p.length===3&&`${p[2]}-${p[1]}-${p[0]}`===TODAY;},
     month:t=>t.status==='completed'&&pd(t.adate)>=m,
     year:t=>t.status==='completed'&&pd(t.adate)>=y
   };
@@ -3014,72 +2952,90 @@ function exportCSV(){
 //  CHARTS
 // ════════════════════════════════════════════════════════════════
 function getAnalyticsTasks(){
-  // Filter by date range selector
   let tasks=[...allTasks];
   const r=($('an-range')||{value:'all'}).value;
   const now=new Date();now.setHours(0,0,0,0);
   if(r==='week'){const w=new Date(now);w.setDate(now.getDate()-7);tasks=tasks.filter(t=>pd(t.adate)>=w);}
   else if(r==='month'){const m=new Date(now.getFullYear(),now.getMonth(),1);tasks=tasks.filter(t=>pd(t.adate)>=m);}
   else if(r==='year'){const y=new Date(now.getFullYear(),0,1);tasks=tasks.filter(t=>pd(t.adate)>=y);}
-  // For managers: only their team
-  if(isManager()){
-    const team=new Set(tasks.filter(t=>t.by===cu.name).map(t=>t.email));
-    tasks=tasks.filter(t=>team.has(t.email));
+  // ✅ FIX: Regular users see only their own tasks; managers see tasks they assigned or are assigned to them
+  if(!isAdmin()){
+    if(isManager()){
+      tasks=tasks.filter(t=>t.by===cu.name || taskBelongsToCurrentUser(t));
+    } else {
+      tasks=tasks.filter(t=>taskBelongsToCurrentUser(t));
+    }
   }
   return tasks;
 }
 
+let _chartRenderTimer=null;
 function reRenderCharts(){
-  const tasks=getAnalyticsTasks();
-  // Show manager banner
-  const banner=$('analytics-banner');
-  if(banner){
-    if(isManager()){
-      banner.innerHTML=`<div class="role-banner"><div class="role-banner-icon">🔀</div><div><strong>Manager view:</strong> You are seeing analytics only for employees you assigned tasks to.</div></div>`;
-    } else {
-      banner.innerHTML='';
+  // ✅ FIX: Throttle chart re-renders to avoid blinking (max once per 600ms)
+  if(_chartRenderTimer) clearTimeout(_chartRenderTimer);
+  _chartRenderTimer=setTimeout(()=>{
+    _chartRenderTimer=null;
+    const tasks=getAnalyticsTasks();
+    const banner=$('analytics-banner');
+    if(banner){
+      if(isManager()&&!isAdmin()){
+        banner.innerHTML=`<div class="role-banner"><div class="role-banner-icon">🔀</div><div><strong>Manager view:</strong> Analytics for your team's tasks.</div></div>`;
+      } else if(!isAdmin()&&!isManager()){
+        banner.innerHTML=`<div class="role-banner"><div class="role-banner-icon">👤</div><div><strong>My Analytics:</strong> Showing your personal task data.</div></div>`;
+      } else {
+        banner.innerHTML='';
+      }
     }
-  }
-  renderCharts(tasks);
+    renderCharts(tasks);
+  },400);
 }
 
 function buildEmpStats(tasks){
   const map={};
   tasks.forEach(t=>{
     if(!t.email)return;
-    if(!map[t.email])map[t.email]={email:t.email,name:normalizeDisplayName(uname(t.email),t.email,udesig(t.email)),short:normalizeDisplayName(uname(t.email),t.email,udesig(t.email)).split(' ')[0],desig:udesig(t.email),total:0,completed:0,overdue:0,inProgress:0,ontime:0,withDue:0};
+    if(!map[t.email])map[t.email]={email:t.email,name:uname(t.email),short:uname(t.email).split(' ')[0],desig:udesig(t.email),total:0,completed:0,overdue:0,inProgress:0,ontime:0,withDue:0};
     map[t.email].total++;
     if(t.status==='completed'){
       map[t.email].completed++;
-      if(t.ddate){
+      if(t.ddate&&t.completedAt){
         map[t.email].withDue++;
-        // ✅ Count as on-time if: completedAt <= dueDate OR no completedAt (assume done on time)
-        const due=pd(t.ddate);
-        const cd=t.completedAt?parseCompletedDate(t.completedAt):null;
-        if(due&&(!cd||cd<=due)) map[t.email].ontime++;
-        else if(!due) map[t.email].ontime++; // no due date = on time
-      } else {
-        map[t.email].ontime++; // completed without due date = on time
+        const due=pd(t.ddate);const p=t.completedAt.split(' ')[0].split('/');const cd=p.length===3?new Date(`${p[2]}-${p[1]}-${p[0]}`):null;
+        if(due&&cd&&cd<=due)map[t.email].ontime++;
       }
     }
     if(t.status==='in progress')map[t.email].inProgress++;
-    // ✅ Overdue = NOT completed AND past due date
-    if(t.status!=='completed' && isOD(t))map[t.email].overdue++;
+    if(isOD(t))map[t.email].overdue++;
   });
   return Object.values(map).filter(e=>e.total>0)
-    .map(e=>({...e,score:Math.max(0,e.completed*2-e.overdue+Math.round(e.completed/(e.total||1)*5)),ontimePct:e.withDue?Math.round(e.ontime/e.withDue*100):(e.completed>0?100:0)}))
+    .map(e=>({...e,score:Math.max(0,e.completed*2-e.overdue+Math.round(e.completed/(e.total||1)*5)),ontimePct:e.withDue?Math.round(e.ontime/e.withDue*100):0}))
     .sort((a,b)=>b.score-a.score);
 }
 
 function renderCharts(tasks){
-  Object.values(charts).forEach(c=>{try{c.destroy()}catch(e){}});charts={};
+  // ✅ FIX: destroy old charts cleanly, no animation flash
+  Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}});charts={};
   const es=buildEmpStats(tasks),nm=es.map(e=>e.short);
+  // ✅ FIX: No animation = no blinking
+  const ANIM={duration:0};
+  const OPT={responsive:true,maintainAspectRatio:false,animation:ANIM};
+  if(anKpi){
+    const tot=tasks.length,comp=tasks.filter(t=>t.status==='completed').length,ov=tasks.filter(t=>isOD(t)).length,ip=tasks.filter(t=>t.status==='in progress').length;
+    const cwd=tasks.filter(t=>t.status==='completed'&&t.ddate&&t.completedAt);let ot=0;
+    cwd.forEach(t=>{const due=pd(t.ddate);const p=t.completedAt.split(' ')[0].split('/');const cd=p.length===3?new Date(`${p[2]}-${p[1]}-${p[0]}`):null;if(due&&cd&&cd<=due)ot++;});
+    const otPct=cwd.length?Math.round(ot/cwd.length*100):0;
+    anKpi.innerHTML=[
+      ['📋','Total',tot,'#0B84FF'],['✅','Completed',comp,'#00B67A'],['⚡','In Progress',ip,'#F59E0B'],
+      ['🔴','Overdue',ov,'#E53935'],['⏱','On-Time %',otPct+'%','#7C3AED'],['👥','Employees',es.length,'#0E9F8E']
+    ].map(([ico,lbl,val,clr])=>`<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center;box-shadow:var(--sh0)"><div style="font-size:18px">${ico}</div><div style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:${clr};line-height:1.2">${val}</div><div style="font-size:10px;color:var(--muted);font-weight:600">${lbl}</div></div>`).join('');
+  }
+  const F={family:"'Inter',sans-serif"};
   if(!es.length){
     ['c-perf','c-score','c-work','c-week','c-stat','c-pri','c-24h','c-dept'].forEach(id=>{
       const cv=$(id);if(!cv)return;
       const ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);
       ctx.fillStyle='#94A3B8';ctx.font='13px Inter';ctx.textAlign='center';
-      ctx.fillText('No data — connect Google Sheet in Settings',cv.width/2,cv.height/2);
+      ctx.fillText('No data available',cv.width/2,cv.height/2);
     });
     const an=$('an-kpi');if(an)an.innerHTML='';
     const pb=$('pm-body');if(pb)pb.innerHTML='';
@@ -3088,19 +3044,6 @@ function renderCharts(tasks){
   }
   // KPI Ribbon
   const anKpi=$('an-kpi');
-  if(anKpi){
-    const tot=tasks.length,comp=tasks.filter(t=>t.status==='completed').length,ov=tasks.filter(t=>isOD(t)).length,ip=tasks.filter(t=>t.status==='in progress').length;
-    const cwd=tasks.filter(t=>t.status==='completed'&&t.ddate&&t.completedAt);let ot=0;
-    cwd.forEach(t=>{const due=pd(t.ddate);const cd=parseCompletedDate(t.completedAt);if(due&&cd&&cd<=due)ot++;});
-    const otPct=cwd.length?Math.round(ot/cwd.length*100):0;
-    anKpi.innerHTML=[
-      ['📋','Total',tot,'#0B84FF'],['✅','Completed',comp,'#00B67A'],['⚡','In Progress',ip,'#F59E0B'],
-      ['🔴','Overdue',ov,'#E53935'],['⏱','On-Time %',otPct+'%','#7C3AED'],['👥','Employees',es.length,'#0E9F8E']
-    ].map(([ico,lbl,val,clr])=>`<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:center;box-shadow:var(--sh0)"><div style="font-size:18px">${ico}</div><div style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:${clr};line-height:1.2">${val}</div><div style="font-size:10px;color:var(--muted);font-weight:600">${lbl}</div></div>`).join('');
-  }
-  const F={family:"'Inter',sans-serif"};
-  const A={duration:800,easing:'easeOutQuart'};
-  const OPT={responsive:true,maintainAspectRatio:false,animation:A};
   function grd(ctx,c1,c2){const g=ctx.createLinearGradient(0,0,0,280);g.addColorStop(0,c1);g.addColorStop(1,c2);return g;}
 
   // PERF
@@ -3123,7 +3066,7 @@ function renderCharts(tasks){
   const wk=$('c-week');if(wk){
     const days=[],dlabels=[];
     for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(d.toISOString().split('T')[0]);dlabels.push(d.toLocaleDateString('en-IN',{weekday:'short'}));}
-    const wkc=days.map(day=>tasks.filter(t=>{if(t.status!=='completed'||!t.completedAt)return false;return completedDateISO(t.completedAt)===day;}).length);
+    const wkc=days.map(day=>tasks.filter(t=>{if(t.status!=='completed'||!t.completedAt)return false;const p=t.completedAt.split(' ')[0].split('/');return p.length===3&&`${p[2]}-${p[1]}-${p[0]}`===day;}).length);
     const wkCtx=wk.getContext('2d');
     charts.week=new Chart(wkCtx,{type:'bar',data:{labels:dlabels,datasets:[{label:'Completed',data:wkc,backgroundColor:dlabels.map(()=>grd(wkCtx,'rgba(0,182,122,.8)','rgba(0,182,122,.2)')),borderRadius:8}]},options:{...OPT,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:F}},x:{grid:{display:false},ticks:{font:F}}}}});}
 
@@ -3177,7 +3120,7 @@ function switchPerf(mode,el){
       {label:'Overdue',data:es.map(e=>e.overdue),backgroundColor:nm.map(()=>grd('rgba(229,57,53,.85)','rgba(229,57,53,.2)')),borderRadius:6}
     ]
   };
-  charts.perf=new Chart(ctx,{type:'bar',data:{labels:nm,datasets:sets[mode]||sets.compare},options:{responsive:true,maintainAspectRatio:false,animation:{duration:700},plugins:{legend:{position:'top',labels:{font:F,boxWidth:12}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,.04)'},ticks:{font:F}},x:{grid:{display:false},ticks:{font:F}}}}});
+  charts.perf=new Chart(ctx,{type:'bar',data:{labels:nm,datasets:sets[mode]||sets.compare},options:{responsive:true,maintainAspectRatio:false,animation:{duration:0},plugins:{legend:{position:'top',labels:{font:F,boxWidth:12}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,.04)'},ticks:{font:F}},x:{grid:{display:false},ticks:{font:F}}}}});
   const lbl=$('perf-lbl');if(lbl)lbl.textContent={assigned:'Assigned',completed:'Completed',overdue:'Overdue',score:'Score',ontime:'On-Time %',compare:'Compare All'}[mode]||mode;
 }
 
@@ -3380,8 +3323,7 @@ async function addNewEmp(){
   const emailRx=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if(!name||!email||!pass){toast('⚠ Name, email and password required');return;}
   if(!emailRx.test(email)){toast('⚠ Please enter a valid email address');return;}
-  // ✅ Check both USERS and empReg to avoid false duplicate detection
-  if(empReg.find(e=>String(e.email||'').trim().toLowerCase()===email)){toast('⚠ Email already exists in registry');return;}
+  if(empReg.find(e=>String(e.email||'').trim().toLowerCase()===email)){toast('⚠ Email already exists');return;}
   const managerFlag=!!(isMgrCk || isForcedAssigner({email,name,desig,role:roleVal}));
   const newEmp={email,name,pass,role:roleVal,desig,isAdmin:!!isAdminCk,isManager:managerFlag,active:true,bg:CLRS[empReg.length%CLRS.length],joinDate:TODAY};
 
@@ -3395,21 +3337,18 @@ async function addNewEmp(){
     bg:newEmp.bg,
     joinDate:TODAY
   };
-  // ✅ Save FULL empReg as dyn (not just loadDynEmployees which may miss new entry)
-  const dynFull=empReg.map(e=>({email:e.email,name:e.name,pass:e.pass,role:e.role,desig:e.desig,isAdmin:!!e.isAdmin,isManager:!!e.isManager,active:e.active!==false,bg:e.bg||'#2563eb',joinDate:e.joinDate||''}));
-  try{ localStorage.setItem(EMP_STORE_KEY,JSON.stringify(dynFull)); }catch(_e){}
   persistEmpRegistry();
   syncUserDirectoryFromRegistry();
+  try{ localStorage.setItem(EMP_STORE_KEY, JSON.stringify(loadDynEmployees())); }catch(_e){}
   emitEmpSync();
 
-  // ✅ Sync to Google Sheet server
   const synced=await syncEmployeeToServer(newEmp,'upsertEmployee');
   initEmpReg(true);
   renderEmpList();
   selectEmp(email);
   refillEmpDropdown();
   buildUI();
-  toast(synced ? ('✅ Employee added & synced: '+name) : ('✅ Employee added locally: '+name+' — sync to sheet failed, try "Sync to Sheet" button'));
+  toast(synced ? ('✅ Employee added: '+name) : ('✅ Employee added locally: '+name+' (sheet sync failed)'));
 }
 async function delEmp(email){
   if(!confirm('Remove '+email+'? Task history will remain.'))return;
@@ -3588,51 +3527,13 @@ function downloadFile(id){
 // ════════════════════════════════════════════════════════════════
 //  SETTINGS
 // ════════════════════════════════════════════════════════════════
-// ✅ 2FA PIN for sheet URL (PIN: 8840, admin can change)
-const TFA_PIN_KEY='upgro_tfa_pin_v1';
-function getTfaPin(){return localStorage.getItem(TFA_PIN_KEY)||'8840';}
-function verifyTfaPin(action='this action'){
-  const pin=prompt('🔐 Security PIN required for '+action+'\nEnter 4-digit PIN:','');
-  if(pin===null)return false;
-  if(pin.trim()!==getTfaPin()){toast('❌ Incorrect PIN! Access denied.');return false;}
-  return true;
-}
 function saveURL(){
-  if(!verifyTfaPin('saving Sheet URL'))return;
   const url=($('url-in')||{value:''}).value.trim();
   if(!url.includes('script.google.com')){const st=$('url-st');if(st)st.textContent='❌ Invalid — must be a Google Apps Script URL';return;}
   SURL=url;
   ['ugv4_url','upgro_url','upgro_script_url'].forEach(k=>localStorage.setItem(k,url));
   const st=$('url-st');if(st)st.textContent='✅ Saved! Testing...';
   testConn();
-}
-function clearSheetURL(){
-  if(!verifyTfaPin('deleting Sheet URL'))return;
-  SURL='';
-  ['ugv4_url','upgro_url','upgro_script_url'].forEach(k=>localStorage.removeItem(k));
-  const ui=$('url-in');if(ui)ui.value='';
-  const st=$('url-st');if(st)st.textContent='🗑 URL cleared.';
-  const cst=$('conn-st');if(cst){cst.className='cno';cst.textContent='⭕ Not Connected';}
-  toast('🗑 Sheet URL removed');
-}
-function adminChangePIN(){
-  if(!isAdmin()){toast('❌ Admin only');return;}
-  const cur=prompt('Enter CURRENT PIN:','');
-  if(cur===null)return;
-  if(cur.trim()!==getTfaPin()){toast('❌ Current PIN incorrect');return;}
-  const np=prompt('Enter NEW 4-digit PIN:','');
-  if(!np||!/^\d{4}$/.test(np.trim())){toast('⚠ PIN must be exactly 4 digits');return;}
-  const cp=prompt('Confirm new PIN:','');
-  if(cp!==np){toast('❌ PINs do not match');return;}
-  localStorage.setItem(TFA_PIN_KEY,np.trim());
-  toast('✅ PIN changed successfully!');
-}
-function adminViewPIN(){
-  if(!isAdmin()){toast('❌ Admin only');return;}
-  const cur=prompt('Enter CURRENT PIN to view it:','');
-  if(cur===null)return;
-  if(cur.trim()!==getTfaPin()){toast('❌ Incorrect PIN');return;}
-  alert('Current Security PIN: '+getTfaPin());
 }
 async function testConn(){
   if(!SURL){const st=$('url-st');if(st)st.textContent='❌ Save URL first';return;}
