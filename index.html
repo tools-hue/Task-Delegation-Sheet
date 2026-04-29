@@ -744,7 +744,7 @@ textarea.fc{resize:vertical;min-height:68px}
         </div>
         <div class="sc">
           <div class="sc-t">📧 Email Notifications</div>
-          <div class="srow"><div><div class="sr-l">Pending Task Hourly Alerts</div><div class="sr-d">Overdue / pending automatic emails are disabled. Only assign, update, submission and meeting mails will work.</div></div><span style="font-size:12px;color:var(--red);font-weight:700">⛔ Disabled</span></div>
+          <div class="srow"><div><div class="sr-l">Pending Task Hourly Alerts</div><div class="sr-d">Sent every hour for accepted &amp; pending tasks (from 01/04/2026) · Stops when task completed</div></div><span style="font-size:12px;color:var(--green);font-weight:700">✅ Active via Apps Script</span></div>
           <div class="srow"><div><div class="sr-l">Daily Report</div><div class="sr-d">Sent every day ~9 AM IST to admin</div></div><span style="font-size:12px;color:var(--green);font-weight:700">✅ Active via Apps Script</span></div>
           <div class="srow"><div><div class="sr-l">Setup Triggers</div><div class="sr-d">In Google Sheet: 🚀 UpGro v5 menu → "Setup All Triggers"</div></div></div>
           <div class="srow" style="align-items:flex-end">
@@ -925,7 +925,7 @@ textarea.fc{resize:vertical;min-height:68px}
 //  Managers: Vikash, Dharmendra, Abhishek, Neeraj
 //  Admins: Adarsh MIS, Dhiraj Jaiswal (CEO), Ritu Tyagi (EA)
 //  Features: Manager role, task counters, multi-link, drive upload,
-//            overdue / hourly pending emails disabled, consolidated clean code
+//            hourly pending email (01/04/2026+), consolidated clean code
 // ════════════════════════════════════════════════════════════════
 
 // ── USERS ─────────────────────────────────────────────────────
@@ -953,7 +953,7 @@ const USERS = {
 const CLRS=['#0B84FF','#E53935','#00B67A','#F59E0B','#7C3AED','#0E9F8E','#EA580C','#DB2777','#64748B','#D97706','#1565C0','#16A34A','#9333EA','#0891B2'];
 const DESIG_OPTS=['MIS','Executive Assistant','Web Developer','Graphic Designer','Video Editor','CRM','Meta Media Buyer','Google Ads','SEO Executive','SEO','Founder','CEO','HR','Accountant','Intern','Content Writer','Social Media Manager','Performance Marketer','Team Lead','Other'];
 const PAGE_TITLES={dash:'Dashboard',mytasks:'My Tasks',alltasks:'All Tasks',analytics:'Analytics',employees:'Employees',forms:'Forms & Links',meetings:'Meetings',settings:'Settings'};
-const DATA_START = new Date('2026-04-01T00:00:00'); // Data from this date. Overdue/pending auto emails disabled.
+const DATA_START = new Date('2026-04-01T00:00:00'); // Data & email from this date
 
 // Canonical employee master list — email is unique ID. This prevents duplicate quick-filter pills.
 const CANONICAL_EMPLOYEES = Object.entries(USERS).map(([email,u],i)=>({
@@ -979,7 +979,7 @@ function canonEmail(v){
   return EMAIL_ALIAS_MAP[e] || e;
 }
 function canonNameKey(v){
-  return String(v||'').trim().toLowerCase().replace(/s+/g,' ').replace(/[^a-z0-9 ]/g,'');
+  return String(v||'').trim().toLowerCase().replace(/\s+/g,' ').replace(/[^a-z0-9 ]/g,'');
 }
 function canonicalByEmail(email){
   const em=canonEmail(email);
@@ -3791,14 +3791,46 @@ if(data.action === 'saveMeetingDiscussion'){
 // }
 
 // ─────────────────────────────────────────────────────────────
-// HOURLY PENDING / OVERDUE ALERTS — DISABLED
-// This function is intentionally kept as NO-OP so old Apps Script triggers
-// do not send any pending/overdue task emails.
+// HOURLY PENDING ALERTS — trigger every 1 hour
+// ─────────────────────────────────────────────────────────────
 function sendHourlyPendingAlerts() {
-  Logger.log('Hourly pending / overdue alerts are disabled. No emails sent.');
-  return;
+  var CUTOFF = new Date('2026-04-01');
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Tasks');
+  if(!sheet) return;
+  var rows = sheet.getDataRange().getValues();
+  var h = rows[0];
+  var iEmail=h.indexOf('AssignedTo_Email'),iTask=h.indexOf('Task'),
+      iStatus=h.indexOf('Status'),iDue=h.indexOf('DueDate'),iTs=h.indexOf('Timestamp'),
+      iTotal=h.indexOf('TotalUnits'),iDone=h.indexOf('DoneUnits'),iPend=h.indexOf('PendingUnits');
+  var pending={};
+  for(var i=1;i<rows.length;i++){
+    var r=rows[i];
+    if(new Date(r[iTs])<CUTOFF) continue;
+    if(String(r[iStatus]||'').toLowerCase()==='completed') continue;
+    var email=String(r[iEmail]||'').toLowerCase(); if(!email) continue;
+    if(!pending[email]) pending[email]=[];
+    pending[email].push({task:r[iTask],status:r[iStatus],due:r[iDue],
+      total:r[iTotal]||1,done:r[iDone]||0,pend:r[iPend]||0});
+  }
+  Object.keys(pending).forEach(function(email){
+    var tasks=pending[email];
+    var body=tasks.map(function(t){
+      return '• '+getTaskDisplayName(t)+'
+  Status: '+t.status+' | Due: '+t.due+' | Qty: '+t.done+'/'+t.total+' done';
+    }).join('
+
+');
+    GmailApp.sendEmail(email,'⏰ Pending Tasks — UpGro Media',
+      'Hi,
+
+You have '+tasks.length+' pending task(s):
+
+'+body+'
+
+UpGro Mission Control');
+  });
 }
-// Remove any old time trigger for sendHourlyPendingAlerts from Apps Script > Triggers.
+// Trigger: Apps Script → Triggers → sendHourlyPendingAlerts → Time → Every hour
 =================================================================
 -->
 
@@ -4148,32 +4180,368 @@ function deleteMeeting(id){
 </script>
 
 
+
+
 <script>
-// FINAL LOGIN-FIRST BOOTSTRAP FIX
-// Portal will always open login page first. No auto-login / session restore.
+// ================================================================
+// STRICT PERSONAL DATA ISOLATION + NAME-WISE ANALYTICS PATCH
+// Email is the only unique employee key. Names are display-only.
+// ================================================================
 (function(){
-  function bootMissionControl(){
+  const ISO_PATCH_VERSION = 'strict-email-isolation-v7';
+
+  function sEmail(v){
     try{
-      try{ initEmpReg(true); }catch(_e){ console.error(_e); }
-      try{ clearCurrentSession(); }catch(_e){}
-      cu = null;
-      const lp=$("lp"), app=$("app");
-      if(app) app.classList.add("hidden");
-      if(lp) lp.classList.remove("hidden");
-      const emailInput=$("lem"), passInput=$("lpw"), errBox=$("lerr");
-      if(emailInput) emailInput.value="";
-      if(passInput) passInput.value="";
-      if(errBox) errBox.style.display="none";
-      if(emailInput) setTimeout(()=>emailInput.focus(),100);
-    }catch(e){
-      console.error("Mission Control boot failed:", e);
-      const lp=$("lp"), app=$("app");
-      if(app) app.classList.add("hidden");
-      if(lp) lp.classList.remove("hidden");
-    }
+      const raw = String(v || '').trim().toLowerCase();
+      if(!raw || raw.indexOf('@') < 0) return '';
+      return (typeof canonEmail === 'function') ? canonEmail(raw) : raw;
+    }catch(e){ return String(v || '').trim().toLowerCase(); }
   }
-  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", bootMissionControl);
-  else bootMissionControl();
+  function sName(v){
+    try{ return String(v || '').trim().toLowerCase().replace(/\s+/g,' '); }
+    catch(e){ return ''; }
+  }
+  function hasEmail(v){ return /[^\s@]+@[^\s@]+\.[^\s@]+/.test(String(v||'').trim()); }
+  function uniqByEmail(list){
+    const map = new Map();
+    (list || []).forEach((e,i)=>{
+      const email = sEmail(e && e.email);
+      if(!email) return;
+      if(!map.has(email)) map.set(email, {...e, email, bg:(e && e.bg) || (typeof CLRS!=='undefined' ? CLRS[i % CLRS.length] : '#2563eb')});
+    });
+    return Array.from(map.values());
+  }
+  function empByEmail(email){
+    email = sEmail(email);
+    if(!email) return null;
+    try{
+      if(Array.isArray(empReg)){
+        const hit = empReg.find(e => sEmail(e.email) === email);
+        if(hit) return {...hit, email};
+      }
+      if(typeof canonicalByEmail === 'function'){
+        const hit = canonicalByEmail(email);
+        if(hit) return {...hit, email};
+      }
+      if(typeof USERS !== 'undefined' && USERS[email]){
+        const u = USERS[email];
+        return {email, name:u.name || email.split('@')[0], role:u.role || u.desig || 'Team', desig:u.desig || u.role || 'Team', pass:u.pass || '', isAdmin:!!u.isAdmin, isManager:!!u.isManager, active:u.active!==false};
+      }
+    }catch(e){}
+    return null;
+  }
+  function taskEmail(t){
+    if(!t) return '';
+    const keys = [
+      'email','assignedToEmail','assignedEmail','empEmail','employeeEmail','EmployeeEmail','AssignedTo_Email','AssignedToEmail',
+      'Assigned To Email','Assigned To (Email)','Employee Email','UserEmail','Email','mail'
+    ];
+    for(const k of keys){
+      const v = t[k];
+      if(hasEmail(v)) return sEmail(v);
+    }
+    return '';
+  }
+  function currentEmail(){ return sEmail(cu && cu.email); }
+  function assignedByMatchesMe(t){
+    if(!cu || !t) return false;
+    const byName = sName(t.assignedByLabel || t.by || t.assignedBy || t.AssignedBy || t['Assigned By'] || '');
+    const myName = sName(cu.name || '');
+    const byEmail = sEmail(t.assignedByEmail || t.byEmail || t.AssignedBy_Email || t['Assigned By Email'] || '');
+    return (!!byEmail && byEmail === currentEmail()) || (!!byName && !!myName && byName === myName);
+  }
+  function accessTasks(tasks){
+    const list = (tasks || []).map(t => ensureTaskMeta(t)).filter(Boolean);
+    if(typeof isAdmin === 'function' && isAdmin()) return list;
+    const me = currentEmail();
+    if(!me) return [];
+    if(typeof isManager === 'function' && isManager()){
+      return list.filter(t => taskEmail(t) === me || assignedByMatchesMe(t));
+    }
+    return list.filter(t => taskEmail(t) === me);
+  }
+
+  window.canonicalFromTask = function(t){
+    const email = taskEmail(t);
+    if(!email) return null;
+    const rec = empByEmail(email);
+    if(rec) return rec;
+    const nm = String((t && (t.empName || t.assignedTo || t.AssignedTo_Name || t['Assigned To Name'] || t.employeeName)) || '').trim();
+    return {email, name:nm || (typeof uname === 'function' ? uname(email) : email.split('@')[0]), role:(t && (t.desig || t.role)) || 'Team', desig:(t && (t.desig || t.role)) || 'Team', active:true};
+  };
+
+  const oldGetTaskDisplayName = window.getTaskDisplayName;
+  window.ensureTaskMeta = function(t){
+    if(!t) return t;
+    const email = taskEmail(t);
+    t.email = email;
+    t.assignedToEmail = email;
+    t.empEmail = email;
+    t.employeeEmail = email;
+    t.AssignedTo_Email = email;
+    t['Assigned To Email'] = email;
+    const rec = email ? empByEmail(email) : null;
+    const displayName = rec ? rec.name : String(t.empName || t.assignedTo || t.AssignedTo_Name || t['Assigned To Name'] || (email && typeof uname === 'function' ? uname(email) : '') || '').trim();
+    t.empName = displayName;
+    t.assignedTo = displayName;
+    t.AssignedTo_Name = displayName;
+    t.assignedToLabel = displayName || email || 'Unassigned';
+    t.desig = (rec && (rec.desig || rec.role)) || t.desig || t.role || '';
+    t.task = (typeof oldGetTaskDisplayName === 'function' ? oldGetTaskDisplayName(t) : (t.task || t.Task || t.WorkName || t['Work Name'] || t.id || 'Untitled Work'));
+    t.primaryWorkName = t.primaryWorkName || t.workName || t.WorkName || t['Work Name'] || t.task;
+    t.taskCode = t.taskCode || t.taskId || t.id || (typeof generateTaskId === 'function' ? generateTaskId() : String(Date.now()));
+    t.taskId = t.taskId || t.taskCode || t.id;
+    if(typeof normStatus === 'function') t.status = normStatus(t.status || 'assigned');
+    const total = Math.max(1, Number(t.totalUnits || t.TotalUnits || t.Count || 1) || 1);
+    const done = Math.max(0, Math.min(total, Number(t.doneUnits || t.DoneUnits || 0) || 0));
+    t.totalUnits = total;
+    t.doneUnits = done;
+    t.pendingUnits = Math.max(0, total - done);
+    t.changeCount = Math.max(0, Number(t.changeCount || t.ChangeCount || 0) || 0);
+    t.assignedByLabel = (typeof displayAssignedBy === 'function') ? displayAssignedBy(t.by || t.assignedBy || t.AssignedBy || t['Assigned By'] || '') : (t.by || t.assignedBy || '');
+    t.rejectReason = t.rejectReason || t.RejectReason || '';
+    return t;
+  };
+
+  window.taskBelongsToCurrentUser = function(t){
+    const me = currentEmail();
+    return !!(me && taskEmail(t) === me);
+  };
+
+  const oldInitEmpReg = window.initEmpReg;
+  window.initEmpReg = function(force){
+    if(typeof oldInitEmpReg === 'function') oldInitEmpReg(force);
+    try{
+      const merged = [];
+      if(Array.isArray(empReg)) merged.push(...empReg);
+      if(Array.isArray(sheetEmpReg)) merged.push(...sheetEmpReg);
+      if(typeof USERS !== 'undefined'){
+        Object.entries(USERS).forEach(([email,u])=>merged.push({email, name:u.name, pass:u.pass, role:u.role, desig:u.desig, isAdmin:!!u.isAdmin, isManager:!!u.isManager, active:u.active!==false, bg:u.bg}));
+      }
+      if(typeof loadDynEmployees === 'function') merged.push(...(loadDynEmployees() || []));
+      empReg = uniqByEmail(merged).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')));
+      if(typeof syncUserDirectoryFromRegistry === 'function') syncUserDirectoryFromRegistry();
+    }catch(e){ console.error('strict initEmpReg failed', e); }
+    return empReg;
+  };
+
+  window.applyEmpF = function(tasks){
+    let list = accessTasks(tasks);
+    if(activeEmpF){
+      const selected = sEmail(activeEmpF);
+      list = list.filter(t => taskEmail(t) === selected);
+    }
+    return list;
+  };
+
+  window.buildEmpPills = function(tasks){
+    if(typeof canAssign === 'function' && !canAssign()) return;
+    try{ initEmpReg(true); }catch(e){}
+    const cont = $('emp-pills'); if(!cont) return;
+    cont.innerHTML = '';
+    const accessible = accessTasks(tasks || allTasks || []);
+    const pendingByEmail = new Map();
+    accessible.forEach(t=>{
+      const email = taskEmail(t); if(!email) return;
+      if((typeof normStatus === 'function' ? normStatus(t.status) : String(t.status||'').toLowerCase()) !== 'completed'){
+        pendingByEmail.set(email, (pendingByEmail.get(email)||0) + Math.max(0, Number(t.pendingUnits||1)||1));
+      }
+    });
+    const all = document.createElement('span');
+    all.className = 'efp' + (activeEmpF===null ? ' act' : '');
+    all.innerHTML = '🌐 All';
+    all.onclick = () => setEmpF(null, all);
+    cont.appendChild(all);
+
+    const empMap = new Map();
+    (empReg || []).forEach(e=>{ const email=sEmail(e.email); if(email && e.active!==false) empMap.set(email,{...e,email}); });
+    accessible.forEach(t=>{
+      const email=taskEmail(t); if(!email || empMap.has(email)) return;
+      empMap.set(email, {email, name:t.assignedToLabel || t.empName || (typeof uname==='function'?uname(email):email), desig:t.desig || '', active:true});
+    });
+    Array.from(empMap.values()).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''))).forEach((e,i)=>{
+      const email=sEmail(e.email);
+      const bg=e.bg || (typeof CLRS!=='undefined' ? CLRS[i%CLRS.length] : '#2563eb');
+      const pending=pendingByEmail.get(email)||0;
+      const sp=document.createElement('span');
+      sp.className='efp'+(sEmail(activeEmpF)===email?' act':'');
+      sp.title=(e.name||email)+' — '+pending+' pending units';
+      sp.innerHTML='<span class="efav" style="background:'+bg+'">'+(typeof ini==='function'?ini(e.name||email):String(e.name||email).slice(0,2).toUpperCase())+'</span>'+escapeHtml(e.name||email)+(pending?'<span style="margin-left:6px;background:#FEF2F2;color:#B91C1C;border-radius:10px;padding:1px 6px;font-size:9px;font-weight:800">'+pending+'</span>':'');
+      sp.onclick=()=>setEmpF(email,sp);
+      cont.appendChild(sp);
+    });
+  };
+
+  window.populateTaskFilterOptions = function(){
+    const toSel=$('at-assigned-to'), bySel=$('at-assigned-by');
+    const toVal=sEmail(toSel && toSel.value), byVal=(bySel && bySel.value)||'';
+    try{ initEmpReg(true); }catch(e){}
+    const access = accessTasks(allTasks || []);
+    const toMap = new Map();
+    (empReg || []).forEach(e=>{ const email=sEmail(e.email); if(email && e.active!==false) toMap.set(email, e.name || email); });
+    access.forEach(t=>{ const email=taskEmail(t); if(email && !toMap.has(email)) toMap.set(email, t.assignedToLabel || t.empName || email); });
+    const byMap = new Map();
+    access.forEach(t=>{
+      const label = t.assignedByLabel || (typeof displayAssignedBy==='function'?displayAssignedBy(t.by):t.by) || '';
+      const key=sName(label || t.by || '');
+      if(key && !byMap.has(key)) byMap.set(key,label);
+    });
+    if(toSel){
+      toSel.innerHTML='<option value="">Assigned To — All</option>'+Array.from(toMap.entries()).sort((a,b)=>a[1].localeCompare(b[1])).map(([email,name])=>'<option value="'+email+'">'+escapeHtml(name)+'</option>').join('');
+      toSel.value = toVal && toMap.has(toVal) ? toVal : '';
+    }
+    if(bySel){
+      bySel.innerHTML='<option value="">Assigned By — All</option>'+Array.from(byMap.entries()).sort((a,b)=>a[1].localeCompare(b[1])).map(([key,name])=>'<option value="'+key+'">'+escapeHtml(name)+'</option>').join('');
+      bySel.value = byVal && byMap.has(byVal) ? byVal : '';
+    }
+  };
+
+  function analyticsBaseTasks(){
+    let tasks = (allTasks || []).map(t=>ensureTaskMeta(t));
+    const r = ($('an-range') || {value:'all'}).value;
+    const now = new Date(); now.setHours(0,0,0,0);
+    if(r==='week'){ const w=new Date(now); w.setDate(now.getDate()-6); tasks=tasks.filter(t=>{const d=taskDateValue(t); return d && d>=w;}); }
+    else if(r==='month'){ const m=new Date(now.getFullYear(),now.getMonth(),1); tasks=tasks.filter(t=>{const d=taskDateValue(t); return d && d>=m;}); }
+    else if(r==='year'){ const y=new Date(now.getFullYear(),0,1); tasks=tasks.filter(t=>{const d=taskDateValue(t); return d && d>=y;}); }
+    tasks = accessTasks(tasks);
+    return tasks;
+  }
+  window.ensureAnalyticsEmployeeFilter = function(){
+    const range=$('an-range'); if(!range) return;
+    let sel=$('an-emp');
+    if(!sel){
+      sel=document.createElement('select');
+      sel.id='an-emp'; sel.className='fc'; sel.style.cssText='width:auto;padding:6px 11px;font-size:12px';
+      sel.onchange=function(){ reRenderCharts(); };
+      range.parentNode.insertBefore(sel, range.nextSibling);
+    }
+    const old=sEmail(sel.value);
+    const tasks=analyticsBaseTasks();
+    const map=new Map();
+    tasks.forEach(t=>{ const email=taskEmail(t); if(email) map.set(email, t.assignedToLabel || t.empName || (typeof uname==='function'?uname(email):email)); });
+    sel.innerHTML='<option value="">Name Wise — All</option>'+Array.from(map.entries()).sort((a,b)=>a[1].localeCompare(b[1])).map(([email,name])=>'<option value="'+email+'">'+escapeHtml(name)+'</option>').join('');
+    sel.value = old && map.has(old) ? old : '';
+    sel.style.display = (typeof isAdmin==='function' && isAdmin()) || (typeof isManager==='function' && isManager()) ? '' : 'none';
+  };
+  window.getAnalyticsTasks = function(){
+    let tasks = analyticsBaseTasks();
+    const sel = $('an-emp');
+    const email = sEmail(sel && sel.value);
+    if(email) tasks = tasks.filter(t=>taskEmail(t)===email);
+    return tasks;
+  };
+
+  window.buildEmpStats = function(tasks){
+    const map={};
+    (tasks || []).forEach(raw=>{
+      const t=ensureTaskMeta(raw);
+      const email=taskEmail(t); if(!email) return;
+      const rec=empByEmail(email);
+      const name=(rec && rec.name) || t.assignedToLabel || t.empName || (typeof uname==='function'?uname(email):email);
+      if(!map[email]) map[email]={email,name,short:name.split(' ')[0],desig:(rec&&(rec.desig||rec.role))||t.desig||'',total:0,completed:0,overdue:0,inProgress:0,ontime:0,withDue:0};
+      map[email].total++;
+      const st=typeof normStatus==='function'?normStatus(t.status):String(t.status||'').toLowerCase();
+      if(st==='completed'){
+        map[email].completed++;
+        if(t.ddate && t.completedAt){
+          map[email].withDue++;
+          const due=pd(t.ddate); const p=String(t.completedAt).split(' ')[0].split('/'); const cd=p.length===3?new Date(`${p[2]}-${p[1]}-${p[0]}`):null;
+          if(due && cd && cd<=due) map[email].ontime++;
+        }
+      }
+      if(st==='in progress') map[email].inProgress++;
+      if(typeof isOD==='function' && isOD(t)) map[email].overdue++;
+    });
+    return Object.values(map).filter(e=>e.total>0).map(e=>({...e,score:Math.max(0,e.completed*2-e.overdue+Math.round(e.completed/(e.total||1)*5)),ontimePct:e.withDue?Math.round(e.ontime/e.withDue*100):0})).sort((a,b)=>b.score-a.score);
+  };
+
+  window.reRenderCharts = function(){
+    if(window._chartRenderTimer) clearTimeout(window._chartRenderTimer);
+    window._chartRenderTimer=setTimeout(()=>{
+      window._chartRenderTimer=null;
+      ensureAnalyticsEmployeeFilter();
+      const tasks=getAnalyticsTasks();
+      const banner=$('analytics-banner');
+      if(banner){
+        const emp=($('an-emp')||{}).value;
+        if(emp){
+          const rec=empByEmail(emp);
+          banner.innerHTML=`<div class="role-banner"><div class="role-banner-icon">👤</div><div><strong>Name-wise analytics:</strong> ${escapeHtml((rec&&rec.name)||emp)} ka exact email-based data.</div></div>`;
+        }else if(typeof isManager==='function' && isManager() && !(typeof isAdmin==='function' && isAdmin())){
+          banner.innerHTML='<div class="role-banner"><div class="role-banner-icon">🔀</div><div><strong>Manager view:</strong> Only tasks assigned by you and your own tasks.</div></div>';
+        }else if(!(typeof isAdmin==='function' && isAdmin()) && !(typeof isManager==='function' && isManager())){
+          banner.innerHTML='<div class="role-banner"><div class="role-banner-icon">👤</div><div><strong>My Analytics:</strong> Only your personal email-based task data.</div></div>';
+        }else banner.innerHTML='';
+      }
+      renderCharts(tasks);
+    },250);
+  };
+
+  function refreshSoon(){ setTimeout(()=>{ try{ if(cu && SURL) loadData(); }catch(e){} }, 450); }
+  ['qAccept','qReject','qDone','submitWork'].forEach(fn=>{
+    const old=window[fn];
+    if(typeof old==='function'){
+      window[fn]=async function(){
+        const out = await old.apply(this, arguments);
+        refreshSoon();
+        return out;
+      };
+    }
+  });
+
+  const oldLoadData=window.loadData;
+  if(typeof oldLoadData==='function'){
+    window.loadData=async function(){
+      const out=await oldLoadData.apply(this, arguments);
+      try{
+        const map=new Map();
+        (allTasks || []).forEach(t=>{
+          ensureTaskMeta(t);
+          const key=String(t.id || t.taskId || t.taskCode || '').trim();
+          if(!key) return;
+          map.set(key,t);
+        });
+        allTasks=Array.from(map.values());
+        if(typeof populateTaskFilterOptions==='function') populateTaskFilterOptions();
+        if(typeof buildUI==='function') buildUI();
+      }catch(e){ console.error('strict load postprocess failed', e); }
+      return out;
+    };
+  }
+
+  window.resetStrictPortalCache = function(){
+    try{
+      activeEmpF=null;
+      localStorage.removeItem('upgro_current_user_v1');
+      localStorage.removeItem('upgro_roles_v3');
+      localStorage.removeItem('upgro_emp_sync_ping_v1');
+      statusOverrides && statusOverrides.clear && statusOverrides.clear();
+      toast('✅ Cache cleared. Please login again.');
+      setTimeout(()=>location.reload(),600);
+    }catch(e){ location.reload(); }
+  };
+
+  console.log('UpGro patch loaded:', ISO_PATCH_VERSION);
+})();
+</script>
+
+<script>
+// FINAL BOOTSTRAP FIX: login page first, no auto session restore
+(function(){
+  function bootMissionControlLoginFirst(){
+    try{
+      initEmpReg(true);
+      clearCurrentSession();
+      cu = null;
+      const lp=$('lp'), app=$('app');
+      if(app) app.classList.add('hidden');
+      if(lp) lp.classList.remove('hidden');
+      const er=$('lerr'); if(er) er.style.display='none';
+      const em=$('lem'); if(em) em.focus();
+    }catch(e){ console.error('Mission Control boot failed:', e); }
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootMissionControlLoginFirst);
+  else bootMissionControlLoginFirst();
 })();
 </script>
 </body>
