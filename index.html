@@ -1771,7 +1771,7 @@ function buildTaskMailHtml(mode,payload){
         +'<div style="margin-top:6px;font-size:11px;color:#94a3b8">Official work notification mail · UpGro Media</div>'
       +'</div>'
     +'</td></tr>'
-    +'</table></td></tr></table></body></html>';
+    +'</table></td></tr></table></html>';
 }
 
 function buildMeetingMailHtml(data){
@@ -4204,9 +4204,180 @@ function deleteMeeting(id){
   window.delEmp=async function(email){ email=em(email); if(!email) return; if(!confirm('Remove '+email+'? Backup sheet data safe rahega.')) return; window.initEmpReg(true); const idx=(empReg||[]).findIndex(e=>em(e.email)===email); if(idx>=0) empReg[idx].active=false; if(typeof USERS!=='undefined' && USERS[email]) USERS[email].active=false; try{ if(typeof persistEmpRegistry==='function') persistEmpRegistry(); }catch(_e){} try{ if(typeof syncUserDirectoryFromRegistry==='function') syncUserDirectoryFromRegistry(); }catch(_e){} try{ if(SURL){ const rec=(empReg||[]).find(e=>em(e.email)===email)||{email,active:false}; await fetch(SURL,{method:'POST',body:JSON.stringify({action:'upsertEmployee',...rec,email,active:false,Active:'No'})}); } }catch(_e){} editEmpEmail=null; const fp=document.getElementById('emp-fp'); if(fp) fp.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:32px;margin-bottom:8px">✓</div><div style="font-weight:600">Employee removed from portal. Backup safe in sheet.</div></div>'; if(typeof toast==='function') toast('🗑 Employee hidden from portal. Backup safe.'); if(typeof renderEmpList==='function') renderEmpList(); if(typeof refillEmpDropdown==='function') refillEmpDropdown(); if(typeof buildUI==='function') buildUI(); };
   const oldRenderEmpList=window.renderEmpList; window.renderEmpList=function(){ const backup=empReg; try{ empReg=(empReg||[]).filter(e=>e.active!==false); return oldRenderEmpList && oldRenderEmpList(); } finally{ empReg=backup; } };
   window.fixPortalDataNow=function(){ hardenUsers(); window.initEmpReg(true); allTasks=(allTasks||[]).map(t=>normalizeTaskInPlace(t)).filter(t=>{ const te=resolveTaskEmail(t); return !!te && isActiveEmail(te); }); if(cu) cu=window.forceAdminByEmail(cu); if(typeof refillEmpDropdown==='function') refillEmpDropdown(); if(typeof buildUI==='function') buildUI(); if(typeof toast==='function') toast('✅ Portal data fixed: email ownership + active employees + on-time stats'); };
+
+
+  // ─────────────────────────────────────────────────────────────
+  // HARSH KUMAR / HARSH VERMA STRICT SEPARATION FIX
+  // Root fix: employee filter key must be EMAIL, not first name.
+  // Harsh Kumar = harsh.graphic@upgromedia.com
+  // Harsh Verma = harsh.editor@upgromedia.com
+  // ─────────────────────────────────────────────────────────────
+  function employeeEmailKey(email){
+    return em(email).replace(/[^a-z0-9]/g,'-');
+  }
+
+  function strictEmpLabelByEmail(email){
+    const r=getEmpByEmail(email)||{};
+    return r.name || window.uname(email) || em(email).split('@')[0];
+  }
+
+  function strictResolveTaskEmail(t){
+    const email=resolveTaskEmail(t);
+    if(email) return email;
+    const rawName=String((t&&(t.empName||t.assignedTo||t.AssignedTo_Name||t['Assigned To (Name)']||t.EmployeeName||t.Name))||'').trim().toLowerCase();
+    const rawDesig=String((t&&(t.desig||t.Designation||t.role||t.Role))||'').trim().toLowerCase();
+    if(rawName.includes('harsh kumar') || (rawName==='harsh' && rawDesig.includes('graphic'))) return 'harsh.graphic@upgromedia.com';
+    if(rawName.includes('harsh verma') || (rawName==='harsh' && rawDesig.includes('video'))) return 'harsh.editor@upgromedia.com';
+    return '';
+  }
+
+  const oldNormalizeTaskInPlaceHarshSafe = normalizeTaskInPlace;
+  normalizeTaskInPlace = function(t){
+    if(!t) return t;
+    const fixedEmail = strictResolveTaskEmail(t);
+    if(fixedEmail){
+      t.email=fixedEmail;
+      t.assignedToEmail=fixedEmail;
+      t.empEmail=fixedEmail;
+      t.AssignedTo_Email=fixedEmail;
+      t['Assigned To (Email)']=fixedEmail;
+      const emp=getEmpByEmail(fixedEmail)||{};
+      if(emp.name){
+        t.empName=emp.name;
+        t.assignedTo=emp.name;
+        t.AssignedTo_Name=emp.name;
+        t['Assigned To (Name)']=emp.name;
+        t.desig=emp.desig||emp.role||t.desig;
+        t.assignedToLabel=emp.name;
+      }
+    }
+    return oldNormalizeTaskInPlaceHarshSafe(t);
+  };
+
+  // Override pills completely: one pill per active employee email, not per first-name.
+  window.buildEmpPills=function(tasks){
+    if(!window.canAssign()) return;
+    try{ window.initEmpReg(true); }catch(_e){}
+    const cont=document.getElementById('emp-pills');
+    if(!cont) return;
+
+    const map=new Map();
+    (tasks||[]).forEach(t=>{
+      t=normalizeTaskInPlace(t);
+      const email=strictResolveTaskEmail(t);
+      if(!email || !isActiveEmail(email)) return;
+      const emp=getEmpByEmail(email)||{};
+      if(!map.has(email)){
+        map.set(email,{email,key:employeeEmailKey(email),label:emp.name||strictEmpLabelByEmail(email),desig:emp.desig||emp.role||window.udesig(email),cnt:0,pending:0});
+      }
+      const row=map.get(email);
+      row.cnt++;
+      const st=(typeof normStatus==='function')?normStatus(t.status):String(t.status||'assigned').toLowerCase();
+      if(st!=='completed') row.pending++;
+    });
+
+    const sorted=Array.from(map.values()).sort((a,b)=>a.label.localeCompare(b.label));
+    cont.innerHTML='';
+
+    const all=document.createElement('span');
+    all.className='efp'+(activeEmpF===null?' act':'');
+    all.textContent='🌐 All';
+    all.onclick=()=>setEmpF(null,all);
+    cont.appendChild(all);
+
+    sorted.forEach((e,i)=>{
+      const bg=CLRS[i%CLRS.length];
+      const sp=document.createElement('span');
+      sp.className='efp'+(activeEmpF===e.key?' act':'');
+      sp.title=e.email+' • '+(e.desig||'Team');
+      const pendingTxt=e.pending>0?` <b style="font-size:10px;color:#dc2626">${e.pending}</b>`:'';
+      sp.innerHTML='<span class="efav" style="background:'+bg+'">'+ini(e.label)+'</span>'+e.label+pendingTxt;
+      sp.onclick=()=>setEmpF(e.key,sp);
+      cont.appendChild(sp);
+    });
+  };
+
+  // Apply employee filter using exact email key only.
+  window.applyEmpF=function(tasks){
+    tasks=(tasks||[]).map(t=>normalizeTaskInPlace(t)).filter(t=>{ const te=strictResolveTaskEmail(t); return !!te && isActiveEmail(te); });
+    if(window.isAdmin()){
+      if(activeEmpF){
+        return tasks.filter(t=>employeeEmailKey(strictResolveTaskEmail(t))===activeEmpF);
+      }
+      return tasks;
+    }
+    if(window.isManager()){
+      const mine=em(cu.email);
+      let final=tasks.filter(t=>strictResolveTaskEmail(t)===mine || nm(t.by||t.assignedBy||'')===nm(cu.name||''));
+      if(activeEmpF) final=final.filter(t=>employeeEmailKey(strictResolveTaskEmail(t))===activeEmpF);
+      return final;
+    }
+    return tasks.filter(t=>window.taskBelongsToCurrentUser(t));
+  };
+
+  window.taskBelongsToCurrentUser=function(t){
+    if(!t||!cu||!cu.email) return false;
+    const taskEmail=strictResolveTaskEmail(normalizeTaskInPlace(t));
+    return !!taskEmail && taskEmail===em(cu.email) && isActiveEmail(taskEmail);
+  };
+
+  // One-click repair for old browser cache / previously mixed Harsh data.
+  window.fixHarshDataSeparationNow=function(){
+    try{ window.initEmpReg(true); }catch(_e){}
+    allTasks=(allTasks||[]).map(t=>normalizeTaskInPlace(t)).filter(t=>{ const te=strictResolveTaskEmail(t); return !!te && isActiveEmail(te); });
+    activeEmpF=null;
+    if(typeof refillEmpDropdown==='function') refillEmpDropdown();
+    if(typeof buildUI==='function') buildUI();
+    if(typeof toast==='function') toast('✅ Harsh Kumar aur Harsh Verma ka data email ke basis par alag ho gaya');
+  };
+
   window.resetLoginCacheAndReload=function(){ try{ localStorage.removeItem('upgro_current_session_v1'); localStorage.removeItem('upgro_current_user_v1'); localStorage.removeItem('user'); }catch(e){} location.reload(); };
   window.addEventListener('DOMContentLoaded',()=>{ hardenUsers(); try{ window.initEmpReg(true); }catch(_e){} const lp=document.getElementById('lp'), app=document.getElementById('app'); if(lp) lp.classList.remove('hidden'); if(app) app.classList.add('hidden'); const err=document.getElementById('lerr'); if(err) err.style.display='none'; });
 })();
 </script>
+</body>
+</html>
+
+<script>
+/* FINAL ADD-ON: active employees only + analytics employee filter + strict email dropdowns */
+(function(){
+  'use strict';
+  const alias={'ritutyagi@upgromedia.com':'ritutyagiea@upgromedia.com','ritu.tyagi@upgromedia.com':'ritutyagiea@upgromedia.com','chnadrakala.meta@upgromedia.com':'chandrakala.meta@upgromedia.com','shubhi.meta@upgromedia.com':'subhi.meta@upgromedia.com'};
+  const emailOf=v=>{let x=String(v||'').trim().toLowerCase().replace(/\s+/g,'');return alias[x]||x};
+  const isEmail=v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailOf(v));
+  function empByEmail(email){email=emailOf(email);try{if(typeof initEmpReg==='function')initEmpReg(false)}catch(e){};return (window.empReg||empReg||[]).find(e=>emailOf(e.email)===email)||null}
+  function isActiveEmp(email){const e=empByEmail(email);return !e || e.active!==false}
+  function ownerEmail(t){
+    if(typeof resolveTaskEmail==='function'){const e=emailOf(resolveTaskEmail(t));if(isEmail(e))return e}
+    const e=emailOf(t&& (t.email||t.assignedToEmail||t.empEmail||t.AssignedTo_Email||t['Assigned To (Email)']||t['Assigned To Email']));
+    if(isEmail(e))return e;
+    const nm=String(t&&(t.empName||t.assignedTo||t.AssignedTo_Name||t['Assigned To (Name)']||'')).trim().toLowerCase();
+    const ds=String(t&&(t.desig||t.Designation||t.role||'')).trim().toLowerCase();
+    if(nm==='harsh kumar'||(nm==='harsh'&&ds.includes('graphic')))return 'harsh.graphic@upgromedia.com';
+    if(nm==='harsh verma'||(nm==='harsh'&&ds.includes('video')))return 'harsh.editor@upgromedia.com';
+    return '';
+  }
+  function key(email){return emailOf(email).replace(/[^a-z0-9]/g,'-')}
+  function empName(email){const e=empByEmail(email);return e?(e.name||email):((typeof uname==='function')?uname(email):email.split('@')[0])}
+  function activeEmployees(){try{if(typeof initEmpReg==='function')initEmpReg(false)}catch(e){};const m=new Map();(window.empReg||empReg||[]).forEach(e=>{const em=emailOf(e.email);if(isEmail(em)&&e.active!==false)m.set(em,{...e,email:em})});return Array.from(m.values()).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')))}
+  function cleanTasks(list){return (list||[]).map(t=>{try{if(typeof ensureTaskMeta==='function')t=ensureTaskMeta(t)}catch(e){};const em=ownerEmail(t);if(em){t.email=em;t.assignedToEmail=em;t.empEmail=em;t.AssignedTo_Email=em;const ep=empByEmail(em);if(ep){t.empName=ep.name;t.assignedTo=ep.name;t.assignedToLabel=ep.name;t.desig=ep.desig||ep.role||t.desig}}return t}).filter(t=>{const em=ownerEmail(t);return isEmail(em)&&isActiveEmp(em)})}
+
+  window.taskBelongsToCurrentUser=function(t){return !!(window.cu&&cu.email&&ownerEmail(t)===emailOf(cu.email)&&isActiveEmp(cu.email))};
+  window.applyEmpF=function(tasks){let list=cleanTasks(tasks);if(window.isAdmin&&isAdmin()){return window.activeEmpF?list.filter(t=>key(ownerEmail(t))===activeEmpF):list}if(window.isManager&&isManager()){const me=emailOf(cu.email),my=String(cu.name||'').trim().toLowerCase();list=list.filter(t=>ownerEmail(t)===me||String(t.by||t.assignedBy||'').trim().toLowerCase()===my);return window.activeEmpF?list.filter(t=>key(ownerEmail(t))===activeEmpF):list}return list.filter(t=>taskBelongsToCurrentUser(t))};
+
+  window.buildEmpPills=function(tasks){const cont=document.getElementById('emp-pills')||document.querySelector('.efpills');if(!cont)return;const counts=new Map(),pending=new Map();cleanTasks(tasks||allTasks||[]).forEach(t=>{const em=ownerEmail(t);counts.set(em,(counts.get(em)||0)+1);const st=(typeof normStatus==='function'?normStatus(t.status):String(t.status||'').toLowerCase());if(st!=='completed')pending.set(em,(pending.get(em)||0)+1)});const emps=activeEmployees().filter(e=>counts.has(emailOf(e.email)));cont.innerHTML='';const all=document.createElement('span');all.className='efp'+(!activeEmpF?' act':'');all.textContent='🌐 All';all.onclick=()=>{activeEmpF=null;buildUI()};cont.appendChild(all);emps.forEach((e,i)=>{const em=emailOf(e.email);const sp=document.createElement('span');sp.className='efp'+(activeEmpF===key(em)?' act':'');sp.title=em;sp.innerHTML='<span class="efav" style="background:'+(e.bg||(window.CLRS?CLRS[i%CLRS.length]:'#0B84FF'))+'">'+((e.name||'?').split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase())+'</span>'+e.name+(pending.get(em)?' <b style="font-size:10px;color:#dc2626">'+pending.get(em)+'</b>':'');sp.onclick=()=>{activeEmpF=key(em);buildUI()};cont.appendChild(sp)})};
+
+  const oldRefill=window.refillEmpDropdown;window.refillEmpDropdown=function(){try{oldRefill&&oldRefill()}catch(e){};const sel=document.getElementById('add-emp');if(!sel)return;const keep=sel.value;const emps=activeEmployees().filter(e=>!(e.isAdmin)&&isEmail(e.email));sel.innerHTML='<option value="">— Select Active Employee —</option>'+emps.map(e=>'<option value="'+emailOf(e.email)+'">'+e.name+' — '+(e.desig||e.role||'Team')+'</option>').join('');if(keep&&emps.some(e=>emailOf(e.email)===keep))sel.value=keep};
+  const oldPopulate=window.populateTaskFilterOptions;window.populateTaskFilterOptions=function(){try{oldPopulate&&oldPopulate()}catch(e){};const sel=document.getElementById('at-assigned-to');if(sel){const keep=sel.value,emps=activeEmployees();sel.innerHTML='<option value="">Assigned To — All Active</option>'+emps.map(e=>'<option value="'+emailOf(e.email)+'">'+e.name+' — '+(e.desig||e.role||'Team')+'</option>').join('');if(keep&&emps.some(e=>emailOf(e.email)===keep))sel.value=keep}};
+
+  function addAnalyticsFilter(){const ph=document.querySelector('#pg-analytics .ph-r');if(!ph)return;let sel=document.getElementById('an-emp-filter');if(!sel){sel=document.createElement('select');sel.id='an-emp-filter';sel.className='fc';sel.style.cssText='width:auto;padding:6px 11px;font-size:12px;min-width:190px';sel.onchange=function(){reRenderCharts&&reRenderCharts()};const r=document.getElementById('an-range');ph.insertBefore(sel,r?r.nextSibling:ph.firstChild)}const keep=sel.value,emps=activeEmployees();sel.innerHTML='<option value="">Employee — All Active</option>'+emps.map(e=>'<option value="'+emailOf(e.email)+'">'+e.name+' — '+(e.desig||e.role||'Team')+'</option>').join('');if(keep&&emps.some(e=>emailOf(e.email)===keep))sel.value=keep}
+  window.getAnalyticsTasks=function(){let list=cleanTasks(window.allTasks||allTasks||[]);const r=(document.getElementById('an-range')||{value:'all'}).value;const now=new Date();now.setHours(0,0,0,0);function dt(t){return (typeof pd==='function'?pd(t.adate||t.ts):new Date(t.adate||t.ts))}if(r==='week'){let w=new Date(now);w.setDate(now.getDate()-7);list=list.filter(t=>dt(t)>=w)}else if(r==='month'){let m=new Date(now.getFullYear(),now.getMonth(),1);list=list.filter(t=>dt(t)>=m)}else if(r==='year'){let y=new Date(now.getFullYear(),0,1);list=list.filter(t=>dt(t)>=y)}const f=(document.getElementById('an-emp-filter')||{value:''}).value;if(f)list=list.filter(t=>ownerEmail(t)===f);if(!(window.isAdmin&&isAdmin()))list=list.filter(t=>taskBelongsToCurrentUser(t));return list};
+  const oldBuildUI=window.buildUI;window.buildUI=function(){try{if(Array.isArray(allTasks))allTasks=cleanTasks(allTasks)}catch(e){};try{oldBuildUI&&oldBuildUI()}catch(e){console.error(e)};try{addAnalyticsFilter()}catch(e){}};
+  const oldDel=window.delEmp;window.delEmp=async function(email){email=emailOf(email);if(!confirm('Remove '+email+'? Portal se hide hoga, backup sheet me safe rahega.'))return;try{if(typeof initEmpReg==='function')initEmpReg(false)}catch(e){};(empReg||[]).forEach(e=>{if(emailOf(e.email)===email){e.active=false;e.Active='No'}});try{if(window.USERS&&USERS[email])USERS[email].active=false}catch(e){};try{if(typeof persistEmpRegistry==='function')persistEmpRegistry()}catch(e){};try{if(SURL){const rec=empByEmail(email)||{email};await fetch(SURL,{method:'POST',body:JSON.stringify({action:'upsertEmployee',...rec,email,active:false,Active:'No'})})}}catch(e){};allTasks=cleanTasks(allTasks);activeEmpF=null;if(typeof renderEmpList==='function')renderEmpList();if(typeof refillEmpDropdown==='function')refillEmpDropdown();if(typeof populateTaskFilterOptions==='function')populateTaskFilterOptions();if(typeof buildUI==='function')buildUI();if(typeof toast==='function')toast('🗑 Employee hidden. Assign/submit/analytics se removed.')};
+  window.fixHarshEmployeeAnalyticsNow=function(){try{if(typeof initEmpReg==='function')initEmpReg(true)}catch(e){};try{allTasks=cleanTasks(allTasks||[])}catch(e){};activeEmpF=null;try{addAnalyticsFilter()}catch(e){};try{refillEmpDropdown()}catch(e){};try{populateTaskFilterOptions()}catch(e){};try{buildUI()}catch(e){};if(typeof toast==='function')toast('✅ Harsh Kumar/Verma separated + removed employees hidden + analytics filter fixed')};
+  window.addEventListener('DOMContentLoaded',function(){setTimeout(()=>{try{fixHarshEmployeeAnalyticsNow()}catch(e){}},1000)});
+})();
+</script>
+
 </body>
 </html>
