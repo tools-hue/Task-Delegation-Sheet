@@ -4138,428 +4138,75 @@ function deleteMeeting(id){
 
 
 <script>
-
 /* ============================================================
-   FINAL STABILITY PATCH — Login + Admin + Employee + Exact Data
-   Added by ChatGPT. This overrides older broken logic safely.
+   UP-GRO STABILITY PATCH — ORIGINAL UI PRESERVED
+   Fixes: login, admin role, employee email ownership, inactive hide,
+   on-time calculation for old completed tasks, one-time completion sync.
    ============================================================ */
 (function(){
-  const EMAIL_ALIASES_FINAL = {
-    'ritutyagi@upgromedia.com':'ritutyagiea@upgromedia.com',
-    'ritu.tyagi@upgromedia.com':'ritutyagiea@upgromedia.com',
-    'ritutyagiea@upgromedia.com':'ritutyagiea@upgromedia.com',
-    'chnadrakala.meta@upgromedia.com':'chandrakala.meta@upgromedia.com',
-    'chandrakala.meta@upgromedia.com':'chandrakala.meta@upgromedia.com',
-    'shubhi.meta@upgromedia.com':'subhi.meta@upgromedia.com',
-    'subhi.meta@upgromedia.com':'subhi.meta@upgromedia.com',
-    'dheeraj.jaiswal@upgromedia.com':'dhiraj.jaiswal@upgromedia.com'
-  };
-  const ADMIN_EMAILS_FINAL = new Set([
-    'ritutyagiea@upgromedia.com',
-    'adarsh.mis@upgromedia.com',
-    'dhiraj.jaiswal@upgromedia.com',
-    'vraj9424@gmail.com'
-  ]);
+  'use strict';
 
-  window.normalizeEmailFinal = function(v){
-    let e = String(v || '').trim().toLowerCase();
-    if(!e) return '';
-    return EMAIL_ALIASES_FINAL[e] || e;
-  };
+  const MASTER_EMPLOYEES = [
+    {name:'Ritu Tyagi', email:'ritutyagiea@upgromedia.com', pass:'Ritu@1001', role:'Executive Assistant', desig:'EA', isAdmin:true, isManager:false},
+    {name:'Vishal Srivastava', email:'vishal.editor@upgromedia.com', pass:'Vishal@1002', role:'Video Editor', desig:'Video Editor'},
+    {name:'Ankit Prajapati', email:'ankit.seo@upgromedia.com', pass:'Ankit@1003', role:'SEO Executive', desig:'SEO', isManager:true},
+    {name:'Harsh Kumar', email:'harsh.graphic@upgromedia.com', pass:'Harsh@1004', role:'Graphic Designer', desig:'Graphic Designer'},
+    {name:'Vikas Pandey', email:'vikasvideoedit@upgromedia.com', pass:'Vikas@1005', role:'Manager - Video', desig:'Graphic Designer', isManager:true},
+    {name:'Abhishek Kasaudhan', email:'abhishek.meta@upgromedia.com', pass:'Abhishek@1006', role:'Manager - Meta', desig:'Meta Media Buyer', isManager:true},
+    {name:'Harsh Verma', email:'harsh.editor@upgromedia.com', pass:'Harsh@1007', role:'Video Editor', desig:'Video Editor'},
+    {name:'Dharmendra Sharma', email:'dharmendra.web@upgromedia.com', pass:'Dharmendra@1008', role:'Manager - Web', desig:'Web Developer', isManager:true},
+    {name:'Adarsh Srivastava', email:'adarsh.web@upgromedia.com', pass:'Adarsh@1010', role:'Web Developer', desig:'Web Developer', isManager:true},
+    {name:'Arpit Yadav', email:'arpit@upgromedia.com', pass:'Arpit@1011', role:'Accounts', desig:'Accounts'},
+    {name:'Adarsh Singh', email:'adarsh.mis@upgromedia.com', pass:'Adarsh@1012', role:'MIS', desig:'MIS', isAdmin:true},
+    {name:'Dhiraj Jaiswal', email:'dhiraj.jaiswal@upgromedia.com', pass:'Dheeraj@1013', role:'Founder & CEO', desig:'CEO', isAdmin:true},
+    {name:'Neeraj Kumar Yadav', email:'neeraj.meta@upgromedia.com', pass:'Neeraj@1015', role:'Manager - Meta', desig:'Meta Media Buyer', isManager:true},
+    {name:'Chandrakala Waldia', email:'chandrakala.meta@upgromedia.com', pass:'Chandrakala@1016', role:'Meta Media Buyer', desig:'Meta Media Buyer'},
+    {name:'Ranveer Singh', email:'ranveer.copywriter@upgromedia.com', pass:'Ranveer@123', role:'Copywriter', desig:'Copywriter', isManager:true},
+    {name:'Subhi Singh', email:'subhi.meta@upgromedia.com', pass:'Shubhi@123', role:'Meta Media Buyer', desig:'Meta Media Buyer', isManager:true},
+    {name:'Surya Singh', email:'surya.meta@upgromedia.com', pass:'Surya@123', role:'Meta Media Buyer', desig:'Meta Media Buyer', isManager:true}
+  ];
 
-  window.resetPortalCacheFinal = function(){
-    try{
-      localStorage.removeItem('upgro_current_user_v1');
-      localStorage.removeItem('upgro_roles_v3');
-      localStorage.removeItem('upgro_emp_sync_ping_v1');
-    }catch(e){}
-    location.reload();
-  };
+  const ADMIN_EMAILS = new Set(['ritutyagiea@upgromedia.com','adarsh.mis@upgromedia.com','dhiraj.jaiswal@upgromedia.com','vraj9424@gmail.com']);
+  const EMAIL_ALIASES = {'ritutyagi@upgromedia.com':'ritutyagiea@upgromedia.com','ritu.tyagi@upgromedia.com':'ritutyagiea@upgromedia.com','chnadrakala.meta@upgromedia.com':'chandrakala.meta@upgromedia.com','chandrakala.waldia@upgromedia.com':'chandrakala.meta@upgromedia.com','shubhi.meta@upgromedia.com':'subhi.meta@upgromedia.com'};
+  const nm = v => String(v||'').trim().replace(/\s+/g,' ').toLowerCase();
+  const em = v => { let x=String(v||'').trim().toLowerCase().replace(/\s+/g,''); return EMAIL_ALIASES[x] || x; };
+  const dateObj = v => { if(!v) return null; if(v instanceof Date && !isNaN(v)) return new Date(v.getTime()); const s=String(v).trim(); let m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/); if(m){ const d=new Date(+m[3],+m[2]-1,+m[1]); return isNaN(d)?null:d; } m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/); if(m){ const d=new Date(+m[1],+m[2]-1,+m[3]); return isNaN(d)?null:d; } const d=new Date(s); return isNaN(d)?null:d; };
+  const indianDate = d => { const x=dateObj(d)||new Date(); return String(x.getDate()).padStart(2,'0')+'/'+String(x.getMonth()+1).padStart(2,'0')+'/'+x.getFullYear()+', '+String(x.getHours()).padStart(2,'0')+':'+String(x.getMinutes()).padStart(2,'0')+':'+String(x.getSeconds()).padStart(2,'0'); };
+  const masterByEmail = () => new Map(MASTER_EMPLOYEES.map(e=>[em(e.email), {...e,email:em(e.email),active:true}]));
+  const masterByName = () => { const m=new Map(); MASTER_EMPLOYEES.forEach(e=>{ const rec={...e,email:em(e.email)}; const key=nm(e.name); if(!m.has(key)) m.set(key,[]); m.get(key).push(rec); const first=nm(String(e.name).split(' ')[0]); if(!m.has(first)) m.set(first,[]); m.get(first).push(rec); }); return m; };
 
-  function patchUsers(){
-    if(typeof USERS === 'undefined') return;
-    if(USERS['chnadrakala.meta@upgromedia.com'] && !USERS['chandrakala.meta@upgromedia.com']){
-      USERS['chandrakala.meta@upgromedia.com'] = {...USERS['chnadrakala.meta@upgromedia.com'], name:'Chandrakala Waldia'};
-    }
-    if(USERS['shubhi.meta@upgromedia.com'] && !USERS['subhi.meta@upgromedia.com']){
-      USERS['subhi.meta@upgromedia.com'] = {...USERS['shubhi.meta@upgromedia.com'], name:'Subhi Singh'};
-    }
-    Object.keys(USERS).forEach(k=>{
-      const nk = normalizeEmailFinal(k);
-      if(nk !== k && !USERS[nk]) USERS[nk] = {...USERS[k]};
-    });
-    ADMIN_EMAILS_FINAL.forEach(e=>{
-      if(USERS[e]){
-        USERS[e].isAdmin = true;
-        USERS[e].isManager = false;
-      }
-    });
-  }
+  function hardenUsers(){ try{ MASTER_EMPLOYEES.forEach((e,i)=>{ const email=em(e.email); if(typeof USERS!=='undefined'){ USERS[email]={...(USERS[email]||{}),...e,email,active:true,isAdmin:!!e.isAdmin,isManager:!!e.isManager,bg:(typeof CLRS!=='undefined'?CLRS[i%CLRS.length]:'#0B84FF')}; } }); if(typeof USERS!=='undefined' && USERS['chnadrakala.meta@upgromedia.com'] && !USERS['chandrakala.meta@upgromedia.com']) USERS['chandrakala.meta@upgromedia.com']={...USERS['chnadrakala.meta@upgromedia.com'],email:'chandrakala.meta@upgromedia.com',name:'Chandrakala Waldia'}; }catch(e){console.warn('hardenUsers failed',e);} }
+  hardenUsers();
 
-  function getUserRecordByEmail(email){
-    email = normalizeEmailFinal(email);
-    patchUsers();
-    let rec = null;
-    try{
-      if(Array.isArray(window.empReg)){
-        rec = empReg.find(e=>normalizeEmailFinal(e.email) === email) || null;
-      }
-    }catch(e){}
-    if(!rec && typeof USERS !== 'undefined' && USERS[email]) rec = {email, ...USERS[email]};
-    if(rec){
-      rec.email = email;
-      rec.name = rec.name || (email.split('@')[0]);
-      rec.role = rec.role || rec.desig || 'Team';
-      rec.desig = rec.desig || rec.role || 'Team';
-      rec.active = rec.active !== false;
-      if(ADMIN_EMAILS_FINAL.has(email)){
-        rec.isAdmin = true;
-        rec.isManager = false;
-        rec.role = rec.role || 'Admin';
-      }
-    }
-    return rec;
-  }
-
-  window.forceAdminByEmail = function(user){
-    if(!user || !user.email) return user;
-    user.email = normalizeEmailFinal(user.email);
-    if(ADMIN_EMAILS_FINAL.has(user.email)){
-      user.isAdmin = true;
-      user.isManager = false;
-      user.role = user.role || 'Admin';
-      user.desig = user.desig || user.role || 'Admin';
-    }
-    return user;
-  };
-
-  window.saveCurrentSession = function(){
-    try{ if(window.cu && cu.email) localStorage.setItem('upgro_current_user_v1', JSON.stringify({email:normalizeEmailFinal(cu.email), ts:Date.now()})); }catch(e){}
-  };
-
-  window.restoreCurrentSession = function(){
-    try{
-      const raw = localStorage.getItem('upgro_current_user_v1');
-      if(!raw) return false;
-      const sess = JSON.parse(raw) || {};
-      const email = normalizeEmailFinal(sess.email);
-      if(!email) return false;
-      try{ if(typeof initEmpReg === 'function') initEmpReg(true); }catch(e){}
-      const rec = getUserRecordByEmail(email);
-      if(!rec || rec.active === false) return false;
-      window.cu = forceAdminByEmail({...rec, email});
-      return true;
-    }catch(e){ return false; }
-  };
-
-  window.doLogin = async function(){
-    const email = normalizeEmailFinal((document.getElementById('lem') || {value:''}).value);
-    const pass = (document.getElementById('lpw') || {value:''}).value;
-    const errBox = document.getElementById('lerr');
-    function show(msg){ if(errBox){ errBox.textContent = msg; errBox.style.display='block'; } }
-    if(!email || !pass){ show('❌ Email and password required.'); return; }
-
-    patchUsers();
-
-    // Priority 1: hardcoded USERS. This prevents “email not found” when sheet is slow/not loaded.
-    if(typeof USERS !== 'undefined' && USERS[email] && String(USERS[email].pass || '') === String(pass)){
-      window.cu = forceAdminByEmail({email, ...USERS[email], active:USERS[email].active !== false});
-      if(errBox) errBox.style.display='none';
-      saveCurrentSession();
-      const lp=document.getElementById('lp'), app=document.getElementById('app');
-      if(lp) lp.classList.add('hidden');
-      if(app) app.classList.remove('hidden');
-      if(typeof initApp === 'function') initApp();
-      return;
-    }
-
-    // Priority 2: employee registry/sheet.
-    try{ if(typeof fetchEmployeesFromServer === 'function' && window.SURL) await fetchEmployeesFromServer(); }catch(e){}
-    try{ if(typeof initEmpReg === 'function') initEmpReg(true); }catch(e){}
-    const rec = getUserRecordByEmail(email);
-    if(rec && String(rec.pass || '') === String(pass) && rec.active !== false){
-      window.cu = forceAdminByEmail({...rec, email});
-      if(errBox) errBox.style.display='none';
-      saveCurrentSession();
-      const lp=document.getElementById('lp'), app=document.getElementById('app');
-      if(lp) lp.classList.add('hidden');
-      if(app) app.classList.remove('hidden');
-      if(typeof initApp === 'function') initApp();
-      return;
-    }
-    show('❌ Wrong email or password.');
-  };
-
-  function activeEmployeesFinal(){
-    patchUsers();
-    try{ if(typeof initEmpReg === 'function') initEmpReg(true); }catch(e){}
-    const map = new Map();
-    if(typeof USERS !== 'undefined'){
-      Object.entries(USERS).forEach(([email,u])=>{
-        const e = normalizeEmailFinal(email);
-        if(!e) return;
-        map.set(e,{email:e, ...u, active:u.active !== false});
-      });
-    }
-    try{
-      (empReg || []).forEach(e=>{
-        const em = normalizeEmailFinal(e.email);
-        if(!em) return;
-        map.set(em,{...(map.get(em)||{}), ...e, email:em, active:e.active !== false});
-      });
-    }catch(e){}
-    const out = Array.from(map.values()).map(forceAdminByEmail).filter(e=>e.email && e.active !== false);
-    out.sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')));
-    return out;
-  }
-  window.getActiveEmployeesFinal = activeEmployeesFinal;
-
-  function activeEmailSet(){ return new Set(activeEmployeesFinal().map(e=>e.email)); }
-
-  function emailFromName(name){
-    const n = String(name||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
-    if(!n) return '';
-    const emps = activeEmployeesFinal();
-    const matches = emps.filter(e=>{
-      const en = String(e.name||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
-      return en === n || en.split(' ')[0] === n;
-    });
-    return matches.length === 1 ? matches[0].email : '';
-  }
-
-  function taskOwnerEmail(t){
-    if(!t) return '';
-    const fields = [t.email,t.assignedEmail,t.assignedToEmail,t.empEmail,t.employeeEmail,t.AssignedTo_Email,t.AssignedToEmail,t['Assigned To Email'],t['Assigned To (Email)'],t['Employee Email'],t.Email,t.mail];
-    for(const f of fields){ const e = normalizeEmailFinal(f); if(e && e.includes('@')) return e; }
-    return emailFromName(t.empName || t.assignedTo || t.AssignedTo_Name || t['Assigned To Name'] || t.assignedToLabel || t.Name || '');
-  }
-  window.taskOwnerEmailFinal = taskOwnerEmail;
-
-  const oldEnsure = window.ensureTaskMeta;
-  window.ensureTaskMeta = function(t){
-    let x = oldEnsure ? oldEnsure(t) : (t || {});
-    const em = taskOwnerEmail(x);
-    if(em){
-      x.email = em;
-      x.assignedToEmail = em;
-      x.empEmail = em;
-      x.AssignedTo_Email = em;
-      const emp = activeEmployeesFinal().find(e=>e.email===em) || getUserRecordByEmail(em);
-      if(emp){
-        x.empName = emp.name;
-        x.assignedTo = emp.name;
-        x.assignedToLabel = emp.name;
-        x.desig = emp.desig || emp.role || x.desig || '';
-      }
-    }
-    x.status = String(x.status || '').toLowerCase().trim() || 'assigned';
-    return x;
-  };
-
-  window.cleanAllTasksFinal = function(){
-    const active = activeEmailSet();
-    if(Array.isArray(window.allTasks)){
-      window.allTasks = allTasks.map(t=>ensureTaskMeta(t)).filter(t=>{
-        const em = taskOwnerEmail(t);
-        return em && active.has(em);
-      });
-    }
-    return window.allTasks || [];
-  };
-
-  window.taskBelongsToCurrentUser = function(t){
-    if(!window.cu || !cu.email) return false;
-    return taskOwnerEmail(t) === normalizeEmailFinal(cu.email);
-  };
-
-  window.isAdmin = function(){
-    if(!window.cu || !cu.email) return false;
-    return ADMIN_EMAILS_FINAL.has(normalizeEmailFinal(cu.email)) || !!cu.isAdmin;
-  };
-
-  window.isManager = function(){
-    if(!window.cu || !cu.email || isAdmin()) return false;
-    const rec = getUserRecordByEmail(cu.email) || cu;
-    return !!(rec && rec.isManager);
-  };
-
-  window.canAssign = function(){ return !!(isAdmin() || isManager()); };
-
-  const oldApplyEmpF = window.applyEmpF;
-  window.applyEmpF = function(tasks){
-    let arr = (tasks || []).map(t=>ensureTaskMeta(t));
-    const active = activeEmailSet();
-    arr = arr.filter(t=>active.has(taskOwnerEmail(t)));
-    if(window.activeEmpF){
-      const f = normalizeEmailFinal(activeEmpF);
-      arr = arr.filter(t=>taskOwnerEmail(t) === f);
-    }
-    return arr;
-  };
-
-  const oldGetAnalyticsTasks = window.getAnalyticsTasks;
-  window.getAnalyticsTasks = function(){
-    let tasks = cleanAllTasksFinal().slice();
-    if(typeof applyDateF === 'function') tasks = applyDateF(tasks);
-    tasks = applyEmpF(tasks);
-    if(!isAdmin()){
-      if(isManager()){
-        const myEmail = normalizeEmailFinal(cu.email);
-        const myName = String(cu.name||'').toLowerCase().trim();
-        tasks = tasks.filter(t=> taskOwnerEmail(t)===myEmail || String(t.by||t.assignedBy||t.assignedByLabel||'').toLowerCase().trim()===myName );
-      }else{
-        tasks = tasks.filter(t=>taskBelongsToCurrentUser(t));
-      }
-    }
-    return tasks;
-  };
-
-  window.buildEmpPills = function(tasks){
-    const wrap = document.getElementById('emp-pills') || document.getElementById('empFilterWrap') || document.querySelector('.efpills');
-    if(!wrap) return;
-    const sourceTasks = Array.isArray(tasks) ? tasks.map(t=>ensureTaskMeta(t)) : cleanAllTasksFinal();
-    const counts = {};
-    sourceTasks.forEach(t=>{
-      const em = taskOwnerEmail(t);
-      if(!em) return;
-      if(!counts[em]) counts[em] = {total:0,pending:0};
-      counts[em].total++;
-      if(String(t.status||'').toLowerCase() !== 'completed') counts[em].pending++;
-    });
-    wrap.innerHTML='';
-    const all = document.createElement('div');
-    all.className = 'efp' + (!window.activeEmpF ? ' act' : '');
-    all.innerHTML = '🌐 All';
-    all.onclick = ()=>{ window.activeEmpF = null; if(typeof buildUI==='function') buildUI(); };
-    wrap.appendChild(all);
-    activeEmployeesFinal().forEach(emp=>{
-      const c = counts[emp.email] || {total:0,pending:0};
-      const p = document.createElement('div');
-      p.className = 'efp' + (normalizeEmailFinal(window.activeEmpF)===emp.email ? ' act' : '');
-      p.title = emp.email;
-      p.innerHTML = `<span class="efav" style="background:${emp.bg||'#0B84FF'}">${String(emp.name||'?').split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase()}</span> ${emp.name||emp.email}${c.pending?` <b style="color:var(--orange)">${c.pending}</b>`:''}`;
-      p.onclick = ()=>{ window.activeEmpF = emp.email; if(typeof buildUI==='function') buildUI(); };
-      wrap.appendChild(p);
-    });
-  };
-
-  function dateOnly(d){
-    if(!d) return null;
-    let x = d instanceof Date ? d : (typeof flexDate==='function' ? flexDate(d) : new Date(d));
-    if(!x || isNaN(x)) return null;
-    x = new Date(x.getFullYear(), x.getMonth(), x.getDate());
-    return x;
-  }
-  function completedDateFinal(t){
-    return dateOnly(t.completedAt || t.CompletedAt || t['Completed At'] || t.doneDate || t.submittedAt || t.ts);
-  }
-  function dueDateFinal(t){ return dateOnly(t.ddate || t.dueDate || t.DueDate || t['Due Date']); }
-
-  window.isTaskCompletedOnTimeFinal = function(t){
-    const due = dueDateFinal(t);
-    if(String(t.status||'').toLowerCase() !== 'completed') return false;
-    if(!due) return true;
-    const done = completedDateFinal(t);
-    if(!done) return true; // old completed data without completedAt is counted as on-time instead of showing 0%.
-    return done.getTime() <= due.getTime();
-  };
-
-  window.buildEmpStats = function(tasks){
-    const map = {};
-    (tasks||[]).map(t=>ensureTaskMeta(t)).forEach(t=>{
-      const em = taskOwnerEmail(t);
-      if(!em || !activeEmailSet().has(em)) return;
-      const emp = activeEmployeesFinal().find(e=>e.email===em) || {name:em.split('@')[0],desig:''};
-      if(!map[em]) map[em] = {email:em,name:emp.name,short:String(emp.name||em).split(' ')[0],desig:emp.desig||emp.role||'',total:0,completed:0,overdue:0,inProgress:0,ontime:0,withDue:0};
-      const s = String(t.status||'').toLowerCase();
-      map[em].total++;
-      if(s === 'completed'){
-        map[em].completed++;
-        map[em].withDue++;
-        if(isTaskCompletedOnTimeFinal(t)) map[em].ontime++;
-      }else if(s === 'in progress'){
-        map[em].inProgress++;
-      }
-      try{ if(typeof isOD==='function' && isOD(t)) map[em].overdue++; }catch(e){}
-    });
-    return Object.values(map).filter(e=>e.total>0).map(e=>({
-      ...e,
-      score:Math.max(0,e.completed*2-e.overdue+Math.round(e.completed/(e.total||1)*5)),
-      ontimePct:e.completed ? Math.round(e.ontime/e.completed*100) : 0
-    })).sort((a,b)=>b.score-a.score);
-  };
-
-  window.refreshEverywhereOnceFinal = function(){
-    cleanAllTasksFinal();
-    try{ if(typeof buildUI === 'function') buildUI(); }catch(e){ console.error(e); }
-    try{ if(typeof renderMyTasks === 'function') renderMyTasks(); }catch(e){}
-    try{ if(typeof renderAllTasks === 'function') renderAllTasks(); }catch(e){}
-    try{ if(typeof populateSubSel === 'function') populateSubSel(); }catch(e){}
-    try{ if(typeof reRenderCharts === 'function') reRenderCharts(); }catch(e){}
-  };
-
-  const oldQDone = window.qDone;
-  window.qDone = async function(id){
-    const now = new Date().toLocaleString('en-IN');
-    const t = Array.isArray(window.allTasks) ? allTasks.find(x=>String(x.id)===String(id) || String(x.taskCode)===String(id)) : null;
-    if(t){
-      t.status = 'completed';
-      t.completedAt = now;
-      t.doneUnits = Number(t.totalUnits || t.doneUnits || 1);
-      t.pendingUnits = 0;
-      ensureTaskMeta(t);
-    }
-    try{ if(window.statusOverrides) statusOverrides.set(id,{status:'completed',completedAt:now,pendingUnits:0}); }catch(e){}
-    refreshEverywhereOnceFinal();
-    if(typeof SURL !== 'undefined' && SURL){
-      try{ await fetch(SURL,{method:'POST',body:JSON.stringify({action:'updateTask',id,taskId:id,status:'Completed',Status:'Completed',completedAt:now,CompletedAt:now,doneUnits:t?Number(t.doneUnits||1):1,pendingUnits:0,deleteEmailOnComplete:false,keepEmail:true,preserveEmail:true})}); }catch(e){}
-    }
-    if(typeof toast==='function') toast('✅ Task completed and updated everywhere');
-  };
-
-  const oldSubmitWork = window.submitWork;
-  window.submitWork = async function(){
-    if(oldSubmitWork) await oldSubmitWork.apply(this, arguments);
-    setTimeout(refreshEverywhereOnceFinal, 250);
-  };
-
-  window.delEmp = async function(email){
-    const em = normalizeEmailFinal(email);
-    if(!em) return;
-    if(!confirm('Remove '+em+' from portal? Backup sheet data will remain safe.')) return;
-    try{ if(typeof initEmpReg==='function') initEmpReg(true); }catch(e){}
-    const idx = (empReg||[]).findIndex(e=>normalizeEmailFinal(e.email)===em);
-    if(idx >= 0) empReg[idx].active = false;
-    if(typeof USERS !== 'undefined' && USERS[em]) USERS[em].active = false;
-    try{ if(typeof persistEmpRegistry==='function') persistEmpRegistry(); }catch(e){}
-    try{ if(typeof syncUserDirectoryFromRegistry==='function') syncUserDirectoryFromRegistry(); }catch(e){}
-    try{ if(typeof emitEmpSync==='function') emitEmpSync(); }catch(e){}
-    if(typeof SURL !== 'undefined' && SURL){
-      try{ await fetch(SURL,{method:'POST',body:JSON.stringify({action:'upsertEmployee',email:em,name:(empReg[idx]&&empReg[idx].name)||'',pass:(empReg[idx]&&empReg[idx].pass)||'',role:(empReg[idx]&&empReg[idx].role)||'',desig:(empReg[idx]&&empReg[idx].desig)||'',isAdmin:false,isManager:false,active:false,joinDate:(empReg[idx]&&empReg[idx].joinDate)||''})}); }catch(e){}
-    }
-    if(window.activeEmpF && normalizeEmailFinal(activeEmpF)===em) window.activeEmpF = null;
-    if(typeof renderEmpList==='function') renderEmpList();
-    refreshEverywhereOnceFinal();
-    if(typeof toast==='function') toast('Employee removed from portal. Backup sheet data safe.');
-  };
-
-  window.fixPortalDataNow = function(){
-    patchUsers();
-    try{ if(typeof initEmpReg === 'function') initEmpReg(true); }catch(e){}
-    cleanAllTasksFinal();
-    if(window.cu) window.cu = forceAdminByEmail(cu);
-    refreshEverywhereOnceFinal();
-    if(typeof toast==='function') toast('Portal data fixed: email-based ownership active');
-  };
-
-  // Initial safe patch after the old app loads.
-  setTimeout(()=>{
-    patchUsers();
-    try{ if(Array.isArray(window.allTasks)) cleanAllTasksFinal(); }catch(e){}
-    try{ if(window.cu) window.cu = forceAdminByEmail(cu); }catch(e){}
-  }, 600);
+  function mergeEmployeeRegistry(list){ const map=new Map(); (Array.isArray(list)?list:[]).forEach((r,i)=>{ if(!r) return; const email=em(r.email||r.Email||r.EmployeeEmail||''); if(!email || !email.includes('@')) return; const old=map.get(email)||{}; map.set(email,{...old,...r,email,name:String(r.name||r.Name||old.name||'').trim()||email.split('@')[0],active:r.active!==false,bg:r.bg||old.bg||(typeof CLRS!=='undefined'?CLRS[i%CLRS.length]:'#0B84FF')}); }); MASTER_EMPLOYEES.forEach((r,i)=>{ const email=em(r.email), old=map.get(email)||{}; map.set(email,{...old,...r,email,active:old.active===false?false:true,bg:old.bg||(typeof CLRS!=='undefined'?CLRS[i%CLRS.length]:'#0B84FF')}); }); return Array.from(map.values()).map((r,i)=>({...r,email:em(r.email),name:r.name||r.email.split('@')[0],role:r.role||r.desig||'Team',desig:r.desig||r.role||'Team',isAdmin:ADMIN_EMAILS.has(em(r.email))||!!r.isAdmin,isManager:(ADMIN_EMAILS.has(em(r.email))?false:!!r.isManager),active:r.active!==false,bg:r.bg||(typeof CLRS!=='undefined'?CLRS[i%CLRS.length]:'#0B84FF')})); }
+  const oldInitEmpReg = window.initEmpReg;
+  window.initEmpReg = function(force){ try{ if(typeof oldInitEmpReg==='function') oldInitEmpReg.call(this,force); }catch(e){ console.warn('old initEmpReg failed',e); } try{ empReg=mergeEmployeeRegistry(empReg||[]); hardenUsers(); if(typeof syncUserDirectoryFromRegistry==='function') syncUserDirectoryFromRegistry(); return empReg; }catch(e){ console.error('fixed initEmpReg failed',e); return empReg||[]; } };
+  function getEmpByEmail(email){ email=em(email); try{ if(!empReg || !empReg.length) window.initEmpReg(true); }catch(_e){} return (empReg||[]).find(x=>em(x.email)===email) || masterByEmail().get(email) || null; }
+  function isActiveEmail(email){ const r=getEmpByEmail(email); return !!(r && r.active!==false); }
+  function resolveEmailFromName(name, desig){ const key=nm(name); if(!key) return ''; const arr=masterByName().get(key)||[]; if(!arr.length) return ''; if(arr.length===1) return em(arr[0].email); const d=nm(desig); if(d){ const exact=arr.find(e=>nm(e.desig).includes(d)||d.includes(nm(e.desig))||nm(e.role).includes(d)||d.includes(nm(e.role))); if(exact) return em(exact.email); } return ''; }
+  function resolveTaskEmail(t){ if(!t) return ''; let email=em(t.email||t.assignedEmail||t.assignedToEmail||t.empEmail||t.employeeEmail||t.AssignedTo_Email||t.AssignedToEmail||t['Assigned To Email']||t['Assigned To (Email)']||t.EmployeeEmail||t['Employee Email']||t.mail||t.Email||''); if(email && email.includes('@')) return email; const name=t.empName||t.assignedTo||t.assignedToName||t.AssignedTo_Name||t['Assigned To Name']||t['Assigned To (Name)']||t.EmployeeName||t.Name||''; return resolveEmailFromName(name,t.desig||t.Designation||''); }
+  function normalizeTaskInPlace(t){ if(!t) return t; const email=resolveTaskEmail(t); if(email){ const emp=getEmpByEmail(email); t.email=email; t.assignedToEmail=email; t.empEmail=email; if(emp){ t.empName=emp.name; t.assignedTo=emp.name; t.desig=emp.desig||emp.role||t.desig; t.assignedToLabel=(typeof normalizeDisplayName==='function')?normalizeDisplayName(emp.name,email,emp.desig):emp.name; } } const s=(typeof normStatus==='function')?normStatus(t.status||t.Status):String(t.status||'assigned').toLowerCase(); t.status=s; const total=Math.max(1,Number(t.totalUnits||t.TotalUnits||t['Total Units / Count']||1)||1); const done=Math.max(0,Math.min(total,Number(t.doneUnits||t.DoneUnits||0)||0)); t.totalUnits=total; t.doneUnits=done; t.pendingUnits=Math.max(0,total-done); if(s==='completed'){ t.doneUnits=total; t.pendingUnits=0; if(!t.completedAt && !t.CompletedAt && !t['Completed At']) t.completedAt=t.ddate?indianDate(t.ddate):indianDate(t.ts||t.adate||new Date()); } return t; }
+  const oldEnsure=window.ensureTaskMeta; window.ensureTaskMeta=function(t){ try{ if(typeof oldEnsure==='function') t=oldEnsure.call(this,t); }catch(e){} return normalizeTaskInPlace(t); };
+  window.taskBelongsToCurrentUser=function(t){ if(!t||!cu||!cu.email) return false; const taskEmail=resolveTaskEmail(t); return !!taskEmail && taskEmail===em(cu.email) && isActiveEmail(taskEmail); };
+  window.isAdmin=function(){ return !!(cu && ADMIN_EMAILS.has(em(cu.email))); };
+  window.isManager=function(){ if(!cu || window.isAdmin()) return false; const r=getEmpByEmail(cu.email)||cu; return !!(r && r.active!==false && r.isManager); };
+  window.canAssign=function(){ return window.isAdmin() || window.isManager(); };
+  const oldUname=window.uname; window.uname=function(email){ const r=getEmpByEmail(email); if(r) return r.name; return typeof oldUname==='function'?oldUname(email):String(email||'Unknown').split('@')[0]; };
+  const oldUdesig=window.udesig; window.udesig=function(email){ const r=getEmpByEmail(email); if(r) return r.desig||r.role||'Team'; return typeof oldUdesig==='function'?oldUdesig(email):'Team'; };
+  window.forceAdminByEmail=function(user){ if(!user||!user.email) return user; user.email=em(user.email); const r=getEmpByEmail(user.email)||{}; Object.assign(user,r,user,{email:user.email}); if(ADMIN_EMAILS.has(user.email)){ user.isAdmin=true; user.isManager=false; user.role=user.role||'Admin'; user.desig=user.desig||'Admin'; user.active=true; } return user; };
+  window.restoreCurrentSession=function(){ return false; };
+  window.doLogin=async function(){ const email=em((document.getElementById('lem')||{value:''}).value); const pass=(document.getElementById('lpw')||{value:''}).value; const err=document.getElementById('lerr'); const fail=msg=>{ if(err){err.textContent='❌ '+msg; err.style.display='block';} cu=null; }; if(!email||!pass) return fail('Email and password required.'); hardenUsers(); window.initEmpReg(true); let rec=getEmpByEmail(email); if((!rec || !String(rec.pass||'').trim()) && typeof USERS!=='undefined' && USERS[email]) rec={...USERS[email],email}; if(!rec && typeof USERS!=='undefined' && USERS[email]) rec={...USERS[email],email}; if(!rec) return fail('Email not found. Please check employee list.'); if(rec.active===false) return fail('This employee account is inactive.'); const savedPass=String(rec.pass || (typeof USERS!=='undefined' && USERS[email] && USERS[email].pass) || '').trim(); if(String(pass)!==savedPass) return fail('Wrong password.'); cu=window.forceAdminByEmail({...rec,email,role:rec.role||rec.desig||'Team',desig:rec.desig||rec.role||'Team'}); if(err) err.style.display='none'; try{ if(typeof saveCurrentSession==='function') saveCurrentSession(); }catch(_e){} const lp=document.getElementById('lp'), app=document.getElementById('app'); if(lp) lp.classList.add('hidden'); if(app) app.classList.remove('hidden'); if(typeof initApp==='function') initApp(); };
+  const oldRehydrate=window.rehydrateCurrentUser; window.rehydrateCurrentUser=function(forceUI){ try{ if(cu&&cu.email) cu=window.forceAdminByEmail(cu); }catch(_e){} try{ if(typeof oldRehydrate==='function') oldRehydrate.call(this,forceUI); }catch(_e){} try{ if(cu&&cu.email) cu=window.forceAdminByEmail(cu); }catch(_e){} const sr=document.getElementById('sb-role'); if(sr&&cu) sr.textContent=window.isAdmin()?'👑 Admin':window.isManager()?'🔀 Manager':(cu.role||'Team'); const sn=document.getElementById('sb-name'); if(sn&&cu) sn.textContent=cu.name||window.uname(cu.email); };
+  window.applyEmpF=function(tasks){ tasks=(tasks||[]).map(t=>normalizeTaskInPlace(t)).filter(t=>{ const te=resolveTaskEmail(t); return !!te && isActiveEmail(te); }); if(window.isAdmin()){ if(activeEmpF){ return tasks.filter(t=>{ const te=resolveTaskEmail(t); const key=te.split('@')[0].replace(/[^a-z0-9]/g,'-'); return key===activeEmpF || (typeof quickNameKey==='function' && quickNameKey(t.assignedTo||t.empName||window.uname(te),te)===activeEmpF); }); } return tasks; } if(window.isManager()){ const mine=em(cu.email); let final=tasks.filter(t=>resolveTaskEmail(t)===mine || nm(t.by||t.assignedBy||'')===nm(cu.name||'')); if(activeEmpF) final=final.filter(t=>resolveTaskEmail(t).split('@')[0].replace(/[^a-z0-9]/g,'-')===activeEmpF); return final; } return tasks.filter(t=>window.taskBelongsToCurrentUser(t)); };
+  const oldBuildEmpPills=window.buildEmpPills; window.buildEmpPills=function(tasks){ try{ window.initEmpReg(true); }catch(_e){} const cleaned=(tasks||[]).map(t=>normalizeTaskInPlace(t)).filter(t=>resolveTaskEmail(t)&&isActiveEmail(resolveTaskEmail(t))); if(typeof oldBuildEmpPills==='function') return oldBuildEmpPills.call(this,cleaned); };
+  window.buildEmpStats=function(tasks){ const map={}; (tasks||[]).map(t=>normalizeTaskInPlace(t)).forEach(t=>{ const email=resolveTaskEmail(t); if(!email || !isActiveEmail(email)) return; const emp=getEmpByEmail(email)||{}; if(!map[email]) map[email]={email,name:emp.name||window.uname(email),short:(emp.name||window.uname(email)).split(' ')[0],desig:emp.desig||window.udesig(email),total:0,completed:0,overdue:0,inProgress:0,ontime:0,withDue:0}; const row=map[email]; row.total++; const s=(typeof normStatus==='function')?normStatus(t.status):String(t.status||'assigned').toLowerCase(); if(s==='completed'){ row.completed++; const due=dateObj(t.ddate||t.DueDate||t['Due Date']); const cd=dateObj(t.completedAt||t.CompletedAt||t['Completed At']||t.ddate||t.ts||t.adate); if(due){ row.withDue++; if(!cd || cd<=due) row.ontime++; } else { row.withDue++; row.ontime++; } } if(s==='in progress') row.inProgress++; if(typeof isOD==='function' && isOD(t)) row.overdue++; }); return Object.values(map).filter(e=>e.total>0).map(e=>({...e,score:Math.max(0,e.completed*2-e.overdue+Math.round(e.completed/(e.total||1)*5)),ontimePct:e.withDue?Math.round(e.ontime/e.withDue*100):0})).sort((a,b)=>b.score-a.score); };
+  window.qDone=async function(id){ if(!SURL){ if(typeof toast==='function') toast('⚠ Connect Google Sheet in Settings'); return; } const now=indianDate(new Date()); const t=(allTasks||[]).find(x=>String(x.id)===String(id)||String(x.taskId)===String(id)||String(x.taskCode)===String(id)); if(t){ normalizeTaskInPlace(t); t.status='completed'; t.doneUnits=Math.max(1,Number(t.totalUnits||1)); t.pendingUnits=0; t.completedAt=now; if(statusOverrides) statusOverrides.set(id,{status:'completed',doneUnits:t.doneUnits,pendingUnits:0,completedAt:now}); } if(typeof buildUI==='function') buildUI(); if(typeof toast==='function') toast('✅ Task completed and updated everywhere'); try{ await fetch(SURL,{method:'POST',body:JSON.stringify({action:'updateTask',id,taskId:id,taskCode:id,status:'Completed',Status:'Completed',doneUnits:t?Math.max(1,Number(t.totalUnits||1)):1,updatedDoneUnits:t?Math.max(1,Number(t.totalUnits||1)):1,pendingUnits:0,completedAt:now,CompletedAt:now,'Completed At':now,email:t?resolveTaskEmail(t):'',AssignedTo_Email:t?resolveTaskEmail(t):'',preserveEmail:true,keepEmail:true,deleteEmailOnComplete:false})}); }catch(e){ if(typeof toast==='function') toast('⚠ Sheet sync failed — saved locally'); } };
+  window.delEmp=async function(email){ email=em(email); if(!email) return; if(!confirm('Remove '+email+'? Backup sheet data safe rahega.')) return; window.initEmpReg(true); const idx=(empReg||[]).findIndex(e=>em(e.email)===email); if(idx>=0) empReg[idx].active=false; if(typeof USERS!=='undefined' && USERS[email]) USERS[email].active=false; try{ if(typeof persistEmpRegistry==='function') persistEmpRegistry(); }catch(_e){} try{ if(typeof syncUserDirectoryFromRegistry==='function') syncUserDirectoryFromRegistry(); }catch(_e){} try{ if(SURL){ const rec=(empReg||[]).find(e=>em(e.email)===email)||{email,active:false}; await fetch(SURL,{method:'POST',body:JSON.stringify({action:'upsertEmployee',...rec,email,active:false,Active:'No'})}); } }catch(_e){} editEmpEmail=null; const fp=document.getElementById('emp-fp'); if(fp) fp.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:32px;margin-bottom:8px">✓</div><div style="font-weight:600">Employee removed from portal. Backup safe in sheet.</div></div>'; if(typeof toast==='function') toast('🗑 Employee hidden from portal. Backup safe.'); if(typeof renderEmpList==='function') renderEmpList(); if(typeof refillEmpDropdown==='function') refillEmpDropdown(); if(typeof buildUI==='function') buildUI(); };
+  const oldRenderEmpList=window.renderEmpList; window.renderEmpList=function(){ const backup=empReg; try{ empReg=(empReg||[]).filter(e=>e.active!==false); return oldRenderEmpList && oldRenderEmpList(); } finally{ empReg=backup; } };
+  window.fixPortalDataNow=function(){ hardenUsers(); window.initEmpReg(true); allTasks=(allTasks||[]).map(t=>normalizeTaskInPlace(t)).filter(t=>{ const te=resolveTaskEmail(t); return !!te && isActiveEmail(te); }); if(cu) cu=window.forceAdminByEmail(cu); if(typeof refillEmpDropdown==='function') refillEmpDropdown(); if(typeof buildUI==='function') buildUI(); if(typeof toast==='function') toast('✅ Portal data fixed: email ownership + active employees + on-time stats'); };
+  window.resetLoginCacheAndReload=function(){ try{ localStorage.removeItem('upgro_current_session_v1'); localStorage.removeItem('upgro_current_user_v1'); localStorage.removeItem('user'); }catch(e){} location.reload(); };
+  window.addEventListener('DOMContentLoaded',()=>{ hardenUsers(); try{ window.initEmpReg(true); }catch(_e){} const lp=document.getElementById('lp'), app=document.getElementById('app'); if(lp) lp.classList.remove('hidden'); if(app) app.classList.add('hidden'); const err=document.getElementById('lerr'); if(err) err.style.display='none'; });
 })();
-
 </script>
 </body>
 </html>
