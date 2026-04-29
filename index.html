@@ -4144,7 +4144,7 @@ function deleteMeeting(id){
     {name:'Vishal Srivastava', email:'vishal.editor@upgromedia.com', pass:'Vishal@1002', role:'Video Editor', desig:'Video Editor'},
     {name:'Ankit Prajapati', email:'ankit.seo@upgromedia.com', pass:'Ankit@1003', role:'SEO Executive', desig:'SEO', isManager:true},
     {name:'Harsh Kumar', email:'harsh.graphic@upgromedia.com', pass:'Harsh@1004', role:'Graphic Designer', desig:'Graphic Designer'},
-    {name:'Vikas Pandey', email:'vikasvideoedit@upgromedia.com', pass:'Vikas@1005', role:'Manager - Video', desig:'Graphic Designer', isManager:true},
+    {name:'Vikas Pandey', email:'vikasvideoedit@upgromedia.com', pass:'Vikas@1005', role:'Manager - Video', desig:'Video Editor', isManager:true},
     {name:'Abhishek Kasaudhan', email:'abhishek.meta@upgromedia.com', pass:'Abhishek@1006', role:'Manager - Meta', desig:'Meta Media Buyer', isManager:true},
     {name:'Harsh Verma', email:'harsh.editor@upgromedia.com', pass:'Harsh@1007', role:'Video Editor', desig:'Video Editor'},
     {name:'Dharmendra Sharma', email:'dharmendra.web@upgromedia.com', pass:'Dharmendra@1008', role:'Manager - Web', desig:'Web Developer', isManager:true},
@@ -4625,330 +4625,159 @@ function deleteMeeting(id){
   });
 })();
 </script>
+</body>
+</html>
 
 <script>
-/* ============================================================
-   FINAL SAFE PATCH — DO NOT BREAK EXISTING UI
-   Fix focus: employee designation accuracy + active employee flow.
-   - Vikas Pandey corrected to Video Editor everywhere.
-   - Email remains the only ID.
-   - Removed employees stay hidden from portal dropdowns/filters/analytics.
-   - Existing UI/functions are only wrapped, not replaced wholesale.
-   ============================================================ */
+/* FINAL LOCK: Vikas Pandey = Video Editor, no duplicate designation in portal */
 (function(){
   'use strict';
-
-  var CANON = {
-    'vikasvideoedit@upgromedia.com': {name:'Vikas Pandey', role:'Video Editor', desig:'Video Editor', isAdmin:false, isManager:false},
-    'harsh.graphic@upgromedia.com': {name:'Harsh Kumar', role:'Graphic Designer', desig:'Graphic Designer'},
-    'harsh.editor@upgromedia.com': {name:'Harsh Verma', role:'Video Editor', desig:'Video Editor'},
-    'vishal.editor@upgromedia.com': {name:'Vishal Srivastava', role:'Video Editor', desig:'Video Editor'},
-    'dharmendra.web@upgromedia.com': {name:'Dharmendra Sharma', role:'Web Developer', desig:'Web Developer'},
-    'adarsh.web@upgromedia.com': {name:'Adarsh Srivastava', role:'Web Developer', desig:'Web Developer'},
-    'adarsh.mis@upgromedia.com': {name:'Adarsh Singh', role:'MIS', desig:'MIS', isAdmin:true},
-    'ritutyagiea@upgromedia.com': {name:'Ritu Tyagi', role:'EA', desig:'EA', isAdmin:true},
-    'abhishek.meta@upgromedia.com': {name:'Abhishek Kasaudhan', role:'Meta Media Buyer', desig:'Meta Media Buyer'},
-    'chandrakala.meta@upgromedia.com': {name:'Chandrakala Waldia', role:'Meta Media Buyer', desig:'Meta Media Buyer'},
-    'neeraj.meta@upgromedia.com': {name:'Neeraj Kumar Yadav', role:'Meta Media Buyer', desig:'Meta Media Buyer'},
-    'subhi.meta@upgromedia.com': {name:'Subhi Singh', role:'Meta Media Buyer', desig:'Meta Media Buyer'},
-    'surya.meta@upgromedia.com': {name:'Surya Singh', role:'Meta Media Buyer', desig:'Meta Media Buyer'},
-    'ankit.seo@upgromedia.com': {name:'Ankit Prajapati', role:'SEO', desig:'SEO'},
-    'arpit@upgromedia.com': {name:'Arpit Yadav', role:'Accounts', desig:'Accounts'},
-    'dhiraj.jaiswal@upgromedia.com': {name:'Dhiraj Jaiswal', role:'CEO', desig:'CEO', isAdmin:true}
-  };
-
-  function E(v){return String(v||'').trim().toLowerCase();}
-  function getEmail(x){return E(x && (x.email || x.Email || x.empEmail || x.assignedToEmail || x['Assigned To (Email)'] || x.AssignedTo_Email));}
-  function isInactive(e){
-    if(!e) return true;
-    if(e.active === false) return true;
-    var a = String(e.Active !== undefined ? e.Active : '').trim().toLowerCase();
-    return a === 'no' || a === 'false' || a === 'inactive' || a === '0';
-  }
-  function applyCanonToEmp(e){
-    if(!e) return e;
-    var email = getEmail(e);
-    if(!email) return e;
-    e.email = email;
-    var c = CANON[email];
-    if(c){
-      e.name = c.name || e.name;
-      e.role = c.role || c.desig || e.role || e.desig || 'Team';
-      e.desig = c.desig || c.role || e.desig || e.role || 'Team';
-      if(c.isAdmin !== undefined) e.isAdmin = !!c.isAdmin;
-      if(c.isManager !== undefined) e.isManager = !!c.isManager;
+  const FIX_EMAIL='vikasvideoedit@upgromedia.com';
+  function E(v){return String(v||'').trim().toLowerCase().replace(/\s+/g,'');}
+  function isActive(e){const v=(e&&e.active!==undefined)?e.active:(e&&e.Active); if(v===false)return false; const s=String(v==null?'':v).toLowerCase().trim(); return !(s==='false'||s==='no'||s==='inactive'||s==='0'||s==='removed');}
+  function fixEmp(e){
+    if(!e)return e;
+    const email=E(e.email||e.Email||e.EmployeeEmail||'');
+    if(!email)return e;
+    e.email=email;
+    if(email===FIX_EMAIL){
+      e.name='Vikas Pandey';
+      e.role='Manager - Video';
+      e.desig='Video Editor';
+      e.isAdmin=false;
+      e.isManager=true;
+      e.pass=e.pass||'Vikas@1005';
     }else{
-      e.role = e.role || e.desig || 'Team';
-      e.desig = e.desig || e.role || 'Team';
+      e.name=e.name||e.Name||email.split('@')[0];
+      e.role=e.role||e.Role||e.desig||e.Designation||'Team';
+      e.desig=e.desig||e.Designation||e.role||'Team';
     }
-    if(e.active === undefined && e.Active !== undefined){
-      e.active = !isInactive(e);
-    }
-    if(e.active === undefined) e.active = true;
+    e.active=isActive(e);
+    e.Active=e.active?'Yes':'No';
     return e;
   }
-  function canonList(list){
-    var seen = Object.create(null), out=[];
-    (Array.isArray(list)?list:[]).forEach(function(raw){
-      var e = applyCanonToEmp(raw || {});
-      var email = getEmail(e);
-      if(!email) return;
-      if(seen[email]){
-        var prev=seen[email];
-        Object.assign(prev, e);
-        applyCanonToEmp(prev);
-      }else{
-        seen[email]=e;
-        out.push(e);
+  function dedupe(list){
+    const map=new Map();
+    (Array.isArray(list)?list:[]).forEach(function(x){
+      let e=fixEmp(Object.assign({},x));
+      if(!e||!e.email||!e.email.includes('@'))return;
+      const p=map.get(e.email);
+      if(p){
+        const inactive=p.active===false||e.active===false;
+        e=Object.assign({},p,e,{active:!inactive,Active:inactive?'No':'Yes'});
       }
+      map.set(e.email,e);
     });
-    return out;
+    if(map.has(FIX_EMAIL)) map.set(FIX_EMAIL,fixEmp(map.get(FIX_EMAIL)));
+    return Array.from(map.values()).sort(function(a,b){return String(a.name||'').localeCompare(String(b.name||''));});
   }
-  function currentEmployeesRaw(){
-    var arr=[];
-    try{ if(Array.isArray(window.empReg)) arr=arr.concat(window.empReg); }catch(_e){}
-    try{ if(typeof empReg!=='undefined' && Array.isArray(empReg) && empReg!==window.empReg) arr=arr.concat(empReg); }catch(_e){}
-    try{ if(window.USERS){ Object.keys(window.USERS).forEach(function(k){arr.push(Object.assign({email:k}, window.USERS[k]||{}));}); } }catch(_e){}
-    return canonList(arr);
-  }
-  function activeEmployeesSafe(){
-    return currentEmployeesRaw().filter(function(e){return getEmail(e) && !isInactive(e);});
-  }
-  function writeBackRegistry(){
-    var list = canonList(currentEmployeesRaw());
-    try{ window.empReg = list; }catch(_e){}
-    try{ empReg = list; }catch(_e){}
+  const oldInit=window.initEmpReg;
+  window.initEmpReg=function(force){
+    try{ if(typeof oldInit==='function') oldInit.call(this,force); }catch(e){console.warn('old init failed',e);}
+    const base=Array.isArray(window.empReg)?window.empReg:(typeof empReg!=='undefined'&&Array.isArray(empReg)?empReg:[]);
+    const fixed=dedupe(base);
+    window.empReg=fixed;
+    try{empReg=fixed;}catch(e){}
     try{
-      window.USERS = window.USERS || {};
-      list.forEach(function(e){
-        var email=getEmail(e); if(!email) return;
-        window.USERS[email] = Object.assign({}, window.USERS[email]||{}, e, {email:email, role:e.role, desig:e.desig, active:!isInactive(e)});
-      });
-    }catch(_e){}
+      if(typeof USERS!=='undefined'){
+        fixed.forEach(function(e){USERS[e.email]=Object.assign({},USERS[e.email]||{},e);});
+        USERS[FIX_EMAIL]=Object.assign({},USERS[FIX_EMAIL]||{},{email:FIX_EMAIL,name:'Vikas Pandey',role:'Manager - Video',desig:'Video Editor',pass:'Vikas@1005',isAdmin:false,isManager:true,active:true});
+      }
+    }catch(e){}
+    return fixed;
+  };
+  window.getAllEmployees=function(){try{window.initEmpReg(false);}catch(e){} return dedupe(window.empReg||empReg||[]);};
+  window.getActiveEmployees=window.activeEmployees=function(){return window.getAllEmployees().filter(function(e){return e.active!==false;});};
+  function activeNonAdmin(){return window.getActiveEmployees().filter(function(e){return !e.isAdmin;});}
+  window.refillEmpDropdown=function(){
+    try{window.initEmpReg(false);}catch(e){}
+    const sel=document.getElementById('add-emp'); if(!sel)return;
+    const keep=E(sel.value); const list=activeNonAdmin();
+    sel.innerHTML='<option value="">— Select Active Employee —</option>'+list.map(function(e){return '<option value="'+E(e.email)+'">'+(e.name||E(e.email))+' — '+(e.desig||e.role||'Team')+'</option>';}).join('');
+    if(keep&&list.some(function(e){return E(e.email)===keep;}))sel.value=keep;
+  };
+  function taskEmail(t){
+    if(!t)return '';
+    const email=E(t.email||t.assignedToEmail||t.empEmail||t.AssignedTo_Email||t['Assigned To (Email)']||t['Assigned To Email']||t.EmployeeEmail||t.Email||'');
+    if(email&&email.includes('@'))return email;
+    const n=String(t.empName||t.assignedTo||t.AssignedTo_Name||t['Assigned To (Name)']||t.Name||'').trim().toLowerCase();
+    if(n==='vikas pandey'||n==='vikash pandey')return FIX_EMAIL;
+    if(n==='harsh kumar')return 'harsh.graphic@upgromedia.com';
+    if(n==='harsh verma')return 'harsh.editor@upgromedia.com';
+    return '';
+  }
+  function filterActiveTasks(tasks){
+    const active=new Set(window.getActiveEmployees().map(function(e){return E(e.email);}));
+    return (Array.isArray(tasks)?tasks:[]).filter(function(t){return active.has(taskEmail(t));});
+  }
+  window.applyEmpF=function(tasks){
+    let list=filterActiveTasks(tasks||window.allTasks||allTasks||[]);
+    const key=window.activeEmpF||(typeof activeEmpF!=='undefined'?activeEmpF:null);
+    if(key)list=list.filter(function(t){return taskEmail(t).replace(/[^a-z0-9]/g,'-')===key;});
+    if(typeof isAdmin==='function'&&isAdmin())return list;
+    if(typeof isManager==='function'&&isManager())return list;
+    if(window.cu&&window.cu.email)return list.filter(function(t){return taskEmail(t)===E(window.cu.email);});
     return list;
-  }
-  function cleanTaskOwner(t){
-    if(!t) return t;
-    var email=getEmail(t);
-    if(email){
-      t.email=email; t.empEmail=email; t.assignedToEmail=email; t.AssignedTo_Email=email; t['Assigned To (Email)']=email;
-      var c=CANON[email];
-      if(c){
-        t.empName=c.name; t.assignedTo=c.name; t.AssignedTo_Name=c.name; t['Assigned To (Name)']=c.name;
-        t.desig=c.desig || c.role || t.desig;
-      }
-    }
-    return t;
-  }
-  function activeEmailSet(){
-    var s=Object.create(null); activeEmployeesSafe().forEach(function(e){s[getEmail(e)]=true;}); return s;
-  }
-  function cleanTasks(list){
-    var active=activeEmailSet();
-    return (Array.isArray(list)?list:[]).map(cleanTaskOwner).filter(function(t){
-      var em=getEmail(t); return em && active[em];
+  };
+  window.buildEmpPills=function(tasks){
+    const cont=document.getElementById('emp-pills'); if(!cont)return;
+    const counts=new Map(),pend=new Map();
+    filterActiveTasks(tasks||window.allTasks||allTasks||[]).forEach(function(t){
+      const e=taskEmail(t); counts.set(e,(counts.get(e)||0)+1);
+      if(String(t.status||'').toLowerCase()!=='completed')pend.set(e,(pend.get(e)||0)+1);
     });
-  }
-  function refreshTextEverywhere(){
-    // Correct already-rendered option/table/card text without touching layout.
-    try{
-      document.querySelectorAll('option').forEach(function(o){
-        var val=E(o.value); if(CANON[val]) o.textContent=(CANON[val].name+' — '+CANON[val].desig);
-      });
-    }catch(_e){}
-  }
-  function refreshEverythingSafe(){
-    writeBackRegistry();
-    try{ if(Array.isArray(window.allTasks)) window.allTasks=cleanTasks(window.allTasks); }catch(_e){}
-    try{ if(typeof allTasks!=='undefined' && Array.isArray(allTasks)) allTasks=cleanTasks(allTasks); }catch(_e){}
-    try{ if(typeof syncUserDirectoryFromRegistry==='function') syncUserDirectoryFromRegistry(); }catch(_e){}
-    try{ if(typeof refillEmpDropdown==='function') refillEmpDropdown(); }catch(_e){}
-    try{ if(typeof populateTaskFilterOptions==='function') populateTaskFilterOptions(); }catch(_e){}
-    try{ if(typeof renderEmpList==='function') renderEmpList(); }catch(_e){}
-    try{ if(typeof buildUI==='function') buildUI(); }catch(_e){}
-    try{ if(typeof reRenderCharts==='function') reRenderCharts(); }catch(_e){}
-    refreshTextEverywhere();
-  }
-
-  // Ensure init always normalizes registry.
-  var oldInit = window.initEmpReg;
-  window.initEmpReg = function(){
-    var r;
-    try{ r = oldInit && oldInit.apply(this, arguments); }catch(e){ console.error('initEmpReg original error', e); }
-    writeBackRegistry();
-    return r;
-  };
-
-  // Public helpers used by other patches/functions.
-  window.getAllEmployees = function(){ return currentEmployeesRaw(); };
-  window.getActiveEmployees = function(){ return activeEmployeesSafe(); };
-  window.isActiveEmployeeEmail = function(email){ var set=activeEmailSet(); return !!set[E(email)]; };
-
-  // Assign task dropdown: exact active employee list with correct designation.
-  window.refillEmpDropdown = function(){
-    writeBackRegistry();
-    var sel=document.getElementById('add-emp'); if(!sel) return;
-    var keep=E(sel.value);
-    var list=activeEmployeesSafe().filter(function(e){return !e.isAdmin;});
-    sel.innerHTML='<option value="">— Select Active Employee —</option>'+list.map(function(e){
-      return '<option value="'+getEmail(e)+'">'+(e.name||getEmail(e))+' — '+(e.desig||e.role||'Team')+'</option>';
-    }).join('');
-    if(keep && list.some(function(e){return getEmail(e)===keep;})) sel.value=keep;
-  };
-
-  // Generic employee selects/dropdowns used elsewhere: active only + correct designation.
-  var oldPopulate = window.populateTaskFilterOptions;
-  window.populateTaskFilterOptions = function(){
-    var r; try{ r = oldPopulate && oldPopulate.apply(this, arguments); }catch(e){ console.warn(e); }
-    refreshTextEverywhere();
-    return r;
-  };
-
-  // Keep render list original, but normalize data before/after.
-  var oldRenderEmp = window.renderEmpList;
-  window.renderEmpList = function(){
-    writeBackRegistry();
-    var r = oldRenderEmp && oldRenderEmp.apply(this, arguments);
-    refreshTextEverywhere();
-    return r;
-  };
-
-  // Save/edit employee: preserve admin editing, then normalize exact designation.
-  var oldSaveEmp = window.saveEmp;
-  if(oldSaveEmp){
-    window.saveEmp = async function(email){
-      var r = await oldSaveEmp.apply(this, arguments);
-      writeBackRegistry();
-      refreshEverythingSafe();
-      return r;
-    };
-  }
-  var oldAddEmp = window.addNewEmp;
-  if(oldAddEmp){
-    window.addNewEmp = async function(){
-      var r = await oldAddEmp.apply(this, arguments);
-      writeBackRegistry();
-      refreshEverythingSafe();
-      return r;
-    };
-  }
-
-  // Remove employee = soft hide in portal, not backend task deletion.
-  var oldDelEmp = window.delEmp;
-  window.delEmp = async function(email){
-    email=E(email); if(!email) return;
-    if(!confirm('Remove '+email+'? Portal se har jagah hide hoga. Backend sheet backup safe rahega.')) return;
-    writeBackRegistry();
-    var found=false;
-    try{ (window.empReg||[]).forEach(function(e){ if(getEmail(e)===email){ e.active=false; e.Active='No'; found=true; } }); }catch(_e){}
-    try{ if(window.USERS && window.USERS[email]) window.USERS[email].active=false; }catch(_e){}
-    try{ if(typeof persistEmpRegistry==='function') persistEmpRegistry(); }catch(_e){}
-    try{ if(typeof syncUserDirectoryFromRegistry==='function') syncUserDirectoryFromRegistry(); }catch(_e){}
-    try{
-      if(typeof SURL!=='undefined' && SURL){
-        await fetch(SURL,{method:'POST',body:JSON.stringify({action:'upsertEmployee',email:email,Email:email,active:false,Active:'No'})});
-      }
-    }catch(e){ console.warn('employee inactive sheet sync failed', e); }
-    try{ if(Array.isArray(window.allTasks)) window.allTasks=cleanTasks(window.allTasks); allTasks=window.allTasks; }catch(_e){}
-    try{ activeEmpF=null; window.activeEmpF=null; }catch(_e){}
-    refreshEverythingSafe();
-    if(typeof toast==='function') toast('🗑 Employee hidden from portal everywhere. Backup safe.');
-  };
-
-  // Task ownership + visibility uses email only.
-  window.taskBelongsToCurrentUser = function(t){ return !!(window.cu && getEmail(t)===E(window.cu.email)); };
-  window.applyEmpF = function(tasks){
-    var list=cleanTasks(tasks||[]);
-    var admin=(typeof isAdmin==='function' && isAdmin());
-    var manager=(typeof isManager==='function' && isManager());
-    var selected=E(window.activeEmpF || (typeof activeEmpF!=='undefined'?activeEmpF:''));
-    if(admin){
-      if(selected){
-        list=list.filter(function(t){return getEmail(t).replace(/[^a-z0-9]/g,'-')===selected || getEmail(t)===selected;});
-      }
-      return list;
-    }
-    if(manager && window.cu){
-      var me=E(window.cu.email), myName=String(window.cu.name||'').trim().toLowerCase();
-      return list.filter(function(t){return getEmail(t)===me || String(t.by||t.assignedBy||'').trim().toLowerCase()===myName;});
-    }
-    return list.filter(function(t){return window.taskBelongsToCurrentUser(t);});
-  };
-
-  // Quick employee pills: no name merging, email key only.
-  window.buildEmpPills = function(tasks){
-    var cont=document.getElementById('emp-pills')||document.querySelector('.efpills'); if(!cont) return;
-    var list=cleanTasks(tasks||window.allTasks||[]);
-    var counts=new Map(), pend=new Map();
-    list.forEach(function(t){ var e=getEmail(t); counts.set(e,(counts.get(e)||0)+1); if(String(t.status||'').toLowerCase()!=='completed') pend.set(e,(pend.get(e)||0)+1); });
     cont.innerHTML='';
-    var all=document.createElement('span'); all.className='efp'+(!(window.activeEmpF||activeEmpF)?' act':''); all.textContent='🌐 All';
-    all.onclick=function(){window.activeEmpF=null; try{activeEmpF=null;}catch(_e){}; if(typeof buildUI==='function') buildUI();};
+    const all=document.createElement('span');
+    all.className='efp'+(!(window.activeEmpF||(typeof activeEmpF!=='undefined'?activeEmpF:null))?' act':'');
+    all.textContent='🌐 All';
+    all.onclick=function(){window.activeEmpF=null;try{activeEmpF=null;}catch(e){} if(typeof buildUI==='function')buildUI();};
     cont.appendChild(all);
-    activeEmployeesSafe().filter(function(e){return counts.has(getEmail(e));}).forEach(function(e,i){
-      var em=getEmail(e), key=em.replace(/[^a-z0-9]/g,'-'), sp=document.createElement('span');
-      sp.className='efp'+(((window.activeEmpF||activeEmpF)===key)?' act':''); sp.title=em;
-      var initials=String(e.name||'?').split(/\s+/).map(function(x){return x[0];}).join('').slice(0,2).toUpperCase();
-      sp.innerHTML='<span class="efav" style="background:'+(e.bg||(typeof CLRS!=='undefined'?CLRS[i%CLRS.length]:'#0B84FF'))+'">'+initials+'</span>'+e.name+(pend.get(em)?' <b style="font-size:10px;color:#dc2626">'+pend.get(em)+'</b>':'');
-      sp.onclick=function(){ window.activeEmpF=key; try{activeEmpF=key;}catch(_e){}; if(typeof buildUI==='function') buildUI(); };
+    window.getActiveEmployees().filter(function(e){return counts.has(E(e.email));}).forEach(function(e,i){
+      const email=E(e.email),key=email.replace(/[^a-z0-9]/g,'-'),sp=document.createElement('span');
+      sp.className='efp'+(((window.activeEmpF||(typeof activeEmpF!=='undefined'?activeEmpF:null))===key)?' act':'');
+      sp.title=email+' • '+(e.desig||e.role||'Team');
+      const ini=String(e.name||'?').split(/\s+/).map(function(x){return x[0];}).join('').slice(0,2).toUpperCase();
+      sp.innerHTML='<span class="efav" style="background:'+(e.bg||(typeof CLRS!=='undefined'?CLRS[i%CLRS.length]:'#0B84FF'))+'">'+ini+'</span>'+e.name+(pend.get(email)?' <b style="font-size:10px;color:#dc2626">'+pend.get(email)+'</b>':'');
+      sp.onclick=function(){window.activeEmpF=key;try{activeEmpF=key;}catch(e){} if(typeof buildUI==='function')buildUI();};
       cont.appendChild(sp);
     });
   };
-
-  // Analytics employee filter: active employees only + correct designation.
   function ensureAnalyticsFilter(){
-    var ph=document.querySelector('#pg-analytics .ph-r'); if(!ph) return;
-    var sel=document.getElementById('an-emp-filter');
+    const ph=document.querySelector('#pg-analytics .ph-r'); if(!ph)return;
+    let sel=document.getElementById('an-emp-filter');
     if(!sel){
-      sel=document.createElement('select'); sel.id='an-emp-filter'; sel.className='fc'; sel.style.cssText='width:auto;padding:6px 11px;font-size:12px;min-width:220px';
-      sel.onchange=function(){ if(typeof reRenderCharts==='function') reRenderCharts(); };
-      var r=document.getElementById('an-range'); ph.insertBefore(sel,r?r.nextSibling:ph.firstChild);
+      sel=document.createElement('select'); sel.id='an-emp-filter'; sel.className='fc';
+      sel.style.cssText='width:auto;padding:6px 11px;font-size:12px;min-width:260px';
+      sel.onchange=function(){if(typeof reRenderCharts==='function')reRenderCharts();};
+      const r=document.getElementById('an-range'); ph.insertBefore(sel,r?r.nextSibling:ph.firstChild);
     }
-    var keep=E(sel.value), list=activeEmployeesSafe();
-    sel.innerHTML='<option value="">Employee — All Active</option>'+list.map(function(e){return '<option value="'+getEmail(e)+'">'+e.name+' — '+(e.desig||e.role||'Team')+'</option>';}).join('');
-    if(keep && list.some(function(e){return getEmail(e)===keep;})) sel.value=keep;
+    const keep=E(sel.value),list=window.getActiveEmployees();
+    sel.innerHTML='<option value="">Employee — All Active</option>'+list.map(function(e){return '<option value="'+E(e.email)+'">'+e.name+' — '+(e.desig||e.role||'Team')+'</option>';}).join('');
+    if(keep&&list.some(function(e){return E(e.email)===keep;}))sel.value=keep;
   }
-  window.getAnalyticsTasks = function(){
-    var list=cleanTasks(window.allTasks||allTasks||[]);
-    var f=E((document.getElementById('an-emp-filter')||{value:''}).value);
-    if(f) list=list.filter(function(t){return getEmail(t)===f;});
-    if(!(typeof isAdmin==='function' && isAdmin())) list=list.filter(function(t){return window.taskBelongsToCurrentUser(t);});
-    return list;
+  const oldCharts=window.reRenderCharts; window.reRenderCharts=function(){ensureAnalyticsFilter(); return typeof oldCharts==='function'?oldCharts.apply(this,arguments):undefined;};
+  const oldBuild=window.buildUI; window.buildUI=function(){try{window.initEmpReg(false);window.refillEmpDropdown();ensureAnalyticsFilter();}catch(e){} return typeof oldBuild==='function'?oldBuild.apply(this,arguments):undefined;};
+  const oldRenderEmp=window.renderEmpList;
+  window.renderEmpList=function(){
+    try{window.initEmpReg(false);}catch(e){}
+    const backup=window.empReg||empReg||[];
+    try{const active=window.getActiveEmployees(); window.empReg=active; try{empReg=active;}catch(e){} return typeof oldRenderEmp==='function'?oldRenderEmp.apply(this,arguments):undefined;}
+    finally{window.empReg=backup;try{empReg=backup;}catch(e){}}
   };
-  var oldCharts=window.reRenderCharts;
-  window.reRenderCharts=function(){ ensureAnalyticsFilter(); return oldCharts&&oldCharts.apply(this, arguments); };
-
-  // BuildUI wrapper: normalize only, keep original UI.
-  var oldBuild=window.buildUI;
-  window.buildUI=function(){
-    writeBackRegistry();
-    try{ if(Array.isArray(window.allTasks)) window.allTasks=cleanTasks(window.allTasks); allTasks=window.allTasks||allTasks; }catch(_e){}
-    var r=oldBuild&&oldBuild.apply(this, arguments);
-    ensureAnalyticsFilter();
-    window.refillEmpDropdown();
-    refreshTextEverywhere();
-    return r;
-  };
-
-  // User-run repair.
-  window.fixEverythingWithoutBreakingUI = function(){
-    writeBackRegistry();
-    refreshEverythingSafe();
-    try{
-      // persist corrected Vikas once to sheet if connected
-      if(typeof SURL!=='undefined' && SURL){
-        var v=CANON['vikasvideoedit@upgromedia.com'];
-        fetch(SURL,{method:'POST',body:JSON.stringify(Object.assign({action:'upsertEmployee',email:'vikasvideoedit@upgromedia.com',Email:'vikasvideoedit@upgromedia.com',active:true,Active:'Yes'},v))}).catch(function(){});
+  window.fixVikasPandeyEverywhereNow=function(){
+    try{window.initEmpReg(true);}catch(e){}
+    try{(window.allTasks||allTasks||[]).forEach(function(t){
+      const te=taskEmail(t),n=String(t.empName||t.assignedTo||'').toLowerCase();
+      if(te===FIX_EMAIL||n.includes('vikas pandey')||n.includes('vikash pandey')){
+        t.email=FIX_EMAIL;t.assignedToEmail=FIX_EMAIL;t.empEmail=FIX_EMAIL;t.empName='Vikas Pandey';t.assignedTo='Vikas Pandey';t.desig='Video Editor';
       }
-    }catch(_e){}
-    if(typeof toast==='function') toast('✅ Full UI preserved. Vikas designation + employees + analytics fixed.');
+    });}catch(e){}
+    try{window.refillEmpDropdown();}catch(e){}
+    try{ensureAnalyticsFilter();}catch(e){}
+    try{if(typeof renderEmpList==='function')renderEmpList();}catch(e){}
+    try{if(typeof buildUI==='function')buildUI();}catch(e){}
+    try{if(typeof toast==='function')toast('✅ Vikas Pandey fixed as Video Editor everywhere');}catch(e){}
   };
-
-  document.addEventListener('DOMContentLoaded', function(){
-    setTimeout(function(){ try{ window.fixEverythingWithoutBreakingUI(); }catch(e){ console.error(e); } }, 800);
-  });
+  setTimeout(function(){try{window.fixVikasPandeyEverywhereNow();}catch(e){console.warn(e);}},300);
 })();
 </script>
-
-</body>
-</html>
