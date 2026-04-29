@@ -961,8 +961,7 @@ const USERS = {
   'adarsh.web@upgromedia.com':       {pass:'Adarsh@1010',     name:'Adarsh Srivastava',     role:'Web Developer',      desig:'Web Developer',    isAdmin:false, isManager:true},
   'arpit@upgromedia.com':            {pass:'Arpit@1011',      name:'Arpit Yadav',           role:'Team',               desig:'Team',             isAdmin:false, isManager:false},
   'junaid@upgromedia.com':           {pass:'Junaid@1014',     name:'Junaid',                role:'Google Ads',         desig:'Google Ads',       isAdmin:false, isManager:false},
-  'chandrakala.meta@upgromedia.com': {pass:'Chandrakala@1016',name:'Chandrakala Waldia',    role:'Meta Media Buyer',   desig:'Meta Media Buyer', isAdmin:false, isManager:false},
-  'adarsh.mis@upgromedia.com':       {pass:'Adarsh@1012',     name:'Adarsh Singh',          role:'MIS',                desig:'MIS',              isAdmin:true,  isManager:false},
+  'chnadrakala.meta@upgromedia.com': {pass:'Chandrakala@1016',name:'Chandrakala Waldia',    role:'Meta Media Buyer',   desig:'Meta Media Buyer', isAdmin:false, isManager:false},
 };
 
 const CLRS=['#0B84FF','#E53935','#00B67A','#F59E0B','#7C3AED','#0E9F8E','#EA580C','#DB2777','#64748B','#D97706','#1565C0','#16A34A','#9333EA','#0891B2'];
@@ -4464,7 +4463,7 @@ function deleteMeeting(id){
   window.refillEmpDropdown=function(){
     var sel=document.getElementById('add-emp'); if(!sel) return;
     var keep=E(sel.value);
-    var list=activeEmployees().filter(function(e){return !e.isAdmin;});
+    var list=activeEmployees();
     sel.innerHTML='<option value="">— Select Active Employee —</option>'+list.map(function(e){return '<option value="'+E(e.email)+'">'+(e.name||E(e.email))+' — '+(e.desig||e.role||'Team')+'</option>';}).join('');
     if(keep && list.some(function(e){return E(e.email)===keep;})) sel.value=keep;
   };
@@ -4650,7 +4649,7 @@ window.normalizeDisplayName=function(name,email,desig){email=cEmail(email,name);
 function tEmail(t){return cEmail(t&&(t.email||t.assignedToEmail||t.empEmail||t.EmployeeEmail||t.AssignedTo_Email||t['Assigned To Email']||''),t&&(t.empName||t.assignedTo||t.AssignedTo_Name||t['Assigned To Name']||''))}
 function normTask(t){if(!t)return t;var em=tEmail(t),e=byEmail.get(em)||clean(true).find(x=>E(x.email)===em);if(e){t.email=em;t.assignedToEmail=em;t.empEmail=em;t.empName=e.name;t.assignedTo=e.name;t.AssignedTo_Name=e.name;t.desig=e.desig||e.role;t.assignedToLabel=e.name+' — '+(e.desig||e.role)}return t}
 function activeTasks(tasks){var active=new Set(clean(false).map(e=>E(e.email)));return (tasks||[]).map(normTask).filter(t=>active.has(tEmail(t)))}
-window.refillEmpDropdown=function(){var sels=[];['task-emp','assignEmployee','assign-to','assignee','emp-select','taskAssignee','task-assignee','meeting-attendees'].forEach(id=>{var el=document.getElementById(id);if(el)sels.push(el)});document.querySelectorAll('select').forEach(function(s){var label=(s.id+' '+s.name+' '+(s.getAttribute('aria-label')||'')+' '+(s.closest('.fg')?s.closest('.fg').innerText:'')).toLowerCase();if(/assign|employee|attendee|assignee|member/.test(label))sels.push(s)});var done=new Set();sels.forEach(function(sel){if(!sel||done.has(sel))return;done.add(sel);var keep=cEmail(sel.value,'');var first=sel.querySelector('option[value=""]')||sel.querySelector('option');var ph=(first&&!isMail(first.value))?(first.textContent||'— Select Active Employee —'):'— Select Active Employee —';sel.innerHTML='<option value="">'+ph+'</option>';clean(false).filter(e=>!e.isAdmin).forEach(function(e){var o=document.createElement('option');o.value=e.email;o.textContent=e.name+' — '+(e.desig||e.role||'Team');sel.appendChild(o)});if(keep&&Array.from(sel.options).some(o=>E(o.value)===keep))sel.value=keep})};
+window.refillEmpDropdown=function(){var sels=[];['task-emp','assignEmployee','assign-to','assignee','emp-select','taskAssignee','task-assignee','meeting-attendees'].forEach(id=>{var el=document.getElementById(id);if(el)sels.push(el)});document.querySelectorAll('select').forEach(function(s){var label=(s.id+' '+s.name+' '+(s.getAttribute('aria-label')||'')+' '+(s.closest('.fg')?s.closest('.fg').innerText:'')).toLowerCase();if(/assign|employee|attendee|assignee|member/.test(label))sels.push(s)});var done=new Set();sels.forEach(function(sel){if(!sel||done.has(sel))return;done.add(sel);var keep=cEmail(sel.value,'');var first=sel.querySelector('option[value=""]')||sel.querySelector('option');var ph=(first&&!isMail(first.value))?(first.textContent||'— Select Active Employee —'):'— Select Active Employee —';sel.innerHTML='<option value="">'+ph+'</option>';clean(false).forEach(function(e){var o=document.createElement('option');o.value=e.email;o.textContent=e.name+' — '+(e.desig||e.role||'Team');sel.appendChild(o)});if(keep&&Array.from(sel.options).some(o=>E(o.value)===keep))sel.value=keep})};
 window.populateTaskFilterOptions=function(){[['at-assigned-to','Assigned To — All'],['at-assigned-by','Assigned By — All'],['an-emp-filter','Employee — All Active']].forEach(function(p){var sel=document.getElementById(p[0]);if(!sel)return;var keep=cEmail(sel.value,'');sel.innerHTML='<option value="">'+p[1]+'</option>';clean(false).forEach(function(e){var o=document.createElement('option');o.value=e.email;o.textContent=e.name+' — '+(e.desig||e.role||'Team');sel.appendChild(o)});if(keep&&Array.from(sel.options).some(o=>E(o.value)===keep))sel.value=keep})};
 var ob=window.buildUI;window.buildUI=function(){try{if(window.allTasks)window.allTasks=activeTasks(window.allTasks);if(typeof allTasks!=='undefined')allTasks=activeTasks(allTasks)}catch(e){}var r=ob&&ob.apply(this,arguments);try{window.refillEmpDropdown();window.populateTaskFilterOptions()}catch(e){}return r};
 var oo=window.openAddTask;window.openAddTask=function(){var r=oo&&oo.apply(this,arguments);setTimeout(function(){try{window.refillEmpDropdown()}catch(e){}},80);return r};
@@ -4658,6 +4657,51 @@ var ora=window.renderAllTasks;window.renderAllTasks=function(){try{if(typeof all
 var orc=window.reRenderCharts;window.reRenderCharts=function(){try{window.populateTaskFilterOptions()}catch(e){}return orc&&orc.apply(this,arguments)};
 window.fixDuplicateEmployeesNow=function(){clean(true);try{if(window.allTasks)window.allTasks=activeTasks(window.allTasks);if(typeof allTasks!=='undefined')allTasks=activeTasks(allTasks)}catch(e){}window.refillEmpDropdown();window.populateTaskFilterOptions();try{if(typeof renderEmpList==='function')renderEmpList()}catch(e){}try{if(typeof buildUI==='function')buildUI()}catch(e){}try{if(typeof toast==='function')toast('✅ Duplicate employees removed. Vikas Pandey locked as Video Editor.')}catch(e){}};
 document.addEventListener('DOMContentLoaded',function(){setTimeout(window.fixDuplicateEmployeesNow,1000)});
+})();
+</script>
+
+<script>
+/* ADMIN ASSIGN VISIBILITY PATCH — include active admins in Assign Task dropdown */
+(function(){
+'use strict';
+function E(v){return String(v||'').trim().toLowerCase()}
+function isMail(v){return E(v).includes('@')}
+function getList(){
+  try{
+    if(typeof getActiveEmployees==='function') return getActiveEmployees();
+  }catch(e){}
+  try{return (window.empReg||empReg||[]).filter(function(x){return x&&x.active!==false&&isMail(x.email)});}catch(e){return []}
+}
+function fillAssignDropdownsIncludingAdmins(){
+  var sels=[];
+  ['add-emp','task-emp','assignEmployee','assign-to','assignee','emp-select','taskAssignee','task-assignee'].forEach(function(id){var el=document.getElementById(id);if(el)sels.push(el)});
+  document.querySelectorAll('select').forEach(function(s){
+    var label=(s.id+' '+s.name+' '+(s.getAttribute('aria-label')||'')+' '+(s.closest('.fg')?s.closest('.fg').innerText:'')).toLowerCase();
+    if(/assign to|assign|assignee|employee/.test(label)) sels.push(s);
+  });
+  var used=new Set();
+  sels.forEach(function(sel){
+    if(!sel||used.has(sel)) return; used.add(sel);
+    var keep=E(sel.value);
+    var ph='— Select Active Employee —';
+    var first=sel.querySelector('option[value=""]')||sel.querySelector('option');
+    if(first && !isMail(first.value) && String(first.textContent||'').trim()) ph=first.textContent;
+    sel.innerHTML='<option value="">'+ph+'</option>';
+    getList().forEach(function(e){
+      var o=document.createElement('option');
+      o.value=E(e.email);
+      o.textContent=(e.name||E(e.email))+' — '+(e.desig||e.role||'Team');
+      sel.appendChild(o);
+    });
+    if(keep && Array.from(sel.options).some(function(o){return E(o.value)===keep;})) sel.value=keep;
+  });
+}
+var oldRefill=window.refillEmpDropdown;
+window.refillEmpDropdown=function(){try{if(typeof oldRefill==='function') oldRefill.apply(this,arguments);}catch(e){} fillAssignDropdownsIncludingAdmins();};
+var oldOpen=window.openAddTask;
+window.openAddTask=function(){var r=oldOpen&&oldOpen.apply(this,arguments); setTimeout(fillAssignDropdownsIncludingAdmins,80); setTimeout(fillAssignDropdownsIncludingAdmins,300); return r;};
+window.fixAdminsInAssignTaskNow=function(){fillAssignDropdownsIncludingAdmins(); try{if(typeof toast==='function')toast('✅ Active admins are now visible in Assign Task dropdown.');}catch(e){}};
+document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDropdownsIncludingAdmins,1200);});
 })();
 </script>
 </body>
