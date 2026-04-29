@@ -4,13 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>UpGro Media — Mission Control</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js">
-initEmpReg(true);
-if(restoreCurrentSession()){
-  const lp=$('lp'), app=$('app');
-  if(lp&&app){lp.classList.add('hidden');app.classList.remove('hidden');initApp();}
-}
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -750,7 +744,7 @@ textarea.fc{resize:vertical;min-height:68px}
         </div>
         <div class="sc">
           <div class="sc-t">📧 Email Notifications</div>
-          <div class="srow"><div><div class="sr-l">Pending Task Hourly Alerts</div><div class="sr-d">Sent every hour for accepted &amp; pending tasks (from 01/04/2026) · Stops when task completed</div></div><span style="font-size:12px;color:var(--green);font-weight:700">✅ Active via Apps Script</span></div>
+          <div class="srow"><div><div class="sr-l">Pending Task Hourly Alerts</div><div class="sr-d">Overdue / pending automatic emails are disabled. Only assign, update, submission and meeting mails will work.</div></div><span style="font-size:12px;color:var(--red);font-weight:700">⛔ Disabled</span></div>
           <div class="srow"><div><div class="sr-l">Daily Report</div><div class="sr-d">Sent every day ~9 AM IST to admin</div></div><span style="font-size:12px;color:var(--green);font-weight:700">✅ Active via Apps Script</span></div>
           <div class="srow"><div><div class="sr-l">Setup Triggers</div><div class="sr-d">In Google Sheet: 🚀 UpGro v5 menu → "Setup All Triggers"</div></div></div>
           <div class="srow" style="align-items:flex-end">
@@ -931,50 +925,95 @@ textarea.fc{resize:vertical;min-height:68px}
 //  Managers: Vikash, Dharmendra, Abhishek, Neeraj
 //  Admins: Adarsh MIS, Dhiraj Jaiswal (CEO), Ritu Tyagi (EA)
 //  Features: Manager role, task counters, multi-link, drive upload,
-//            hourly pending email (01/04/2026+), consolidated clean code
+//            overdue / hourly pending emails disabled, consolidated clean code
 // ════════════════════════════════════════════════════════════════
 
 // ── USERS ─────────────────────────────────────────────────────
 // isManager = Work Assigner (can assign tasks to team)
 const USERS = {
-  'ritutyagiea@upgromedia.com':      {pass:'Ritu@1001',       name:'Ritu Tyagi',            role:'Executive Assistant', desig:'EA',               isAdmin:true,  isManager:false},
-  'adarsh.mis@upgromedia.com':       {pass:'Adarsh@1012',     name:'Adarsh Singh',          role:'MIS',                desig:'MIS',              isAdmin:true,  isManager:false},
-  'dhiraj.jaiswal@upgromedia.com':   {pass:'Dheeraj@1013',    name:'Dhiraj Jaiswal',        role:'Founder & CEO',      desig:'CEO',              isAdmin:true,  isManager:false},
-  'vraj9424@gmail.com':              {pass:'Tarun@1017',      name:'Tarun Verma',           role:'Founder',            desig:'Founder',          isAdmin:true,  isManager:false},
-
-  // MANAGERS
-  'vikasvideoedit@upgromedia.com':   {pass:'Vikas@1005',      name:'Vikas Pandey',          role:'Manager - Video',    desig:'Video Editor',     isAdmin:false, isManager:true},
-  'dharmendra.web@upgromedia.com':   {pass:'Dharmendra@1008', name:'Dharmendra Sharma',     role:'Manager - Web',      desig:'Web Developer',    isAdmin:false, isManager:true},
-  'abhishek.meta@upgromedia.com':    {pass:'Abhishek@1006',   name:'Abhishek Kasaudhan',    role:'Manager - Meta',     desig:'Meta Media Buyer', isAdmin:false, isManager:true},
-  'neeraj.meta@upgromedia.com':      {pass:'Neeraj@1015',     name:'Neeraj Kumar Yadav',    role:'Manager - Meta',     desig:'Meta Media Buyer', isAdmin:false, isManager:true},
-  'adarsh.web@upgromedia.com':       {pass:'Adarsh@1010',     name:'Adarsh Srivastava',     role:'Web Developer',      desig:'Web Developer',    isAdmin:false, isManager:true},
-  'ankit.seo@upgromedia.com':        {pass:'Ankit@1003',      name:'Ankit Prajapati',       role:'SEO Executive',      desig:'SEO',              isAdmin:false, isManager:true},
-  'aditya.googleads@upgromedia.com': {pass:'Aditya@1019',     name:'Aditya Sharma',         role:'Google Ads',         desig:'Google Ads',       isAdmin:false, isManager:true},
-  'surya.meta@upgromedia.com':       {pass:'Surya@123',        name:'Surya Pratap Singh',    role:'Meta Media Buyer',   desig:'Meta Media Buyer', isAdmin:false, isManager:true},
-  'shubhi.meta@upgromedia.com':      {pass:'Shubhi@123',       name:'Shubhi Singh',          role:'Meta Media Buyer',   desig:'Meta Media Buyer', isAdmin:false, isManager:true},
-  'ranveer.copywriter@upgromedia.com':{pass:'Ranveer@123',     name:'Ranveer Singh',          role:'Copywriter',   desig:'Copywriter', isAdmin:false, isManager:true},
-
-  // USERS
-  'vishal.editor@upgromedia.com':    {pass:'Vishal@1002',     name:'Vishal Srivastava',     role:'Video Editor',       desig:'Video Editor',     isAdmin:false, isManager:false},
-  'ankit.seo@upgromedia.com':        {pass:'Ankit@1003',      name:'Ankit Prajapati',       role:'SEO Executive',      desig:'SEO',              isAdmin:false, isManager:true},
-  'harsh.graphic@upgromedia.com':    {pass:'Harsh@1004',      name:'Harsh Kumar',           role:'Graphic Designer',   desig:'Graphic Designer', isAdmin:false, isManager:false},
-  'harsh.editor@upgromedia.com':     {pass:'Harsh@1007',      name:'Harsh Verma',           role:'Video Editor',       desig:'Video Editor',     isAdmin:false, isManager:false},
-  'palak.intern@upgromedia.com':     {pass:'Palak@1009',      name:'Palak Gupta',           role:'Intern',             desig:'Intern',           isAdmin:false, isManager:false},
-  'adarsh.web@upgromedia.com':       {pass:'Adarsh@1010',     name:'Adarsh Srivastava',     role:'Web Developer',      desig:'Web Developer',    isAdmin:false, isManager:true},
-  'arpit@upgromedia.com':            {pass:'Arpit@1011',      name:'Arpit Yadav',           role:'Team',               desig:'Team',             isAdmin:false, isManager:false},
-  'junaid@upgromedia.com':           {pass:'Junaid@1014',     name:'Junaid',                role:'Google Ads',         desig:'Google Ads',       isAdmin:false, isManager:false},
-  'chnadrakala.meta@upgromedia.com': {pass:'Chandrakala@1016',name:'Chandrakala Waldia',    role:'Meta Media Buyer',   desig:'Meta Media Buyer', isAdmin:false, isManager:false},
-  'muskan.crm@upgromedia.com':       {pass:'Muskan@1018',     name:'Muskan Agarwal',        role:'CRM',                desig:'CRM',              isAdmin:false, isManager:false},
-  'aditya.googleads@upgromedia.com': {pass:'Aditya@1019',     name:'Aditya Sharma',         role:'Google Ads',         desig:'Google Ads',       isAdmin:false, isManager:true},
-  'aditya.mis@upgromedia.com':       {pass:'Aditya@1020',     name:'Aditya',                role:'MIS',                desig:'MIS',              isAdmin:false, isManager:false},
-  'anshikagupta@upgromedia.com':     {pass:'Anshika@1021',    name:'Anshika Gupta',         role:'CRM Executive',      desig:'CRM',              isAdmin:false, isManager:false},
-  'nishant.meta@upgromedia.com':     {pass:'Nishant@1022',    name:'Nishant Arya',          role:'Meta Media Buyer',   desig:'Meta Media Buyer', isAdmin:false, isManager:false}
+  'ritutyagiea@upgromedia.com':       {pass:'Ritu@1001',       name:'Ritu Tyagi',            role:'EA',               desig:'EA',               isAdmin:true,  isManager:false},
+  'vishal.editor@upgromedia.com':     {pass:'Vishal@1002',     name:'Vishal Srivastava',     role:'Video Editor',     desig:'Video Editor',     isAdmin:false, isManager:false},
+  'ankit.seo@upgromedia.com':         {pass:'Ankit@1003',      name:'Ankit Prajapati',       role:'SEO',              desig:'SEO',              isAdmin:false, isManager:true},
+  'harsh.graphic@upgromedia.com':     {pass:'Harsh@1004',      name:'Harsh Kumar',           role:'Graphic Designer', desig:'Graphic Designer', isAdmin:false, isManager:false},
+  'vikasvideoedit@upgromedia.com':    {pass:'Vikas@1005',      name:'Vikas Pandey',          role:'Graphic Designer', desig:'Graphic Designer', isAdmin:false, isManager:true},
+  'abhishek.meta@upgromedia.com':     {pass:'Abhishek@1006',   name:'Abhishek Kasaudhan',    role:'Meta Media Buyer', desig:'Meta Media Buyer', isAdmin:false, isManager:true},
+  'harsh.editor@upgromedia.com':      {pass:'Harsh@1007',      name:'Harsh Verma',           role:'Video Editor',     desig:'Video Editor',     isAdmin:false, isManager:false},
+  'dharmendra.web@upgromedia.com':    {pass:'Dharmendra@1008', name:'Dharmendra Sharma',     role:'Web Developer',    desig:'Web Developer',    isAdmin:false, isManager:true},
+  'adarsh.web@upgromedia.com':        {pass:'Adarsh@1010',     name:'Adarsh Srivastava',     role:'Web Developer',    desig:'Web Developer',    isAdmin:false, isManager:true},
+  'arpit@upgromedia.com':             {pass:'Arpit@1011',      name:'Arpit Yadav',           role:'Accounts',         desig:'Accounts',         isAdmin:false, isManager:false},
+  'adarsh.mis@upgromedia.com':        {pass:'Adarsh@1012',     name:'Adarsh Singh',          role:'MIS',              desig:'MIS',              isAdmin:true,  isManager:false},
+  'dhiraj.jaiswal@upgromedia.com':    {pass:'Dheeraj@1013',    name:'Dhiraj Sir',            role:'CEO',              desig:'CEO',              isAdmin:true,  isManager:false},
+  'neeraj.meta@upgromedia.com':       {pass:'Neeraj@1015',     name:'Neeraj Kumar Yadav',    role:'Meta Media Buyer', desig:'Meta Media Buyer', isAdmin:false, isManager:true},
+  'chandrakala.meta@upgromedia.com':  {pass:'Chandrakala@1016',name:'Chandrakala Waldia',    role:'Meta Media Buyer', desig:'Meta Media Buyer', isAdmin:false, isManager:false},
+  'ranveer.copywriter@upgromedia.com':{pass:'Ranveer@123',     name:'Ranveer Singh',         role:'Copywriter',       desig:'Copywriter',       isAdmin:false, isManager:true},
+  'subhi.meta@upgromedia.com':        {pass:'Subhi@123',       name:'Subhi Singh',           role:'Meta Media Buyer', desig:'Meta Media Buyer', isAdmin:false, isManager:true},
+  'surya.meta@upgromedia.com':        {pass:'Surya@123',       name:'Surya Singh',           role:'Meta Media Buyer', desig:'Meta Media Buyer', isAdmin:false, isManager:true}
 };
 
 const CLRS=['#0B84FF','#E53935','#00B67A','#F59E0B','#7C3AED','#0E9F8E','#EA580C','#DB2777','#64748B','#D97706','#1565C0','#16A34A','#9333EA','#0891B2'];
 const DESIG_OPTS=['MIS','Executive Assistant','Web Developer','Graphic Designer','Video Editor','CRM','Meta Media Buyer','Google Ads','SEO Executive','SEO','Founder','CEO','HR','Accountant','Intern','Content Writer','Social Media Manager','Performance Marketer','Team Lead','Other'];
 const PAGE_TITLES={dash:'Dashboard',mytasks:'My Tasks',alltasks:'All Tasks',analytics:'Analytics',employees:'Employees',forms:'Forms & Links',meetings:'Meetings',settings:'Settings'};
-const DATA_START = new Date('2026-04-01T00:00:00'); // Data & email from this date
+const DATA_START = new Date('2026-04-01T00:00:00'); // Data from this date. Overdue/pending auto emails disabled.
+
+// Canonical employee master list — email is unique ID. This prevents duplicate quick-filter pills.
+const CANONICAL_EMPLOYEES = Object.entries(USERS).map(([email,u],i)=>({
+  email:String(email).trim().toLowerCase(),
+  name:u.name,
+  pass:u.pass,
+  role:u.role,
+  desig:u.desig,
+  isAdmin:!!u.isAdmin,
+  isManager:!!u.isManager,
+  active:u.active!==false,
+  bg:u.bg||CLRS[i%CLRS.length],
+  joinDate:u.joinDate||''
+}));
+const CANONICAL_EMAILS = new Set(CANONICAL_EMPLOYEES.map(e=>e.email));
+const EMAIL_ALIAS_MAP = {
+  'chnadrakala.meta@upgromedia.com':'chandrakala.meta@upgromedia.com',
+  'shubhi.meta@upgromedia.com':'subhi.meta@upgromedia.com',
+  'dheeraj.jaiswal@upgromedia.com':'dhiraj.jaiswal@upgromedia.com'
+};
+function canonEmail(v){
+  const e=String(v||'').trim().toLowerCase();
+  return EMAIL_ALIAS_MAP[e] || e;
+}
+function canonNameKey(v){
+  return String(v||'').trim().toLowerCase().replace(/s+/g,' ').replace(/[^a-z0-9 ]/g,'');
+}
+function canonicalByEmail(email){
+  const em=canonEmail(email);
+  return CANONICAL_EMPLOYEES.find(e=>e.email===em)||null;
+}
+function canonicalByName(name){
+  const key=canonNameKey(name);
+  if(!key || key==='unknown') return null;
+  const direct = CANONICAL_EMPLOYEES.find(e=>canonNameKey(e.name)===key);
+  if(direct) return direct;
+  return CANONICAL_EMPLOYEES.find(e=>{
+    const n=canonNameKey(e.name);
+    const first=n.split(' ')[0];
+    return key===first || key.startsWith(first+' ') || n.startsWith(key+' ');
+  }) || null;
+}
+function canonicalFromTask(t){
+  if(!t) return null;
+  const emailCandidates=[
+    t.email,t.assignedEmail,t.assignedToEmail,t.empEmail,t.employeeEmail,t.AssignedTo_Email,t.AssignedToEmail,
+    t['Assigned To Email'],t['Employee Email'],t.mail,t.Email,
+    t.assignedTo,t.assignedToLabel,t.empName,t.employeeName,t.EmployeeName,t.AssignedTo_Name,t['Assigned To Name'],t['Assigned To'],t.Name
+  ].map(v=>String(v||'').trim()).filter(Boolean);
+  for(const raw of emailCandidates){
+    if(isEmailLike(raw)){
+      const rec=canonicalByEmail(raw);
+      if(rec) return rec;
+    }
+  }
+  const names=[t.assignedTo,t.assignedToLabel,t.empName,t.assignedUser,t.employeeName,t.EmployeeName,t.AssignedTo_Name,t['Assigned To Name'],t['Assigned To'],t.Name]
+    .map(v=>String(v||'').trim()).filter(Boolean);
+  for(const nm of names){ const rec=canonicalByName(nm); if(rec) return rec; }
+  return null;
+}
 
 // ── STATE ─────────────────────────────────────────────────────
 let cu=null, allTasks=[], empReg=[], formLinks=[], dataSheets=[], charts={}, notifications=[], sheetEmpReg=[];
@@ -988,63 +1027,51 @@ let SURL=localStorage.getItem('ugv4_url')||localStorage.getItem('upgro_url')||''
 // ── UTILS ─────────────────────────────────────────────────────
 const ini=n=>(n||'?').trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2);
 function normalizeQuickName(name,email=''){
-  let n=String(name||'').replace(/\s+/g,' ').trim();
-  const em=String(email||'').trim().toLowerCase();
-  if(!n && em) n=uname(em)||'';
-  const low=n.toLowerCase();
-  if(em.includes('adarsh')||low==='adarsh'||low.includes('adarsh singh')) return 'Adarsh Singh (MIS)';
-  if(low.includes('adarsh srivastava')) return 'Adarsh Srivastava (Web)';
-  if(low==='ritu' || low.startsWith('ritu ')) return 'Ritu';
-  if(low==='harsh' || low.startsWith('harsh ')) return 'Harsh';
-  if(low==='vikas' || low.startsWith('vikas ')) return 'Vikas';
-  if(low==='vishal' || low.startsWith('vishal ')) return 'Vishal';
-  if(low==='chandrakala' || low.startsWith('chandrakala ')) return 'Chandrakala';
-  if(low==='abhishek' || low.startsWith('abhishek ')) return 'Abhishek';
-  if(low==='ankit' || low.startsWith('ankit ')) return 'Ankit';
-  if(low==='neeraj' || low.startsWith('neeraj ')) return 'Neeraj';
-  if(low==='muskan' || low.startsWith('muskan ')) return 'Muskan';
-  if(low==='dhiraj' || low.startsWith('dhiraj ')) return 'Dhiraj';
-  if(low==='surya' || low.startsWith('surya ')) return 'Surya';
-  if(low==='subhi' || low.startsWith('shubhi ') || low==='shubhi') return 'Shubhi';
-  if(low==='arpit' || low.startsWith('arpit ')) return 'Arpit';
-  if(low==='aditya' || low.startsWith('aditya ')) return 'Aditya';
-  if(low==='dharmendra' || low.startsWith('dharmendra ')) return 'Dharmendra';
-  return n ? n.replace(/\b\w/g,c=>c.toUpperCase()) : '';
+  const rec = canonicalByEmail(email) || canonicalByName(name);
+  return rec ? rec.name : '';
 }
 function quickNameKey(name,email=''){
-  const n=normalizeQuickName(name,email).toLowerCase();
-  if(n.includes('adarsh singh')) return 'adarsh-singh-mis';
-  if(n.includes('adarsh srivastava')) return 'adarsh-srivastava-web';
-  return n.replace(/\([^)]*\)/g,'').replace(/[^a-z0-9]/g,'');
+  const rec = canonicalByEmail(email) || canonicalByName(name);
+  return rec ? rec.email : '';
 }
 
 const CM=id=>document.getElementById(id).classList.add('hidden');
 const $=id=>document.getElementById(id);
 const toast=msg=>{const el=document.createElement('div');el.className='toast';el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),2700);};
 
-// Role helpers
+// Role helpers — ADMIN SECTION MASTER FIX
 function getCurrentEmployeeRecord(){
-  if(!cu||!cu.email) return null;
-  try{ initEmpReg(true); }catch(e){}
-  const email=String(cu.email).trim().toLowerCase();
-  const fresh=(typeof getStoredEmployee==='function' ? getStoredEmployee(email) : null) || empReg.find(e=>e.email===email) || null;
+  if(!cu || !cu.email) return null;
+  const email = String(cu.email || '').trim().toLowerCase();
+  try{ if(!empReg || !empReg.length) initEmpReg(true); }catch(e){ console.error('Employee registry init failed:', e); }
+  let fresh = null;
+  try{
+    fresh = (typeof getStoredEmployee === 'function' ? getStoredEmployee(email) : null)
+      || (Array.isArray(empReg) ? empReg.find(e => String(e.email || '').trim().toLowerCase() === email) : null)
+      || (USERS[email] ? {
+        email,
+        name: USERS[email].name || uname(email),
+        pass: USERS[email].pass || '',
+        role: USERS[email].role || USERS[email].desig || 'Team',
+        desig: USERS[email].desig || USERS[email].role || 'Team',
+        isAdmin: !!USERS[email].isAdmin,
+        isManager: !!USERS[email].isManager,
+        active: USERS[email].active !== false,
+        bg: USERS[email].bg || '#2563eb',
+        joinDate: USERS[email].joinDate || ''
+      } : null);
+  }catch(e){ console.error('Current employee resolve failed:', e); }
   if(fresh){
-    cu={...cu,...fresh,email:fresh.email,role:fresh.role||fresh.desig,desig:fresh.desig||fresh.role};
-    cu.isAdmin=!!fresh.isAdmin;
-    cu.isManager=computeManagerFlag(fresh);
+    cu = {...cu, ...fresh, email:String(fresh.email || email).trim().toLowerCase(), role:fresh.role || fresh.desig || 'Team', desig:fresh.desig || fresh.role || 'Team', active:fresh.active !== false};
+    cu.isAdmin = !!fresh.isAdmin;
+    cu.isManager = cu.isAdmin ? false : (typeof computeManagerFlag === 'function' ? !!computeManagerFlag(fresh) : !!fresh.isManager);
+    try{ saveCurrentSession(); }catch(e){}
   }
   return fresh;
 }
-const isAdmin=()=>{
-  const r=getCurrentEmployeeRecord();
-  return !!((r&&r.isAdmin) || (cu&&cu.isAdmin));
-};
-const isManager=()=>{
-  const r=getCurrentEmployeeRecord();
-  if(r) return computeManagerFlag(r);
-  return computeManagerFlag(cu);
-};
-const canAssign=()=>!!(isAdmin()||isManager());
+function isAdmin(){ const r=getCurrentEmployeeRecord(); return !!((r&&r.isAdmin)||(cu&&cu.isAdmin)); }
+function isManager(){ const r=getCurrentEmployeeRecord(); if(isAdmin())return false; if(r)return typeof computeManagerFlag==='function'?!!computeManagerFlag(r):!!r.isManager; return typeof computeManagerFlag==='function'?!!computeManagerFlag(cu):!!(cu&&cu.isManager); }
+function canAssign(){ return !!(isAdmin()||isManager()); }
 const EMP_STORE_KEY='upgro_emp_dyn';
 const ROLE_STORE_KEY='upgro_roles_v3';
 const SESSION_STORE_KEY='upgro_current_user_v1';
@@ -1105,23 +1132,13 @@ function parseEmployeeRow(row, i=0){
 }
 function taskBelongsToCurrentUser(t){
   if(!t || !cu) return false;
-  const userEmail = normEmail(cu.email||'');
-  const possibleTaskEmails = [
-    t.email,t.assignedEmail,t.assignedToEmail,t.empEmail,t.employeeEmail,t.AssignedTo_Email,t.AssignedToEmail,
-    t['Assigned To Email'],t['Employee Email'],t.mail,t.Email
-  ].map(normEmail).filter(Boolean);
+  const userEmail = canonEmail(cu.email||'');
+  const taskRec = canonicalFromTask(t);
+  if(taskRec && userEmail && taskRec.email === userEmail) return true;
+  const possibleTaskEmails = [t.email,t.assignedEmail,t.assignedToEmail,t.empEmail,t.employeeEmail,t.AssignedTo_Email,t.AssignedToEmail,t['Assigned To Email'],t['Employee Email'],t.mail,t.Email].map(canonEmail).filter(Boolean);
   if(userEmail && possibleTaskEmails.includes(userEmail)) return true;
-
-  const possibleTaskNames = [
-    t.assignedToLabel,t.empName,t.assignedTo,t.assignedUser,t.employeeName,t.EmployeeName,t.AssignedTo_Name,
-    t['Assigned To Name'],t['Assigned To'],t.Name,
-    (possibleTaskEmails[0] ? uname(possibleTaskEmails[0]) : '')
-  ].map(v=>normName(v||'')).filter(Boolean);
-
-  const userNames = [
-    cu.name, uname(userEmail), cu.empName, cu.assignedTo
-  ].map(v=>normName(v||'')).filter(Boolean);
-
+  const possibleTaskNames = [t.assignedToLabel,t.empName,t.assignedTo,t.assignedUser,t.employeeName,t.EmployeeName,t.AssignedTo_Name,t['Assigned To Name'],t['Assigned To'],t.Name,(possibleTaskEmails[0] ? uname(possibleTaskEmails[0]) : '')].map(v=>normName(v||'')).filter(Boolean);
+  const userNames = [cu.name, uname(userEmail), cu.empName, cu.assignedTo].map(v=>normName(v||'')).filter(Boolean);
   return userNames.some(un=>possibleTaskNames.includes(un));
 }
 
@@ -1131,9 +1148,10 @@ function computeManagerFlag(rec){
 }
 
 function getBaseRegistry(){
-  return Object.entries(USERS).map(([email,u],i)=>({
-    email,name:u.name,pass:u.pass,role:u.role,desig:u.desig,
-    isAdmin:!!u.isAdmin,isManager:!!u.isManager,active:u.active!==false,bg:u.bg||CLRS[i%CLRS.length],joinDate:u.joinDate||''
+  return CANONICAL_EMPLOYEES.map((e,i)=>({
+    ...e,
+    email:canonEmail(e.email),
+    bg:e.bg||CLRS[i%CLRS.length]
   }));
 }
 function loadDynEmployees(){
@@ -1214,6 +1232,8 @@ function restoreCurrentSession(){
     const fresh=getStoredEmployee(sess.email);
     if(!fresh||fresh.active===false)return false;
     cu={...fresh,email:fresh.email,role:fresh.role||fresh.desig,desig:fresh.desig||fresh.role};
+    cu.isAdmin=!!fresh.isAdmin;
+    cu.isManager=cu.isAdmin?false:computeManagerFlag(fresh);
     return true;
   }catch(e){return false;}
 }
@@ -1221,37 +1241,52 @@ function emitEmpSync(){
   try{localStorage.setItem(EMP_SYNC_KEY,String(Date.now()));}catch(e){}
 }
 function mergeRegistry(base,dyn,roles){
-  const map=new Map();
-  [...base,...(Array.isArray(sheetEmpReg)?sheetEmpReg:[]),...dyn].forEach((e,i)=>{
-    if(!e||!e.email)return;
-    const email=String(e.email).trim().toLowerCase();
-    const prev=map.get(email)||{};
-    map.set(email,{
+  // Fixed: canonical employees only. Email is unique ID. Old cached duplicates are ignored.
+  const incoming=[...(Array.isArray(base)?base:[]), ...(Array.isArray(sheetEmpReg)?sheetEmpReg:[]), ...(Array.isArray(dyn)?dyn:[])];
+  const byEmail=new Map();
+
+  incoming.forEach(e=>{
+    if(!e) return;
+    const email=canonEmail(e.email);
+    const canon=canonicalByEmail(email) || canonicalByName(e.name);
+    if(!canon) return;
+    const prev=byEmail.get(canon.email) || {};
+    byEmail.set(canon.email, {
+      ...canon,
       ...prev,
-      ...e,
-      email,
-      name:e.name||prev.name||uname(email),
-      pass:e.pass||prev.pass||'',
-      role:e.role||e.desig||prev.role||prev.desig||'Team',
-      desig:e.desig||e.role||prev.desig||prev.role||'Team'
+      email:canon.email,
+      name:canon.name,
+      pass:e.pass || prev.pass || canon.pass || '',
+      role:canon.role || e.role || e.desig || 'Team',
+      desig:canon.desig || e.desig || e.role || 'Team',
+      active:e.active!==false,
+      bg:prev.bg || e.bg || canon.bg,
+      joinDate:e.joinDate || prev.joinDate || canon.joinDate || ''
     });
   });
-  const out=[];
-  Array.from(map.values()).forEach((e,i)=>{
-    const ov=roles[e.email]||{};
+
+  CANONICAL_EMPLOYEES.forEach((canon,i)=>{
+    if(!byEmail.has(canon.email)) byEmail.set(canon.email,{...canon,bg:canon.bg||CLRS[i%CLRS.length]});
+  });
+
+  return CANONICAL_EMPLOYEES.map((canon,i)=>{
+    const e=byEmail.get(canon.email) || canon;
+    const ov=(roles && roles[canon.email]) || {};
     const rec={
       ...e,
-      isAdmin: ov.isAdmin!==undefined ? !!ov.isAdmin : !!e.isAdmin,
-      isManager: ov.isManager!==undefined ? !!ov.isManager : !!e.isManager,
-      active: e.active!==false,
-      bg: e.bg||CLRS[i%CLRS.length],
-      joinDate: e.joinDate||''
+      email:canon.email,
+      name:canon.name,
+      role:canon.role,
+      desig:canon.desig,
+      isAdmin: ov.isAdmin!==undefined ? !!ov.isAdmin : !!canon.isAdmin,
+      isManager: ov.isManager!==undefined ? !!ov.isManager : !!canon.isManager,
+      active:e.active!==false,
+      bg:e.bg||CLRS[i%CLRS.length],
+      joinDate:e.joinDate||''
     };
-    rec.isManager=computeManagerFlag(rec);
-    if(rec.isAdmin)rec.isManager=false;
-    out.push(rec);
+    rec.isManager=rec.isAdmin ? false : !!(rec.isManager || isForcedAssigner(rec));
+    return rec;
   });
-  return out;
 }
 function persistEmpRegistry(){
   const dyn=empReg.map(e=>({
@@ -1599,7 +1634,9 @@ function pickTaskName(row,email=''){
 }
 
 function getTaskMailLabel(t){
-  const em=String((t&& (t.email||t.assignedEmail||t.empEmail))||'').trim();
+  const rec=canonicalFromTask(t);
+  if(rec) return rec.email;
+  const em=canonEmail(String((t&& (t.email||t.assignedEmail||t.empEmail||t.assignedToEmail||t.employeeEmail))||'').trim());
   return em||'-';
 }
 function getTaskDisplayName(t){
@@ -1634,6 +1671,23 @@ function ensureTaskMeta(t){
   const explicitWorkName = String(t.primaryWorkName||t.workName||t.WorkName||t['Work Name']||t.taskName||t.TaskName||t['Task Name']||'').trim();
   t.task=getTaskDisplayName({...t, primaryWorkName: explicitWorkName || t.task});
   t.primaryWorkName = explicitWorkName || t.task;
+  const rec=canonicalFromTask(t);
+  if(rec){
+    t.email=rec.email;
+    t.assignedToEmail=rec.email;
+    t.empEmail=rec.email;
+    t.employeeEmail=rec.email;
+    t.empName=rec.name;
+    t.assignedTo=rec.name;
+    t.AssignedTo_Name=rec.name;
+    t.desig=rec.desig||rec.role||t.desig||'';
+  }else{
+    t.email=canonEmail(String(t.email||t.assignedEmail||t.assignedToEmail||t.empEmail||t.employeeEmail||t.AssignedTo_Email||t['Assigned To Email']||t['Employee Email']||'').trim());
+    t.assignedToEmail=t.assignedToEmail||t.email;
+    t.empEmail=t.empEmail||t.email;
+    t.empName=t.empName||t.assignedTo||t.assignedToName||t.AssignedTo_Name||t['Assigned To Name']||uname(t.email);
+    t.assignedTo=t.assignedTo||t.empName;
+  }
   const total=Math.max(1,Number(t.totalUnits||1)||1);
   const done=Math.max(0,Math.min(total,Number(t.doneUnits||0)||0));
   const pending=Math.max(0, total-done);
@@ -1641,12 +1695,7 @@ function ensureTaskMeta(t){
   if(t.pendingUnits !== pending) t.pendingUnits = pending;
   t.changeCount=Math.max(0,Number(t.changeCount||0)||0);
   t.taskCode=t.taskCode||t.taskId||t.id||generateTaskId();
-  t.email=String(t.email||t.assignedEmail||t.assignedToEmail||t.empEmail||t.employeeEmail||t.AssignedTo_Email||t['Assigned To Email']||t['Employee Email']||'').trim().toLowerCase();
-  t.assignedToEmail=t.assignedToEmail||t.email;
-  t.empEmail=t.empEmail||t.email;
-  t.empName=t.empName||t.assignedTo||t.assignedToName||t.AssignedTo_Name||t['Assigned To Name']||uname(t.email);
-  t.assignedTo=t.assignedTo||t.empName;
-  t.assignedToLabel=normalizeDisplayName(t.empName||t.assignedTo||uname(t.email),t.email,t.desig);
+  t.assignedToLabel=rec ? rec.name : normalizeDisplayName(t.empName||t.assignedTo||uname(t.email),t.email,t.desig);
   t.assignedByLabel=displayAssignedBy(t.by||t.assignedBy||'');
   t.rejectReason=t.rejectReason||t.RejectReason||'';
   return t;
@@ -2002,6 +2051,12 @@ function logout(){
 function initApp(){
   initEmpReg(true);
   if((!cu||!cu.email))restoreCurrentSession();
+  if(!cu || !cu.email){
+    const lp=$('lp'), app=$('app');
+    if(app)app.classList.add('hidden');
+    if(lp)lp.classList.remove('hidden');
+    return;
+  }
   rehydrateCurrentUser();
   dataSheets=loadDS();
   const ci=Math.max(0,Object.keys(USERS).indexOf(cu.email));
@@ -2053,31 +2108,16 @@ function initApp(){
 
 
 function updateSidebarVis(){
-  rehydrateCurrentUser();
-  const niAll=$('ni-alltasks');
-  const niAn=$('ni-analytics');
-  const niEmp=$('ni-employees');
-  const sec=$('sb-mgmt-sec');
-  const niMtg=$('ni-meetings');
-  if(isAdmin()){
-    if(niAll)niAll.style.display='';
-    if(niAn)niAn.style.display='';
-    if(niEmp)niEmp.style.display='';
-    if(niMtg)niMtg.style.display='';
-    if(sec)sec.style.display='';
-  } else if(isManager()){
-    if(niAll)niAll.style.display='';
-    if(niAn)niAn.style.display='';
-    if(niEmp)niEmp.style.display='none';
-    if(niMtg)niMtg.style.display='';
-    if(sec)sec.style.display='';
-  } else {
-    if(niAll)niAll.style.display='none';
-    if(niAn)niAn.style.display='none';
-    if(niEmp)niEmp.style.display='none';
-    if(niMtg)niMtg.style.display='';  // all users can see meetings they're invited to
-    if(sec)sec.style.display='';
-  }
+  try{ rehydrateCurrentUser(); }catch(e){}
+  const admin=isAdmin(), manager=isManager();
+  const niAll=$('ni-alltasks'), niAn=$('ni-analytics'), niEmp=$('ni-employees'), niMtg=$('ni-meetings'), sec=$('sb-mgmt-sec');
+  if(niAll)niAll.style.display=(admin||manager)?'':'none';
+  if(niAn)niAn.style.display=(admin||manager)?'':'none';
+  if(niEmp)niEmp.style.display=admin?'':'none';
+  if(niMtg)niMtg.style.display='';
+  if(sec)sec.style.display='';
+  const sr=$('sb-role');
+  if(sr&&cu)sr.textContent=admin?'👑 Admin':manager?'🔀 Manager':(cu.role||'Team');
 }
 
 function renderPageButtons(){
@@ -2127,22 +2167,22 @@ function populateTaskFilterOptions(){
   const bySel=$('at-assigned-by');
   const toVal=toSel?toSel.value:'';
   const byVal=bySel?bySel.value:'';
-  const toMap=new Map(), byMap=new Map();
+  initEmpReg(true);
+  const toMap=new Map();
+  empReg.filter(e=>e.active!==false).forEach(e=>toMap.set(canonEmail(e.email), e.name));
+  const byMap=new Map();
   allTasks.forEach(t=>{
     ensureTaskMeta(t);
-    const toLabel=t.assignedToLabel||normalizeDisplayName(t.empName,t.email,t.desig);
-    const toKey=t.email||normName(toLabel);
-    if(toKey && !Array.from(toMap.values()).some(v=>normName(v)===normName(toLabel))) toMap.set(toKey,toLabel);
     const byLabel=t.assignedByLabel||displayAssignedBy(t.by);
     const byKey=normName(byLabel||t.by||'');
     if(byKey&&!byMap.has(byKey))byMap.set(byKey,byLabel);
   });
   if(toSel){
-    toSel.innerHTML='<option value="">Assigned To — All</option>'+Array.from(toMap.entries()).sort((a,b)=>a[1].localeCompare(b[1])).map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
-    toSel.value=toVal && toMap.has(toVal) ? toVal : '';
+    toSel.innerHTML='<option value="">Assigned To — All</option>'+Array.from(toMap.entries()).sort((a,b)=>a[1].localeCompare(b[1])).map(function(pair){return '<option value="'+pair[0]+'">'+pair[1]+'</option>';}).join('');
+    toSel.value=toVal && toMap.has(canonEmail(toVal)) ? canonEmail(toVal) : '';
   }
   if(bySel){
-    bySel.innerHTML='<option value="">Assigned By — All</option>'+Array.from(byMap.entries()).sort((a,b)=>a[1].localeCompare(b[1])).map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
+    bySel.innerHTML='<option value="">Assigned By — All</option>'+Array.from(byMap.entries()).sort((a,b)=>a[1].localeCompare(b[1])).map(function(pair){return '<option value="'+pair[0]+'">'+pair[1]+'</option>';}).join('');
     bySel.value=byVal && byMap.has(byVal) ? byVal : '';
   }
 }
@@ -2187,23 +2227,24 @@ function closeSB(){const sb=$('sb');if(sb)sb.classList.remove('mob');}
 //  NAVIGATION
 // ════════════════════════════════════════════════════════════════
 function nav(page){
-  // Restrict pages for regular users
-  if(!canAssign()&&(page==='alltasks'||page==='analytics'||page==='employees'))return;
-  if(!isAdmin()&&page==='employees')return;
+  const admin=isAdmin(), manager=isManager();
+  if(page==='employees'&&!admin){toast('⚠ Employees section sirf Admin ke liye hai');return;}
+  if((page==='alltasks'||page==='analytics')&&!(admin||manager)){toast('⚠ Access restricted');return;}
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('act'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('act'));
-  const pg=$('pg-'+page);if(!pg)return;
-  pg.classList.add('act');
-  document.querySelectorAll('.ni').forEach(n=>{if((n.getAttribute('onclick')||'').includes("'"+page+"'"))n.classList.add('act');});
-  const ttl=$('tb-ttl');if(ttl)ttl.textContent=PAGE_TITLES[page]||page;
+  const pg=$('pg-'+page); if(!pg)return; pg.classList.add('act');
+  document.querySelectorAll('.ni').forEach(n=>{const oc=n.getAttribute('onclick')||''; if(oc.includes("'"+page+"'")||oc.includes('"'+page+'"'))n.classList.add('act');});
+  const ttl=$('tb-ttl'); if(ttl)ttl.textContent=PAGE_TITLES[page]||page;
+  updateSidebarVis();
+  if(page==='dashboard'||page==='dash')buildUI();
   if(page==='analytics')reRenderCharts();
-  if(page==='employees'){initEmpReg();renderEmpList();}
-  if(page==='mytasks'){initEmpReg();renderMyTasks();populateSubSel();}
+  if(page==='employees'){initEmpReg(true);renderEmpList();}
+  if(page==='mytasks'){initEmpReg(true);renderMyTasks();populateSubSel();}
   if(page==='alltasks')renderAllTasks();
   if(page==='forms'){renderFormLinks();renderDataSheets();}
   if(page==='meetings'){loadMeetings();renderMeetings();}
   closeSB();
-  const pages=$('pages');if(pages)pages.scrollTo(0,0);
+  const pages=$('pages'); if(pages)pages.scrollTo(0,0);
 }
 
 
@@ -2344,7 +2385,7 @@ function showNotifToast(n){
 //  BUILD UI
 // ════════════════════════════════════════════════════════════════
 function buildUI(){
-  rehydrateCurrentUser();
+  getCurrentEmployeeRecord();
   const filt=applyDateF(applyEmpF([...allTasks]));
   renderStats(filt);
   renderEOTY(allTasks);
@@ -2359,6 +2400,8 @@ function buildUI(){
   if(pg('pg-mytasks')){renderMyTasks();populateSubSel();}
   if(pg('pg-analytics'))reRenderCharts();
   if(pg('pg-forms')){renderFormLinks();renderDataSheets();}
+  if(pg('pg-employees')){initEmpReg(true);renderEmpList();}
+  if(pg('pg-meetings'))renderMeetings();
 }
 
 // ── COUNTERS ──────────────────────────────────────────────────
@@ -2394,31 +2437,23 @@ function renderCounters(tasks, containerId){
 //  FILTERS
 // ════════════════════════════════════════════════════════════════
 function applyEmpF(tasks){
+  const matchActiveEmployee = (t)=>{
+    if(!activeEmpF) return true;
+    const rec = canonicalFromTask(t);
+    return !!(rec && rec.email === activeEmpF);
+  };
+
   if(isAdmin()){
-    if(activeEmpF){
-      return tasks.filter(t=>{
-        const em=String(t.email||t.assignedToEmail||t.empEmail||'').toLowerCase();
-        const empKey=em.indexOf('@')>0 ? em.split('@')[0].replace(/[^a-z0-9]/g,'-') : '';
-        return empKey===activeEmpF || quickNameKey(t.assignedTo||t.empName||uname(t.email),t.email)===activeEmpF;
-      });
-    }
-    return tasks;
+    return activeEmpF ? tasks.filter(matchActiveEmployee) : tasks;
   }
+
   if(isManager()){
-    // ✅ FIX: Manager sees tasks they assigned + tasks assigned to them
     const merged=tasks.filter(t=>t.by===cu.name || taskBelongsToCurrentUser(t));
     const uniq=new Map();merged.forEach(t=>uniq.set(t.id||JSON.stringify(t),t));
     const final=Array.from(uniq.values());
-    if(activeEmpF){
-      return final.filter(t=>{
-        const em=String(t.email||t.assignedToEmail||t.empEmail||'').toLowerCase();
-        const empKey=em.indexOf('@')>0 ? em.split('@')[0].replace(/[^a-z0-9]/g,'-') : '';
-        return empKey===activeEmpF || quickNameKey(t.assignedTo||t.empName||uname(t.email),t.email)===activeEmpF;
-      });
-    }
-    return final;
+    return activeEmpF ? final.filter(matchActiveEmployee) : final;
   }
-  // Regular user: only their own tasks
+
   return tasks.filter(t=>taskBelongsToCurrentUser(t));
 }
 function applyDateF(tasks){
@@ -2458,28 +2493,31 @@ function setRange(r,btn){
 function setEmpF(key,el){activeEmpF=key;document.querySelectorAll('.efp').forEach(p=>p.classList.remove('act'));if(el)el.classList.add('act');buildUI();}
 function buildEmpPills(tasks){
   if(!canAssign())return;
-  const map={};
-  tasks.forEach(t=>{
-    const label=normalizeQuickName(t.assignedTo||t.name||uname(t.email),t.email);
-    const key=quickNameKey(label,t.email);
-    if(!label || !key) return;
-    if(!map[key]) map[key]={key,label,cnt:0,email:t.email||''};
-    map[key].cnt++;
-  });
-  const sorted=Object.values(map).sort((a,b)=>a.label.localeCompare(b.label));
+  initEmpReg(true);
   const cont=$('emp-pills');if(!cont)return;
-  cont.innerHTML=''; if(!empReg.length){ cont.innerHTML='<div style="padding:16px;color:var(--muted)">No employee data found yet. Sync or load from sheet.</div>'; }
+  cont.innerHTML='';
+  const pendingByEmail=new Map();
+  tasks.forEach(t=>{
+    ensureTaskMeta(t);
+    const rec=canonicalFromTask(t);
+    if(!rec) return;
+    if(normStatus(t.status)!=='completed') pendingByEmail.set(rec.email,(pendingByEmail.get(rec.email)||0)+Number(t.pendingUnits||1));
+  });
   const all=document.createElement('span');
   all.className='efp'+(activeEmpF===null?' act':'');
-  all.textContent='🌐 All';
+  all.innerHTML='🌐 All';
+  all.title='Show all employees';
   all.onclick=()=>setEmpF(null,all);
   cont.appendChild(all);
-  sorted.forEach((e,i)=>{
-    const bg=CLRS[i%CLRS.length];
+  const list = empReg.filter(e=>e && e.active!==false && CANONICAL_EMAILS.has(canonEmail(e.email))).map(e=>({ ...e, email:canonEmail(e.email), name:(canonicalByEmail(e.email)||e).name })).filter((e,idx,arr)=>arr.findIndex(x=>x.email===e.email)===idx).sort((a,b)=>a.name.localeCompare(b.name));
+  list.forEach((e,i)=>{
+    const bg=e.bg||CLRS[i%CLRS.length];
+    const pending=pendingByEmail.get(e.email)||0;
     const sp=document.createElement('span');
-    sp.className='efp'+(activeEmpF===e.key?' act':'');
-    sp.innerHTML='<span class="efav" style="background:'+bg+'">'+ini(e.label)+'</span>'+e.label;
-    sp.onclick=()=>setEmpF(e.key,sp);
+    sp.className='efp'+(activeEmpF===e.email?' act':'');
+    sp.title=e.name+' — '+pending+' pending work';
+    sp.innerHTML='<span class="efav" style="background:'+bg+'">'+ini(e.name)+'</span>'+e.name+(pending?'<span style="margin-left:6px;background:#FEF2F2;color:#B91C1C;border-radius:10px;padding:1px 6px;font-size:9px;font-weight:800">'+pending+'</span>':'');
+    sp.onclick=()=>setEmpF(e.email,sp);
     cont.appendChild(sp);
   });
 }
@@ -2643,7 +2681,7 @@ function renderAllTasks(){
   if(q)tasks=tasks.filter(t=>getTaskDisplayName(t).toLowerCase().includes(q)||(t.assignedToLabel||uname(t.email)).toLowerCase().includes(q)||(t.assignedByLabel||displayAssignedBy(t.by)).toLowerCase().includes(q)||taskUiId(t).toLowerCase().includes(q));
   if(sf==='overdue')tasks=tasks.filter(t=>isOD(t));
   else if(sf)tasks=tasks.filter(t=>t.status===sf);
-  if(assignedTo)tasks=tasks.filter(t=>t.email===assignedTo);
+  if(assignedTo)tasks=tasks.filter(t=>{ ensureTaskMeta(t); const rec=canonicalFromTask(t); return rec && rec.email===canonEmail(assignedTo); });
   if(assignedBy)tasks=tasks.filter(t=>normName(t.assignedByLabel||displayAssignedBy(t.by))===assignedBy || normName(t.by)===assignedBy);
   const cnt=$('at-cnt');if(cnt)cnt.textContent=tasks.length+' tasks';
   const sub=$('at-sub');if(sub)sub.textContent=tasks.length+' tasks · '+(isManager()?'your team':'all employees');
@@ -3199,7 +3237,7 @@ function initEmpReg(force=false){
   }
 }
 function renderEmpList(){
-  initEmpReg();
+  initEmpReg(true);
   const q=($('emp-q')||{value:''}).value.toLowerCase();
   const cont=$('emp-items');if(!cont)return;
   const counters=$('emp-counters');
@@ -3368,6 +3406,11 @@ async function syncEmps(){
   catch(e){toast('❌ Sync failed: '+e.message);}
 }
 
+
+function resetEmployeeCache(){
+  try{localStorage.removeItem(EMP_STORE_KEY);localStorage.removeItem(ROLE_STORE_KEY);localStorage.removeItem(EMP_SYNC_KEY);}catch(e){}
+  sheetEmpReg=[]; empReg=[]; initEmpReg(true); syncUserDirectoryFromRegistry(); populateTaskFilterOptions(); buildUI(); toast('✅ Employee list refreshed');
+}
 // ════════════════════════════════════════════════════════════════
 //  FORM LINKS (supports multiple links at once)
 // ════════════════════════════════════════════════════════════════
@@ -3748,46 +3791,14 @@ if(data.action === 'saveMeetingDiscussion'){
 // }
 
 // ─────────────────────────────────────────────────────────────
-// HOURLY PENDING ALERTS — trigger every 1 hour
-// ─────────────────────────────────────────────────────────────
+// HOURLY PENDING / OVERDUE ALERTS — DISABLED
+// This function is intentionally kept as NO-OP so old Apps Script triggers
+// do not send any pending/overdue task emails.
 function sendHourlyPendingAlerts() {
-  var CUTOFF = new Date('2026-04-01');
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Tasks');
-  if(!sheet) return;
-  var rows = sheet.getDataRange().getValues();
-  var h = rows[0];
-  var iEmail=h.indexOf('AssignedTo_Email'),iTask=h.indexOf('Task'),
-      iStatus=h.indexOf('Status'),iDue=h.indexOf('DueDate'),iTs=h.indexOf('Timestamp'),
-      iTotal=h.indexOf('TotalUnits'),iDone=h.indexOf('DoneUnits'),iPend=h.indexOf('PendingUnits');
-  var pending={};
-  for(var i=1;i<rows.length;i++){
-    var r=rows[i];
-    if(new Date(r[iTs])<CUTOFF) continue;
-    if(String(r[iStatus]||'').toLowerCase()==='completed') continue;
-    var email=String(r[iEmail]||'').toLowerCase(); if(!email) continue;
-    if(!pending[email]) pending[email]=[];
-    pending[email].push({task:r[iTask],status:r[iStatus],due:r[iDue],
-      total:r[iTotal]||1,done:r[iDone]||0,pend:r[iPend]||0});
-  }
-  Object.keys(pending).forEach(function(email){
-    var tasks=pending[email];
-    var body=tasks.map(function(t){
-      return '• '+getTaskDisplayName(t)+'
-  Status: '+t.status+' | Due: '+t.due+' | Qty: '+t.done+'/'+t.total+' done';
-    }).join('
-
-');
-    GmailApp.sendEmail(email,'⏰ Pending Tasks — UpGro Media',
-      'Hi,
-
-You have '+tasks.length+' pending task(s):
-
-'+body+'
-
-UpGro Mission Control');
-  });
+  Logger.log('Hourly pending / overdue alerts are disabled. No emails sent.');
+  return;
 }
-// Trigger: Apps Script → Triggers → sendHourlyPendingAlerts → Time → Every hour
+// Remove any old time trigger for sendHourlyPendingAlerts from Apps Script > Triggers.
 =================================================================
 -->
 
@@ -4136,5 +4147,34 @@ function deleteMeeting(id){
 }
 </script>
 
+
+<script>
+// FINAL LOGIN-FIRST BOOTSTRAP FIX
+// Portal will always open login page first. No auto-login / session restore.
+(function(){
+  function bootMissionControl(){
+    try{
+      try{ initEmpReg(true); }catch(_e){ console.error(_e); }
+      try{ clearCurrentSession(); }catch(_e){}
+      cu = null;
+      const lp=$("lp"), app=$("app");
+      if(app) app.classList.add("hidden");
+      if(lp) lp.classList.remove("hidden");
+      const emailInput=$("lem"), passInput=$("lpw"), errBox=$("lerr");
+      if(emailInput) emailInput.value="";
+      if(passInput) passInput.value="";
+      if(errBox) errBox.style.display="none";
+      if(emailInput) setTimeout(()=>emailInput.focus(),100);
+    }catch(e){
+      console.error("Mission Control boot failed:", e);
+      const lp=$("lp"), app=$("app");
+      if(app) app.classList.add("hidden");
+      if(lp) lp.classList.remove("hidden");
+    }
+  }
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", bootMissionControl);
+  else bootMissionControl();
+})();
+</script>
 </body>
 </html>
