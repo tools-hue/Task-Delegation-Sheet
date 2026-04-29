@@ -2129,6 +2129,116 @@ function buildTaskMailHtml(mode,payload){
 })();
 </script>
 
+
+<script>
+/* FINAL LOGIN REPAIR — 2026-04-29 */
+(function(){
+  const LOGIN_FIX_VERSION = 'LOGIN_REPAIR_2026_04_29_V2';
+  function byId(id){ return document.getElementById(id); }
+  function cleanEmail(v){
+    const raw = String(v || '').trim().toLowerCase();
+    const aliases = {
+      'ritutyagi@upgromedia.com':'ritutyagiea@upgromedia.com',
+      'ritu.tyagi@upgromedia.com':'ritutyagiea@upgromedia.com',
+      'dheeraj.jaiswal@upgromedia.com':'dhiraj.jaiswal@upgromedia.com',
+      'shubhi.meta@upgromedia.com':'subhi.meta@upgromedia.com',
+      'chnadrakala.meta@upgromedia.com':'chandrakala.meta@upgromedia.com'
+    };
+    return aliases[raw] || raw;
+  }
+  function showLogin(msg){
+    const lp = byId('lp'), app = byId('app');
+    if(app) app.classList.add('hidden');
+    if(lp) lp.classList.remove('hidden');
+    const err = byId('lerr');
+    if(err){
+      if(msg){ err.textContent = msg; err.style.display = 'block'; }
+      else err.style.display = 'none';
+    }
+  }
+  function showApp(){
+    const lp = byId('lp'), app = byId('app');
+    if(lp) lp.classList.add('hidden');
+    if(app) app.classList.remove('hidden');
+  }
+  function stableRole(user){
+    if(!user || !user.email) return user;
+    user.email = cleanEmail(user.email);
+    const adminEmails = new Set([
+      'ritutyagiea@upgromedia.com',
+      'ritutyagi@upgromedia.com',
+      'ritu.tyagi@upgromedia.com',
+      'adarsh.mis@upgromedia.com',
+      'dhiraj.jaiswal@upgromedia.com'
+    ].map(cleanEmail));
+    if(adminEmails.has(user.email)){
+      user.isAdmin = true;
+      user.isManager = false;
+      user.role = user.role || 'Admin';
+      user.desig = user.desig || user.role || 'Admin';
+    }else{
+      user.isAdmin = !!user.isAdmin;
+      user.isManager = !!user.isManager;
+    }
+    user.active = user.active !== false;
+    return user;
+  }
+  function lookupUser(email){
+    email = cleanEmail(email);
+    try{ if(typeof initEmpReg === 'function') initEmpReg(true); }catch(e){}
+    let found = null;
+    try{ if(typeof getStoredEmployee === 'function') found = getStoredEmployee(email); }catch(e){}
+    if(!found){
+      try{ if(Array.isArray(empReg)) found = empReg.find(e => cleanEmail(e && e.email) === email) || null; }catch(e){}
+    }
+    if(!found){
+      try{
+        if(typeof USERS !== 'undefined' && USERS[email]){
+          const u = USERS[email];
+          found = {email, name:u.name || email.split('@')[0], pass:u.pass || '', role:u.role || u.desig || 'Team', desig:u.desig || u.role || 'Team', isAdmin:!!u.isAdmin, isManager:!!u.isManager, active:u.active !== false, bg:u.bg || '#2563eb', joinDate:u.joinDate || ''};
+        }
+      }catch(e){}
+    }
+    return found ? stableRole({...found, email}) : null;
+  }
+  window.togglePwd = function(){ const i = byId('lpw'); if(i) i.type = i.type === 'password' ? 'text' : 'password'; };
+  window.doLogin = async function(){
+    const email = cleanEmail((byId('lem') || {}).value);
+    const pass = String((byId('lpw') || {}).value || '');
+    if(!email || !pass){ showLogin('❌ Email and password required.'); return; }
+    let user = lookupUser(email);
+    if((!user || String(user.pass || '') !== pass) && typeof fetchEmployeesFromServer === 'function'){
+      try{ await fetchEmployeesFromServer(); }catch(e){}
+      user = lookupUser(email);
+    }
+    if(!user){ showLogin('❌ Email not found. Please check employee list.'); return; }
+    if(user.active === false){ showLogin('❌ This employee account is inactive.'); return; }
+    if(String(user.pass || '') !== pass){ showLogin('❌ Wrong password.'); return; }
+    try{
+      window.cu = stableRole(user);
+      if(typeof saveCurrentSession === 'function') saveCurrentSession();
+      try{ localStorage.setItem('upgro_current_user_v1', JSON.stringify({email: window.cu.email, ts: Date.now()})); }catch(e){}
+      showApp();
+      if(typeof initApp === 'function') initApp();
+      setTimeout(function(){ try{ if(typeof nav === 'function') nav(window.cu.isAdmin ? 'dash' : 'mytasks'); }catch(e){} }, 80);
+    }catch(err){
+      console.error('Login init failed:', err);
+      showLogin('❌ Login open hua, but app init error aa raha hai. Console check karein.');
+    }
+  };
+  window.resetLoginCacheAndReload = function(){
+    try{ localStorage.removeItem('upgro_current_user_v1'); localStorage.removeItem('upgro_roles_v3'); localStorage.removeItem('upgro_emp_sync_ping_v1'); }catch(e){}
+    location.reload();
+  };
+  function boot(){
+    showLogin('');
+    const em = byId('lem'); if(em) setTimeout(()=>em.focus(), 100);
+    console.log('UpGro login repair loaded:', LOGIN_FIX_VERSION);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
+
 </body></html>';
 }
 
