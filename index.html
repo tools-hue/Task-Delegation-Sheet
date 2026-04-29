@@ -972,11 +972,63 @@ const CANONICAL_EMAILS = new Set(CANONICAL_EMPLOYEES.map(e=>e.email));
 const EMAIL_ALIAS_MAP = {
   'chnadrakala.meta@upgromedia.com':'chandrakala.meta@upgromedia.com',
   'shubhi.meta@upgromedia.com':'subhi.meta@upgromedia.com',
-  'dheeraj.jaiswal@upgromedia.com':'dhiraj.jaiswal@upgromedia.com'
+  'dheeraj.jaiswal@upgromedia.com':'dhiraj.jaiswal@upgromedia.com',
+  'ritutyagi@upgromedia.com':'ritutyagiea@upgromedia.com',
+  'ritu.tyagi@upgromedia.com':'ritutyagiea@upgromedia.com'
 };
 function canonEmail(v){
   const e=String(v||'').trim().toLowerCase();
   return EMAIL_ALIAS_MAP[e] || e;
+}
+
+// ✅ MULTI-DEVICE ROLE STABILITY FIX
+// Email is the only source of truth. Admin cannot become normal user due to cache/device/sheet delay.
+const ADMIN_EMAILS = new Set([
+  'ritutyagiea@upgromedia.com',
+  'ritutyagi@upgromedia.com',
+  'ritu.tyagi@upgromedia.com',
+  'adarsh.mis@upgromedia.com',
+  'dhiraj.jaiswal@upgromedia.com',
+  'dheeraj.jaiswal@upgromedia.com'
+].map(canonEmail));
+
+function isForcedAdminEmail(email){
+  return ADMIN_EMAILS.has(canonEmail(email));
+}
+
+function applyStableRole(user){
+  if(!user || !user.email) return user;
+  const email = canonEmail(user.email);
+  const canon = canonicalByEmail(email);
+  const base = USERS[email] || (canon ? {
+    name: canon.name, pass: canon.pass, role: canon.role, desig: canon.desig,
+    isAdmin: canon.isAdmin, isManager: canon.isManager, active: canon.active, bg: canon.bg, joinDate: canon.joinDate
+  } : {});
+
+  const fixed = {
+    ...base,
+    ...user,
+    email,
+    name: (canon && canon.name) || user.name || base.name || uname(email),
+    pass: user.pass || base.pass || (canon && canon.pass) || '',
+    role: (canon && canon.role) || user.role || user.desig || base.role || 'Team',
+    desig: (canon && canon.desig) || user.desig || user.role || base.desig || 'Team',
+    active: user.active !== false && base.active !== false && (!canon || canon.active !== false),
+    bg: user.bg || base.bg || (canon && canon.bg) || '#2563eb',
+    joinDate: user.joinDate || base.joinDate || (canon && canon.joinDate) || ''
+  };
+
+  const forcedAdmin = isForcedAdminEmail(email) || !!(canon && canon.isAdmin) || !!base.isAdmin;
+  if(forcedAdmin){
+    fixed.isAdmin = true;
+    fixed.isManager = false;
+    fixed.role = fixed.role || 'Admin';
+    fixed.desig = fixed.desig || 'Admin';
+  }else{
+    fixed.isAdmin = false;
+    fixed.isManager = typeof computeManagerFlag === 'function' ? !!computeManagerFlag(fixed) : !!(user.isManager || base.isManager || (canon && canon.isManager));
+  }
+  return fixed;
 }
 function canonNameKey(v){
   return String(v||'').trim().toLowerCase().replace(/\s+/g,' ').replace(/[^a-z0-9 ]/g,'');
@@ -1042,7 +1094,7 @@ const toast=msg=>{const el=document.createElement('div');el.className='toast';el
 // Role helpers — ADMIN SECTION MASTER FIX
 function getCurrentEmployeeRecord(){
   if(!cu || !cu.email) return null;
-  const email = String(cu.email || '').trim().toLowerCase();
+  const email = canonEmail(cu.email || '');
   try{ if(!empReg || !empReg.length) initEmpReg(true); }catch(e){ console.error('Employee registry init failed:', e); }
   let fresh = null;
   try{
@@ -1062,9 +1114,7 @@ function getCurrentEmployeeRecord(){
       } : null);
   }catch(e){ console.error('Current employee resolve failed:', e); }
   if(fresh){
-    cu = {...cu, ...fresh, email:String(fresh.email || email).trim().toLowerCase(), role:fresh.role || fresh.desig || 'Team', desig:fresh.desig || fresh.role || 'Team', active:fresh.active !== false};
-    cu.isAdmin = !!fresh.isAdmin;
-    cu.isManager = cu.isAdmin ? false : (typeof computeManagerFlag === 'function' ? !!computeManagerFlag(fresh) : !!fresh.isManager);
+    cu = applyStableRole({...cu, ...fresh, email:String(fresh.email || email).trim().toLowerCase(), role:fresh.role || fresh.desig || 'Team', desig:fresh.desig || fresh.role || 'Team', active:fresh.active !== false});
     try{ saveCurrentSession(); }catch(e){}
   }
   return fresh;
@@ -1229,11 +1279,9 @@ function restoreCurrentSession(){
     const sess=JSON.parse(raw)||{};
     if(!sess.email)return false;
     try{ initEmpReg(true); }catch(_e){ console.error(_e); }
-    const fresh=getStoredEmployee(sess.email);
+    const fresh=getStoredEmployee(canonEmail(sess.email));
     if(!fresh||fresh.active===false)return false;
-    cu={...fresh,email:fresh.email,role:fresh.role||fresh.desig,desig:fresh.desig||fresh.role};
-    cu.isAdmin=!!fresh.isAdmin;
-    cu.isManager=cu.isAdmin?false:computeManagerFlag(fresh);
+    cu=applyStableRole({...fresh,email:fresh.email,role:fresh.role||fresh.desig,desig:fresh.desig||fresh.role});
     return true;
   }catch(e){return false;}
 }
@@ -1278,7 +1326,7 @@ function mergeRegistry(base,dyn,roles){
       name:canon.name,
       role:canon.role,
       desig:canon.desig,
-      isAdmin: ov.isAdmin!==undefined ? !!ov.isAdmin : !!canon.isAdmin,
+      isAdmin: isForcedAdminEmail(canon.email) || !!canon.isAdmin || (ov.isAdmin!==undefined ? !!ov.isAdmin : false),
       isManager: ov.isManager!==undefined ? !!ov.isManager : !!canon.isManager,
       active:e.active!==false,
       bg:e.bg||CLRS[i%CLRS.length],
@@ -1311,15 +1359,13 @@ function getStoredEmployee(email){
   const base=getBaseRegistry();
   const dyn=loadDynEmployees();
   const roles=loadStoredRoles();
-  return mergeRegistry(base,dyn,roles).find(e=>e.email===String(email||'').trim().toLowerCase())||null;
+  return mergeRegistry(base,dyn,roles).find(e=>e.email===canonEmail(email))||null;
 }
 function rehydrateCurrentUser(forceUI=false){
   if(!cu||!cu.email)return;
   const fresh=getStoredEmployee(cu.email);
   if(fresh){
-    cu={...cu,...fresh,email:fresh.email,role:fresh.role||fresh.desig,desig:fresh.desig||fresh.role};
-    cu.isManager=computeManagerFlag(fresh);
-    cu.isAdmin=!!fresh.isAdmin;
+    cu=applyStableRole({...cu,...fresh,email:fresh.email,role:fresh.role||fresh.desig,desig:fresh.desig||fresh.role});
     saveCurrentSession();
     if($('sb-name'))$('sb-name').textContent=cu.name;
     if($('sb-role'))$('sb-role').textContent=cu.isAdmin?'👑 Admin':cu.isManager?'🔀 Manager':cu.role;
@@ -1820,7 +1866,270 @@ function buildTaskMailHtml(mode,payload){
         +'<div style="margin-top:6px;font-size:11px;color:#94a3b8">Official work notification mail · UpGro Media</div>'
       +'</div>'
     +'</td></tr>'
-    +'</table></td></tr></table></body></html>';
+    +'</table></td></tr></table><script>
+/* ============================================================
+   FINAL DATA CONSISTENCY PATCH — email ownership + old on-time + one-shot updates
+   ============================================================ */
+(function(){
+  'use strict';
+  const ADMIN_EMAILS = new Set(['ritutyagi@upgromedia.com','adarsh.mis@upgromedia.com','dhiraj.jaiswal@upgromedia.com','dheeraj.jaiswal@upgromedia.com'].map(x=>String(x).toLowerCase().trim()));
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const E = v => { try{ return (typeof canonEmail === 'function' ? canonEmail(v) : String(v||'').toLowerCase().trim()); }catch(_){ return String(v||'').toLowerCase().trim(); } };
+  const S = v => String(v == null ? '' : v).trim();
+  const H = v => (typeof escapeHtml === 'function' ? escapeHtml(v) : S(v).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])));
+  function validEmail(v){ return emailRe.test(E(v)); }
+  function todayOnly(d){ return d && !isNaN(d) ? new Date(d.getFullYear(), d.getMonth(), d.getDate()) : null; }
+  function FDATE(v){
+    if(!v) return null;
+    if(v instanceof Date) return todayOnly(v);
+    if(typeof flexDate === 'function'){
+      const d = flexDate(v); if(d && !isNaN(d)) return todayOnly(d);
+    }
+    let raw = S(v).replace(',', '');
+    let m = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if(m) return todayOnly(new Date(+m[1], +m[2]-1, +m[3]));
+    m = raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+    if(m) return todayOnly(new Date(+m[3], +m[2]-1, +m[1]));
+    const d = new Date(raw); return !isNaN(d) ? todayOnly(d) : null;
+  }
+  function ownerEmail(t){
+    if(!t) return '';
+    const keys = ['email','assignedToEmail','assignedEmail','empEmail','employeeEmail','EmployeeEmail','AssignedTo_Email','AssignedToEmail','Assigned To Email','Assigned To (Email)','Employee Email','UserEmail','Email','mail'];
+    for(const k of keys){ const v = t[k]; if(validEmail(v)) return E(v); }
+    return '';
+  }
+  function empActiveMapFinal(){
+    try{ if(typeof initEmpReg === 'function') initEmpReg(false); }catch(_){ }
+    const map = new Map();
+    (Array.isArray(empReg) ? empReg : []).forEach((e,i)=>{
+      const email = E(e && e.email); if(!validEmail(email) || (e && e.active === false)) return;
+      const rec = {...e, email};
+      rec.name = S(rec.name) || (typeof uname === 'function' ? uname(email) : email.split('@')[0]);
+      rec.role = rec.role || rec.desig || 'Team'; rec.desig = rec.desig || rec.role || 'Team';
+      rec.bg = rec.bg || (typeof CLRS !== 'undefined' ? CLRS[i % CLRS.length] : '#2563eb');
+      if(ADMIN_EMAILS.has(email)){ rec.isAdmin = true; rec.isManager = false; rec.role = rec.role || 'Admin'; rec.desig = rec.desig || 'Admin'; }
+      map.set(email, rec);
+    });
+    return map;
+  }
+  function isTaskActiveFinal(t){
+    const email = ownerEmail(t); if(!email) return false;
+    const map = empActiveMapFinal();
+    return map.has(email);
+  }
+  function doneDateFinal(t){
+    const status = statusFinal(t);
+    const direct = FDATE(t && (t.completedAt || t.CompletedAt || t['Completed At'] || t.CompletionDate || t.completionDate || t.SubmittedAt || t.submittedAt || t['Submitted At'] || t.UpdatedAt || t.updatedAt));
+    if(direct) return direct;
+    if(status === 'completed'){
+      // Old sheets often have no Completed At. For old completed rows, count them against due date instead of showing 0%.
+      return FDATE(t.ddate || t.DueDate || t['Due Date']) || FDATE(t.ts || t.Timestamp || t.adate || t.AssignDate || t['Assign Date']);
+    }
+    return null;
+  }
+  function dueDateFinal(t){ return FDATE(t && (t.ddate || t.DueDate || t['Due Date'] || t.dueDate)); }
+  function assignDateFinal(t){ return FDATE(t && (t.adate || t.AssignDate || t['Assign Date'] || t.ts || t.Timestamp)); }
+  function statusFinal(t){
+    let st = S(t && (t.status || t.Status || '')).toLowerCase();
+    if(typeof normStatus === 'function') st = normStatus(st || 'assigned');
+    const total = Math.max(1, Number(t && (t.totalUnits || t.TotalUnits || t.Count || t['Total Units / Count'] || 1)) || 1);
+    const done = Math.max(0, Number(t && (t.doneUnits || t.DoneUnits || t.DoneQty || t.CompletedQty || 0)) || 0);
+    const pendingRaw = t && (t.pendingUnits ?? t.PendingUnits ?? t.PendingQty ?? t['Pending Units']);
+    const pending = pendingRaw === undefined || pendingRaw === null || pendingRaw === '' ? Math.max(0,total-done) : Math.max(0, Number(pendingRaw)||0);
+    if(st === 'done' || st === 'finished') st = 'completed';
+    if(st === 'completed' || done >= total || pending === 0 && done > 0) return 'completed';
+    return st || 'assigned';
+  }
+  function normalizeTaskFinal(t){
+    if(!t) return t;
+    if(typeof ensureTaskMeta === 'function') t = ensureTaskMeta(t) || t;
+    const email = ownerEmail(t);
+    t.email = email; t.assignedToEmail = email; t.empEmail = email; t.employeeEmail = email; t.AssignedTo_Email = email; t['Assigned To Email'] = email; t['Assigned To (Email)'] = email;
+    const emp = empActiveMapFinal().get(email);
+    if(emp){
+      t.empName = emp.name; t.assignedTo = emp.name; t.AssignedTo_Name = emp.name; t.assignedToLabel = emp.name; t.desig = emp.desig || emp.role || t.desig || '';
+    }
+    const total = Math.max(1, Number(t.totalUnits || t.TotalUnits || t.Count || t['Total Units / Count'] || 1) || 1);
+    let done = Math.max(0, Number(t.doneUnits || t.DoneUnits || t.DoneQty || t.CompletedQty || 0) || 0);
+    const st = statusFinal(t);
+    if(st === 'completed' && done === 0) done = total;
+    t.totalUnits = total;
+    t.doneUnits = Math.min(total, done);
+    t.pendingUnits = st === 'completed' ? 0 : Math.max(0, total - t.doneUnits);
+    t.status = st;
+    const dd = dueDateFinal(t), ad = assignDateFinal(t), cd = doneDateFinal(t);
+    if(dd && !S(t.ddate)) t.ddate = dd.toISOString().slice(0,10);
+    if(ad && !S(t.adate)) t.adate = ad.toISOString().slice(0,10);
+    if(st === 'completed' && cd && !S(t.completedAt)) t.completedAt = cd.toLocaleDateString('en-IN');
+    t.taskId = t.taskId || t.taskCode || t.id; t.taskCode = t.taskCode || t.taskId || t.id;
+    return t;
+  }
+  function taskWeight(t){
+    let w = 0; ['task','WorkName','workName','primaryWorkName','completedAt','driveLink','notes','references','adCopy'].forEach(k=>{ if(S(t && t[k])) w++; });
+    if(statusFinal(t)==='completed') w += 5;
+    return w;
+  }
+  window.normalizeAllTasksFinal = function(list){
+    const by = new Map();
+    (list || []).forEach(raw=>{
+      const t = normalizeTaskFinal(raw); if(!t) return;
+      const id = S(t.id || t.taskId || t.taskCode); if(!id) return;
+      const old = by.get(id);
+      by.set(id, !old || taskWeight(t) >= taskWeight(old) ? {...old, ...t, id} : {...t, ...old, id});
+    });
+    let arr = Array.from(by.values()).map(t=>normalizeTaskFinal(t));
+    try{ if(typeof statusOverrides !== 'undefined') statusOverrides.forEach((ov,id)=>{ const x = arr.find(t=>S(t.id)===S(id)); if(x){ Object.assign(x, ov); normalizeTaskFinal(x); } }); }catch(_){ }
+    return arr.filter(isTaskActiveFinal);
+  };
+  window.taskBelongsToCurrentUser = function(t){ const me = E(cu && cu.email); return !!(me && ownerEmail(t) === me && isTaskActiveFinal(t)); };
+  window.applyStableRole = function(user){
+    if(!user || !user.email) return user;
+    const email = E(user.email);
+    const emp = empActiveMapFinal().get(email) || user;
+    const out = {...emp, ...user, email, name:S(user.name || emp.name) || email.split('@')[0]};
+    if(ADMIN_EMAILS.has(email) || out.isAdmin){ out.isAdmin = true; out.isManager = false; out.role = out.role || 'Admin'; out.desig = out.desig || 'Admin'; }
+    return out;
+  };
+  window.accessTasks = function(tasks){
+    const list = normalizeAllTasksFinal(tasks || allTasks || []);
+    const me = E(cu && cu.email);
+    if(typeof isAdmin === 'function' && isAdmin()) return list;
+    if(!me) return [];
+    if(typeof isManager === 'function' && isManager()){
+      return list.filter(t => ownerEmail(t) === me || S(t.assignedByEmail || t.byEmail).toLowerCase() === me || S(t.by || t.assignedBy || t.AssignedBy || t['Assigned By']).toLowerCase() === S(cu && cu.name).toLowerCase());
+    }
+    return list.filter(t => ownerEmail(t) === me);
+  };
+  window.applyEmpF = function(tasks){
+    let list = window.accessTasks(tasks || allTasks || []);
+    const f = E(typeof activeEmpF !== 'undefined' ? activeEmpF : '');
+    if(f) list = list.filter(t => ownerEmail(t) === f);
+    return list;
+  };
+  function onTimeStats(tasks){
+    let total = 0, good = 0;
+    (tasks || []).forEach(t=>{
+      if(statusFinal(t) !== 'completed') return;
+      const due = dueDateFinal(t); if(!due) return;
+      const done = doneDateFinal(t) || due;
+      total++; if(done.getTime() <= due.getTime()) good++;
+    });
+    return {total, good, pct: total ? Math.round(good / total * 100) : 0};
+  }
+  window.buildEmpStats = function(tasks){
+    const map = new Map();
+    window.accessTasks(tasks || allTasks || []).forEach(t=>{
+      const email = ownerEmail(t), emp = empActiveMapFinal().get(email); if(!email || !emp) return;
+      if(!map.has(email)) map.set(email, {email, name:emp.name, short:emp.name.split(' ')[0], desig:emp.desig || emp.role || 'Team', total:0, completed:0, overdue:0, inProgress:0, ontime:0, withDue:0});
+      const r = map.get(email); r.total++;
+      const st = statusFinal(t);
+      if(st === 'completed'){
+        r.completed++;
+        const due = dueDateFinal(t); if(due){ r.withDue++; if((doneDateFinal(t) || due).getTime() <= due.getTime()) r.ontime++; }
+      }else if(st === 'in progress') r.inProgress++;
+      if(typeof isOD === 'function' && isOD(t) && st !== 'completed') r.overdue++;
+    });
+    return Array.from(map.values()).filter(e=>e.total>0).map(e=>({...e, score:Math.max(0, e.completed*2 - e.overdue + Math.round(e.completed/(e.total||1)*5)), ontimePct:e.withDue ? Math.round(e.ontime/e.withDue*100) : 0})).sort((a,b)=>b.score-a.score);
+  };
+  const oldRenderStatsFinal = window.renderStats;
+  window.renderStats = function(tasks){
+    const safe = (tasks || []).map(normalizeTaskFinal).filter(isTaskActiveFinal);
+    if(typeof oldRenderStatsFinal === 'function') oldRenderStatsFinal(safe);
+    const el = document.getElementById('k-ot'); if(el){ const s = onTimeStats(safe); el.textContent = s.total ? s.pct + '%' : '0%'; }
+  };
+  const oldBuildUIPatched = window.buildUI;
+  let building = false;
+  window.buildUI = function(){
+    if(building) return;
+    building = true;
+    try{
+      if(Array.isArray(allTasks)) allTasks = normalizeAllTasksFinal(allTasks);
+      if(cu) cu = window.applyStableRole(cu);
+      if(typeof oldBuildUIPatched === 'function') oldBuildUIPatched();
+    }finally{ building = false; }
+  };
+  const oldLoadDataPatched = window.loadData;
+  if(typeof oldLoadDataPatched === 'function'){
+    window.loadData = async function(){
+      const res = await oldLoadDataPatched.apply(this, arguments);
+      if(Array.isArray(allTasks)) allTasks = normalizeAllTasksFinal(allTasks);
+      try{ window.buildUI(); }catch(e){ console.error(e); }
+      return res;
+    };
+  }
+  window.renderMyTasks = function(){
+    let tasks = (allTasks || []).map(normalizeTaskFinal).filter(t=>window.taskBelongsToCurrentUser(t));
+    tasks = (typeof sortTasksNewestFirst === 'function') ? sortTasksNewestFirst(tasks) : tasks;
+    const sf=(document.getElementById('mt-sf')||{value:''}).value;
+    const q=S((document.getElementById('mt-q')||{value:''}).value).toLowerCase();
+    if(sf==='overdue') tasks=tasks.filter(t=>typeof isOD === 'function' && isOD(t)); else if(sf) tasks=tasks.filter(t=>statusFinal(t)===sf);
+    if(q) tasks=tasks.filter(t=>S(typeof getTaskDisplayName==='function'?getTaskDisplayName(t):t.task).toLowerCase().includes(q)||S(t.id).toLowerCase().includes(q));
+    if(typeof renderCounters === 'function') renderCounters(tasks,'mt-counters');
+    const el=document.getElementById('mt-list'); if(!el) return;
+    if(!tasks.length){ el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:36px;margin-bottom:8px">📋</div><div style="font-weight:600">No tasks found for your login email</div></div>'; return; }
+    el.innerHTML=tasks.map(t=>{
+      const st=statusFinal(t), ov=typeof isOD==='function' && isOD(t) && st!=='completed';
+      const cls=st==='completed'?'tc tcc':ov?'tc tov':st==='in progress'?'tc tp':'tc ta';
+      const label=st==='completed'?'Completed':ov?'Overdue':st==='in progress'?'In Progress':'Assigned';
+      const pill=st==='completed'?'pc':ov?'po':st==='in progress'?'pp':'pa';
+      const name=H(typeof getTaskDisplayName==='function'?getTaskDisplayName(t):(t.task||'Untitled Work'));
+      return `<div class="${cls}"><div class="tc-top"><div style="flex:1"><div class="tc-task">${name}</div><div style="margin-top:4px;font-size:11px;color:var(--muted);font-weight:700">🆔 ${H(t.id||t.taskCode||'')}</div><div style="margin-top:4px;font-size:11px;color:var(--blue);font-weight:700">🔢 ${H(typeof getTaskQtySummary==='function'?getTaskQtySummary(t):`${t.pendingUnits} Pending / ${t.doneUnits} Submit`)}</div>${t.driveLink?`<div style="margin-top:5px;font-size:11px"><a href="${H(t.driveLink)}" target="_blank">Drive Link ↗</a></div>`:''}</div><span class="pill ${pill}">${label}</span></div><div class="tc-meta"><span>👤 By: ${H(t.assignedByLabel||t.by||'Admin')}</span><span>📅 Assign: ${typeof fd==='function'?fd(t.adate):H(t.adate)}</span><span>🕐 Due: ${typeof fd==='function'?fd(t.ddate):H(t.ddate)}</span></div><div class="tc-acts">${st==='assigned'?`<button class="btn bp bsm" onclick="qAccept('${H(t.id)}')">▶ Accept</button>`:''}${st==='assigned'?` <button class="btn bd bsm" onclick="qReject('${H(t.id)}')">✕ Reject</button>`:''}${st==='in progress'?`<button class="btn bs bsm" onclick="qDone('${H(t.id)}')">✓ Mark Done</button>`:''}<button class="btn bo bsm" onclick="openEditTask('${H(t.id)}')">✏ Edit</button></div></div>`;
+    }).join('');
+  };
+  window.populateSubSel = function(){
+    const sel=document.getElementById('sub-task'); if(!sel) return;
+    let mine = (allTasks || []).map(normalizeTaskFinal).filter(t=>window.taskBelongsToCurrentUser(t) && statusFinal(t)!=='completed');
+    mine = (typeof sortTasksNewestFirst === 'function') ? sortTasksNewestFirst(mine) : mine;
+    sel.innerHTML='<option value="">— Select your task by Work Name / Task ID —</option>';
+    if(!mine.length) sel.innerHTML += '<option value="" disabled>No pending task found for your login email</option>';
+    mine.forEach(t=>{ const o=document.createElement('option'); o.value=t.id; o.textContent=S(typeof getTaskDisplayName==='function'?getTaskDisplayName(t):t.task).slice(0,90) + (t.totalUnits>1?` · ${t.pendingUnits} pending`:''); sel.appendChild(o); });
+    if(typeof refreshSubTaskMeta === 'function') refreshSubTaskMeta();
+  };
+  function updateTaskEverywhere(id, patch){
+    id = S(id); if(!id) return null;
+    let found = null;
+    (allTasks || []).forEach(t=>{ if(S(t.id||t.taskId||t.taskCode) === id){ Object.assign(t, patch); normalizeTaskFinal(t); found=t; } });
+    if(typeof statusOverrides !== 'undefined') statusOverrides.set(id, {...(statusOverrides.get(id)||{}), ...patch});
+    allTasks = normalizeAllTasksFinal(allTasks || []);
+    return found;
+  }
+  const oldQDoneFinal = window.qDone;
+  window.qDone = async function(id){
+    const now = new Date().toLocaleString('en-IN');
+    const t = (allTasks || []).find(x=>S(x.id||x.taskId||x.taskCode)===S(id));
+    const total = Math.max(1, Number(t && t.totalUnits || 1)||1);
+    updateTaskEverywhere(id, {status:'completed', completedAt:now, doneUnits:total, pendingUnits:0});
+    try{ window.buildUI(); }catch(_){ }
+    if(typeof SURL !== 'undefined' && SURL){
+      try{ await fetch(SURL,{method:'POST',body:JSON.stringify({action:'updateTask',id,taskId:id,taskCode:id,status:'Completed',Status:'Completed',completedAt:now,CompletedAt:now,doneUnits:total,DoneUnits:total,pendingUnits:0,PendingUnits:0,deleteEmailOnComplete:false,keepEmail:true,preserveEmail:true})}); }catch(e){ console.error(e); }
+    }else if(typeof oldQDoneFinal === 'function') return oldQDoneFinal.apply(this, arguments);
+    if(typeof toast === 'function') toast('✅ Task completed and updated everywhere');
+  };
+  const oldSubmitFinal = window.submitWork;
+  window.submitWork = async function(){
+    const taskId=S((document.getElementById('sub-task')||{value:''}).value);
+    if(!taskId) return oldSubmitFinal ? oldSubmitFinal.apply(this, arguments) : undefined;
+    const t=(allTasks || []).find(x=>S(x.id||x.taskId||x.taskCode)===taskId);
+    const beforeTotal = Math.max(1, Number(t && t.totalUnits || 1)||1);
+    const res = oldSubmitFinal ? await oldSubmitFinal.apply(this, arguments) : undefined;
+    const fresh=(allTasks || []).find(x=>S(x.id||x.taskId||x.taskCode)===taskId);
+    if(fresh && (statusFinal(fresh)==='completed' || Number(fresh.pendingUnits||0)===0)) updateTaskEverywhere(taskId,{status:'completed',doneUnits:beforeTotal,pendingUnits:0,completedAt:fresh.completedAt || new Date().toLocaleString('en-IN')});
+    try{ window.buildUI(); }catch(_){ }
+    return res;
+  };
+  // One manual rescue for cache/data confusion after deploy.
+  window.fixPortalDataNow = function(){
+    try{ if(typeof initEmpReg==='function') initEmpReg(true); }catch(_){ }
+    if(Array.isArray(allTasks)) allTasks = normalizeAllTasksFinal(allTasks);
+    if(typeof activeEmpF !== 'undefined') activeEmpF = null;
+    window.buildUI();
+    if(typeof toast==='function') toast('✅ Portal data normalized: email ownership + on-time recalculated');
+  };
+  setTimeout(()=>{ try{ window.fixPortalDataNow(); }catch(e){ console.error(e); } }, 300);
+})();
+</script>
+
+</body></html>';
 }
 
 function buildMeetingMailHtml(data){
@@ -1862,7 +2171,270 @@ function buildMeetingMailHtml(data){
   +(data.notes?'<tr><td style="padding:18px 28px 0"><div style="background:linear-gradient(180deg,#ffffff,#f5f3ff);border:1px solid #ddd6fe;border-radius:24px;padding:18px 20px;box-shadow:0 12px 30px rgba(124,58,237,.08)"><div style="font-size:11px;font-weight:900;letter-spacing:2px;color:#7c3aed;text-transform:uppercase;margin-bottom:10px">Notes</div><div style="font-size:13px;color:#334155;line-height:1.75">'+escapeHtml(data.notes)+'</div></div></td></tr>':'')
 
   +'<tr><td style="padding:24px 28px 30px"><div style="background:linear-gradient(180deg,#f8fafc,#e2e8f0);border:1px solid #cbd5e1;border-radius:24px;padding:20px;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.9)"><div style="display:inline-flex;align-items:center;gap:10px;background:#ffffff;border:1px solid #ccfbf1;border-radius:999px;padding:8px 14px;box-shadow:0 8px 20px rgba(15,23,42,.08)"><img src="data:image/jpeg;base64,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8888888888888888888841G8888888888dE/888888888L2+888888884pxq8888888885ZCq88888888xKDCq888888885qDCq88888888uqLPs38888888Q+MzAV8888888e9voG988888888sMAE888888888888888888//EACURAQABBAEDBAMBAAAAAAAAAAERACExQWEwUbFxgaHwEECRwf/aAAgBAwEBPxD9SdRJCWwTtb270KAN4N3oo8qdNKVC3YEABh126YZG2QXwd0waywU10E3AzTOVmYtjAWJlSPYWI9Yn36RSsabtw3X8F3QlARoGuEW1/goRCVfJ6LiEN1IwPECS5S73ceq1REL0pe42md8zCsj7XLXy3z0bzyRXDNKmjWjBfAUmMMYYtf1uxa/4L7XLXy3z0EKsoIJXSzYEwKW2aQdaHYiMuxbHD+vtcn4X2uWvlvnoG5GXMzgk9mm3NiK+R/uvtcn4X2uWvlvnoC1pDAu2riLsRfPVPinITZW2RxaLyPAXdGLDLn16CUCBTF4wTmKca2xM3la14KhMPjsyhGJPLTQ8IddRFemECJe76EHCAXkMHAXlT5uwEviRAMask89CCjkBMG5BzBa1FaEJuJYSzm4CWpERINq49Gbt4xbmjSXMTUkbi0KYh9qjeKCSByDI2EoMYTBoAA9gL7z+/wD/xAAnEQEAAQMDAwQDAQEAAAAAAAABEQAhQTFRYTCBoXGRsfBAwfHR4f/aAAgBAgEBPxD8SQhMUojd7eP+1H+EwR5/XTYIW8Cts7DL7XqC1WALh2bRpvrfMr6xL3v0m+BGEzlvY8uhlAvBW3Nb8MGfTUgTSPgdEDKMf2mrBkhIwbsNuN6lLSKmbWeB/pa1fe4K8P4HRiEMUNiSJd+D3tQqVtlrpM8tjBrewVvtcFeH8DoRHvYUMGAbl1Zg7uzN+vg3hYF7p4edPrcNFb7XBXh/A6CoIG5pDJzfXGK8f9a+tw0VvtcFeH8DoMgjLVDBViFms205o9F4I4aMgcyh6JyQwU9skGnodC41pfLR0ZKXfSkZc2jtt71Exwum14btHTExYmwY70RhE/zoQdUjSbUmUolbZzH6o8TGfTarv0N4tZMdqi7hGk2pAJD8/wD/xAAqEAEAAQMEAQMDBAMAAAAAAAABEQAhMUFRYfBAIDCBEHHBkaGx0VBg4f/aAAgBAQABPxD/AENHA2TJwLL8VfScEMuhYPxNLhLSlaXJ48XWBS3Mu5ClhZByVDC0YAwoJfM08z5WRytT9YokCy4fFAXYwQASMNmjwdKCBQ4LEBjDETGBbx8RWFBn3f6f1vilvzXglID7qh805nRbVzf6of1rANgmgudmL4gQUMVgBgAWfsdEgNCOFgDRsXhkZAUgZEWzSDvwDGgip0AlpXfZNc48rQxgSyopptjD/wAc0Q42AgCHik9vLV0DmphJGfHLzTVigQAYew/Oi10CAAgDBXSbPEEzaHfR6g/bLALTl8fxZhbS3zSEkkoaSH8NaBcZBAGg+nSbPCFlgGQQi40wMMDKtik5fMsbobqCVd4ACaebkDwcfb0NHOk2eE4koiy6uZTgcDYoNKFqemk6jRlvY9ABo50mzwWZgMADq7Oq+JUKasiLiXwA/VbsqtCDnJ8c3n+K6Lb0wGjnSbPfHeFjA3E1IEBn35eKnziV0Ivmwb1Cko5GwWG4ljBOWui29MBo50mz30DRIcS6qfLCt1disgVCxeFKA5RIWWfoL0W3pgNHOk2e+gUMGWpmMF9A2P7rpNvrF6Lb0wGjnSbPB+6Tb6xei29MBo50mzwfuk2+sXotvTAaOdJs98+hRzhcwV278UsMU2iSiS8SfrRbX7ivhgtXbvxSEi4DaI4aRjWeTRELjQ6aiyRVSwFLhD0sWAMtdu/FCwc+QWBT3wcbXIhkLllqYlJEvBSxK25o8Q7+ORsEQRa1EIwRAEOggvqhRj7SRuCDbDmp3NMYUVYwRlLMgNAETk4ATEI/AlSnzNnsJEwSRuUDFAtHEBtUIOYVbYLb5owvDiWESyeFTY+xj7hhSBYbSz8VOgG0uBCyov4d6eUhBczD/FXLTShIkCQGy5zUI94QOLBITGDGKCAWNDupYHKzFWxdqxqccQy4N2j3xjnBWxAxuvfSMSfgRZXQUE80hEIhgoZi1E5s1BcTCT9VwDJOKhaI5MTO0DBdM5p5qfYCkYLkYoNlh5kgAN5Jcr3KYWtRADAcGqddKmTIYYgSWYRxSEBFRACuhAo0p4ZDgvIICJnjNSMgMUcbgSjclhPAyLqs+xRijbGgCAKPkIyXaUZblxSReFc8I7BObLZpuSQUWazNop2h5UDlZeiUu0toqEOi9D7wE68ssEAtpS2KvJqjhvZElBkaRJE8JQE2aQtvHcalam9UhHH7BSmRRZJpBYLwUvT8TJbCmxghKJVpOGoZHTqWq4tFinNFpMUJk8/uN4ETKygUIlbpmdwFLAIWYrPhF79S5ZGLbxjvTYvlcjjNtpz2pWd32ELIICSQgreFGBPFGi+GVASUwYiiuIniSSYMMVEWVRSFOcmIIgSSttRnMErEFsrsIiPJG/Ot7BtJVjjU2v8A4H//2Q==" alt="UpGro Media" style="width:28px;height:28px;border-radius:8px;object-fit:contain"><span style="font-size:13px;font-weight:900;color:#0f172a">UpGro Media Mission Control</span></div><div style="margin-top:12px;font-size:12px;color:#475569;line-height:1.7">Organized by '+escapeHtml(data.organizer||cu?.name||'UpGro Media')+'</div><div style="margin-top:6px;font-size:11px;color:#94a3b8">Official premium meeting invite · UpGro Media</div></div></td></tr>'
-  +'</table></td></tr></table></body></html>';
+  +'</table></td></tr></table><script>
+/* ============================================================
+   FINAL DATA CONSISTENCY PATCH — email ownership + old on-time + one-shot updates
+   ============================================================ */
+(function(){
+  'use strict';
+  const ADMIN_EMAILS = new Set(['ritutyagi@upgromedia.com','adarsh.mis@upgromedia.com','dhiraj.jaiswal@upgromedia.com','dheeraj.jaiswal@upgromedia.com'].map(x=>String(x).toLowerCase().trim()));
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const E = v => { try{ return (typeof canonEmail === 'function' ? canonEmail(v) : String(v||'').toLowerCase().trim()); }catch(_){ return String(v||'').toLowerCase().trim(); } };
+  const S = v => String(v == null ? '' : v).trim();
+  const H = v => (typeof escapeHtml === 'function' ? escapeHtml(v) : S(v).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])));
+  function validEmail(v){ return emailRe.test(E(v)); }
+  function todayOnly(d){ return d && !isNaN(d) ? new Date(d.getFullYear(), d.getMonth(), d.getDate()) : null; }
+  function FDATE(v){
+    if(!v) return null;
+    if(v instanceof Date) return todayOnly(v);
+    if(typeof flexDate === 'function'){
+      const d = flexDate(v); if(d && !isNaN(d)) return todayOnly(d);
+    }
+    let raw = S(v).replace(',', '');
+    let m = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if(m) return todayOnly(new Date(+m[1], +m[2]-1, +m[3]));
+    m = raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+    if(m) return todayOnly(new Date(+m[3], +m[2]-1, +m[1]));
+    const d = new Date(raw); return !isNaN(d) ? todayOnly(d) : null;
+  }
+  function ownerEmail(t){
+    if(!t) return '';
+    const keys = ['email','assignedToEmail','assignedEmail','empEmail','employeeEmail','EmployeeEmail','AssignedTo_Email','AssignedToEmail','Assigned To Email','Assigned To (Email)','Employee Email','UserEmail','Email','mail'];
+    for(const k of keys){ const v = t[k]; if(validEmail(v)) return E(v); }
+    return '';
+  }
+  function empActiveMapFinal(){
+    try{ if(typeof initEmpReg === 'function') initEmpReg(false); }catch(_){ }
+    const map = new Map();
+    (Array.isArray(empReg) ? empReg : []).forEach((e,i)=>{
+      const email = E(e && e.email); if(!validEmail(email) || (e && e.active === false)) return;
+      const rec = {...e, email};
+      rec.name = S(rec.name) || (typeof uname === 'function' ? uname(email) : email.split('@')[0]);
+      rec.role = rec.role || rec.desig || 'Team'; rec.desig = rec.desig || rec.role || 'Team';
+      rec.bg = rec.bg || (typeof CLRS !== 'undefined' ? CLRS[i % CLRS.length] : '#2563eb');
+      if(ADMIN_EMAILS.has(email)){ rec.isAdmin = true; rec.isManager = false; rec.role = rec.role || 'Admin'; rec.desig = rec.desig || 'Admin'; }
+      map.set(email, rec);
+    });
+    return map;
+  }
+  function isTaskActiveFinal(t){
+    const email = ownerEmail(t); if(!email) return false;
+    const map = empActiveMapFinal();
+    return map.has(email);
+  }
+  function doneDateFinal(t){
+    const status = statusFinal(t);
+    const direct = FDATE(t && (t.completedAt || t.CompletedAt || t['Completed At'] || t.CompletionDate || t.completionDate || t.SubmittedAt || t.submittedAt || t['Submitted At'] || t.UpdatedAt || t.updatedAt));
+    if(direct) return direct;
+    if(status === 'completed'){
+      // Old sheets often have no Completed At. For old completed rows, count them against due date instead of showing 0%.
+      return FDATE(t.ddate || t.DueDate || t['Due Date']) || FDATE(t.ts || t.Timestamp || t.adate || t.AssignDate || t['Assign Date']);
+    }
+    return null;
+  }
+  function dueDateFinal(t){ return FDATE(t && (t.ddate || t.DueDate || t['Due Date'] || t.dueDate)); }
+  function assignDateFinal(t){ return FDATE(t && (t.adate || t.AssignDate || t['Assign Date'] || t.ts || t.Timestamp)); }
+  function statusFinal(t){
+    let st = S(t && (t.status || t.Status || '')).toLowerCase();
+    if(typeof normStatus === 'function') st = normStatus(st || 'assigned');
+    const total = Math.max(1, Number(t && (t.totalUnits || t.TotalUnits || t.Count || t['Total Units / Count'] || 1)) || 1);
+    const done = Math.max(0, Number(t && (t.doneUnits || t.DoneUnits || t.DoneQty || t.CompletedQty || 0)) || 0);
+    const pendingRaw = t && (t.pendingUnits ?? t.PendingUnits ?? t.PendingQty ?? t['Pending Units']);
+    const pending = pendingRaw === undefined || pendingRaw === null || pendingRaw === '' ? Math.max(0,total-done) : Math.max(0, Number(pendingRaw)||0);
+    if(st === 'done' || st === 'finished') st = 'completed';
+    if(st === 'completed' || done >= total || pending === 0 && done > 0) return 'completed';
+    return st || 'assigned';
+  }
+  function normalizeTaskFinal(t){
+    if(!t) return t;
+    if(typeof ensureTaskMeta === 'function') t = ensureTaskMeta(t) || t;
+    const email = ownerEmail(t);
+    t.email = email; t.assignedToEmail = email; t.empEmail = email; t.employeeEmail = email; t.AssignedTo_Email = email; t['Assigned To Email'] = email; t['Assigned To (Email)'] = email;
+    const emp = empActiveMapFinal().get(email);
+    if(emp){
+      t.empName = emp.name; t.assignedTo = emp.name; t.AssignedTo_Name = emp.name; t.assignedToLabel = emp.name; t.desig = emp.desig || emp.role || t.desig || '';
+    }
+    const total = Math.max(1, Number(t.totalUnits || t.TotalUnits || t.Count || t['Total Units / Count'] || 1) || 1);
+    let done = Math.max(0, Number(t.doneUnits || t.DoneUnits || t.DoneQty || t.CompletedQty || 0) || 0);
+    const st = statusFinal(t);
+    if(st === 'completed' && done === 0) done = total;
+    t.totalUnits = total;
+    t.doneUnits = Math.min(total, done);
+    t.pendingUnits = st === 'completed' ? 0 : Math.max(0, total - t.doneUnits);
+    t.status = st;
+    const dd = dueDateFinal(t), ad = assignDateFinal(t), cd = doneDateFinal(t);
+    if(dd && !S(t.ddate)) t.ddate = dd.toISOString().slice(0,10);
+    if(ad && !S(t.adate)) t.adate = ad.toISOString().slice(0,10);
+    if(st === 'completed' && cd && !S(t.completedAt)) t.completedAt = cd.toLocaleDateString('en-IN');
+    t.taskId = t.taskId || t.taskCode || t.id; t.taskCode = t.taskCode || t.taskId || t.id;
+    return t;
+  }
+  function taskWeight(t){
+    let w = 0; ['task','WorkName','workName','primaryWorkName','completedAt','driveLink','notes','references','adCopy'].forEach(k=>{ if(S(t && t[k])) w++; });
+    if(statusFinal(t)==='completed') w += 5;
+    return w;
+  }
+  window.normalizeAllTasksFinal = function(list){
+    const by = new Map();
+    (list || []).forEach(raw=>{
+      const t = normalizeTaskFinal(raw); if(!t) return;
+      const id = S(t.id || t.taskId || t.taskCode); if(!id) return;
+      const old = by.get(id);
+      by.set(id, !old || taskWeight(t) >= taskWeight(old) ? {...old, ...t, id} : {...t, ...old, id});
+    });
+    let arr = Array.from(by.values()).map(t=>normalizeTaskFinal(t));
+    try{ if(typeof statusOverrides !== 'undefined') statusOverrides.forEach((ov,id)=>{ const x = arr.find(t=>S(t.id)===S(id)); if(x){ Object.assign(x, ov); normalizeTaskFinal(x); } }); }catch(_){ }
+    return arr.filter(isTaskActiveFinal);
+  };
+  window.taskBelongsToCurrentUser = function(t){ const me = E(cu && cu.email); return !!(me && ownerEmail(t) === me && isTaskActiveFinal(t)); };
+  window.applyStableRole = function(user){
+    if(!user || !user.email) return user;
+    const email = E(user.email);
+    const emp = empActiveMapFinal().get(email) || user;
+    const out = {...emp, ...user, email, name:S(user.name || emp.name) || email.split('@')[0]};
+    if(ADMIN_EMAILS.has(email) || out.isAdmin){ out.isAdmin = true; out.isManager = false; out.role = out.role || 'Admin'; out.desig = out.desig || 'Admin'; }
+    return out;
+  };
+  window.accessTasks = function(tasks){
+    const list = normalizeAllTasksFinal(tasks || allTasks || []);
+    const me = E(cu && cu.email);
+    if(typeof isAdmin === 'function' && isAdmin()) return list;
+    if(!me) return [];
+    if(typeof isManager === 'function' && isManager()){
+      return list.filter(t => ownerEmail(t) === me || S(t.assignedByEmail || t.byEmail).toLowerCase() === me || S(t.by || t.assignedBy || t.AssignedBy || t['Assigned By']).toLowerCase() === S(cu && cu.name).toLowerCase());
+    }
+    return list.filter(t => ownerEmail(t) === me);
+  };
+  window.applyEmpF = function(tasks){
+    let list = window.accessTasks(tasks || allTasks || []);
+    const f = E(typeof activeEmpF !== 'undefined' ? activeEmpF : '');
+    if(f) list = list.filter(t => ownerEmail(t) === f);
+    return list;
+  };
+  function onTimeStats(tasks){
+    let total = 0, good = 0;
+    (tasks || []).forEach(t=>{
+      if(statusFinal(t) !== 'completed') return;
+      const due = dueDateFinal(t); if(!due) return;
+      const done = doneDateFinal(t) || due;
+      total++; if(done.getTime() <= due.getTime()) good++;
+    });
+    return {total, good, pct: total ? Math.round(good / total * 100) : 0};
+  }
+  window.buildEmpStats = function(tasks){
+    const map = new Map();
+    window.accessTasks(tasks || allTasks || []).forEach(t=>{
+      const email = ownerEmail(t), emp = empActiveMapFinal().get(email); if(!email || !emp) return;
+      if(!map.has(email)) map.set(email, {email, name:emp.name, short:emp.name.split(' ')[0], desig:emp.desig || emp.role || 'Team', total:0, completed:0, overdue:0, inProgress:0, ontime:0, withDue:0});
+      const r = map.get(email); r.total++;
+      const st = statusFinal(t);
+      if(st === 'completed'){
+        r.completed++;
+        const due = dueDateFinal(t); if(due){ r.withDue++; if((doneDateFinal(t) || due).getTime() <= due.getTime()) r.ontime++; }
+      }else if(st === 'in progress') r.inProgress++;
+      if(typeof isOD === 'function' && isOD(t) && st !== 'completed') r.overdue++;
+    });
+    return Array.from(map.values()).filter(e=>e.total>0).map(e=>({...e, score:Math.max(0, e.completed*2 - e.overdue + Math.round(e.completed/(e.total||1)*5)), ontimePct:e.withDue ? Math.round(e.ontime/e.withDue*100) : 0})).sort((a,b)=>b.score-a.score);
+  };
+  const oldRenderStatsFinal = window.renderStats;
+  window.renderStats = function(tasks){
+    const safe = (tasks || []).map(normalizeTaskFinal).filter(isTaskActiveFinal);
+    if(typeof oldRenderStatsFinal === 'function') oldRenderStatsFinal(safe);
+    const el = document.getElementById('k-ot'); if(el){ const s = onTimeStats(safe); el.textContent = s.total ? s.pct + '%' : '0%'; }
+  };
+  const oldBuildUIPatched = window.buildUI;
+  let building = false;
+  window.buildUI = function(){
+    if(building) return;
+    building = true;
+    try{
+      if(Array.isArray(allTasks)) allTasks = normalizeAllTasksFinal(allTasks);
+      if(cu) cu = window.applyStableRole(cu);
+      if(typeof oldBuildUIPatched === 'function') oldBuildUIPatched();
+    }finally{ building = false; }
+  };
+  const oldLoadDataPatched = window.loadData;
+  if(typeof oldLoadDataPatched === 'function'){
+    window.loadData = async function(){
+      const res = await oldLoadDataPatched.apply(this, arguments);
+      if(Array.isArray(allTasks)) allTasks = normalizeAllTasksFinal(allTasks);
+      try{ window.buildUI(); }catch(e){ console.error(e); }
+      return res;
+    };
+  }
+  window.renderMyTasks = function(){
+    let tasks = (allTasks || []).map(normalizeTaskFinal).filter(t=>window.taskBelongsToCurrentUser(t));
+    tasks = (typeof sortTasksNewestFirst === 'function') ? sortTasksNewestFirst(tasks) : tasks;
+    const sf=(document.getElementById('mt-sf')||{value:''}).value;
+    const q=S((document.getElementById('mt-q')||{value:''}).value).toLowerCase();
+    if(sf==='overdue') tasks=tasks.filter(t=>typeof isOD === 'function' && isOD(t)); else if(sf) tasks=tasks.filter(t=>statusFinal(t)===sf);
+    if(q) tasks=tasks.filter(t=>S(typeof getTaskDisplayName==='function'?getTaskDisplayName(t):t.task).toLowerCase().includes(q)||S(t.id).toLowerCase().includes(q));
+    if(typeof renderCounters === 'function') renderCounters(tasks,'mt-counters');
+    const el=document.getElementById('mt-list'); if(!el) return;
+    if(!tasks.length){ el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:36px;margin-bottom:8px">📋</div><div style="font-weight:600">No tasks found for your login email</div></div>'; return; }
+    el.innerHTML=tasks.map(t=>{
+      const st=statusFinal(t), ov=typeof isOD==='function' && isOD(t) && st!=='completed';
+      const cls=st==='completed'?'tc tcc':ov?'tc tov':st==='in progress'?'tc tp':'tc ta';
+      const label=st==='completed'?'Completed':ov?'Overdue':st==='in progress'?'In Progress':'Assigned';
+      const pill=st==='completed'?'pc':ov?'po':st==='in progress'?'pp':'pa';
+      const name=H(typeof getTaskDisplayName==='function'?getTaskDisplayName(t):(t.task||'Untitled Work'));
+      return `<div class="${cls}"><div class="tc-top"><div style="flex:1"><div class="tc-task">${name}</div><div style="margin-top:4px;font-size:11px;color:var(--muted);font-weight:700">🆔 ${H(t.id||t.taskCode||'')}</div><div style="margin-top:4px;font-size:11px;color:var(--blue);font-weight:700">🔢 ${H(typeof getTaskQtySummary==='function'?getTaskQtySummary(t):`${t.pendingUnits} Pending / ${t.doneUnits} Submit`)}</div>${t.driveLink?`<div style="margin-top:5px;font-size:11px"><a href="${H(t.driveLink)}" target="_blank">Drive Link ↗</a></div>`:''}</div><span class="pill ${pill}">${label}</span></div><div class="tc-meta"><span>👤 By: ${H(t.assignedByLabel||t.by||'Admin')}</span><span>📅 Assign: ${typeof fd==='function'?fd(t.adate):H(t.adate)}</span><span>🕐 Due: ${typeof fd==='function'?fd(t.ddate):H(t.ddate)}</span></div><div class="tc-acts">${st==='assigned'?`<button class="btn bp bsm" onclick="qAccept('${H(t.id)}')">▶ Accept</button>`:''}${st==='assigned'?` <button class="btn bd bsm" onclick="qReject('${H(t.id)}')">✕ Reject</button>`:''}${st==='in progress'?`<button class="btn bs bsm" onclick="qDone('${H(t.id)}')">✓ Mark Done</button>`:''}<button class="btn bo bsm" onclick="openEditTask('${H(t.id)}')">✏ Edit</button></div></div>`;
+    }).join('');
+  };
+  window.populateSubSel = function(){
+    const sel=document.getElementById('sub-task'); if(!sel) return;
+    let mine = (allTasks || []).map(normalizeTaskFinal).filter(t=>window.taskBelongsToCurrentUser(t) && statusFinal(t)!=='completed');
+    mine = (typeof sortTasksNewestFirst === 'function') ? sortTasksNewestFirst(mine) : mine;
+    sel.innerHTML='<option value="">— Select your task by Work Name / Task ID —</option>';
+    if(!mine.length) sel.innerHTML += '<option value="" disabled>No pending task found for your login email</option>';
+    mine.forEach(t=>{ const o=document.createElement('option'); o.value=t.id; o.textContent=S(typeof getTaskDisplayName==='function'?getTaskDisplayName(t):t.task).slice(0,90) + (t.totalUnits>1?` · ${t.pendingUnits} pending`:''); sel.appendChild(o); });
+    if(typeof refreshSubTaskMeta === 'function') refreshSubTaskMeta();
+  };
+  function updateTaskEverywhere(id, patch){
+    id = S(id); if(!id) return null;
+    let found = null;
+    (allTasks || []).forEach(t=>{ if(S(t.id||t.taskId||t.taskCode) === id){ Object.assign(t, patch); normalizeTaskFinal(t); found=t; } });
+    if(typeof statusOverrides !== 'undefined') statusOverrides.set(id, {...(statusOverrides.get(id)||{}), ...patch});
+    allTasks = normalizeAllTasksFinal(allTasks || []);
+    return found;
+  }
+  const oldQDoneFinal = window.qDone;
+  window.qDone = async function(id){
+    const now = new Date().toLocaleString('en-IN');
+    const t = (allTasks || []).find(x=>S(x.id||x.taskId||x.taskCode)===S(id));
+    const total = Math.max(1, Number(t && t.totalUnits || 1)||1);
+    updateTaskEverywhere(id, {status:'completed', completedAt:now, doneUnits:total, pendingUnits:0});
+    try{ window.buildUI(); }catch(_){ }
+    if(typeof SURL !== 'undefined' && SURL){
+      try{ await fetch(SURL,{method:'POST',body:JSON.stringify({action:'updateTask',id,taskId:id,taskCode:id,status:'Completed',Status:'Completed',completedAt:now,CompletedAt:now,doneUnits:total,DoneUnits:total,pendingUnits:0,PendingUnits:0,deleteEmailOnComplete:false,keepEmail:true,preserveEmail:true})}); }catch(e){ console.error(e); }
+    }else if(typeof oldQDoneFinal === 'function') return oldQDoneFinal.apply(this, arguments);
+    if(typeof toast === 'function') toast('✅ Task completed and updated everywhere');
+  };
+  const oldSubmitFinal = window.submitWork;
+  window.submitWork = async function(){
+    const taskId=S((document.getElementById('sub-task')||{value:''}).value);
+    if(!taskId) return oldSubmitFinal ? oldSubmitFinal.apply(this, arguments) : undefined;
+    const t=(allTasks || []).find(x=>S(x.id||x.taskId||x.taskCode)===taskId);
+    const beforeTotal = Math.max(1, Number(t && t.totalUnits || 1)||1);
+    const res = oldSubmitFinal ? await oldSubmitFinal.apply(this, arguments) : undefined;
+    const fresh=(allTasks || []).find(x=>S(x.id||x.taskId||x.taskCode)===taskId);
+    if(fresh && (statusFinal(fresh)==='completed' || Number(fresh.pendingUnits||0)===0)) updateTaskEverywhere(taskId,{status:'completed',doneUnits:beforeTotal,pendingUnits:0,completedAt:fresh.completedAt || new Date().toLocaleString('en-IN')});
+    try{ window.buildUI(); }catch(_){ }
+    return res;
+  };
+  // One manual rescue for cache/data confusion after deploy.
+  window.fixPortalDataNow = function(){
+    try{ if(typeof initEmpReg==='function') initEmpReg(true); }catch(_){ }
+    if(Array.isArray(allTasks)) allTasks = normalizeAllTasksFinal(allTasks);
+    if(typeof activeEmpF !== 'undefined') activeEmpF = null;
+    window.buildUI();
+    if(typeof toast==='function') toast('✅ Portal data normalized: email ownership + on-time recalculated');
+  };
+  setTimeout(()=>{ try{ window.fixPortalDataNow(); }catch(e){ console.error(e); } }, 300);
+})();
+</script>
+
+</body></html>';
 }
 function getTestMailTarget(){
   const el=$('test-mail-email');
@@ -1915,7 +2487,7 @@ function saveDS_local(arr){try{localStorage.setItem('upgro_ds_v1',JSON.stringify
 // ════════════════════════════════════════════════════════════════
 function togglePwd(){const i=$('lpw');i.type=i.type==='password'?'text':'password';}
 async function doLogin(){
-  const email = ($('lem') || {value:''}).value.trim().toLowerCase();
+  const email = canonEmail(($('lem') || {value:''}).value);
   const pass = ($('lpw') || {value:''}).value;
   const errBox = $('lerr');
   if(!email || !pass){
@@ -1958,15 +2530,14 @@ async function doLogin(){
     return;
   }
 
-  cu = {...regEmp, email, role:regEmp.role||regEmp.desig, desig:regEmp.desig||regEmp.role};
-  cu.isAdmin=!!regEmp.isAdmin;
-  cu.isManager=computeManagerFlag(regEmp);
+  cu = applyStableRole({...regEmp, email, role:regEmp.role||regEmp.desig, desig:regEmp.desig||regEmp.role});
 
   if(errBox) errBox.style.display = 'none';
   saveCurrentSession();
   $('lp').classList.add('hidden');
   $('app').classList.remove('hidden');
   initApp();
+  setTimeout(()=>{ try{ nav('dash'); }catch(e){} }, 50);
 }
 
 
@@ -3713,7 +4284,270 @@ if(data.action === 'sendMeetingInvite'){
         +'</td></tr>'
 
         +'</table></td></tr></table>'
-        +'</body></html>';
+        +'<script>
+/* ============================================================
+   FINAL DATA CONSISTENCY PATCH — email ownership + old on-time + one-shot updates
+   ============================================================ */
+(function(){
+  'use strict';
+  const ADMIN_EMAILS = new Set(['ritutyagi@upgromedia.com','adarsh.mis@upgromedia.com','dhiraj.jaiswal@upgromedia.com','dheeraj.jaiswal@upgromedia.com'].map(x=>String(x).toLowerCase().trim()));
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const E = v => { try{ return (typeof canonEmail === 'function' ? canonEmail(v) : String(v||'').toLowerCase().trim()); }catch(_){ return String(v||'').toLowerCase().trim(); } };
+  const S = v => String(v == null ? '' : v).trim();
+  const H = v => (typeof escapeHtml === 'function' ? escapeHtml(v) : S(v).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])));
+  function validEmail(v){ return emailRe.test(E(v)); }
+  function todayOnly(d){ return d && !isNaN(d) ? new Date(d.getFullYear(), d.getMonth(), d.getDate()) : null; }
+  function FDATE(v){
+    if(!v) return null;
+    if(v instanceof Date) return todayOnly(v);
+    if(typeof flexDate === 'function'){
+      const d = flexDate(v); if(d && !isNaN(d)) return todayOnly(d);
+    }
+    let raw = S(v).replace(',', '');
+    let m = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if(m) return todayOnly(new Date(+m[1], +m[2]-1, +m[3]));
+    m = raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+    if(m) return todayOnly(new Date(+m[3], +m[2]-1, +m[1]));
+    const d = new Date(raw); return !isNaN(d) ? todayOnly(d) : null;
+  }
+  function ownerEmail(t){
+    if(!t) return '';
+    const keys = ['email','assignedToEmail','assignedEmail','empEmail','employeeEmail','EmployeeEmail','AssignedTo_Email','AssignedToEmail','Assigned To Email','Assigned To (Email)','Employee Email','UserEmail','Email','mail'];
+    for(const k of keys){ const v = t[k]; if(validEmail(v)) return E(v); }
+    return '';
+  }
+  function empActiveMapFinal(){
+    try{ if(typeof initEmpReg === 'function') initEmpReg(false); }catch(_){ }
+    const map = new Map();
+    (Array.isArray(empReg) ? empReg : []).forEach((e,i)=>{
+      const email = E(e && e.email); if(!validEmail(email) || (e && e.active === false)) return;
+      const rec = {...e, email};
+      rec.name = S(rec.name) || (typeof uname === 'function' ? uname(email) : email.split('@')[0]);
+      rec.role = rec.role || rec.desig || 'Team'; rec.desig = rec.desig || rec.role || 'Team';
+      rec.bg = rec.bg || (typeof CLRS !== 'undefined' ? CLRS[i % CLRS.length] : '#2563eb');
+      if(ADMIN_EMAILS.has(email)){ rec.isAdmin = true; rec.isManager = false; rec.role = rec.role || 'Admin'; rec.desig = rec.desig || 'Admin'; }
+      map.set(email, rec);
+    });
+    return map;
+  }
+  function isTaskActiveFinal(t){
+    const email = ownerEmail(t); if(!email) return false;
+    const map = empActiveMapFinal();
+    return map.has(email);
+  }
+  function doneDateFinal(t){
+    const status = statusFinal(t);
+    const direct = FDATE(t && (t.completedAt || t.CompletedAt || t['Completed At'] || t.CompletionDate || t.completionDate || t.SubmittedAt || t.submittedAt || t['Submitted At'] || t.UpdatedAt || t.updatedAt));
+    if(direct) return direct;
+    if(status === 'completed'){
+      // Old sheets often have no Completed At. For old completed rows, count them against due date instead of showing 0%.
+      return FDATE(t.ddate || t.DueDate || t['Due Date']) || FDATE(t.ts || t.Timestamp || t.adate || t.AssignDate || t['Assign Date']);
+    }
+    return null;
+  }
+  function dueDateFinal(t){ return FDATE(t && (t.ddate || t.DueDate || t['Due Date'] || t.dueDate)); }
+  function assignDateFinal(t){ return FDATE(t && (t.adate || t.AssignDate || t['Assign Date'] || t.ts || t.Timestamp)); }
+  function statusFinal(t){
+    let st = S(t && (t.status || t.Status || '')).toLowerCase();
+    if(typeof normStatus === 'function') st = normStatus(st || 'assigned');
+    const total = Math.max(1, Number(t && (t.totalUnits || t.TotalUnits || t.Count || t['Total Units / Count'] || 1)) || 1);
+    const done = Math.max(0, Number(t && (t.doneUnits || t.DoneUnits || t.DoneQty || t.CompletedQty || 0)) || 0);
+    const pendingRaw = t && (t.pendingUnits ?? t.PendingUnits ?? t.PendingQty ?? t['Pending Units']);
+    const pending = pendingRaw === undefined || pendingRaw === null || pendingRaw === '' ? Math.max(0,total-done) : Math.max(0, Number(pendingRaw)||0);
+    if(st === 'done' || st === 'finished') st = 'completed';
+    if(st === 'completed' || done >= total || pending === 0 && done > 0) return 'completed';
+    return st || 'assigned';
+  }
+  function normalizeTaskFinal(t){
+    if(!t) return t;
+    if(typeof ensureTaskMeta === 'function') t = ensureTaskMeta(t) || t;
+    const email = ownerEmail(t);
+    t.email = email; t.assignedToEmail = email; t.empEmail = email; t.employeeEmail = email; t.AssignedTo_Email = email; t['Assigned To Email'] = email; t['Assigned To (Email)'] = email;
+    const emp = empActiveMapFinal().get(email);
+    if(emp){
+      t.empName = emp.name; t.assignedTo = emp.name; t.AssignedTo_Name = emp.name; t.assignedToLabel = emp.name; t.desig = emp.desig || emp.role || t.desig || '';
+    }
+    const total = Math.max(1, Number(t.totalUnits || t.TotalUnits || t.Count || t['Total Units / Count'] || 1) || 1);
+    let done = Math.max(0, Number(t.doneUnits || t.DoneUnits || t.DoneQty || t.CompletedQty || 0) || 0);
+    const st = statusFinal(t);
+    if(st === 'completed' && done === 0) done = total;
+    t.totalUnits = total;
+    t.doneUnits = Math.min(total, done);
+    t.pendingUnits = st === 'completed' ? 0 : Math.max(0, total - t.doneUnits);
+    t.status = st;
+    const dd = dueDateFinal(t), ad = assignDateFinal(t), cd = doneDateFinal(t);
+    if(dd && !S(t.ddate)) t.ddate = dd.toISOString().slice(0,10);
+    if(ad && !S(t.adate)) t.adate = ad.toISOString().slice(0,10);
+    if(st === 'completed' && cd && !S(t.completedAt)) t.completedAt = cd.toLocaleDateString('en-IN');
+    t.taskId = t.taskId || t.taskCode || t.id; t.taskCode = t.taskCode || t.taskId || t.id;
+    return t;
+  }
+  function taskWeight(t){
+    let w = 0; ['task','WorkName','workName','primaryWorkName','completedAt','driveLink','notes','references','adCopy'].forEach(k=>{ if(S(t && t[k])) w++; });
+    if(statusFinal(t)==='completed') w += 5;
+    return w;
+  }
+  window.normalizeAllTasksFinal = function(list){
+    const by = new Map();
+    (list || []).forEach(raw=>{
+      const t = normalizeTaskFinal(raw); if(!t) return;
+      const id = S(t.id || t.taskId || t.taskCode); if(!id) return;
+      const old = by.get(id);
+      by.set(id, !old || taskWeight(t) >= taskWeight(old) ? {...old, ...t, id} : {...t, ...old, id});
+    });
+    let arr = Array.from(by.values()).map(t=>normalizeTaskFinal(t));
+    try{ if(typeof statusOverrides !== 'undefined') statusOverrides.forEach((ov,id)=>{ const x = arr.find(t=>S(t.id)===S(id)); if(x){ Object.assign(x, ov); normalizeTaskFinal(x); } }); }catch(_){ }
+    return arr.filter(isTaskActiveFinal);
+  };
+  window.taskBelongsToCurrentUser = function(t){ const me = E(cu && cu.email); return !!(me && ownerEmail(t) === me && isTaskActiveFinal(t)); };
+  window.applyStableRole = function(user){
+    if(!user || !user.email) return user;
+    const email = E(user.email);
+    const emp = empActiveMapFinal().get(email) || user;
+    const out = {...emp, ...user, email, name:S(user.name || emp.name) || email.split('@')[0]};
+    if(ADMIN_EMAILS.has(email) || out.isAdmin){ out.isAdmin = true; out.isManager = false; out.role = out.role || 'Admin'; out.desig = out.desig || 'Admin'; }
+    return out;
+  };
+  window.accessTasks = function(tasks){
+    const list = normalizeAllTasksFinal(tasks || allTasks || []);
+    const me = E(cu && cu.email);
+    if(typeof isAdmin === 'function' && isAdmin()) return list;
+    if(!me) return [];
+    if(typeof isManager === 'function' && isManager()){
+      return list.filter(t => ownerEmail(t) === me || S(t.assignedByEmail || t.byEmail).toLowerCase() === me || S(t.by || t.assignedBy || t.AssignedBy || t['Assigned By']).toLowerCase() === S(cu && cu.name).toLowerCase());
+    }
+    return list.filter(t => ownerEmail(t) === me);
+  };
+  window.applyEmpF = function(tasks){
+    let list = window.accessTasks(tasks || allTasks || []);
+    const f = E(typeof activeEmpF !== 'undefined' ? activeEmpF : '');
+    if(f) list = list.filter(t => ownerEmail(t) === f);
+    return list;
+  };
+  function onTimeStats(tasks){
+    let total = 0, good = 0;
+    (tasks || []).forEach(t=>{
+      if(statusFinal(t) !== 'completed') return;
+      const due = dueDateFinal(t); if(!due) return;
+      const done = doneDateFinal(t) || due;
+      total++; if(done.getTime() <= due.getTime()) good++;
+    });
+    return {total, good, pct: total ? Math.round(good / total * 100) : 0};
+  }
+  window.buildEmpStats = function(tasks){
+    const map = new Map();
+    window.accessTasks(tasks || allTasks || []).forEach(t=>{
+      const email = ownerEmail(t), emp = empActiveMapFinal().get(email); if(!email || !emp) return;
+      if(!map.has(email)) map.set(email, {email, name:emp.name, short:emp.name.split(' ')[0], desig:emp.desig || emp.role || 'Team', total:0, completed:0, overdue:0, inProgress:0, ontime:0, withDue:0});
+      const r = map.get(email); r.total++;
+      const st = statusFinal(t);
+      if(st === 'completed'){
+        r.completed++;
+        const due = dueDateFinal(t); if(due){ r.withDue++; if((doneDateFinal(t) || due).getTime() <= due.getTime()) r.ontime++; }
+      }else if(st === 'in progress') r.inProgress++;
+      if(typeof isOD === 'function' && isOD(t) && st !== 'completed') r.overdue++;
+    });
+    return Array.from(map.values()).filter(e=>e.total>0).map(e=>({...e, score:Math.max(0, e.completed*2 - e.overdue + Math.round(e.completed/(e.total||1)*5)), ontimePct:e.withDue ? Math.round(e.ontime/e.withDue*100) : 0})).sort((a,b)=>b.score-a.score);
+  };
+  const oldRenderStatsFinal = window.renderStats;
+  window.renderStats = function(tasks){
+    const safe = (tasks || []).map(normalizeTaskFinal).filter(isTaskActiveFinal);
+    if(typeof oldRenderStatsFinal === 'function') oldRenderStatsFinal(safe);
+    const el = document.getElementById('k-ot'); if(el){ const s = onTimeStats(safe); el.textContent = s.total ? s.pct + '%' : '0%'; }
+  };
+  const oldBuildUIPatched = window.buildUI;
+  let building = false;
+  window.buildUI = function(){
+    if(building) return;
+    building = true;
+    try{
+      if(Array.isArray(allTasks)) allTasks = normalizeAllTasksFinal(allTasks);
+      if(cu) cu = window.applyStableRole(cu);
+      if(typeof oldBuildUIPatched === 'function') oldBuildUIPatched();
+    }finally{ building = false; }
+  };
+  const oldLoadDataPatched = window.loadData;
+  if(typeof oldLoadDataPatched === 'function'){
+    window.loadData = async function(){
+      const res = await oldLoadDataPatched.apply(this, arguments);
+      if(Array.isArray(allTasks)) allTasks = normalizeAllTasksFinal(allTasks);
+      try{ window.buildUI(); }catch(e){ console.error(e); }
+      return res;
+    };
+  }
+  window.renderMyTasks = function(){
+    let tasks = (allTasks || []).map(normalizeTaskFinal).filter(t=>window.taskBelongsToCurrentUser(t));
+    tasks = (typeof sortTasksNewestFirst === 'function') ? sortTasksNewestFirst(tasks) : tasks;
+    const sf=(document.getElementById('mt-sf')||{value:''}).value;
+    const q=S((document.getElementById('mt-q')||{value:''}).value).toLowerCase();
+    if(sf==='overdue') tasks=tasks.filter(t=>typeof isOD === 'function' && isOD(t)); else if(sf) tasks=tasks.filter(t=>statusFinal(t)===sf);
+    if(q) tasks=tasks.filter(t=>S(typeof getTaskDisplayName==='function'?getTaskDisplayName(t):t.task).toLowerCase().includes(q)||S(t.id).toLowerCase().includes(q));
+    if(typeof renderCounters === 'function') renderCounters(tasks,'mt-counters');
+    const el=document.getElementById('mt-list'); if(!el) return;
+    if(!tasks.length){ el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:36px;margin-bottom:8px">📋</div><div style="font-weight:600">No tasks found for your login email</div></div>'; return; }
+    el.innerHTML=tasks.map(t=>{
+      const st=statusFinal(t), ov=typeof isOD==='function' && isOD(t) && st!=='completed';
+      const cls=st==='completed'?'tc tcc':ov?'tc tov':st==='in progress'?'tc tp':'tc ta';
+      const label=st==='completed'?'Completed':ov?'Overdue':st==='in progress'?'In Progress':'Assigned';
+      const pill=st==='completed'?'pc':ov?'po':st==='in progress'?'pp':'pa';
+      const name=H(typeof getTaskDisplayName==='function'?getTaskDisplayName(t):(t.task||'Untitled Work'));
+      return `<div class="${cls}"><div class="tc-top"><div style="flex:1"><div class="tc-task">${name}</div><div style="margin-top:4px;font-size:11px;color:var(--muted);font-weight:700">🆔 ${H(t.id||t.taskCode||'')}</div><div style="margin-top:4px;font-size:11px;color:var(--blue);font-weight:700">🔢 ${H(typeof getTaskQtySummary==='function'?getTaskQtySummary(t):`${t.pendingUnits} Pending / ${t.doneUnits} Submit`)}</div>${t.driveLink?`<div style="margin-top:5px;font-size:11px"><a href="${H(t.driveLink)}" target="_blank">Drive Link ↗</a></div>`:''}</div><span class="pill ${pill}">${label}</span></div><div class="tc-meta"><span>👤 By: ${H(t.assignedByLabel||t.by||'Admin')}</span><span>📅 Assign: ${typeof fd==='function'?fd(t.adate):H(t.adate)}</span><span>🕐 Due: ${typeof fd==='function'?fd(t.ddate):H(t.ddate)}</span></div><div class="tc-acts">${st==='assigned'?`<button class="btn bp bsm" onclick="qAccept('${H(t.id)}')">▶ Accept</button>`:''}${st==='assigned'?` <button class="btn bd bsm" onclick="qReject('${H(t.id)}')">✕ Reject</button>`:''}${st==='in progress'?`<button class="btn bs bsm" onclick="qDone('${H(t.id)}')">✓ Mark Done</button>`:''}<button class="btn bo bsm" onclick="openEditTask('${H(t.id)}')">✏ Edit</button></div></div>`;
+    }).join('');
+  };
+  window.populateSubSel = function(){
+    const sel=document.getElementById('sub-task'); if(!sel) return;
+    let mine = (allTasks || []).map(normalizeTaskFinal).filter(t=>window.taskBelongsToCurrentUser(t) && statusFinal(t)!=='completed');
+    mine = (typeof sortTasksNewestFirst === 'function') ? sortTasksNewestFirst(mine) : mine;
+    sel.innerHTML='<option value="">— Select your task by Work Name / Task ID —</option>';
+    if(!mine.length) sel.innerHTML += '<option value="" disabled>No pending task found for your login email</option>';
+    mine.forEach(t=>{ const o=document.createElement('option'); o.value=t.id; o.textContent=S(typeof getTaskDisplayName==='function'?getTaskDisplayName(t):t.task).slice(0,90) + (t.totalUnits>1?` · ${t.pendingUnits} pending`:''); sel.appendChild(o); });
+    if(typeof refreshSubTaskMeta === 'function') refreshSubTaskMeta();
+  };
+  function updateTaskEverywhere(id, patch){
+    id = S(id); if(!id) return null;
+    let found = null;
+    (allTasks || []).forEach(t=>{ if(S(t.id||t.taskId||t.taskCode) === id){ Object.assign(t, patch); normalizeTaskFinal(t); found=t; } });
+    if(typeof statusOverrides !== 'undefined') statusOverrides.set(id, {...(statusOverrides.get(id)||{}), ...patch});
+    allTasks = normalizeAllTasksFinal(allTasks || []);
+    return found;
+  }
+  const oldQDoneFinal = window.qDone;
+  window.qDone = async function(id){
+    const now = new Date().toLocaleString('en-IN');
+    const t = (allTasks || []).find(x=>S(x.id||x.taskId||x.taskCode)===S(id));
+    const total = Math.max(1, Number(t && t.totalUnits || 1)||1);
+    updateTaskEverywhere(id, {status:'completed', completedAt:now, doneUnits:total, pendingUnits:0});
+    try{ window.buildUI(); }catch(_){ }
+    if(typeof SURL !== 'undefined' && SURL){
+      try{ await fetch(SURL,{method:'POST',body:JSON.stringify({action:'updateTask',id,taskId:id,taskCode:id,status:'Completed',Status:'Completed',completedAt:now,CompletedAt:now,doneUnits:total,DoneUnits:total,pendingUnits:0,PendingUnits:0,deleteEmailOnComplete:false,keepEmail:true,preserveEmail:true})}); }catch(e){ console.error(e); }
+    }else if(typeof oldQDoneFinal === 'function') return oldQDoneFinal.apply(this, arguments);
+    if(typeof toast === 'function') toast('✅ Task completed and updated everywhere');
+  };
+  const oldSubmitFinal = window.submitWork;
+  window.submitWork = async function(){
+    const taskId=S((document.getElementById('sub-task')||{value:''}).value);
+    if(!taskId) return oldSubmitFinal ? oldSubmitFinal.apply(this, arguments) : undefined;
+    const t=(allTasks || []).find(x=>S(x.id||x.taskId||x.taskCode)===taskId);
+    const beforeTotal = Math.max(1, Number(t && t.totalUnits || 1)||1);
+    const res = oldSubmitFinal ? await oldSubmitFinal.apply(this, arguments) : undefined;
+    const fresh=(allTasks || []).find(x=>S(x.id||x.taskId||x.taskCode)===taskId);
+    if(fresh && (statusFinal(fresh)==='completed' || Number(fresh.pendingUnits||0)===0)) updateTaskEverywhere(taskId,{status:'completed',doneUnits:beforeTotal,pendingUnits:0,completedAt:fresh.completedAt || new Date().toLocaleString('en-IN')});
+    try{ window.buildUI(); }catch(_){ }
+    return res;
+  };
+  // One manual rescue for cache/data confusion after deploy.
+  window.fixPortalDataNow = function(){
+    try{ if(typeof initEmpReg==='function') initEmpReg(true); }catch(_){ }
+    if(Array.isArray(allTasks)) allTasks = normalizeAllTasksFinal(allTasks);
+    if(typeof activeEmpF !== 'undefined') activeEmpF = null;
+    window.buildUI();
+    if(typeof toast==='function') toast('✅ Portal data normalized: email ownership + on-time recalculated');
+  };
+  setTimeout(()=>{ try{ window.fixPortalDataNow(); }catch(e){ console.error(e); } }, 300);
+})();
+</script>
+
+</body></html>';
 
       GmailApp.sendEmail(att.email, data.subject || subject, 'Please enable HTML to view this email.', {
         htmlBody: htmlBody,
@@ -4544,5 +5378,692 @@ function deleteMeeting(id){
   else bootMissionControlLoginFirst();
 })();
 </script>
+
+<script>
+// Final role repair helpers for admin multi-device issue
+window.resetRoleCacheAndReload = function(){
+  try{
+    localStorage.removeItem('upgro_roles_v3');
+    localStorage.removeItem('upgro_current_user_v1');
+    localStorage.removeItem('upgro_emp_sync_ping_v1');
+  }catch(e){}
+  location.reload();
+};
+</script>
+
+<script>
+/* ============================================================
+   FINAL EMPLOYEE SYSTEM + ACTIVE DATA ISOLATION + ON-TIME FIX
+   - Email is primary key
+   - Removed employee = Active false, sheet backup safe
+   - Portal hides inactive employee + inactive employee tasks
+   - Admin remains admin on every device
+   - Analytics name-wise + On-Time % fixed
+   ============================================================ */
+(function(){
+  const ADMIN_EMAILS_FINAL = new Set([
+    'ritutyagiea@upgromedia.com','ritutyagi@upgromedia.com','ritu.tyagi@upgromedia.com',
+    'adarsh.mis@upgromedia.com','dhiraj.jaiswal@upgromedia.com','dheeraj.jaiswal@upgromedia.com'
+  ].map(e => (typeof canonEmail === 'function' ? canonEmail(e) : String(e).toLowerCase())));
+
+  function E(v){
+    try{
+      const raw = String(v || '').trim().toLowerCase();
+      return typeof canonEmail === 'function' ? canonEmail(raw) : raw;
+    }catch(_){ return String(v || '').trim().toLowerCase(); }
+  }
+  function esc(v){
+    if(typeof escapeHtml === 'function') return escapeHtml(v);
+    return String(v || '').replace(/[&<>'"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[s]));
+  }
+  function isMail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').trim()); }
+  function N(v){ return String(v || '').trim().replace(/\s+/g,' '); }
+  function D(v){
+    if(v === null || v === undefined || v === '') return null;
+    if(v instanceof Date && !isNaN(v)) return new Date(v.getFullYear(), v.getMonth(), v.getDate());
+    if(typeof flexDate === 'function'){
+      const d = flexDate(v);
+      if(d && !isNaN(d)) return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    }
+    const raw = String(v).trim().replace(',', '');
+    let m = raw.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
+    if(m){ const d = new Date(+m[3], +m[2]-1, +m[1]); if(!isNaN(d)) return d; }
+    m = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if(m){ const d = new Date(+m[1], +m[2]-1, +m[3]); if(!isNaN(d)) return d; }
+    const d = new Date(raw);
+    if(!isNaN(d)) return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    return null;
+  }
+  function taskOwnerEmail(t){
+    if(!t) return '';
+    const keys = ['email','assignedToEmail','assignedEmail','empEmail','employeeEmail','EmployeeEmail','AssignedTo_Email','AssignedToEmail','Assigned To Email','Assigned To (Email)','Employee Email','UserEmail','Email','mail'];
+    for(const k of keys){ if(isMail(t[k])) return E(t[k]); }
+    return '';
+  }
+  function activeEmpMap(){
+    try{ if(typeof initEmpReg === 'function') initEmpReg(false); }catch(_){ }
+    const map = new Map();
+    (Array.isArray(empReg) ? empReg : []).forEach((raw,i) => {
+      if(!raw) return;
+      const email = E(raw.email);
+      if(!email || !isMail(email)) return;
+      if(raw.active === false) return;
+      map.set(email, {
+        ...raw,
+        email,
+        name: N(raw.name) || (typeof uname === 'function' ? uname(email) : email.split('@')[0]),
+        role: raw.role || raw.desig || 'Team',
+        desig: raw.desig || raw.role || 'Team',
+        bg: raw.bg || (typeof CLRS !== 'undefined' ? CLRS[i % CLRS.length] : '#2563eb'),
+        active: true,
+        isAdmin: ADMIN_EMAILS_FINAL.has(email) || !!raw.isAdmin,
+        isManager: ADMIN_EMAILS_FINAL.has(email) ? false : !!(typeof computeManagerFlag === 'function' ? computeManagerFlag(raw) : raw.isManager)
+      });
+    });
+    return map;
+  }
+  function isActiveTask(t){
+    const email = taskOwnerEmail(t);
+    if(!email) return false;
+    return activeEmpMap().has(email);
+  }
+  function myEmail(){ return E(cu && cu.email); }
+  function assignedByMe(t){
+    if(!t || !cu) return false;
+    const meName = N(cu.name).toLowerCase();
+    const byEmail = E(t.assignedByEmail || t.byEmail || t.AssignedBy_Email || t['Assigned By Email']);
+    const byName = N(t.assignedByLabel || t.by || t.assignedBy || t.AssignedBy || t['Assigned By']).toLowerCase();
+    return (!!byEmail && byEmail === myEmail()) || (!!byName && !!meName && byName === meName);
+  }
+  function upsertLocalEmployee(emp){
+    if(!emp || !isMail(emp.email)) return null;
+    if(typeof initEmpReg === 'function') initEmpReg(true);
+    const email = E(emp.email);
+    const current = (Array.isArray(empReg) ? empReg : []).find(e => E(e.email) === email) || {};
+    const rec = {
+      ...current,
+      ...emp,
+      email,
+      name: N(emp.name || current.name) || email.split('@')[0],
+      pass: emp.pass !== undefined ? emp.pass : (current.pass || ''),
+      role: emp.role || emp.desig || current.role || current.desig || 'Team',
+      desig: emp.desig || emp.role || current.desig || current.role || 'Team',
+      active: emp.active !== false,
+      bg: emp.bg || current.bg || (typeof CLRS !== 'undefined' ? CLRS[(empReg || []).length % CLRS.length] : '#2563eb'),
+      joinDate: emp.joinDate || current.joinDate || (typeof TODAY !== 'undefined' ? TODAY : new Date().toISOString().slice(0,10)),
+      isAdmin: ADMIN_EMAILS_FINAL.has(email) || !!emp.isAdmin,
+      isManager: ADMIN_EMAILS_FINAL.has(email) ? false : !!emp.isManager
+    };
+    rec.isManager = rec.isAdmin ? false : !!(typeof computeManagerFlag === 'function' ? computeManagerFlag(rec) : rec.isManager);
+    const idx = (empReg || []).findIndex(e => E(e.email) === email);
+    if(idx >= 0) empReg[idx] = rec; else empReg.push(rec);
+    if(typeof USERS !== 'undefined') USERS[email] = {...(USERS[email] || {}), ...rec};
+    return rec;
+  }
+
+  // Merge registry fixed: keep canonical + sheet + dynamic + newly added employees. No duplicates. Email is unique ID.
+  try{
+    mergeRegistry = function(base, dyn, roles){
+      const by = new Map();
+      const incoming = [];
+      if(Array.isArray(base)) incoming.push(...base);
+      if(Array.isArray(typeof sheetEmpReg !== 'undefined' ? sheetEmpReg : [])) incoming.push(...sheetEmpReg);
+      if(Array.isArray(dyn)) incoming.push(...dyn);
+      incoming.forEach((raw,i) => {
+        if(!raw) return;
+        const email = E(raw.email);
+        if(!email || !isMail(email)) return;
+        const prev = by.get(email) || {};
+        const canon = typeof canonicalByEmail === 'function' ? canonicalByEmail(email) : null;
+        const ov = roles && roles[email] ? roles[email] : {};
+        const rec = {
+          ...canon,
+          ...prev,
+          ...raw,
+          email,
+          name: N(raw.name || prev.name || (canon && canon.name)) || email.split('@')[0],
+          pass: raw.pass || prev.pass || (canon && canon.pass) || '',
+          role: raw.role || raw.desig || prev.role || prev.desig || (canon && canon.role) || 'Team',
+          desig: raw.desig || raw.role || prev.desig || prev.role || (canon && canon.desig) || 'Team',
+          active: raw.active !== false && prev.active !== false,
+          bg: raw.bg || prev.bg || (canon && canon.bg) || (typeof CLRS !== 'undefined' ? CLRS[i % CLRS.length] : '#2563eb'),
+          joinDate: raw.joinDate || prev.joinDate || (canon && canon.joinDate) || ''
+        };
+        rec.isAdmin = ADMIN_EMAILS_FINAL.has(email) || !!raw.isAdmin || !!prev.isAdmin || !!(canon && canon.isAdmin) || !!ov.isAdmin;
+        rec.isManager = rec.isAdmin ? false : !!(ov.isManager !== undefined ? ov.isManager : (raw.isManager || prev.isManager || (canon && canon.isManager)));
+        by.set(email, rec);
+      });
+      return Array.from(by.values()).sort((a,b) => String(a.name||'').localeCompare(String(b.name||'')));
+    };
+  }catch(err){ console.error('mergeRegistry override failed', err); }
+
+  try{
+    applyStableRole = function(user){
+      if(!user || !user.email) return user;
+      const email = E(user.email);
+      const rec = (Array.isArray(empReg) ? empReg.find(e => E(e.email) === email) : null) || user;
+      const fixed = {...rec, ...user, email};
+      fixed.name = N(fixed.name) || (typeof uname === 'function' ? uname(email) : email.split('@')[0]);
+      fixed.active = fixed.active !== false;
+      if(ADMIN_EMAILS_FINAL.has(email) || fixed.isAdmin){ fixed.isAdmin = true; fixed.isManager = false; fixed.role = fixed.role || 'Admin'; fixed.desig = fixed.desig || 'Admin'; }
+      else{ fixed.isAdmin = false; fixed.isManager = !!(typeof computeManagerFlag === 'function' ? computeManagerFlag(fixed) : fixed.isManager); }
+      return fixed;
+    };
+  }catch(_){ }
+
+  // Access: inactive employee tasks hidden from portal. Users see only their own email data. Admin sees active employees' tasks.
+  accessTasks = function(tasks){
+    const list = (tasks || []).map(t => typeof ensureTaskMeta === 'function' ? ensureTaskMeta(t) : t).filter(Boolean).filter(isActiveTask);
+    const me = myEmail();
+    if(typeof isAdmin === 'function' && isAdmin()) return list;
+    if(!me) return [];
+    if(typeof isManager === 'function' && isManager()) return list.filter(t => taskOwnerEmail(t) === me || assignedByMe(t));
+    return list.filter(t => taskOwnerEmail(t) === me);
+  };
+  applyEmpF = function(tasks){
+    let list = accessTasks(tasks);
+    const emp = E(typeof activeEmpF !== 'undefined' ? activeEmpF : '');
+    if(emp) list = list.filter(t => taskOwnerEmail(t) === emp);
+    return list;
+  };
+
+  renderEmpList = function(){
+    if(typeof initEmpReg === 'function') initEmpReg(true);
+    const q = (document.getElementById('emp-q') || {value:''}).value.toLowerCase();
+    const cont = document.getElementById('emp-items'); if(!cont) return;
+    const employees = Array.from(activeEmpMap().values()).filter(e => {
+      const s = `${e.name} ${e.email} ${e.role || ''} ${e.desig || ''}`.toLowerCase();
+      return !q || s.includes(q);
+    });
+    const counters = document.getElementById('emp-counters');
+    if(counters){
+      const admins = employees.filter(e => e.isAdmin).length;
+      const managers = employees.filter(e => e.isManager).length;
+      counters.innerHTML = `<div class="tctr tctr-blue"><div class="tctr-v">${employees.length}</div><div class="tctr-l">Active Employees</div></div><div class="tctr tctr-purple"><div class="tctr-v">${admins}</div><div class="tctr-l">Admins</div></div><div class="tctr tctr-orange"><div class="tctr-v">${managers}</div><div class="tctr-l">Assigners</div></div>`;
+    }
+    cont.innerHTML = '';
+    if(!employees.length){ cont.innerHTML = '<div style="padding:16px;color:var(--muted)">No active employees found.</div>'; return; }
+    employees.forEach(e => {
+      const div = document.createElement('div');
+      div.className = 'ei' + ((typeof editEmpEmail !== 'undefined' && E(editEmpEmail) === e.email) ? ' act' : '');
+      div.onclick = () => selectEmp(e.email);
+      const roleBadge = e.isAdmin ? '<span class="role-badge rb-admin">Admin</span>' : e.isManager ? '<span class="role-badge rb-manager">Manager</span>' : '';
+      div.innerHTML = `<div class="ei-av" style="background:${e.bg}">${typeof ini === 'function' ? ini(e.name) : e.name.slice(0,2).toUpperCase()}</div><div class="ei-info"><div class="ei-name">${esc(e.name)} ${roleBadge}</div><div class="ei-role">${esc(e.desig || e.role || 'Team')} • ${esc(e.email)}</div></div><div class="ei-dot" style="background:#00B67A"></div>`;
+      cont.appendChild(div);
+    });
+  };
+
+  selectEmp = function(email){
+    email = E(email);
+    if(typeof editEmpEmail !== 'undefined') editEmpEmail = email;
+    const e = activeEmpMap().get(email) || (empReg || []).find(x => E(x.email) === email);
+    if(!e) return;
+    renderEmpList();
+    const fp = document.getElementById('emp-fp'); if(!fp) return;
+    const opts = (typeof DESIG_OPTS !== 'undefined' ? DESIG_OPTS : ['Team']).map(d => `<option value="${esc(d)}"${d === e.desig ? ' selected' : ''}>${esc(d)}</option>`).join('');
+    fp.innerHTML = `<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px"><div style="width:50px;height:50px;border-radius:50%;background:${e.bg};display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff">${typeof ini === 'function' ? ini(e.name) : e.name.slice(0,2).toUpperCase()}</div><div><div style="font-size:16px;font-weight:700">${esc(e.name)}</div><div style="font-size:12px;color:var(--muted)">${esc(e.email)}</div></div></div><div class="fg"><label class="fl2">Full Name</label><input id="ef-n" value="${esc(e.name)}" class="fc"></div><div class="fg"><label class="fl2">Email (readonly)</label><input id="ef-e" value="${esc(e.email)}" class="fc" readonly style="background:#f9f9f9;color:var(--muted)"></div><div class="fg"><label class="fl2">Password</label><input id="ef-p" type="password" value="${esc(e.pass || '')}" class="fc"></div><div class="fg"><label class="fl2">Designation</label><select id="ef-d" class="fc">${opts}</select></div><div class="fg"><label class="fl2">Role</label><input id="ef-r" value="${esc(e.role || e.desig || '')}" class="fc"></div><div style="display:flex;gap:20px;margin-bottom:14px;flex-wrap:wrap"><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="ef-admin"${e.isAdmin ? ' checked' : ''} style="width:14px;height:14px;accent-color:var(--blue)"> 👑 Admin</label><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="ef-mgr"${e.isManager ? ' checked' : ''} style="width:14px;height:14px;accent-color:var(--purple)"> 🔀 Manager</label></div><div style="display:flex;gap:8px"><button class="btn bp" style="flex:1" onclick="saveEmp('${esc(email)}')">💾 Save Changes</button><button class="btn bd bsm" onclick="delEmp('${esc(email)}')">🗑 Remove</button></div>`;
+  };
+
+  addNewEmp = async function(){
+    const name = N((document.getElementById('ef-n') || {value:''}).value);
+    const email = E((document.getElementById('ef-e') || {value:''}).value);
+    const pass = (document.getElementById('ef-p') || {value:''}).value.trim();
+    const desig = (document.getElementById('ef-d') || {value:'Team'}).value || 'Team';
+    const roleVal = N((document.getElementById('ef-r') || {value:''}).value) || desig;
+    const isAdminCk = !!(document.getElementById('ef-admin') || {checked:false}).checked;
+    const isMgrCk = !!(document.getElementById('ef-mgr') || {checked:false}).checked;
+    if(!name || !email || !pass){ if(typeof toast === 'function') toast('⚠ Name, email and password required'); return; }
+    if(!isMail(email)){ if(typeof toast === 'function') toast('⚠ Valid email required'); return; }
+    const duplicateActive = activeEmpMap().has(email);
+    if(duplicateActive){ if(typeof toast === 'function') toast('⚠ Employee already active with this email'); return; }
+    const rec = upsertLocalEmployee({email,name,pass,desig,role:roleVal,isAdmin:isAdminCk,isManager:isMgrCk,active:true});
+    if(typeof persistEmpRegistry === 'function') persistEmpRegistry();
+    if(typeof syncUserDirectoryFromRegistry === 'function') syncUserDirectoryFromRegistry();
+    if(typeof emitEmpSync === 'function') emitEmpSync();
+    try{ if(typeof syncEmployeeToServer === 'function') await syncEmployeeToServer(rec, 'upsertEmployee'); }catch(err){ console.error(err); }
+    if(typeof initEmpReg === 'function') initEmpReg(true);
+    renderEmpList(); selectEmp(email);
+    if(typeof refillEmpDropdown === 'function') refillEmpDropdown();
+    if(typeof buildUI === 'function') buildUI();
+    if(typeof toast === 'function') toast('✅ Employee added');
+  };
+
+  saveEmp = async function(oldEmail){
+    oldEmail = E(oldEmail);
+    const existing = (empReg || []).find(e => E(e.email) === oldEmail);
+    if(!existing){ if(typeof toast === 'function') toast('⚠ Employee not found'); return; }
+    const name = N((document.getElementById('ef-n') || {value:''}).value);
+    const pass = (document.getElementById('ef-p') || {value:''}).value.trim() || existing.pass || '';
+    const desig = (document.getElementById('ef-d') || {value:existing.desig || 'Team'}).value;
+    const roleVal = N((document.getElementById('ef-r') || {value:''}).value) || desig;
+    const isAdminCk = !!(document.getElementById('ef-admin') || {checked:false}).checked;
+    const isMgrCk = !!(document.getElementById('ef-mgr') || {checked:false}).checked;
+    if(!name){ if(typeof toast === 'function') toast('⚠ Name required'); return; }
+    const rec = upsertLocalEmployee({...existing,email:oldEmail,name,pass,desig,role:roleVal,isAdmin:isAdminCk,isManager:isMgrCk,active:true});
+    if(typeof persistEmpRegistry === 'function') persistEmpRegistry();
+    if(typeof syncUserDirectoryFromRegistry === 'function') syncUserDirectoryFromRegistry();
+    if(typeof emitEmpSync === 'function') emitEmpSync();
+    try{ if(typeof syncEmployeeToServer === 'function') await syncEmployeeToServer(rec, 'upsertEmployee'); }catch(err){ console.error(err); }
+    if(cu && E(cu.email) === oldEmail){ cu = applyStableRole({...cu, ...rec}); if(typeof saveCurrentSession === 'function') saveCurrentSession(); }
+    renderEmpList(); selectEmp(oldEmail);
+    if(typeof refillEmpDropdown === 'function') refillEmpDropdown();
+    if(typeof buildUI === 'function') buildUI();
+    if(typeof toast === 'function') toast('✅ Employee updated');
+  };
+
+  delEmp = async function(email){
+    email = E(email);
+    if(!email) return;
+    if(!confirm('Remove '+email+' from portal? Backup will remain in sheet.')) return;
+    const existing = (empReg || []).find(e => E(e.email) === email);
+    if(!existing){ if(typeof toast === 'function') toast('⚠ Employee not found'); return; }
+    existing.active = false;
+    if(typeof USERS !== 'undefined' && USERS[email]) USERS[email].active = false;
+    if(typeof persistEmpRegistry === 'function') persistEmpRegistry();
+    if(typeof syncUserDirectoryFromRegistry === 'function') syncUserDirectoryFromRegistry();
+    if(typeof emitEmpSync === 'function') emitEmpSync();
+    try{ if(typeof syncEmployeeToServer === 'function') await syncEmployeeToServer({...existing, active:false}, 'upsertEmployee'); }catch(err){ console.error(err); }
+    if(typeof editEmpEmail !== 'undefined') editEmpEmail = null;
+    if(typeof activeEmpF !== 'undefined' && E(activeEmpF) === email) activeEmpF = null;
+    const fp = document.getElementById('emp-fp');
+    if(fp) fp.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:32px;margin-bottom:8px">✓</div><div style="font-weight:600">Employee removed from portal. Backup is safe in sheet.</div></div>';
+    renderEmpList();
+    if(typeof refillEmpDropdown === 'function') refillEmpDropdown();
+    if(typeof buildUI === 'function') buildUI();
+    if(typeof toast === 'function') toast('🗑 Employee removed from portal');
+  };
+
+  buildEmpPills = function(tasks){
+    if(typeof canAssign === 'function' && !canAssign()) return;
+    const cont = document.getElementById('emp-pills'); if(!cont) return;
+    const baseTasks = accessTasks(tasks || (typeof allTasks !== 'undefined' ? allTasks : []));
+    const pending = new Map();
+    baseTasks.forEach(t => {
+      const email = taskOwnerEmail(t); if(!email) return;
+      const st = typeof normStatus === 'function' ? normStatus(t.status) : String(t.status || '').toLowerCase();
+      if(st !== 'completed') pending.set(email, (pending.get(email) || 0) + Math.max(1, Number(t.pendingUnits || 1)));
+    });
+    cont.innerHTML = '';
+    const all = document.createElement('span');
+    all.className = 'efp' + ((typeof activeEmpF === 'undefined' || !activeEmpF) ? ' act' : '');
+    all.innerHTML = '🌐 All'; all.onclick = () => { activeEmpF = null; if(typeof buildUI === 'function') buildUI(); };
+    cont.appendChild(all);
+    Array.from(activeEmpMap().values()).sort((a,b)=>a.name.localeCompare(b.name)).forEach(e => {
+      const sp = document.createElement('span');
+      sp.className = 'efp' + (E(typeof activeEmpF !== 'undefined' ? activeEmpF : '') === e.email ? ' act' : '');
+      const p = pending.get(e.email) || 0;
+      sp.title = `${e.name} — ${p} pending units`;
+      sp.innerHTML = `<span class="efav" style="background:${e.bg}">${typeof ini === 'function' ? ini(e.name) : e.name.slice(0,2).toUpperCase()}</span>${esc(e.name)}${p ? `<span style="margin-left:6px;background:#FEF2F2;color:#B91C1C;border-radius:10px;padding:1px 6px;font-size:9px;font-weight:800">${p}</span>` : ''}`;
+      sp.onclick = () => { activeEmpF = e.email; if(typeof buildUI === 'function') buildUI(); };
+      cont.appendChild(sp);
+    });
+  };
+
+  function analyticsBase(){
+    let tasks = accessTasks(typeof allTasks !== 'undefined' ? allTasks : []);
+    const r = (document.getElementById('an-range') || {value:'all'}).value;
+    const now = new Date(); now.setHours(0,0,0,0);
+    if(r === 'week'){ const w = new Date(now); w.setDate(now.getDate()-6); tasks = tasks.filter(t => { const d = typeof taskDateValue === 'function' ? taskDateValue(t) : D(t.adate || t.ts); return d && d >= w; }); }
+    if(r === 'month'){ const m = new Date(now.getFullYear(), now.getMonth(), 1); tasks = tasks.filter(t => { const d = typeof taskDateValue === 'function' ? taskDateValue(t) : D(t.adate || t.ts); return d && d >= m; }); }
+    if(r === 'year'){ const y = new Date(now.getFullYear(), 0, 1); tasks = tasks.filter(t => { const d = typeof taskDateValue === 'function' ? taskDateValue(t) : D(t.adate || t.ts); return d && d >= y; }); }
+    return tasks;
+  }
+  ensureAnalyticsEmployeeFilter = function(){
+    const range = document.getElementById('an-range'); if(!range) return;
+    let sel = document.getElementById('an-emp');
+    if(!sel){
+      sel = document.createElement('select'); sel.id = 'an-emp'; sel.className = 'fc'; sel.style.cssText = 'width:auto;padding:6px 11px;font-size:12px;margin-left:8px';
+      sel.onchange = function(){ if(typeof reRenderCharts === 'function') reRenderCharts(); };
+      range.parentNode.insertBefore(sel, range.nextSibling);
+    }
+    const old = E(sel.value);
+    const map = new Map();
+    analyticsBase().forEach(t => { const email = taskOwnerEmail(t); const emp = activeEmpMap().get(email); if(emp) map.set(email, emp.name); });
+    sel.innerHTML = '<option value="">Name Wise — All</option>' + Array.from(map.entries()).sort((a,b)=>a[1].localeCompare(b[1])).map(([email,name]) => `<option value="${email}">${esc(name)}</option>`).join('');
+    sel.value = old && map.has(old) ? old : '';
+  };
+  getAnalyticsTasks = function(){
+    let tasks = analyticsBase();
+    const email = E((document.getElementById('an-emp') || {value:''}).value);
+    if(email) tasks = tasks.filter(t => taskOwnerEmail(t) === email);
+    return tasks;
+  };
+  buildEmpStats = function(tasks){
+    const map = new Map();
+    (tasks || []).filter(isActiveTask).forEach(t => {
+      const email = taskOwnerEmail(t); if(!email) return;
+      const emp = activeEmpMap().get(email); if(!emp) return;
+      if(!map.has(email)) map.set(email, {email, name:emp.name, short:emp.name.split(' ')[0], desig:emp.desig || emp.role || 'Team', total:0, completed:0, overdue:0, inProgress:0, ontime:0, withDue:0});
+      const row = map.get(email); row.total++;
+      const st = typeof normStatus === 'function' ? normStatus(t.status) : String(t.status || '').toLowerCase();
+      if(st === 'completed'){
+        row.completed++;
+        const due = D(t.ddate || t['Due Date'] || t.DueDate);
+        const comp = D(t.completedAt || t['Completed At'] || t.CompletedAt || t.completionDate);
+        if(due && comp){ row.withDue++; if(comp.getTime() <= due.getTime()) row.ontime++; }
+      }
+      if(st === 'in progress') row.inProgress++;
+      if(typeof isOD === 'function' && isOD(t)) row.overdue++;
+    });
+    return Array.from(map.values()).filter(e => e.total > 0).map(e => ({...e, score:Math.max(0, e.completed*2 - e.overdue + Math.round(e.completed/(e.total||1)*5)), ontimePct:e.withDue ? Math.round(e.ontime/e.withDue*100) : 0})).sort((a,b)=>b.score-a.score);
+  };
+  reRenderCharts = function(){
+    if(window._chartRenderTimer) clearTimeout(window._chartRenderTimer);
+    window._chartRenderTimer = setTimeout(() => {
+      window._chartRenderTimer = null;
+      try{ ensureAnalyticsEmployeeFilter(); }catch(err){ console.error(err); }
+      const tasks = getAnalyticsTasks();
+      const banner = document.getElementById('analytics-banner');
+      if(banner){
+        const email = E((document.getElementById('an-emp') || {value:''}).value);
+        if(email){ const emp = activeEmpMap().get(email); banner.innerHTML = `<div class="role-banner"><div class="role-banner-icon">👤</div><div><strong>Name-wise analytics:</strong> ${esc((emp && emp.name) || email)} ka exact email-based data.</div></div>`; }
+        else banner.innerHTML = '';
+      }
+      if(typeof renderCharts === 'function') renderCharts(tasks);
+    }, 120);
+  };
+
+  renderStats = function(tasks){
+    tasks = (tasks || []).filter(isActiveTask);
+    const now = new Date(); now.setHours(0,0,0,0);
+    const m = new Date(now.getFullYear(),now.getMonth(),1);
+    const y = new Date(now.getFullYear(),0,1);
+    const status = t => typeof normStatus === 'function' ? normStatus(t.status) : String(t.status || '').toLowerCase();
+    const comp = tasks.filter(t => status(t) === 'completed');
+    const todayISO = new Date().toISOString().slice(0,10);
+    const compToday = comp.filter(t => { const d = D(t.completedAt || t['Completed At'] || t.CompletedAt); return d && d.toISOString().slice(0,10) === todayISO; });
+    const sv = (id,v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+    sv('k-tot', tasks.length);
+    sv('k-td', compToday.length);
+    sv('k-ip', tasks.filter(t => status(t) === 'in progress').length);
+    sv('k-ov', tasks.filter(t => typeof isOD === 'function' && isOD(t)).length);
+    sv('k-aw', tasks.filter(t => status(t) === 'assigned').length);
+    sv('k-mo', comp.filter(t => { const d = typeof taskDateValue === 'function' ? taskDateValue(t) : D(t.adate || t.ts); return d && d >= m; }).length);
+    sv('k-yr', comp.filter(t => { const d = typeof taskDateValue === 'function' ? taskDateValue(t) : D(t.adate || t.ts); return d && d >= y; }).length);
+    sv('k-pg2', tasks.filter(t => status(t) === 'in progress').length);
+    let totalDue = 0, ontime = 0;
+    comp.forEach(t => { const due = D(t.ddate || t['Due Date'] || t.DueDate); const done = D(t.completedAt || t['Completed At'] || t.CompletedAt || t.completionDate); if(due && done){ totalDue++; if(done.getTime() <= due.getTime()) ontime++; } });
+    sv('k-ot', totalDue ? Math.round(ontime / totalDue * 100) + '%' : '0%');
+    let hrs = 0, tc = 0;
+    comp.forEach(t => { const a = D(t.adate || t['Assign Date'] || t.AssignDate); const c = D(t.completedAt || t['Completed At'] || t.CompletedAt); if(a && c && c >= a){ hrs += (c - a) / 3600000; tc++; } });
+    sv('k-tat', tc ? Math.round(hrs/tc) : '—');
+  };
+
+  resetEmployeePortalCache = function(){
+    try{ localStorage.removeItem('upgro_emp_sync_ping_v1'); }catch(_){ }
+    if(typeof initEmpReg === 'function') initEmpReg(true);
+    if(typeof buildUI === 'function') buildUI();
+    if(typeof toast === 'function') toast('Employee portal cache refreshed');
+  };
+
+  document.addEventListener('DOMContentLoaded', function(){
+    try{ if(typeof initEmpReg === 'function') initEmpReg(true); }catch(_){ }
+  });
+})();
+</script>
+
+<script>
+/* ============================================================
+   FINAL DATA CONSISTENCY PATCH — email ownership + old on-time + one-shot updates
+   ============================================================ */
+(function(){
+  'use strict';
+  const ADMIN_EMAILS = new Set(['ritutyagi@upgromedia.com','adarsh.mis@upgromedia.com','dhiraj.jaiswal@upgromedia.com','dheeraj.jaiswal@upgromedia.com'].map(x=>String(x).toLowerCase().trim()));
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const E = v => { try{ return (typeof canonEmail === 'function' ? canonEmail(v) : String(v||'').toLowerCase().trim()); }catch(_){ return String(v||'').toLowerCase().trim(); } };
+  const S = v => String(v == null ? '' : v).trim();
+  const H = v => (typeof escapeHtml === 'function' ? escapeHtml(v) : S(v).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])));
+  function validEmail(v){ return emailRe.test(E(v)); }
+  function todayOnly(d){ return d && !isNaN(d) ? new Date(d.getFullYear(), d.getMonth(), d.getDate()) : null; }
+  function FDATE(v){
+    if(!v) return null;
+    if(v instanceof Date) return todayOnly(v);
+    if(typeof flexDate === 'function'){
+      const d = flexDate(v); if(d && !isNaN(d)) return todayOnly(d);
+    }
+    let raw = S(v).replace(',', '');
+    let m = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if(m) return todayOnly(new Date(+m[1], +m[2]-1, +m[3]));
+    m = raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+    if(m) return todayOnly(new Date(+m[3], +m[2]-1, +m[1]));
+    const d = new Date(raw); return !isNaN(d) ? todayOnly(d) : null;
+  }
+  function ownerEmail(t){
+    if(!t) return '';
+    const keys = ['email','assignedToEmail','assignedEmail','empEmail','employeeEmail','EmployeeEmail','AssignedTo_Email','AssignedToEmail','Assigned To Email','Assigned To (Email)','Employee Email','UserEmail','Email','mail'];
+    for(const k of keys){ const v = t[k]; if(validEmail(v)) return E(v); }
+    return '';
+  }
+  function empActiveMapFinal(){
+    try{ if(typeof initEmpReg === 'function') initEmpReg(false); }catch(_){ }
+    const map = new Map();
+    (Array.isArray(empReg) ? empReg : []).forEach((e,i)=>{
+      const email = E(e && e.email); if(!validEmail(email) || (e && e.active === false)) return;
+      const rec = {...e, email};
+      rec.name = S(rec.name) || (typeof uname === 'function' ? uname(email) : email.split('@')[0]);
+      rec.role = rec.role || rec.desig || 'Team'; rec.desig = rec.desig || rec.role || 'Team';
+      rec.bg = rec.bg || (typeof CLRS !== 'undefined' ? CLRS[i % CLRS.length] : '#2563eb');
+      if(ADMIN_EMAILS.has(email)){ rec.isAdmin = true; rec.isManager = false; rec.role = rec.role || 'Admin'; rec.desig = rec.desig || 'Admin'; }
+      map.set(email, rec);
+    });
+    return map;
+  }
+  function isTaskActiveFinal(t){
+    const email = ownerEmail(t); if(!email) return false;
+    const map = empActiveMapFinal();
+    return map.has(email);
+  }
+  function doneDateFinal(t){
+    const status = statusFinal(t);
+    const direct = FDATE(t && (t.completedAt || t.CompletedAt || t['Completed At'] || t.CompletionDate || t.completionDate || t.SubmittedAt || t.submittedAt || t['Submitted At'] || t.UpdatedAt || t.updatedAt));
+    if(direct) return direct;
+    if(status === 'completed'){
+      // Old sheets often have no Completed At. For old completed rows, count them against due date instead of showing 0%.
+      return FDATE(t.ddate || t.DueDate || t['Due Date']) || FDATE(t.ts || t.Timestamp || t.adate || t.AssignDate || t['Assign Date']);
+    }
+    return null;
+  }
+  function dueDateFinal(t){ return FDATE(t && (t.ddate || t.DueDate || t['Due Date'] || t.dueDate)); }
+  function assignDateFinal(t){ return FDATE(t && (t.adate || t.AssignDate || t['Assign Date'] || t.ts || t.Timestamp)); }
+  function statusFinal(t){
+    let st = S(t && (t.status || t.Status || '')).toLowerCase();
+    if(typeof normStatus === 'function') st = normStatus(st || 'assigned');
+    const total = Math.max(1, Number(t && (t.totalUnits || t.TotalUnits || t.Count || t['Total Units / Count'] || 1)) || 1);
+    const done = Math.max(0, Number(t && (t.doneUnits || t.DoneUnits || t.DoneQty || t.CompletedQty || 0)) || 0);
+    const pendingRaw = t && (t.pendingUnits ?? t.PendingUnits ?? t.PendingQty ?? t['Pending Units']);
+    const pending = pendingRaw === undefined || pendingRaw === null || pendingRaw === '' ? Math.max(0,total-done) : Math.max(0, Number(pendingRaw)||0);
+    if(st === 'done' || st === 'finished') st = 'completed';
+    if(st === 'completed' || done >= total || pending === 0 && done > 0) return 'completed';
+    return st || 'assigned';
+  }
+  function normalizeTaskFinal(t){
+    if(!t) return t;
+    if(typeof ensureTaskMeta === 'function') t = ensureTaskMeta(t) || t;
+    const email = ownerEmail(t);
+    t.email = email; t.assignedToEmail = email; t.empEmail = email; t.employeeEmail = email; t.AssignedTo_Email = email; t['Assigned To Email'] = email; t['Assigned To (Email)'] = email;
+    const emp = empActiveMapFinal().get(email);
+    if(emp){
+      t.empName = emp.name; t.assignedTo = emp.name; t.AssignedTo_Name = emp.name; t.assignedToLabel = emp.name; t.desig = emp.desig || emp.role || t.desig || '';
+    }
+    const total = Math.max(1, Number(t.totalUnits || t.TotalUnits || t.Count || t['Total Units / Count'] || 1) || 1);
+    let done = Math.max(0, Number(t.doneUnits || t.DoneUnits || t.DoneQty || t.CompletedQty || 0) || 0);
+    const st = statusFinal(t);
+    if(st === 'completed' && done === 0) done = total;
+    t.totalUnits = total;
+    t.doneUnits = Math.min(total, done);
+    t.pendingUnits = st === 'completed' ? 0 : Math.max(0, total - t.doneUnits);
+    t.status = st;
+    const dd = dueDateFinal(t), ad = assignDateFinal(t), cd = doneDateFinal(t);
+    if(dd && !S(t.ddate)) t.ddate = dd.toISOString().slice(0,10);
+    if(ad && !S(t.adate)) t.adate = ad.toISOString().slice(0,10);
+    if(st === 'completed' && cd && !S(t.completedAt)) t.completedAt = cd.toLocaleDateString('en-IN');
+    t.taskId = t.taskId || t.taskCode || t.id; t.taskCode = t.taskCode || t.taskId || t.id;
+    return t;
+  }
+  function taskWeight(t){
+    let w = 0; ['task','WorkName','workName','primaryWorkName','completedAt','driveLink','notes','references','adCopy'].forEach(k=>{ if(S(t && t[k])) w++; });
+    if(statusFinal(t)==='completed') w += 5;
+    return w;
+  }
+  window.normalizeAllTasksFinal = function(list){
+    const by = new Map();
+    (list || []).forEach(raw=>{
+      const t = normalizeTaskFinal(raw); if(!t) return;
+      const id = S(t.id || t.taskId || t.taskCode); if(!id) return;
+      const old = by.get(id);
+      by.set(id, !old || taskWeight(t) >= taskWeight(old) ? {...old, ...t, id} : {...t, ...old, id});
+    });
+    let arr = Array.from(by.values()).map(t=>normalizeTaskFinal(t));
+    try{ if(typeof statusOverrides !== 'undefined') statusOverrides.forEach((ov,id)=>{ const x = arr.find(t=>S(t.id)===S(id)); if(x){ Object.assign(x, ov); normalizeTaskFinal(x); } }); }catch(_){ }
+    return arr.filter(isTaskActiveFinal);
+  };
+  window.taskBelongsToCurrentUser = function(t){ const me = E(cu && cu.email); return !!(me && ownerEmail(t) === me && isTaskActiveFinal(t)); };
+  window.applyStableRole = function(user){
+    if(!user || !user.email) return user;
+    const email = E(user.email);
+    const emp = empActiveMapFinal().get(email) || user;
+    const out = {...emp, ...user, email, name:S(user.name || emp.name) || email.split('@')[0]};
+    if(ADMIN_EMAILS.has(email) || out.isAdmin){ out.isAdmin = true; out.isManager = false; out.role = out.role || 'Admin'; out.desig = out.desig || 'Admin'; }
+    return out;
+  };
+  window.accessTasks = function(tasks){
+    const list = normalizeAllTasksFinal(tasks || allTasks || []);
+    const me = E(cu && cu.email);
+    if(typeof isAdmin === 'function' && isAdmin()) return list;
+    if(!me) return [];
+    if(typeof isManager === 'function' && isManager()){
+      return list.filter(t => ownerEmail(t) === me || S(t.assignedByEmail || t.byEmail).toLowerCase() === me || S(t.by || t.assignedBy || t.AssignedBy || t['Assigned By']).toLowerCase() === S(cu && cu.name).toLowerCase());
+    }
+    return list.filter(t => ownerEmail(t) === me);
+  };
+  window.applyEmpF = function(tasks){
+    let list = window.accessTasks(tasks || allTasks || []);
+    const f = E(typeof activeEmpF !== 'undefined' ? activeEmpF : '');
+    if(f) list = list.filter(t => ownerEmail(t) === f);
+    return list;
+  };
+  function onTimeStats(tasks){
+    let total = 0, good = 0;
+    (tasks || []).forEach(t=>{
+      if(statusFinal(t) !== 'completed') return;
+      const due = dueDateFinal(t); if(!due) return;
+      const done = doneDateFinal(t) || due;
+      total++; if(done.getTime() <= due.getTime()) good++;
+    });
+    return {total, good, pct: total ? Math.round(good / total * 100) : 0};
+  }
+  window.buildEmpStats = function(tasks){
+    const map = new Map();
+    window.accessTasks(tasks || allTasks || []).forEach(t=>{
+      const email = ownerEmail(t), emp = empActiveMapFinal().get(email); if(!email || !emp) return;
+      if(!map.has(email)) map.set(email, {email, name:emp.name, short:emp.name.split(' ')[0], desig:emp.desig || emp.role || 'Team', total:0, completed:0, overdue:0, inProgress:0, ontime:0, withDue:0});
+      const r = map.get(email); r.total++;
+      const st = statusFinal(t);
+      if(st === 'completed'){
+        r.completed++;
+        const due = dueDateFinal(t); if(due){ r.withDue++; if((doneDateFinal(t) || due).getTime() <= due.getTime()) r.ontime++; }
+      }else if(st === 'in progress') r.inProgress++;
+      if(typeof isOD === 'function' && isOD(t) && st !== 'completed') r.overdue++;
+    });
+    return Array.from(map.values()).filter(e=>e.total>0).map(e=>({...e, score:Math.max(0, e.completed*2 - e.overdue + Math.round(e.completed/(e.total||1)*5)), ontimePct:e.withDue ? Math.round(e.ontime/e.withDue*100) : 0})).sort((a,b)=>b.score-a.score);
+  };
+  const oldRenderStatsFinal = window.renderStats;
+  window.renderStats = function(tasks){
+    const safe = (tasks || []).map(normalizeTaskFinal).filter(isTaskActiveFinal);
+    if(typeof oldRenderStatsFinal === 'function') oldRenderStatsFinal(safe);
+    const el = document.getElementById('k-ot'); if(el){ const s = onTimeStats(safe); el.textContent = s.total ? s.pct + '%' : '0%'; }
+  };
+  const oldBuildUIPatched = window.buildUI;
+  let building = false;
+  window.buildUI = function(){
+    if(building) return;
+    building = true;
+    try{
+      if(Array.isArray(allTasks)) allTasks = normalizeAllTasksFinal(allTasks);
+      if(cu) cu = window.applyStableRole(cu);
+      if(typeof oldBuildUIPatched === 'function') oldBuildUIPatched();
+    }finally{ building = false; }
+  };
+  const oldLoadDataPatched = window.loadData;
+  if(typeof oldLoadDataPatched === 'function'){
+    window.loadData = async function(){
+      const res = await oldLoadDataPatched.apply(this, arguments);
+      if(Array.isArray(allTasks)) allTasks = normalizeAllTasksFinal(allTasks);
+      try{ window.buildUI(); }catch(e){ console.error(e); }
+      return res;
+    };
+  }
+  window.renderMyTasks = function(){
+    let tasks = (allTasks || []).map(normalizeTaskFinal).filter(t=>window.taskBelongsToCurrentUser(t));
+    tasks = (typeof sortTasksNewestFirst === 'function') ? sortTasksNewestFirst(tasks) : tasks;
+    const sf=(document.getElementById('mt-sf')||{value:''}).value;
+    const q=S((document.getElementById('mt-q')||{value:''}).value).toLowerCase();
+    if(sf==='overdue') tasks=tasks.filter(t=>typeof isOD === 'function' && isOD(t)); else if(sf) tasks=tasks.filter(t=>statusFinal(t)===sf);
+    if(q) tasks=tasks.filter(t=>S(typeof getTaskDisplayName==='function'?getTaskDisplayName(t):t.task).toLowerCase().includes(q)||S(t.id).toLowerCase().includes(q));
+    if(typeof renderCounters === 'function') renderCounters(tasks,'mt-counters');
+    const el=document.getElementById('mt-list'); if(!el) return;
+    if(!tasks.length){ el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:36px;margin-bottom:8px">📋</div><div style="font-weight:600">No tasks found for your login email</div></div>'; return; }
+    el.innerHTML=tasks.map(t=>{
+      const st=statusFinal(t), ov=typeof isOD==='function' && isOD(t) && st!=='completed';
+      const cls=st==='completed'?'tc tcc':ov?'tc tov':st==='in progress'?'tc tp':'tc ta';
+      const label=st==='completed'?'Completed':ov?'Overdue':st==='in progress'?'In Progress':'Assigned';
+      const pill=st==='completed'?'pc':ov?'po':st==='in progress'?'pp':'pa';
+      const name=H(typeof getTaskDisplayName==='function'?getTaskDisplayName(t):(t.task||'Untitled Work'));
+      return `<div class="${cls}"><div class="tc-top"><div style="flex:1"><div class="tc-task">${name}</div><div style="margin-top:4px;font-size:11px;color:var(--muted);font-weight:700">🆔 ${H(t.id||t.taskCode||'')}</div><div style="margin-top:4px;font-size:11px;color:var(--blue);font-weight:700">🔢 ${H(typeof getTaskQtySummary==='function'?getTaskQtySummary(t):`${t.pendingUnits} Pending / ${t.doneUnits} Submit`)}</div>${t.driveLink?`<div style="margin-top:5px;font-size:11px"><a href="${H(t.driveLink)}" target="_blank">Drive Link ↗</a></div>`:''}</div><span class="pill ${pill}">${label}</span></div><div class="tc-meta"><span>👤 By: ${H(t.assignedByLabel||t.by||'Admin')}</span><span>📅 Assign: ${typeof fd==='function'?fd(t.adate):H(t.adate)}</span><span>🕐 Due: ${typeof fd==='function'?fd(t.ddate):H(t.ddate)}</span></div><div class="tc-acts">${st==='assigned'?`<button class="btn bp bsm" onclick="qAccept('${H(t.id)}')">▶ Accept</button>`:''}${st==='assigned'?` <button class="btn bd bsm" onclick="qReject('${H(t.id)}')">✕ Reject</button>`:''}${st==='in progress'?`<button class="btn bs bsm" onclick="qDone('${H(t.id)}')">✓ Mark Done</button>`:''}<button class="btn bo bsm" onclick="openEditTask('${H(t.id)}')">✏ Edit</button></div></div>`;
+    }).join('');
+  };
+  window.populateSubSel = function(){
+    const sel=document.getElementById('sub-task'); if(!sel) return;
+    let mine = (allTasks || []).map(normalizeTaskFinal).filter(t=>window.taskBelongsToCurrentUser(t) && statusFinal(t)!=='completed');
+    mine = (typeof sortTasksNewestFirst === 'function') ? sortTasksNewestFirst(mine) : mine;
+    sel.innerHTML='<option value="">— Select your task by Work Name / Task ID —</option>';
+    if(!mine.length) sel.innerHTML += '<option value="" disabled>No pending task found for your login email</option>';
+    mine.forEach(t=>{ const o=document.createElement('option'); o.value=t.id; o.textContent=S(typeof getTaskDisplayName==='function'?getTaskDisplayName(t):t.task).slice(0,90) + (t.totalUnits>1?` · ${t.pendingUnits} pending`:''); sel.appendChild(o); });
+    if(typeof refreshSubTaskMeta === 'function') refreshSubTaskMeta();
+  };
+  function updateTaskEverywhere(id, patch){
+    id = S(id); if(!id) return null;
+    let found = null;
+    (allTasks || []).forEach(t=>{ if(S(t.id||t.taskId||t.taskCode) === id){ Object.assign(t, patch); normalizeTaskFinal(t); found=t; } });
+    if(typeof statusOverrides !== 'undefined') statusOverrides.set(id, {...(statusOverrides.get(id)||{}), ...patch});
+    allTasks = normalizeAllTasksFinal(allTasks || []);
+    return found;
+  }
+  const oldQDoneFinal = window.qDone;
+  window.qDone = async function(id){
+    const now = new Date().toLocaleString('en-IN');
+    const t = (allTasks || []).find(x=>S(x.id||x.taskId||x.taskCode)===S(id));
+    const total = Math.max(1, Number(t && t.totalUnits || 1)||1);
+    updateTaskEverywhere(id, {status:'completed', completedAt:now, doneUnits:total, pendingUnits:0});
+    try{ window.buildUI(); }catch(_){ }
+    if(typeof SURL !== 'undefined' && SURL){
+      try{ await fetch(SURL,{method:'POST',body:JSON.stringify({action:'updateTask',id,taskId:id,taskCode:id,status:'Completed',Status:'Completed',completedAt:now,CompletedAt:now,doneUnits:total,DoneUnits:total,pendingUnits:0,PendingUnits:0,deleteEmailOnComplete:false,keepEmail:true,preserveEmail:true})}); }catch(e){ console.error(e); }
+    }else if(typeof oldQDoneFinal === 'function') return oldQDoneFinal.apply(this, arguments);
+    if(typeof toast === 'function') toast('✅ Task completed and updated everywhere');
+  };
+  const oldSubmitFinal = window.submitWork;
+  window.submitWork = async function(){
+    const taskId=S((document.getElementById('sub-task')||{value:''}).value);
+    if(!taskId) return oldSubmitFinal ? oldSubmitFinal.apply(this, arguments) : undefined;
+    const t=(allTasks || []).find(x=>S(x.id||x.taskId||x.taskCode)===taskId);
+    const beforeTotal = Math.max(1, Number(t && t.totalUnits || 1)||1);
+    const res = oldSubmitFinal ? await oldSubmitFinal.apply(this, arguments) : undefined;
+    const fresh=(allTasks || []).find(x=>S(x.id||x.taskId||x.taskCode)===taskId);
+    if(fresh && (statusFinal(fresh)==='completed' || Number(fresh.pendingUnits||0)===0)) updateTaskEverywhere(taskId,{status:'completed',doneUnits:beforeTotal,pendingUnits:0,completedAt:fresh.completedAt || new Date().toLocaleString('en-IN')});
+    try{ window.buildUI(); }catch(_){ }
+    return res;
+  };
+  // One manual rescue for cache/data confusion after deploy.
+  window.fixPortalDataNow = function(){
+    try{ if(typeof initEmpReg==='function') initEmpReg(true); }catch(_){ }
+    if(Array.isArray(allTasks)) allTasks = normalizeAllTasksFinal(allTasks);
+    if(typeof activeEmpF !== 'undefined') activeEmpF = null;
+    window.buildUI();
+    if(typeof toast==='function') toast('✅ Portal data normalized: email ownership + on-time recalculated');
+  };
+  setTimeout(()=>{ try{ window.fixPortalDataNow(); }catch(e){ console.error(e); } }, 300);
+})();
+</script>
+
 </body>
 </html>
