@@ -5139,5 +5139,558 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
 
 })();
 </script>
+  <script>
+/* ============================================================
+   EMPLOYEE EMAIL EDITABLE PATCH + ISHIKA SAXENA EMAIL FIX
+   Paste this just before </body>
+   Do not change any existing code above.
+   ============================================================ */
+(function(){
+  'use strict';
+
+  const ISHIKA_NAME_KEY = 'ishika saxena';
+
+  /*
+    Default corrected email.
+    Agar actual email alag ho, Employee section me Ishika Saxena select karke
+    email field se directly change kar sakte ho.
+  */
+  const ISHIKA_CORRECT_EMAIL = 'ishika.saxena@upgromedia.com';
+
+  function $(id){
+    return document.getElementById(id);
+  }
+
+  function cleanEmail(v){
+    return String(v || '')
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '');
+  }
+
+  function cleanName(v){
+    return String(v || '')
+      .trim()
+      .replace(/\s+/g, ' ')
+      .toLowerCase();
+  }
+
+  function isEmail(v){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail(v));
+  }
+
+  function showToast(msg){
+    if(typeof toast === 'function') toast(msg);
+    else alert(msg);
+  }
+
+  function ensureEmpGlobals(){
+    if(typeof window.empReg === 'undefined') window.empReg = [];
+    try{
+      if(typeof empReg === 'undefined') empReg = window.empReg;
+    }catch(e){}
+    if(typeof window.USERS === 'undefined' && typeof USERS !== 'undefined'){
+      window.USERS = USERS;
+    }
+  }
+
+  function getEmpArray(){
+    ensureEmpGlobals();
+
+    try{
+      if(typeof initEmpReg === 'function') initEmpReg(true);
+    }catch(e){}
+
+    if(Array.isArray(window.empReg)) return window.empReg;
+
+    try{
+      if(Array.isArray(empReg)){
+        window.empReg = empReg;
+        return empReg;
+      }
+    }catch(e){}
+
+    window.empReg = [];
+    return window.empReg;
+  }
+
+  function setEmpArray(arr){
+    window.empReg = arr;
+
+    try{
+      empReg = arr;
+    }catch(e){}
+  }
+
+  function syncUsersAfterEmailChange(oldEmail, newEmp){
+    oldEmail = cleanEmail(oldEmail);
+    const newEmail = cleanEmail(newEmp.email);
+
+    try{
+      if(typeof USERS !== 'undefined'){
+        if(oldEmail && oldEmail !== newEmail && USERS[oldEmail]){
+          delete USERS[oldEmail];
+        }
+
+        USERS[newEmail] = {
+          ...(USERS[newEmail] || {}),
+          ...newEmp,
+          email: newEmail,
+          name: newEmp.name,
+          pass: newEmp.pass,
+          role: newEmp.role || newEmp.desig || 'Team',
+          desig: newEmp.desig || newEmp.role || 'Team',
+          isAdmin: !!newEmp.isAdmin,
+          isManager: !!newEmp.isManager,
+          active: newEmp.active !== false
+        };
+      }
+    }catch(e){}
+  }
+
+  function syncTasksAfterEmailChange(oldEmail, newEmail, empName, empDesig){
+    oldEmail = cleanEmail(oldEmail);
+    newEmail = cleanEmail(newEmail);
+
+    if(!oldEmail || !newEmail || oldEmail === newEmail) return;
+
+    const keys = [
+      'email',
+      'assignedToEmail',
+      'empEmail',
+      'AssignedTo_Email',
+      'AssignedToEmail',
+      'EmployeeEmail',
+      'Assigned Email',
+      'Assigned To Email',
+      'Assigned To (Email)'
+    ];
+
+    const nameKeys = [
+      'empName',
+      'assignedTo',
+      'AssignedTo_Name',
+      'AssignedToName',
+      'EmployeeName',
+      'Assigned To',
+      'Assigned To Name',
+      'Assigned To (Name)'
+    ];
+
+    function patchTask(t){
+      if(!t || typeof t !== 'object') return t;
+
+      let matched = false;
+
+      keys.forEach(function(k){
+        if(cleanEmail(t[k]) === oldEmail){
+          t[k] = newEmail;
+          matched = true;
+        }
+      });
+
+      if(matched){
+        nameKeys.forEach(function(k){
+          t[k] = empName;
+        });
+
+        t.email = newEmail;
+        t.assignedToEmail = newEmail;
+        t.empEmail = newEmail;
+        t.AssignedTo_Email = newEmail;
+        t['Assigned To (Email)'] = newEmail;
+
+        t.empName = empName;
+        t.assignedTo = empName;
+        t.AssignedTo_Name = empName;
+        t['Assigned To (Name)'] = empName;
+
+        if(empDesig){
+          t.desig = empDesig;
+          t.Designation = empDesig;
+        }
+      }
+
+      return t;
+    }
+
+    try{
+      if(Array.isArray(window.allTasks)){
+        window.allTasks = window.allTasks.map(patchTask);
+      }
+    }catch(e){}
+
+    try{
+      if(Array.isArray(allTasks)){
+        allTasks = allTasks.map(patchTask);
+        window.allTasks = allTasks;
+      }
+    }catch(e){}
+  }
+
+  function persistEverything(){
+    try{
+      if(typeof persistEmpRegistry === 'function') persistEmpRegistry();
+    }catch(e){}
+
+    try{
+      if(typeof syncUserDirectoryFromRegistry === 'function') syncUserDirectoryFromRegistry();
+    }catch(e){}
+
+    try{
+      if(typeof emitEmpSync === 'function') emitEmpSync();
+    }catch(e){}
+
+    try{
+      if(typeof refillEmpDropdown === 'function') refillEmpDropdown();
+    }catch(e){}
+
+    try{
+      if(typeof populateTaskFilterOptions === 'function') populateTaskFilterOptions();
+    }catch(e){}
+
+    try{
+      if(typeof renderEmpList === 'function') renderEmpList();
+    }catch(e){}
+
+    try{
+      if(typeof buildUI === 'function') buildUI();
+    }catch(e){}
+  }
+
+  function autoFixIshikaEmail(){
+    const arr = getEmpArray();
+    let changed = false;
+
+    arr.forEach(function(emp){
+      if(!emp) return;
+
+      const nm = cleanName(emp.name || emp.Name || emp.EmployeeName || '');
+      const currentEmail = cleanEmail(emp.email || emp.Email || emp.EmployeeEmail || '');
+
+      if(nm === ISHIKA_NAME_KEY && currentEmail !== ISHIKA_CORRECT_EMAIL){
+        const oldEmail = currentEmail;
+
+        emp.email = ISHIKA_CORRECT_EMAIL;
+        emp.Email = ISHIKA_CORRECT_EMAIL;
+        emp.EmployeeEmail = ISHIKA_CORRECT_EMAIL;
+        emp.name = emp.name || 'Ishika Saxena';
+        emp.Name = emp.name;
+        emp.active = emp.active !== false;
+
+        syncUsersAfterEmailChange(oldEmail, emp);
+        syncTasksAfterEmailChange(
+          oldEmail,
+          ISHIKA_CORRECT_EMAIL,
+          emp.name || 'Ishika Saxena',
+          emp.desig || emp.role || 'Team'
+        );
+
+        changed = true;
+      }
+    });
+
+    if(changed){
+      setEmpArray(arr);
+      persistEverything();
+    }
+  }
+
+  function makeEmailFieldEditable(){
+    const fp = $('emp-fp');
+    if(!fp) return;
+
+    const nameInput = $('ef-n');
+    let emailInput = $('ef-e');
+
+    if(!nameInput) return;
+
+    const selectedName = cleanName(nameInput.value);
+
+    /*
+      Agar edit form me email input already hai but readonly/disabled hai,
+      usko editable kar do.
+    */
+    if(emailInput){
+      emailInput.removeAttribute('readonly');
+      emailInput.removeAttribute('disabled');
+      emailInput.type = 'email';
+      emailInput.classList.add('fc');
+      emailInput.placeholder = 'employee@upgromedia.com';
+
+      const wrap = emailInput.closest('.fg');
+      if(wrap){
+        const label = wrap.querySelector('label');
+        if(label) label.textContent = 'Email *';
+      }
+
+      if(selectedName === ISHIKA_NAME_KEY && cleanEmail(emailInput.value) !== ISHIKA_CORRECT_EMAIL){
+        emailInput.value = ISHIKA_CORRECT_EMAIL;
+      }
+
+      return;
+    }
+
+    /*
+      Agar edit form me email field missing hai,
+      name field ke neeche new editable email field inject kar do.
+    */
+    const empList = getEmpArray();
+    const emp = empList.find(function(e){
+      return cleanName(e.name || e.Name || '') === selectedName;
+    });
+
+    const currentEmail = selectedName === ISHIKA_NAME_KEY
+      ? ISHIKA_CORRECT_EMAIL
+      : cleanEmail(emp && emp.email);
+
+    const nameWrap = nameInput.closest('.fg') || nameInput.parentElement;
+
+    const div = document.createElement('div');
+    div.className = 'fg';
+    div.innerHTML =
+      '<label class="fl2">Email *</label>' +
+      '<input id="ef-e" type="email" class="fc" placeholder="employee@upgromedia.com" value="' + currentEmail + '">';
+
+    if(nameWrap && nameWrap.parentNode){
+      nameWrap.parentNode.insertBefore(div, nameWrap.nextSibling);
+    }
+  }
+
+  const oldSelectEmp = window.selectEmp;
+  window.selectEmp = function(email){
+    const result = oldSelectEmp ? oldSelectEmp.apply(this, arguments) : undefined;
+
+    setTimeout(function(){
+      autoFixIshikaEmail();
+      makeEmailFieldEditable();
+    }, 80);
+
+    return result;
+  };
+
+  const oldSelectNewEmp = window.selectNewEmp;
+  window.selectNewEmp = function(){
+    const result = oldSelectNewEmp ? oldSelectNewEmp.apply(this, arguments) : undefined;
+
+    setTimeout(function(){
+      const emailInput = $('ef-e');
+      if(emailInput){
+        emailInput.removeAttribute('readonly');
+        emailInput.removeAttribute('disabled');
+        emailInput.type = 'email';
+      }
+    }, 80);
+
+    return result;
+  };
+
+  /*
+    Complete safe save override:
+    - Name editable
+    - Email editable
+    - Password editable
+    - Designation editable
+    - Role editable
+    - Admin / Manager / Active checkbox working
+    - Old email se new email migration
+  */
+  window.saveEmp = async function(oldEmail){
+    const arr = getEmpArray();
+
+    const name = (($('ef-n') || {}).value || '').trim();
+    const newEmail = cleanEmail(($('ef-e') || {}).value || oldEmail || '');
+    const pass = (($('ef-p') || {}).value || '').trim();
+
+    const desig = (($('ef-d') || {}).value || 'Team').trim();
+    const roleVal = ((($('ef-r') || {}).value || desig) || 'Team').trim();
+
+    const isAdminCk = !!(($('ef-admin') || {}).checked);
+    const isMgrCk = !!(($('ef-mgr') || {}).checked);
+    const active = $('ef-ac') ? !!$('ef-ac').checked : true;
+
+    const oldClean = cleanEmail(oldEmail);
+
+    if(!name){
+      showToast('⚠ Name required');
+      return;
+    }
+
+    if(!newEmail || !isEmail(newEmail)){
+      showToast('⚠ Valid email required');
+      return;
+    }
+
+    const oldIndex = arr.findIndex(function(e){
+      return cleanEmail(e.email) === oldClean;
+    });
+
+    let index = oldIndex;
+
+    /*
+      Fallback: if old email mismatch ho gaya ho, name se record find karo.
+    */
+    if(index < 0){
+      index = arr.findIndex(function(e){
+        return cleanName(e.name) === cleanName(name);
+      });
+    }
+
+    if(index < 0){
+      showToast('⚠ Employee not found');
+      return;
+    }
+
+    const duplicate = arr.find(function(e, i){
+      return i !== index && cleanEmail(e.email) === newEmail;
+    });
+
+    if(duplicate){
+      showToast('⚠ This email already exists for another employee');
+      return;
+    }
+
+    const previousEmail = cleanEmail(arr[index].email || oldEmail);
+
+    const oldEmp = arr[index] || {};
+
+    const managerFlag = !!(
+      isMgrCk ||
+      (
+        typeof isForcedAssigner === 'function' &&
+        isForcedAssigner({
+          email: newEmail,
+          name: name,
+          desig: desig,
+          role: roleVal
+        })
+      )
+    );
+
+    const updatedEmp = {
+      ...oldEmp,
+      email: newEmail,
+      Email: newEmail,
+      EmployeeEmail: newEmail,
+      name: name,
+      Name: name,
+      pass: pass || oldEmp.pass || oldEmp.password || '',
+      password: pass || oldEmp.pass || oldEmp.password || '',
+      role: roleVal,
+      Role: roleVal,
+      desig: desig,
+      Designation: desig,
+      isAdmin: isAdminCk,
+      isManager: managerFlag,
+      active: active,
+      Active: active ? 'Yes' : 'No',
+      bg: oldEmp.bg || (typeof CLRS !== 'undefined' ? CLRS[index % CLRS.length] : '#0B84FF'),
+      joinDate: oldEmp.joinDate || oldEmp.JoinDate || (typeof TODAY !== 'undefined' ? TODAY : '')
+    };
+
+    arr[index] = updatedEmp;
+    setEmpArray(arr);
+
+    syncUsersAfterEmailChange(previousEmail, updatedEmp);
+    syncTasksAfterEmailChange(previousEmail, newEmail, name, desig);
+
+    /*
+      Current logged-in user ka email bhi update karo agar wahi employee edit hua hai.
+    */
+    try{
+      if(typeof cu !== 'undefined' && cu && cleanEmail(cu.email) === previousEmail){
+        cu = {
+          ...cu,
+          ...updatedEmp,
+          email: newEmail,
+          role: roleVal,
+          desig: desig
+        };
+        window.cu = cu;
+
+        if(typeof saveCurrentSession === 'function'){
+          saveCurrentSession();
+        }else{
+          localStorage.setItem('upgro_current_session_v1', JSON.stringify(cu));
+        }
+      }
+    }catch(e){}
+
+    try{
+      if(typeof persistEmpRegistry === 'function') persistEmpRegistry();
+    }catch(e){}
+
+    try{
+      if(typeof syncUserDirectoryFromRegistry === 'function') syncUserDirectoryFromRegistry();
+    }catch(e){}
+
+    try{
+      if(typeof emitEmpSync === 'function') emitEmpSync();
+    }catch(e){}
+
+    /*
+      Google Sheet sync available ho to update bhej do.
+    */
+    try{
+      if(typeof syncEmployeeToServer === 'function'){
+        await syncEmployeeToServer(updatedEmp, 'upsertEmployee');
+      }else if(typeof SURL !== 'undefined' && SURL){
+        await fetch(SURL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'upsertEmployee',
+            ...updatedEmp,
+            oldEmail: previousEmail,
+            email: newEmail
+          })
+        });
+      }
+    }catch(e){
+      console.warn('Employee sheet sync failed, local portal updated:', e);
+    }
+
+    try{
+      if(typeof initEmpReg === 'function') initEmpReg(true);
+    }catch(e){}
+
+    try{
+      if(typeof renderEmpList === 'function') renderEmpList();
+    }catch(e){}
+
+    try{
+      if(typeof selectEmp === 'function') selectEmp(newEmail);
+    }catch(e){}
+
+    try{
+      if(typeof refillEmpDropdown === 'function') refillEmpDropdown();
+    }catch(e){}
+
+    try{
+      if(typeof populateTaskFilterOptions === 'function') populateTaskFilterOptions();
+    }catch(e){}
+
+    try{
+      if(typeof buildUI === 'function') buildUI();
+    }catch(e){}
+
+    showToast('✅ Employee updated successfully');
+  };
+
+  /*
+    Page load pe bhi Ishika email auto-fix.
+  */
+  window.addEventListener('DOMContentLoaded', function(){
+    setTimeout(function(){
+      autoFixIshikaEmail();
+      makeEmailFieldEditable();
+    }, 900);
+  });
+
+  setTimeout(function(){
+    autoFixIshikaEmail();
+  }, 1200);
+
+})();
+</script>
 </body>
 </html>
