@@ -5692,5 +5692,272 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
 
 })();
 </script>
+  <script>
+/* ============================================================
+   ONLY ISHIKA SAXENA EMAIL FIX
+   Correct email: ishika.crm@upgromedia.com
+   Paste just before </body>
+   ============================================================ */
+(function(){
+  'use strict';
+
+  const OLD_EMAILS = [
+    'ishika.saxena@upgromedia.com',
+    'ihika.saxena@upgromedia.com',
+    'ishika@upgromedia.com'
+  ];
+
+  const CORRECT_EMAIL = 'ishika.crm@upgromedia.com';
+
+  function clean(v){
+    return String(v || '').trim().toLowerCase().replace(/\s+/g, '');
+  }
+
+  function cleanName(v){
+    return String(v || '').trim().replace(/\s+/g, ' ').toLowerCase();
+  }
+
+  function isIshika(emp){
+    if(!emp) return false;
+
+    const name = cleanName(emp.name || emp.Name || emp.EmployeeName || emp.empName || '');
+    const email = clean(emp.email || emp.Email || emp.EmployeeEmail || emp.empEmail || '');
+
+    return (
+      name === 'ishika saxena' ||
+      OLD_EMAILS.includes(email) ||
+      email === CORRECT_EMAIL
+    );
+  }
+
+  function patchEmployeeObject(emp){
+    if(!emp || !isIshika(emp)) return emp;
+
+    emp.name = 'Ishika Saxena';
+    emp.Name = 'Ishika Saxena';
+    emp.EmployeeName = 'Ishika Saxena';
+
+    emp.email = CORRECT_EMAIL;
+    emp.Email = CORRECT_EMAIL;
+    emp.EmployeeEmail = CORRECT_EMAIL;
+    emp.empEmail = CORRECT_EMAIL;
+
+    emp.role = emp.role || emp.Role || 'CRM';
+    emp.Role = emp.role;
+
+    emp.desig = emp.desig || emp.Designation || 'CRM';
+    emp.Designation = emp.desig;
+
+    emp.active = true;
+    emp.Active = 'Yes';
+
+    return emp;
+  }
+
+  function fixUsers(){
+    try{
+      if(typeof USERS === 'undefined') return;
+
+      OLD_EMAILS.forEach(function(oldEmail){
+        oldEmail = clean(oldEmail);
+
+        if(USERS[oldEmail]){
+          USERS[CORRECT_EMAIL] = Object.assign({}, USERS[oldEmail], {
+            email: CORRECT_EMAIL,
+            name: 'Ishika Saxena',
+            role: USERS[oldEmail].role || USERS[oldEmail].desig || 'CRM',
+            desig: USERS[oldEmail].desig || USERS[oldEmail].role || 'CRM',
+            active: true
+          });
+
+          delete USERS[oldEmail];
+        }
+      });
+
+      if(!USERS[CORRECT_EMAIL]){
+        USERS[CORRECT_EMAIL] = {
+          name: 'Ishika Saxena',
+          email: CORRECT_EMAIL,
+          pass: 'Ishika@123',
+          role: 'CRM',
+          desig: 'CRM',
+          active: true,
+          isAdmin: false,
+          isManager: false
+        };
+      }else{
+        USERS[CORRECT_EMAIL] = patchEmployeeObject(USERS[CORRECT_EMAIL]);
+      }
+    }catch(e){
+      console.warn('USERS Ishika email fix failed:', e);
+    }
+  }
+
+  function fixEmpRegistry(){
+    let arr = [];
+
+    try{
+      if(Array.isArray(window.empReg)) arr = window.empReg;
+    }catch(e){}
+
+    try{
+      if((!arr || !arr.length) && typeof empReg !== 'undefined' && Array.isArray(empReg)){
+        arr = empReg;
+      }
+    }catch(e){}
+
+    if(!Array.isArray(arr)) arr = [];
+
+    let found = false;
+
+    arr.forEach(function(emp){
+      if(isIshika(emp)){
+        patchEmployeeObject(emp);
+        found = true;
+      }
+    });
+
+    if(!found){
+      arr.push({
+        name: 'Ishika Saxena',
+        email: CORRECT_EMAIL,
+        pass: 'Ishika@123',
+        role: 'CRM',
+        desig: 'CRM',
+        active: true,
+        isAdmin: false,
+        isManager: false
+      });
+    }
+
+    try{ window.empReg = arr; }catch(e){}
+    try{ empReg = arr; }catch(e){}
+  }
+
+  function fixTasks(){
+    function patchTask(t){
+      if(!t || typeof t !== 'object') return t;
+
+      const possibleEmailKeys = [
+        'email',
+        'empEmail',
+        'assignedToEmail',
+        'AssignedTo_Email',
+        'AssignedToEmail',
+        'EmployeeEmail',
+        'Assigned Email',
+        'Assigned To Email',
+        'Assigned To (Email)'
+      ];
+
+      let matched = false;
+
+      possibleEmailKeys.forEach(function(k){
+        if(OLD_EMAILS.includes(clean(t[k])) || clean(t[k]) === CORRECT_EMAIL){
+          t[k] = CORRECT_EMAIL;
+          matched = true;
+        }
+      });
+
+      const possibleNameKeys = [
+        'empName',
+        'assignedTo',
+        'AssignedTo_Name',
+        'AssignedToName',
+        'EmployeeName',
+        'Assigned To',
+        'Assigned To Name',
+        'Assigned To (Name)'
+      ];
+
+      possibleNameKeys.forEach(function(k){
+        if(cleanName(t[k]) === 'ishika saxena'){
+          matched = true;
+        }
+      });
+
+      if(matched){
+        t.email = CORRECT_EMAIL;
+        t.empEmail = CORRECT_EMAIL;
+        t.assignedToEmail = CORRECT_EMAIL;
+        t.AssignedTo_Email = CORRECT_EMAIL;
+        t['Assigned To (Email)'] = CORRECT_EMAIL;
+
+        t.empName = 'Ishika Saxena';
+        t.assignedTo = 'Ishika Saxena';
+        t.AssignedTo_Name = 'Ishika Saxena';
+        t['Assigned To (Name)'] = 'Ishika Saxena';
+
+        t.desig = t.desig || 'CRM';
+        t.Designation = t.Designation || 'CRM';
+      }
+
+      return t;
+    }
+
+    try{
+      if(Array.isArray(window.allTasks)){
+        window.allTasks = window.allTasks.map(patchTask);
+      }
+    }catch(e){}
+
+    try{
+      if(typeof allTasks !== 'undefined' && Array.isArray(allTasks)){
+        allTasks = allTasks.map(patchTask);
+        window.allTasks = allTasks;
+      }
+    }catch(e){}
+  }
+
+  function refreshUI(){
+    try{ if(typeof persistEmpRegistry === 'function') persistEmpRegistry(); }catch(e){}
+    try{ if(typeof syncUserDirectoryFromRegistry === 'function') syncUserDirectoryFromRegistry(); }catch(e){}
+    try{ if(typeof emitEmpSync === 'function') emitEmpSync(); }catch(e){}
+
+    try{ if(typeof initEmpReg === 'function') initEmpReg(true); }catch(e){}
+    try{ if(typeof renderEmpList === 'function') renderEmpList(); }catch(e){}
+    try{ if(typeof refillEmpDropdown === 'function') refillEmpDropdown(); }catch(e){}
+    try{ if(typeof populateTaskFilterOptions === 'function') populateTaskFilterOptions(); }catch(e){}
+    try{ if(typeof buildUI === 'function') buildUI(); }catch(e){}
+
+    const emailInput = document.getElementById('ef-e');
+    if(emailInput){
+      emailInput.value = CORRECT_EMAIL;
+      emailInput.removeAttribute('readonly');
+      emailInput.removeAttribute('disabled');
+    }
+
+    try{
+      if(typeof selectEmp === 'function'){
+        setTimeout(function(){
+          try{ selectEmp(CORRECT_EMAIL); }catch(e){}
+        }, 150);
+      }
+    }catch(e){}
+  }
+
+  function runFix(){
+    fixUsers();
+    fixEmpRegistry();
+    fixTasks();
+    refreshUI();
+
+    if(typeof toast === 'function'){
+      toast('✅ Ishika Saxena email fixed: ' + CORRECT_EMAIL);
+    }
+  }
+
+  window.fixIshikaEmailNow = runFix;
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){
+      setTimeout(runFix, 500);
+    });
+  }else{
+    setTimeout(runFix, 500);
+  }
+
+})();
+</script>
 </body>
 </html>
