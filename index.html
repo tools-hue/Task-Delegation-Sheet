@@ -4704,5 +4704,440 @@ window.fixAdminsInAssignTaskNow=function(){fillAssignDropdownsIncludingAdmins();
 document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDropdownsIncludingAdmins,1200);});
 })();
 </script>
+  <script>
+/* =========================================================
+   MULTI TASK ASSIGN PATCH
+   Paste this just before </body>
+   No existing code change required.
+   ========================================================= */
+(function(){
+  'use strict';
+
+  let multiPatchReady = false;
+
+  function $(id){ return document.getElementById(id); }
+
+  function esc(v){
+    return String(v == null ? '' : v).replace(/[&<>"']/g, function(m){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m];
+    });
+  }
+
+  function getEmpOptionsHtml(selectedValue){
+    const baseSel = $('add-emp');
+    if(!baseSel) return '<option value="">— Select Employee —</option>';
+
+    return Array.from(baseSel.options).map(function(o){
+      const val = o.value || '';
+      const txt = o.textContent || '';
+      const sel = val === selectedValue ? ' selected' : '';
+      return '<option value="' + esc(val) + '"' + sel + '>' + esc(txt) + '</option>';
+    }).join('');
+  }
+
+  function selectedEmpText(sel){
+    if(!sel || !sel.value) return 'Not selected';
+    const opt = sel.options[sel.selectedIndex];
+    return opt ? opt.textContent : sel.value;
+  }
+
+  function refreshRowNumbers(){
+    document.querySelectorAll('.multi-task-row').forEach(function(row, i){
+      const num = row.querySelector('.multi-task-num');
+      if(num) num.textContent = String(i + 1);
+    });
+  }
+
+  function updateRowAssignee(row){
+    const sel = row.querySelector('.multi-task-emp');
+    const out = row.querySelector('.multi-task-assignee-name');
+    if(out) out.textContent = selectedEmpText(sel);
+  }
+
+  function addMultiTaskRow(taskValue, empValue){
+    const list = $('multi-task-list');
+    if(!list) return;
+
+    const row = document.createElement('div');
+    row.className = 'multi-task-row';
+    row.innerHTML = `
+      <div class="multi-task-num">1</div>
+
+      <div class="multi-task-main">
+        <input
+          type="text"
+          class="fc multi-task-input"
+          placeholder="Task likho aur comma press karo..."
+          value="${esc(taskValue || '')}"
+        >
+        <div class="multi-task-assignee-preview">
+          Assigned To: <strong class="multi-task-assignee-name">Not selected</strong>
+        </div>
+      </div>
+
+      <select class="fc multi-task-emp">
+        ${getEmpOptionsHtml(empValue || '')}
+      </select>
+
+      <button type="button" class="btn bd bxs multi-task-remove">×</button>
+    `;
+
+    list.appendChild(row);
+
+    const input = row.querySelector('.multi-task-input');
+    const sel = row.querySelector('.multi-task-emp');
+    const remove = row.querySelector('.multi-task-remove');
+
+    function splitCommaTasks(){
+      const val = input.value || '';
+      if(!val.includes(',')) return;
+
+      const parts = val.split(',').map(x => x.trim()).filter(Boolean);
+
+      if(parts.length === 0){
+        input.value = '';
+        return;
+      }
+
+      input.value = parts[0];
+
+      parts.slice(1).forEach(function(p){
+        addMultiTaskRow(p, sel.value || '');
+      });
+
+      const rows = Array.from(document.querySelectorAll('.multi-task-row'));
+      const last = rows[rows.length - 1];
+      if(last){
+        const lastInput = last.querySelector('.multi-task-input');
+        if(lastInput) lastInput.focus();
+      }
+    }
+
+    input.addEventListener('keyup', function(e){
+      if(e.key === ',' || input.value.includes(',')) splitCommaTasks();
+    });
+
+    input.addEventListener('input', function(){
+      if(input.value.includes(',')) splitCommaTasks();
+    });
+
+    sel.addEventListener('change', function(){
+      updateRowAssignee(row);
+    });
+
+    remove.addEventListener('click', function(){
+      const rows = document.querySelectorAll('.multi-task-row');
+      if(rows.length <= 1){
+        input.value = '';
+        sel.value = '';
+        updateRowAssignee(row);
+        return;
+      }
+      row.remove();
+      refreshRowNumbers();
+    });
+
+    updateRowAssignee(row);
+    refreshRowNumbers();
+  }
+
+  function injectMultiTaskUI(){
+    const taskInput = $('add-task');
+    const empSel = $('add-emp');
+
+    if(!taskInput || !empSel) return;
+
+    if($('multi-task-box')){
+      $('multi-task-list').innerHTML = '';
+      addMultiTaskRow('', '');
+      syncOriginalFieldsVisibility();
+      return;
+    }
+
+    const style = document.createElement('style');
+    style.id = 'multi-task-style';
+    style.textContent = `
+      #multi-task-box{
+        margin-bottom:12px;
+        padding:12px;
+        border:1px solid var(--border);
+        border-radius:10px;
+        background:#F8FAFC;
+      }
+      .multi-task-head{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:10px;
+        margin-bottom:10px;
+      }
+      .multi-task-title{
+        font-size:11px;
+        font-weight:800;
+        color:var(--text);
+        text-transform:uppercase;
+        letter-spacing:.6px;
+      }
+      .multi-task-hint{
+        font-size:11px;
+        color:var(--muted);
+        margin-bottom:10px;
+      }
+      .multi-task-row{
+        display:grid;
+        grid-template-columns:28px 1fr 220px 34px;
+        gap:8px;
+        align-items:start;
+        margin-bottom:8px;
+      }
+      .multi-task-num{
+        width:26px;
+        height:26px;
+        border-radius:50%;
+        background:var(--blue);
+        color:#fff;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:11px;
+        font-weight:800;
+        margin-top:6px;
+      }
+      .multi-task-main{
+        min-width:0;
+      }
+      .multi-task-assignee-preview{
+        font-size:10px;
+        color:var(--muted);
+        margin-top:4px;
+      }
+      .multi-task-assignee-preview strong{
+        color:var(--blue);
+      }
+      .multi-task-remove{
+        width:32px;
+        height:32px;
+        justify-content:center;
+        padding:0;
+        margin-top:1px;
+      }
+      #multi-task-add-row{
+        margin-top:4px;
+      }
+      .multi-original-hidden{
+        display:none !important;
+      }
+      @media(max-width:768px){
+        .multi-task-row{
+          grid-template-columns:26px 1fr 34px;
+        }
+        .multi-task-row .multi-task-emp{
+          grid-column:2 / 4;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    const box = document.createElement('div');
+    box.id = 'multi-task-box';
+    box.innerHTML = `
+      <div class="multi-task-head">
+        <div class="multi-task-title">Multiple Task Assign</div>
+        <button type="button" class="btn bo bxs" id="multi-task-add-row">+ Add Row</button>
+      </div>
+      <div class="multi-task-hint">
+        Task likhne ke baad comma <strong>,</strong> press karoge to neeche automatic new task row add ho jayegi.
+      </div>
+      <div id="multi-task-list"></div>
+    `;
+
+    const taskFg = taskInput.closest('.fg') || taskInput.parentNode;
+    if(taskFg && taskFg.parentNode){
+      taskFg.parentNode.insertBefore(box, taskFg);
+    }
+
+    const addBtn = $('multi-task-add-row');
+    if(addBtn){
+      addBtn.onclick = function(){
+        const firstEmp = document.querySelector('.multi-task-emp');
+        addMultiTaskRow('', firstEmp ? firstEmp.value : '');
+      };
+    }
+
+    addMultiTaskRow('', '');
+    syncOriginalFieldsVisibility();
+  }
+
+  function syncOriginalFieldsVisibility(){
+    const taskInput = $('add-task');
+    const empSel = $('add-emp');
+
+    if(taskInput){
+      const fg = taskInput.closest('.fg') || taskInput.parentNode;
+      if(fg) fg.classList.add('multi-original-hidden');
+    }
+
+    if(empSel){
+      const fg = empSel.closest('.fg') || empSel.parentNode;
+      if(fg) fg.classList.add('multi-original-hidden');
+    }
+  }
+
+  function showOriginalFieldsForEdit(){
+    const taskInput = $('add-task');
+    const empSel = $('add-emp');
+    const box = $('multi-task-box');
+
+    if(box) box.style.display = 'none';
+
+    [taskInput, empSel].forEach(function(el){
+      if(!el) return;
+      const fg = el.closest('.fg') || el.parentNode;
+      if(fg) fg.classList.remove('multi-original-hidden');
+    });
+  }
+
+  function showMultiFieldsForAdd(){
+    const box = $('multi-task-box');
+    if(box) box.style.display = '';
+    syncOriginalFieldsVisibility();
+  }
+
+  function collectRows(){
+    return Array.from(document.querySelectorAll('.multi-task-row')).map(function(row){
+      const input = row.querySelector('.multi-task-input');
+      const sel = row.querySelector('.multi-task-emp');
+      return {
+        task: (input ? input.value : '').trim(),
+        email: sel ? sel.value : ''
+      };
+    }).filter(function(x){
+      return x.task || x.email;
+    });
+  }
+
+  function clearRows(){
+    const list = $('multi-task-list');
+    if(!list) return;
+    list.innerHTML = '';
+    addMultiTaskRow('', '');
+  }
+
+  const oldOpenAddTask = window.openAddTask;
+  window.openAddTask = function(){
+    const r = oldOpenAddTask && oldOpenAddTask.apply(this, arguments);
+
+    setTimeout(function(){
+      injectMultiTaskUI();
+      showMultiFieldsForAdd();
+
+      const title = $('m-add-t');
+      if(title) title.textContent = '📋 Assign Multiple Tasks';
+
+      try{
+        if(typeof window.refillEmpDropdown === 'function') window.refillEmpDropdown();
+      }catch(e){}
+
+      document.querySelectorAll('.multi-task-emp').forEach(function(sel){
+        const keep = sel.value;
+        sel.innerHTML = getEmpOptionsHtml(keep);
+        if(keep) sel.value = keep;
+        updateRowAssignee(sel.closest('.multi-task-row'));
+      });
+    }, 80);
+
+    return r;
+  };
+
+  const oldOpenEditTask = window.openEditTask;
+  window.openEditTask = function(){
+    const r = oldOpenEditTask && oldOpenEditTask.apply(this, arguments);
+    setTimeout(showOriginalFieldsForEdit, 80);
+    return r;
+  };
+
+  const oldSaveTask = window.saveTask;
+  window.saveTask = async function(){
+    // Edit mode me original save hi chalega.
+    try{
+      if(typeof editTaskId !== 'undefined' && editTaskId){
+        return oldSaveTask && oldSaveTask.apply(this, arguments);
+      }
+    }catch(e){}
+
+    const rows = collectRows();
+
+    // Agar multi UI nahi hai, original save.
+    if(!$('multi-task-box')){
+      return oldSaveTask && oldSaveTask.apply(this, arguments);
+    }
+
+    if(!rows.length){
+      if(typeof toast === 'function') toast('⚠ Please add at least one task');
+      return;
+    }
+
+    const incomplete = rows.find(function(x){ return !x.task || !x.email; });
+    if(incomplete){
+      if(typeof toast === 'function') toast('⚠ Har task ke samne employee select karo');
+      return;
+    }
+
+    const taskInput = $('add-task');
+    const empSel = $('add-emp');
+
+    if(!taskInput || !empSel){
+      return oldSaveTask && oldSaveTask.apply(this, arguments);
+    }
+
+    let saved = 0;
+    let failed = 0;
+
+    for(const row of rows){
+      try{
+        taskInput.value = row.task;
+        empSel.value = row.email;
+
+        await oldSaveTask.apply(this, arguments);
+        saved++;
+      }catch(err){
+        console.error('Multi task save failed:', err);
+        failed++;
+      }
+    }
+
+    clearRows();
+
+    try{
+      const modal = $('m-add');
+      if(modal) modal.classList.add('hidden');
+    }catch(e){}
+
+    try{
+      if(typeof buildUI === 'function') buildUI();
+      if(typeof renderAllTasks === 'function') renderAllTasks();
+      if(typeof renderMyTasks === 'function') renderMyTasks();
+      if(typeof populateSubSel === 'function') populateSubSel();
+    }catch(e){}
+
+    if(typeof toast === 'function'){
+      if(failed){
+        toast('⚠ ' + saved + ' tasks saved, ' + failed + ' failed');
+      }else{
+        toast('✅ ' + saved + ' tasks assigned successfully');
+      }
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', function(){
+    setTimeout(function(){
+      if(!multiPatchReady){
+        multiPatchReady = true;
+      }
+    }, 700);
+  });
+
+})();
+</script>
 </body>
 </html>
