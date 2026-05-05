@@ -5155,7 +5155,7 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
     Agar actual email alag ho, Employee section me Ishika Saxena select karke
     email field se directly change kar sakte ho.
   */
-  const ISHIKA_CORRECT_EMAIL = 'ishika.saxena@upgromedia.com';
+  const ISHIKA_CORRECT_EMAIL = 'ishika.crm@upgromedia.com';
 
   function $(id){
     return document.getElementById(id);
@@ -5702,9 +5702,9 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
   'use strict';
 
   const OLD_EMAILS = [
-    'ishika.saxena@upgromedia.com',
-    'ihika.saxena@upgromedia.com',
-    'ishika@upgromedia.com'
+    'ishika.crm@upgromedia.com',
+    'ishika.crm@upgromedia.com',
+    'ishika.crm@upgromedia.com'
   ];
 
   const CORRECT_EMAIL = 'ishika.crm@upgromedia.com';
@@ -5783,7 +5783,7 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
           desig: 'CRM',
           active: true,
           isAdmin: false,
-          isManager: false
+          isManager: true
         };
       }else{
         USERS[CORRECT_EMAIL] = patchEmployeeObject(USERS[CORRECT_EMAIL]);
