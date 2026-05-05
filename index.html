@@ -952,6 +952,7 @@ const USERS = {
   'surya.meta@upgromedia.com':       {pass:'Surya@123',        name:'Surya Pratap Singh',    role:'Meta Media Buyer',   desig:'Meta Media Buyer', isAdmin:false, isManager:true},
   'shubhi.meta@upgromedia.com':      {pass:'Shubhi@123',       name:'Shubhi Singh',          role:'Meta Media Buyer',   desig:'Meta Media Buyer', isAdmin:false, isManager:true},
   'ranveer.copywriter@upgromedia.com':{pass:'Ranveer@123',     name:'Ranveer Singh',          role:'Copywriter',   desig:'Copywriter', isAdmin:false, isManager:true},
+  'ishika.crm@upgromedia.com':    {pass:'Ishika@123',      name:'Ishika Saxena',         role:'CRM',               desig:'CRM',              isAdmin:false, isManager:true},
 
   // USERS
   'vishal.editor@upgromedia.com':    {pass:'Vishal@1002',     name:'Vishal Srivastava',     role:'Video Editor',       desig:'Video Editor',     isAdmin:false, isManager:false},
@@ -961,7 +962,7 @@ const USERS = {
   'adarsh.web@upgromedia.com':       {pass:'Adarsh@1010',     name:'Adarsh Srivastava',     role:'Web Developer',      desig:'Web Developer',    isAdmin:false, isManager:true},
   'arpit@upgromedia.com':            {pass:'Arpit@1011',      name:'Arpit Yadav',           role:'Team',               desig:'Team',             isAdmin:false, isManager:false},
   'junaid@upgromedia.com':           {pass:'Junaid@1014',     name:'Junaid',                role:'Google Ads',         desig:'Google Ads',       isAdmin:false, isManager:false},
-  'chnadrakala.meta@upgromedia.com': {pass:'Chandrakala@1016',name:'Chandrakala Waldia',    role:'Meta Media Buyer',   desig:'Meta Media Buyer', isAdmin:false, isManager:false},
+  'chandrakala.meta@upgromedia.com': {pass:'Chandrakala@1016',name:'Chandrakala Waldia',    role:'Meta Media Buyer',   desig:'Meta Media Buyer', isAdmin:false, isManager:false},
 };
 
 const CLRS=['#0B84FF','#E53935','#00B67A','#F59E0B','#7C3AED','#0E9F8E','#EA580C','#DB2777','#64748B','#D97706','#1565C0','#16A34A','#9333EA','#0891B2'];
@@ -998,6 +999,7 @@ function normalizeQuickName(name,email=''){
   if(low==='muskan' || low.startsWith('muskan ')) return 'Muskan';
   if(low==='dhiraj' || low.startsWith('dhiraj ')) return 'Dhiraj';
   if(low==='surya' || low.startsWith('surya ')) return 'Surya';
+  if(low==='ishika' || low.startsWith('ishika ')) return 'Ishika';
   if(low==='subhi' || low.startsWith('shubhi ') || low==='shubhi') return 'Shubhi';
   if(low==='arpit' || low.startsWith('arpit ')) return 'Arpit';
   if(low==='aditya' || low.startsWith('aditya ')) return 'Aditya';
@@ -5141,70 +5143,105 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
 </script>
   <script>
 /* ============================================================
-   EMPLOYEE EMAIL EDITABLE PATCH + ISHIKA SAXENA EMAIL FIX
-   Paste this just before </body>
-   Do not change any existing code above.
+   ISHIKA SAXENA — SINGLE MANAGER RECORD FIX
+   Paste before </body>. This keeps only one Ishika record:
+   name: Ishika Saxena
+   email: ishika.crm@upgromedia.com
+   role/designation: CRM
+   isManager: true
    ============================================================ */
 (function(){
   'use strict';
 
-  const ISHIKA_NAME_KEY = 'ishika saxena';
+  const ISHIKA_EMAIL = 'ishika.crm@upgromedia.com';
+  const ISHIKA_NAME  = 'Ishika Saxena';
+  const ISHIKA_ROLE  = 'CRM';
+  const ISHIKA_PASS  = 'Ishika@123';
 
-  /*
-    Default corrected email.
-    Agar actual email alag ho, Employee section me Ishika Saxena select karke
-    email field se directly change kar sakte ho.
-  */
-  const ISHIKA_CORRECT_EMAIL = 'ishika.crm@upgromedia.com';
-
-  function $(id){
-    return document.getElementById(id);
-  }
-
-  function cleanEmail(v){
-    return String(v || '')
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, '');
+  function clean(v){
+    return String(v || '').trim().toLowerCase().replace(/\s+/g, '');
   }
 
   function cleanName(v){
-    return String(v || '')
-      .trim()
-      .replace(/\s+/g, ' ')
-      .toLowerCase();
+    return String(v || '').trim().replace(/\s+/g, ' ').toLowerCase();
   }
 
-  function isEmail(v){
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail(v));
+  function isIshikaLike(emp){
+    if(!emp) return false;
+
+    const name = cleanName(emp.name || emp.Name || emp.EmployeeName || emp.empName || '');
+    const email = clean(emp.email || emp.Email || emp.EmployeeEmail || emp.empEmail || '');
+
+    return (
+      name === 'ishika saxena' ||
+      name === 'ishika' ||
+      email.includes('ishika')
+    );
   }
 
-  function showToast(msg){
-    if(typeof toast === 'function') toast(msg);
-    else alert(msg);
+  function makeIshika(existing){
+    existing = existing || {};
+
+    return {
+      ...existing,
+
+      name: ISHIKA_NAME,
+      Name: ISHIKA_NAME,
+      EmployeeName: ISHIKA_NAME,
+      empName: ISHIKA_NAME,
+
+      email: ISHIKA_EMAIL,
+      Email: ISHIKA_EMAIL,
+      EmployeeEmail: ISHIKA_EMAIL,
+      empEmail: ISHIKA_EMAIL,
+
+      pass: existing.pass || existing.password || ISHIKA_PASS,
+      password: existing.password || existing.pass || ISHIKA_PASS,
+
+      role: ISHIKA_ROLE,
+      Role: ISHIKA_ROLE,
+      desig: ISHIKA_ROLE,
+      Designation: ISHIKA_ROLE,
+
+      isAdmin: false,
+      isManager: true,
+
+      active: true,
+      Active: 'Yes'
+    };
   }
 
-  function ensureEmpGlobals(){
-    if(typeof window.empReg === 'undefined') window.empReg = [];
+  function fixUsersObject(){
     try{
-      if(typeof empReg === 'undefined') empReg = window.empReg;
-    }catch(e){}
-    if(typeof window.USERS === 'undefined' && typeof USERS !== 'undefined'){
-      window.USERS = USERS;
+      if(typeof USERS === 'undefined') return;
+
+      let oldIshika = null;
+
+      Object.keys(USERS).forEach(function(email){
+        const rec = USERS[email] || {};
+        if(email === ISHIKA_EMAIL || isIshikaLike({...rec, email: email})){
+          oldIshika = {...rec, email: email};
+          delete USERS[email];
+        }
+      });
+
+      USERS[ISHIKA_EMAIL] = makeIshika(oldIshika);
+    }catch(e){
+      console.warn('Ishika USERS fix failed:', e);
     }
   }
 
   function getEmpArray(){
-    ensureEmpGlobals();
-
     try{
       if(typeof initEmpReg === 'function') initEmpReg(true);
     }catch(e){}
 
-    if(Array.isArray(window.empReg)) return window.empReg;
+    try{
+      if(Array.isArray(window.empReg)) return window.empReg;
+    }catch(e){}
 
     try{
-      if(Array.isArray(empReg)){
+      if(typeof empReg !== 'undefined' && Array.isArray(empReg)){
         window.empReg = empReg;
         return empReg;
       }
@@ -5215,690 +5252,126 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
   }
 
   function setEmpArray(arr){
-    window.empReg = arr;
-
-    try{
-      empReg = arr;
-    }catch(e){}
-  }
-
-  function syncUsersAfterEmailChange(oldEmail, newEmp){
-    oldEmail = cleanEmail(oldEmail);
-    const newEmail = cleanEmail(newEmp.email);
-
-    try{
-      if(typeof USERS !== 'undefined'){
-        if(oldEmail && oldEmail !== newEmail && USERS[oldEmail]){
-          delete USERS[oldEmail];
-        }
-
-        USERS[newEmail] = {
-          ...(USERS[newEmail] || {}),
-          ...newEmp,
-          email: newEmail,
-          name: newEmp.name,
-          pass: newEmp.pass,
-          role: newEmp.role || newEmp.desig || 'Team',
-          desig: newEmp.desig || newEmp.role || 'Team',
-          isAdmin: !!newEmp.isAdmin,
-          isManager: !!newEmp.isManager,
-          active: newEmp.active !== false
-        };
-      }
-    }catch(e){}
-  }
-
-  function syncTasksAfterEmailChange(oldEmail, newEmail, empName, empDesig){
-    oldEmail = cleanEmail(oldEmail);
-    newEmail = cleanEmail(newEmail);
-
-    if(!oldEmail || !newEmail || oldEmail === newEmail) return;
-
-    const keys = [
-      'email',
-      'assignedToEmail',
-      'empEmail',
-      'AssignedTo_Email',
-      'AssignedToEmail',
-      'EmployeeEmail',
-      'Assigned Email',
-      'Assigned To Email',
-      'Assigned To (Email)'
-    ];
-
-    const nameKeys = [
-      'empName',
-      'assignedTo',
-      'AssignedTo_Name',
-      'AssignedToName',
-      'EmployeeName',
-      'Assigned To',
-      'Assigned To Name',
-      'Assigned To (Name)'
-    ];
-
-    function patchTask(t){
-      if(!t || typeof t !== 'object') return t;
-
-      let matched = false;
-
-      keys.forEach(function(k){
-        if(cleanEmail(t[k]) === oldEmail){
-          t[k] = newEmail;
-          matched = true;
-        }
-      });
-
-      if(matched){
-        nameKeys.forEach(function(k){
-          t[k] = empName;
-        });
-
-        t.email = newEmail;
-        t.assignedToEmail = newEmail;
-        t.empEmail = newEmail;
-        t.AssignedTo_Email = newEmail;
-        t['Assigned To (Email)'] = newEmail;
-
-        t.empName = empName;
-        t.assignedTo = empName;
-        t.AssignedTo_Name = empName;
-        t['Assigned To (Name)'] = empName;
-
-        if(empDesig){
-          t.desig = empDesig;
-          t.Designation = empDesig;
-        }
-      }
-
-      return t;
-    }
-
-    try{
-      if(Array.isArray(window.allTasks)){
-        window.allTasks = window.allTasks.map(patchTask);
-      }
-    }catch(e){}
-
-    try{
-      if(Array.isArray(allTasks)){
-        allTasks = allTasks.map(patchTask);
-        window.allTasks = allTasks;
-      }
-    }catch(e){}
-  }
-
-  function persistEverything(){
-    try{
-      if(typeof persistEmpRegistry === 'function') persistEmpRegistry();
-    }catch(e){}
-
-    try{
-      if(typeof syncUserDirectoryFromRegistry === 'function') syncUserDirectoryFromRegistry();
-    }catch(e){}
-
-    try{
-      if(typeof emitEmpSync === 'function') emitEmpSync();
-    }catch(e){}
-
-    try{
-      if(typeof refillEmpDropdown === 'function') refillEmpDropdown();
-    }catch(e){}
-
-    try{
-      if(typeof populateTaskFilterOptions === 'function') populateTaskFilterOptions();
-    }catch(e){}
-
-    try{
-      if(typeof renderEmpList === 'function') renderEmpList();
-    }catch(e){}
-
-    try{
-      if(typeof buildUI === 'function') buildUI();
-    }catch(e){}
-  }
-
-  function autoFixIshikaEmail(){
-    const arr = getEmpArray();
-    let changed = false;
-
-    arr.forEach(function(emp){
-      if(!emp) return;
-
-      const nm = cleanName(emp.name || emp.Name || emp.EmployeeName || '');
-      const currentEmail = cleanEmail(emp.email || emp.Email || emp.EmployeeEmail || '');
-
-      if(nm === ISHIKA_NAME_KEY && currentEmail !== ISHIKA_CORRECT_EMAIL){
-        const oldEmail = currentEmail;
-
-        emp.email = ISHIKA_CORRECT_EMAIL;
-        emp.Email = ISHIKA_CORRECT_EMAIL;
-        emp.EmployeeEmail = ISHIKA_CORRECT_EMAIL;
-        emp.name = emp.name || 'Ishika Saxena';
-        emp.Name = emp.name;
-        emp.active = emp.active !== false;
-
-        syncUsersAfterEmailChange(oldEmail, emp);
-        syncTasksAfterEmailChange(
-          oldEmail,
-          ISHIKA_CORRECT_EMAIL,
-          emp.name || 'Ishika Saxena',
-          emp.desig || emp.role || 'Team'
-        );
-
-        changed = true;
-      }
-    });
-
-    if(changed){
-      setEmpArray(arr);
-      persistEverything();
-    }
-  }
-
-  function makeEmailFieldEditable(){
-    const fp = $('emp-fp');
-    if(!fp) return;
-
-    const nameInput = $('ef-n');
-    let emailInput = $('ef-e');
-
-    if(!nameInput) return;
-
-    const selectedName = cleanName(nameInput.value);
-
-    /*
-      Agar edit form me email input already hai but readonly/disabled hai,
-      usko editable kar do.
-    */
-    if(emailInput){
-      emailInput.removeAttribute('readonly');
-      emailInput.removeAttribute('disabled');
-      emailInput.type = 'email';
-      emailInput.classList.add('fc');
-      emailInput.placeholder = 'employee@upgromedia.com';
-
-      const wrap = emailInput.closest('.fg');
-      if(wrap){
-        const label = wrap.querySelector('label');
-        if(label) label.textContent = 'Email *';
-      }
-
-      if(selectedName === ISHIKA_NAME_KEY && cleanEmail(emailInput.value) !== ISHIKA_CORRECT_EMAIL){
-        emailInput.value = ISHIKA_CORRECT_EMAIL;
-      }
-
-      return;
-    }
-
-    /*
-      Agar edit form me email field missing hai,
-      name field ke neeche new editable email field inject kar do.
-    */
-    const empList = getEmpArray();
-    const emp = empList.find(function(e){
-      return cleanName(e.name || e.Name || '') === selectedName;
-    });
-
-    const currentEmail = selectedName === ISHIKA_NAME_KEY
-      ? ISHIKA_CORRECT_EMAIL
-      : cleanEmail(emp && emp.email);
-
-    const nameWrap = nameInput.closest('.fg') || nameInput.parentElement;
-
-    const div = document.createElement('div');
-    div.className = 'fg';
-    div.innerHTML =
-      '<label class="fl2">Email *</label>' +
-      '<input id="ef-e" type="email" class="fc" placeholder="employee@upgromedia.com" value="' + currentEmail + '">';
-
-    if(nameWrap && nameWrap.parentNode){
-      nameWrap.parentNode.insertBefore(div, nameWrap.nextSibling);
-    }
-  }
-
-  const oldSelectEmp = window.selectEmp;
-  window.selectEmp = function(email){
-    const result = oldSelectEmp ? oldSelectEmp.apply(this, arguments) : undefined;
-
-    setTimeout(function(){
-      autoFixIshikaEmail();
-      makeEmailFieldEditable();
-    }, 80);
-
-    return result;
-  };
-
-  const oldSelectNewEmp = window.selectNewEmp;
-  window.selectNewEmp = function(){
-    const result = oldSelectNewEmp ? oldSelectNewEmp.apply(this, arguments) : undefined;
-
-    setTimeout(function(){
-      const emailInput = $('ef-e');
-      if(emailInput){
-        emailInput.removeAttribute('readonly');
-        emailInput.removeAttribute('disabled');
-        emailInput.type = 'email';
-      }
-    }, 80);
-
-    return result;
-  };
-
-  /*
-    Complete safe save override:
-    - Name editable
-    - Email editable
-    - Password editable
-    - Designation editable
-    - Role editable
-    - Admin / Manager / Active checkbox working
-    - Old email se new email migration
-  */
-  window.saveEmp = async function(oldEmail){
-    const arr = getEmpArray();
-
-    const name = (($('ef-n') || {}).value || '').trim();
-    const newEmail = cleanEmail(($('ef-e') || {}).value || oldEmail || '');
-    const pass = (($('ef-p') || {}).value || '').trim();
-
-    const desig = (($('ef-d') || {}).value || 'Team').trim();
-    const roleVal = ((($('ef-r') || {}).value || desig) || 'Team').trim();
-
-    const isAdminCk = !!(($('ef-admin') || {}).checked);
-    const isMgrCk = !!(($('ef-mgr') || {}).checked);
-    const active = $('ef-ac') ? !!$('ef-ac').checked : true;
-
-    const oldClean = cleanEmail(oldEmail);
-
-    if(!name){
-      showToast('⚠ Name required');
-      return;
-    }
-
-    if(!newEmail || !isEmail(newEmail)){
-      showToast('⚠ Valid email required');
-      return;
-    }
-
-    const oldIndex = arr.findIndex(function(e){
-      return cleanEmail(e.email) === oldClean;
-    });
-
-    let index = oldIndex;
-
-    /*
-      Fallback: if old email mismatch ho gaya ho, name se record find karo.
-    */
-    if(index < 0){
-      index = arr.findIndex(function(e){
-        return cleanName(e.name) === cleanName(name);
-      });
-    }
-
-    if(index < 0){
-      showToast('⚠ Employee not found');
-      return;
-    }
-
-    const duplicate = arr.find(function(e, i){
-      return i !== index && cleanEmail(e.email) === newEmail;
-    });
-
-    if(duplicate){
-      showToast('⚠ This email already exists for another employee');
-      return;
-    }
-
-    const previousEmail = cleanEmail(arr[index].email || oldEmail);
-
-    const oldEmp = arr[index] || {};
-
-    const managerFlag = !!(
-      isMgrCk ||
-      (
-        typeof isForcedAssigner === 'function' &&
-        isForcedAssigner({
-          email: newEmail,
-          name: name,
-          desig: desig,
-          role: roleVal
-        })
-      )
-    );
-
-    const updatedEmp = {
-      ...oldEmp,
-      email: newEmail,
-      Email: newEmail,
-      EmployeeEmail: newEmail,
-      name: name,
-      Name: name,
-      pass: pass || oldEmp.pass || oldEmp.password || '',
-      password: pass || oldEmp.pass || oldEmp.password || '',
-      role: roleVal,
-      Role: roleVal,
-      desig: desig,
-      Designation: desig,
-      isAdmin: isAdminCk,
-      isManager: managerFlag,
-      active: active,
-      Active: active ? 'Yes' : 'No',
-      bg: oldEmp.bg || (typeof CLRS !== 'undefined' ? CLRS[index % CLRS.length] : '#0B84FF'),
-      joinDate: oldEmp.joinDate || oldEmp.JoinDate || (typeof TODAY !== 'undefined' ? TODAY : '')
-    };
-
-    arr[index] = updatedEmp;
-    setEmpArray(arr);
-
-    syncUsersAfterEmailChange(previousEmail, updatedEmp);
-    syncTasksAfterEmailChange(previousEmail, newEmail, name, desig);
-
-    /*
-      Current logged-in user ka email bhi update karo agar wahi employee edit hua hai.
-    */
-    try{
-      if(typeof cu !== 'undefined' && cu && cleanEmail(cu.email) === previousEmail){
-        cu = {
-          ...cu,
-          ...updatedEmp,
-          email: newEmail,
-          role: roleVal,
-          desig: desig
-        };
-        window.cu = cu;
-
-        if(typeof saveCurrentSession === 'function'){
-          saveCurrentSession();
-        }else{
-          localStorage.setItem('upgro_current_session_v1', JSON.stringify(cu));
-        }
-      }
-    }catch(e){}
-
-    try{
-      if(typeof persistEmpRegistry === 'function') persistEmpRegistry();
-    }catch(e){}
-
-    try{
-      if(typeof syncUserDirectoryFromRegistry === 'function') syncUserDirectoryFromRegistry();
-    }catch(e){}
-
-    try{
-      if(typeof emitEmpSync === 'function') emitEmpSync();
-    }catch(e){}
-
-    /*
-      Google Sheet sync available ho to update bhej do.
-    */
-    try{
-      if(typeof syncEmployeeToServer === 'function'){
-        await syncEmployeeToServer(updatedEmp, 'upsertEmployee');
-      }else if(typeof SURL !== 'undefined' && SURL){
-        await fetch(SURL, {
-          method: 'POST',
-          body: JSON.stringify({
-            action: 'upsertEmployee',
-            ...updatedEmp,
-            oldEmail: previousEmail,
-            email: newEmail
-          })
-        });
-      }
-    }catch(e){
-      console.warn('Employee sheet sync failed, local portal updated:', e);
-    }
-
-    try{
-      if(typeof initEmpReg === 'function') initEmpReg(true);
-    }catch(e){}
-
-    try{
-      if(typeof renderEmpList === 'function') renderEmpList();
-    }catch(e){}
-
-    try{
-      if(typeof selectEmp === 'function') selectEmp(newEmail);
-    }catch(e){}
-
-    try{
-      if(typeof refillEmpDropdown === 'function') refillEmpDropdown();
-    }catch(e){}
-
-    try{
-      if(typeof populateTaskFilterOptions === 'function') populateTaskFilterOptions();
-    }catch(e){}
-
-    try{
-      if(typeof buildUI === 'function') buildUI();
-    }catch(e){}
-
-    showToast('✅ Employee updated successfully');
-  };
-
-  /*
-    Page load pe bhi Ishika email auto-fix.
-  */
-  window.addEventListener('DOMContentLoaded', function(){
-    setTimeout(function(){
-      autoFixIshikaEmail();
-      makeEmailFieldEditable();
-    }, 900);
-  });
-
-  setTimeout(function(){
-    autoFixIshikaEmail();
-  }, 1200);
-
-})();
-</script>
-  <script>
-/* ============================================================
-   ONLY ISHIKA SAXENA EMAIL FIX
-   Correct email: ishika.crm@upgromedia.com
-   Paste just before </body>
-   ============================================================ */
-(function(){
-  'use strict';
-
-  const OLD_EMAILS = [
-    'ishika.crm@upgromedia.com',
-    'ishika.crm@upgromedia.com',
-    'ishika.crm@upgromedia.com'
-  ];
-
-  const CORRECT_EMAIL = 'ishika.crm@upgromedia.com';
-
-  function clean(v){
-    return String(v || '').trim().toLowerCase().replace(/\s+/g, '');
-  }
-
-  function cleanName(v){
-    return String(v || '').trim().replace(/\s+/g, ' ').toLowerCase();
-  }
-
-  function isIshika(emp){
-    if(!emp) return false;
-
-    const name = cleanName(emp.name || emp.Name || emp.EmployeeName || emp.empName || '');
-    const email = clean(emp.email || emp.Email || emp.EmployeeEmail || emp.empEmail || '');
-
-    return (
-      name === 'ishika saxena' ||
-      OLD_EMAILS.includes(email) ||
-      email === CORRECT_EMAIL
-    );
-  }
-
-  function patchEmployeeObject(emp){
-    if(!emp || !isIshika(emp)) return emp;
-
-    emp.name = 'Ishika Saxena';
-    emp.Name = 'Ishika Saxena';
-    emp.EmployeeName = 'Ishika Saxena';
-
-    emp.email = CORRECT_EMAIL;
-    emp.Email = CORRECT_EMAIL;
-    emp.EmployeeEmail = CORRECT_EMAIL;
-    emp.empEmail = CORRECT_EMAIL;
-
-    emp.role = emp.role || emp.Role || 'CRM';
-    emp.Role = emp.role;
-
-    emp.desig = emp.desig || emp.Designation || 'CRM';
-    emp.Designation = emp.desig;
-
-    emp.active = true;
-    emp.Active = 'Yes';
-
-    return emp;
-  }
-
-  function fixUsers(){
-    try{
-      if(typeof USERS === 'undefined') return;
-
-      OLD_EMAILS.forEach(function(oldEmail){
-        oldEmail = clean(oldEmail);
-
-        if(USERS[oldEmail]){
-          USERS[CORRECT_EMAIL] = Object.assign({}, USERS[oldEmail], {
-            email: CORRECT_EMAIL,
-            name: 'Ishika Saxena',
-            role: USERS[oldEmail].role || USERS[oldEmail].desig || 'CRM',
-            desig: USERS[oldEmail].desig || USERS[oldEmail].role || 'CRM',
-            active: true
-          });
-
-          delete USERS[oldEmail];
-        }
-      });
-
-      if(!USERS[CORRECT_EMAIL]){
-        USERS[CORRECT_EMAIL] = {
-          name: 'Ishika Saxena',
-          email: CORRECT_EMAIL,
-          pass: 'Ishika@123',
-          role: 'CRM',
-          desig: 'CRM',
-          active: true,
-          isAdmin: false,
-          isManager: true
-        };
-      }else{
-        USERS[CORRECT_EMAIL] = patchEmployeeObject(USERS[CORRECT_EMAIL]);
-      }
-    }catch(e){
-      console.warn('USERS Ishika email fix failed:', e);
-    }
-  }
-
-  function fixEmpRegistry(){
-    let arr = [];
-
-    try{
-      if(Array.isArray(window.empReg)) arr = window.empReg;
-    }catch(e){}
-
-    try{
-      if((!arr || !arr.length) && typeof empReg !== 'undefined' && Array.isArray(empReg)){
-        arr = empReg;
-      }
-    }catch(e){}
-
-    if(!Array.isArray(arr)) arr = [];
-
-    let found = false;
-
-    arr.forEach(function(emp){
-      if(isIshika(emp)){
-        patchEmployeeObject(emp);
-        found = true;
-      }
-    });
-
-    if(!found){
-      arr.push({
-        name: 'Ishika Saxena',
-        email: CORRECT_EMAIL,
-        pass: 'Ishika@123',
-        role: 'CRM',
-        desig: 'CRM',
-        active: true,
-        isAdmin: false,
-        isManager: true
-      });
-    }
-
     try{ window.empReg = arr; }catch(e){}
     try{ empReg = arr; }catch(e){}
+  }
+
+  function fixEmployeeRegistry(){
+    let arr = getEmpArray();
+    if(!Array.isArray(arr)) arr = [];
+
+    let keep = null;
+    const cleaned = [];
+
+    arr.forEach(function(emp){
+      if(isIshikaLike(emp)){
+        keep = keep || emp;
+        return;
+      }
+      cleaned.push(emp);
+    });
+
+    cleaned.push(makeIshika(keep));
+    setEmpArray(cleaned);
+  }
+
+  function fixDynamicEmployeesStorage(){
+    try{
+      const key = typeof EMP_STORE_KEY !== 'undefined' ? EMP_STORE_KEY : 'upgro_emp_dyn';
+      let arr = JSON.parse(localStorage.getItem(key) || '[]');
+      if(!Array.isArray(arr)) arr = [];
+
+      let keep = null;
+      const cleaned = [];
+
+      arr.forEach(function(emp){
+        if(isIshikaLike(emp)){
+          keep = keep || emp;
+          return;
+        }
+        cleaned.push(emp);
+      });
+
+      cleaned.push(makeIshika(keep));
+      localStorage.setItem(key, JSON.stringify(cleaned));
+    }catch(e){}
+  }
+
+  function fixStoredRoles(){
+    try{
+      const key = typeof ROLE_STORE_KEY !== 'undefined' ? ROLE_STORE_KEY : 'upgro_roles_v3';
+      const roles = JSON.parse(localStorage.getItem(key) || '{}') || {};
+
+      Object.keys(roles).forEach(function(email){
+        if(clean(email).includes('ishika') && clean(email) !== ISHIKA_EMAIL){
+          delete roles[email];
+        }
+      });
+
+      roles[ISHIKA_EMAIL] = {
+        role: ISHIKA_ROLE,
+        desig: ISHIKA_ROLE,
+        isAdmin: false,
+        isManager: true,
+        active: true
+      };
+
+      localStorage.setItem(key, JSON.stringify(roles));
+    }catch(e){}
   }
 
   function fixTasks(){
     function patchTask(t){
       if(!t || typeof t !== 'object') return t;
 
-      const possibleEmailKeys = [
-        'email',
-        'empEmail',
-        'assignedToEmail',
-        'AssignedTo_Email',
-        'AssignedToEmail',
-        'EmployeeEmail',
-        'Assigned Email',
-        'Assigned To Email',
-        'Assigned To (Email)'
+      const emailKeys = [
+        'email','empEmail','assignedToEmail','AssignedTo_Email','AssignedToEmail',
+        'EmployeeEmail','Email','Assigned Email','Assigned To Email','Assigned To (Email)'
+      ];
+
+      const nameKeys = [
+        'empName','assignedTo','AssignedTo_Name','AssignedToName','EmployeeName',
+        'Name','Assigned To','Assigned To Name','Assigned To (Name)'
       ];
 
       let matched = false;
 
-      possibleEmailKeys.forEach(function(k){
-        if(OLD_EMAILS.includes(clean(t[k])) || clean(t[k]) === CORRECT_EMAIL){
-          t[k] = CORRECT_EMAIL;
+      emailKeys.forEach(function(k){
+        if(clean(t[k]).includes('ishika')){
+          t[k] = ISHIKA_EMAIL;
           matched = true;
         }
       });
 
-      const possibleNameKeys = [
-        'empName',
-        'assignedTo',
-        'AssignedTo_Name',
-        'AssignedToName',
-        'EmployeeName',
-        'Assigned To',
-        'Assigned To Name',
-        'Assigned To (Name)'
-      ];
-
-      possibleNameKeys.forEach(function(k){
-        if(cleanName(t[k]) === 'ishika saxena'){
+      nameKeys.forEach(function(k){
+        if(cleanName(t[k]) === 'ishika' || cleanName(t[k]) === 'ishika saxena'){
+          t[k] = ISHIKA_NAME;
           matched = true;
         }
       });
 
       if(matched){
-        t.email = CORRECT_EMAIL;
-        t.empEmail = CORRECT_EMAIL;
-        t.assignedToEmail = CORRECT_EMAIL;
-        t.AssignedTo_Email = CORRECT_EMAIL;
-        t['Assigned To (Email)'] = CORRECT_EMAIL;
+        t.email = ISHIKA_EMAIL;
+        t.empEmail = ISHIKA_EMAIL;
+        t.assignedToEmail = ISHIKA_EMAIL;
+        t.AssignedTo_Email = ISHIKA_EMAIL;
+        t['Assigned To (Email)'] = ISHIKA_EMAIL;
 
-        t.empName = 'Ishika Saxena';
-        t.assignedTo = 'Ishika Saxena';
-        t.AssignedTo_Name = 'Ishika Saxena';
-        t['Assigned To (Name)'] = 'Ishika Saxena';
+        t.empName = ISHIKA_NAME;
+        t.assignedTo = ISHIKA_NAME;
+        t.AssignedTo_Name = ISHIKA_NAME;
+        t['Assigned To (Name)'] = ISHIKA_NAME;
 
-        t.desig = t.desig || 'CRM';
-        t.Designation = t.Designation || 'CRM';
+        t.role = ISHIKA_ROLE;
+        t.desig = ISHIKA_ROLE;
+        t.Designation = ISHIKA_ROLE;
       }
 
       return t;
     }
 
     try{
-      if(Array.isArray(window.allTasks)){
-        window.allTasks = window.allTasks.map(patchTask);
-      }
+      if(Array.isArray(window.allTasks)) window.allTasks = window.allTasks.map(patchTask);
     }catch(e){}
 
     try{
@@ -5909,7 +5382,17 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
     }catch(e){}
   }
 
-  function refreshUI(){
+  function fixCurrentSession(){
+    try{
+      if(typeof cu !== 'undefined' && cu && isIshikaLike(cu)){
+        cu = makeIshika(cu);
+        window.cu = cu;
+        if(typeof saveCurrentSession === 'function') saveCurrentSession();
+      }
+    }catch(e){}
+  }
+
+  function refreshPortal(){
     try{ if(typeof persistEmpRegistry === 'function') persistEmpRegistry(); }catch(e){}
     try{ if(typeof syncUserDirectoryFromRegistry === 'function') syncUserDirectoryFromRegistry(); }catch(e){}
     try{ if(typeof emitEmpSync === 'function') emitEmpSync(); }catch(e){}
@@ -5920,43 +5403,38 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
     try{ if(typeof populateTaskFilterOptions === 'function') populateTaskFilterOptions(); }catch(e){}
     try{ if(typeof buildUI === 'function') buildUI(); }catch(e){}
 
-    const emailInput = document.getElementById('ef-e');
-    if(emailInput){
-      emailInput.value = CORRECT_EMAIL;
-      emailInput.removeAttribute('readonly');
-      emailInput.removeAttribute('disabled');
-    }
-
     try{
       if(typeof selectEmp === 'function'){
-        setTimeout(function(){
-          try{ selectEmp(CORRECT_EMAIL); }catch(e){}
-        }, 150);
+        setTimeout(function(){ selectEmp(ISHIKA_EMAIL); }, 150);
       }
     }catch(e){}
   }
 
-  function runFix(){
-    fixUsers();
-    fixEmpRegistry();
+  function runIshikaFix(){
+    fixUsersObject();
+    fixDynamicEmployeesStorage();
+    fixStoredRoles();
+    fixEmployeeRegistry();
     fixTasks();
-    refreshUI();
+    fixCurrentSession();
+    refreshPortal();
 
-    if(typeof toast === 'function'){
-      toast('✅ Ishika Saxena email fixed: ' + CORRECT_EMAIL);
-    }
+    try{
+      if(typeof toast === 'function'){
+        toast('✅ Ishika Saxena fixed as CRM Manager');
+      }
+    }catch(e){}
   }
 
-  window.fixIshikaEmailNow = runFix;
+  window.fixIshikaManagerNow = runIshikaFix;
 
   if(document.readyState === 'loading'){
     document.addEventListener('DOMContentLoaded', function(){
-      setTimeout(runFix, 500);
+      setTimeout(runIshikaFix, 500);
     });
   }else{
-    setTimeout(runFix, 500);
+    setTimeout(runIshikaFix, 500);
   }
-
 })();
 </script>
 </body>
