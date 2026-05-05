@@ -952,7 +952,7 @@ const USERS = {
   'surya.meta@upgromedia.com':       {pass:'Surya@123',        name:'Surya Pratap Singh',    role:'Meta Media Buyer',   desig:'Meta Media Buyer', isAdmin:false, isManager:true},
   'shubhi.meta@upgromedia.com':      {pass:'Shubhi@123',       name:'Shubhi Singh',          role:'Meta Media Buyer',   desig:'Meta Media Buyer', isAdmin:false, isManager:true},
   'ranveer.copywriter@upgromedia.com':{pass:'Ranveer@123',     name:'Ranveer Singh',          role:'Copywriter',   desig:'Copywriter', isAdmin:false, isManager:true},
-  'ishika.crm@upgromedia.com':    {pass:'Ishika@123',      name:'Ishika Saxena',         role:'CRM',               desig:'CRM',              isAdmin:false, isManager:true},
+  'ishika.crm@upgromedia.com':       {pass:'Ishika@123',      name:'Ishika Saxena',         role:'CRM',                desig:'CRM',              isAdmin:false, isManager:true},
 
   // USERS
   'vishal.editor@upgromedia.com':    {pass:'Vishal@1002',     name:'Vishal Srivastava',     role:'Video Editor',       desig:'Video Editor',     isAdmin:false, isManager:false},
@@ -999,7 +999,6 @@ function normalizeQuickName(name,email=''){
   if(low==='muskan' || low.startsWith('muskan ')) return 'Muskan';
   if(low==='dhiraj' || low.startsWith('dhiraj ')) return 'Dhiraj';
   if(low==='surya' || low.startsWith('surya ')) return 'Surya';
-  if(low==='ishika' || low.startsWith('ishika ')) return 'Ishika';
   if(low==='subhi' || low.startsWith('shubhi ') || low==='shubhi') return 'Shubhi';
   if(low==='arpit' || low.startsWith('arpit ')) return 'Arpit';
   if(low==='aditya' || low.startsWith('aditya ')) return 'Aditya';
@@ -1809,204 +1808,113 @@ function buildMeetingMailHtml(data){
 
   +'<tr><td style="padding:24px 28px 30px"><div style="background:linear-gradient(180deg,#f8fafc,#e2e8f0);border:1px solid #cbd5e1;border-radius:24px;padding:20px;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.9)"><div style="display:inline-flex;align-items:center;gap:10px;background:#ffffff;border:1px solid #ccfbf1;border-radius:999px;padding:8px 14px;box-shadow:0 8px 20px rgba(15,23,42,.08)"><img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wgARCADIAMgDASIAAhEBAxEB/8QAHAABAQADAQEBAQAAAAAAAAAAAAcFBggEAQID/8QAGwEBAQADAQEBAAAAAAAAAAAAAAUDBAYHAgH/2gAMAwEAAhADEAAAAeqQAAAAAAAAAAAAAAAAAAADG/n3kvBzFqcj0TpjfuUur9mGG/ygAAAAAAAAGMjVa5S383vwW703j/ZMLb9S22v5gG1EAAAAAAAA8fmgOibe7tWt7f4tfpaNYJBX6fnASaoAAAAAAA1XLi2rF6FF9Pp/HlPFt1PJdOduiudej8to1fkFfj1gkVgAAAAAAEa3/mHB03gtcs6f+9uGfPvz0rwy6869Fc6yK1Gr8gr8esEisAAAAABqsVrPMua57Ns3T2fmzN+ieduieq8thnz78ryrrzr0VzrIrUavyCvx6wSKwAAAAAE+hnQMN6OZVvD7vDnlTfonnbonLihnz78ryrrzr0VzrIrUavyCvx6wSKwAAAAAGmQ28x3seR3/AMOZ8ersyromG3bLihHzK/Ksuw869HQiVV2+vy6oyKgSqoAAAAAGs67nNZ0eqwNciWO1L3Qkfxf6+sf8rjMsI+bf5Z5qGeZ0P+pBX9qCGacAAAAABhYb0Z59S/Etd6W5e1rmx/M3Ysmlzfkrzof5lz0Uq+5ZZ0wq/wA+55gZdAAAAAAABw33JJDnal7/AJknsM7FmJidr2f9ku6Rm1JAAAAAAAAAAAAAAAAAP//EACsQAAEEAQIEBQQDAAAAAAAAAAUCAwQGAQA1BzA0QBESExQVFiEyNjFQYP/aAAgBAQABBQL/AAcmfGh4lXgWxlOfFPaEcSswyNgLOu5zlWavC9+c7Qm+qMPzbCGMFyiy0nXDmF9+0OrwgPJk5ezVgGDcyz09uXHqsDI4H2SpkdOXysOMzZLK6ceixfV1SceEvtDS8NkX5GX1Cqs5IHapXWdmSJMCopKdkjMBQcPEDWPARqldZ2Jg8gQ47fGGUmTUg3KjwspyK3M3tOqV1nY3x5LMh11TyqfU0+Qtugrcze06pXWdgdPMA4xIk+WlRYnk0D2gtugrcze06pXWc6yyHIouRZJzCX5EgnJkAFh06B7QW3QVuZvadUrrOddXfRBZyp1dBGNJVduq0D2gtugrcze06pXWc68pyoBGjYZxSPwu3VaB7QW3QVuZvadUrrOdbdn1SPwu3VaB7QW3QVuZvadUrrOdbdn1SPwu3VaB7QW3QVuZvadUrrOdZmHJAr4idqoRHoqLdCflSfiJ2g7amhZMXMcIjRcxsgXQp0Z8RO1UYUiLK51leWwCost6YKAkZT1wyUh4zFnR5yTxmeUOS3DFQlKJxW2Wpsd958vBjOpVhaeda/17h5s9d/dx4tovbArXwt2r/wB7wUu3tpV7exJiRRH0wEr9aZMiOHc1bsXnGoaiAqv2XNZapMN6YYiFMB7TXvUO24w1IrFmsR/6oVdmlRx8yFkjXhNjVXx/D8Y7Eh89yO09n+NVU0h/iKUv7IW1KxjKWmWmtXqwOVoEVMEYwhbDS1Yz447FvPsLSvPv7TxOlLlWbh5ggJiOh25NC4nfam8TVxFReFS1xzHYp4dxvTVw8jeS009myrr1fWFjucI2VMWOnNWITa6i3aNVimYrRD+h/8QAOREAAAQDAwgGCQUAAAAAAAAAAQIDBQAEERIhQQYTMDFRYXHBFTM0gbHwFCIjQESRoeHxJDI1QmL/2gAIAQMBAT8B90IW2YC1pEtkccwAZdYO6/6/aH9vlWxRNBCojSo1+mjk2OdepwpEDCVMP3G86xhN2bmo6bYQ1QLdWtacR80h6mvTJ9VQNVaB3XaLJ6Qmn2YELFlIo3m5Bv8ACMqMpSMqINTTcOJtnD/W0cOOpsERlgEd+hUUIiW2cboyfaRehzoD7INY7dweboyhyqRkQBnZfVALhMH1Au/aP5h460vCGvswaFrybF5C1MXI+NMA5jDnlOgIi0tNyZAoIh4F3b8fH4jv5w8daXhDX2YNAzZNGdpj0yZPZQJv1jyDaPy3ZVZSFXkjSrYNEtVQxwoG7x4Qz9abhHxHfzh460vCGvswaB0eppOV6LSGhBvHfu4XQb+LDzjDP1puEfEd/OHjrS8Ia+zBoHUhzL1AMIMQ3RoFpf8AeGkhiqmtBhGaPn62cecO5DGULZDCG0BLLAA6BEheglT0vth4BE+2y8yuJlBslImUbg4xLNqLeorMF9cATtlqG3b8oUkVXNSWJNpZsTV9YLN91QuCE2mSEFFzLDmiiBa0vEce6HGTFvmjyxhrT86CQck5dA8pMp2yGGuul8IvaC55hWZLQDEAoFvwwrzgX/8AU2817KxYs1/rxgj+kgohmEaESrdW+8Bx74knRNBM6EwlbIYbWul8T84afmTzJ9Zvf//EADMRAAECBAEICAcBAAAAAAAAAAIBAwAEBREhEhQwMTNBcYETIjI0RFFhwRU1QJHR4fCh/9oACAECAQE/AfpFWyXg6gidkYlXTeRSLRhOyslLETwoRbk/t0OMPTF3yS18fL7RLB0bSJoqiDEg0iqdzXUkUSlZ8azU1iibvP8AUVTCaXloWmjeLIBLrE8ZSPUNOtFNo5vos7PY+Sfn2SKLsi4xVe9Ly0K1FZE7tdqPhboAk5N9ol1fmPD8vaKLsi4xVe9Ly0DlTCUl+hbG7i+mqKPT1bnUWZTra/8AL/eK1sh4x4fl7RRdkXGKr3peWgpEgyRZ4eJak9IH5qv9uitbIeMeH5e0UXZFxiq96XloKS4Ay9iXfAmPxRSvh+orBiTQ5K746VvN7ZSavaKOYi0WUu+KmqFMqqaAlXOUT0hp4gGyY3WDeJ1BDVjZYR0WUNW1vbdCvuYDk4w050oIegdZUiQwWywUsQoCB5xmvUtfG97wsqpIWUWKw4wpKhCtlhptGgQE+v8A/8QAQBAAAQMCAgUJBAgEBwAAAAAAAQIDBAAREiEFMXJzsRATIjJAQVFhwTBScZEUFSMzNEKS0URQoeFgY4Gis/Dx/9oACAEBAAY/Av8AAd3322ttVqsha5CvBtP70CRY+HZXPoZQJH5cYypbUiS62oGxQnoW+VXJuait26IVjV/pn2WQ6g2WhBIq5eT+gVzrmHEBbEE2vySpZHg2nifTsssqNhzZqwyRX2qsLCBiVbWryoPQWw2+2m3Np1LH71HbUnC4oY1fE9jIL7YI7ioUpxclsJTmelWEXbipPRb8fM1iV1eNP7Hr2WWVaucVxrwT4U9PkXbZSgqbT3r/ALckjY9eyKfkKwoHzPkKeethC1FQT4VF51N0FxPRPfnUrdnkkbHr2JtCmi5jF8jVzGX+qudeNkjqNjUmruix901F3qeNS92eSRsevYo5PuHKrmm58sBRObTfh5mpe9VxqLvU8al7s8kjY9ew43Ok6rqNDWqlPvqxLOodw8hWJfW8KibAqXvVcai71PGpe7PJI2PX26ltLLa8QzFfi3CrwvWJxS33lZDvNMGR984nFh93kibAqXvVcai71PGpe7PJI2PX261a+kmvFRqQ+4kKfRYJPu66jbB5ImwKl71XGou9TxqXuzySNj19usDM401c5rqX8U+tRtg8kTYFS96rjUXep41L3Z5JGx6+3VtDkl/FPrUbYPJE2BUveq41F3qeNS92eSRsevt1bQ5JfxT61G2DyRNgVL3quNRd6njUvdnkkbHr7dSGkKcViGSRX4R79BqVzzS2rlNsQt40wWWVuAJzwi9fhHv0GoyFpKVBGYNSVJjOqSXCQQmoylRnUpDiSSU+dSUIBUooNgK/CPfoNPl5lbYKPzC3t5bjayhYTkpJsRnTq33VvK50i6zfuFPsrkOrZCnOgVZUsGUzdvrDGOjRVHeQ8BrwKvX1Xo9wtAHCSk2ue/OmFuyzJaX3YioHxGdNOOPtspdTiTzirXpbTbyFuI6yUnMVzTstltz3VLFApNwe8e3m7HrT2+PAVI23amMP4ubxuK6Jt30YbSiWiSjPww3FSNt2nGXdFc4G1lIUtev/AG1oh0JwBbalYfDq1LntvqckOMd+oGpct5a+euQg377XqTGUbpaIUjyvf9vbyo6OutGXxp+JJirKseK2og0/pNaCho4rHxJqbJU0p1AW4CEd2dL0gGylpJKj5ZWAr6xS1zkdairyz1iorMaK4FIJy1k3rQraxhWhopI87JpUdPWWwAPjapkB6OvniTh7rG1s6fkOpKOfIwg+A/8AewdNtK7e8L8k2GtrDdb6QSddj/amNBNQAvGptKnEuYcJV5W8xRxWw+dfZoSi/ui1KmsNNPOpcSnC7qzqDJgaO+sHnijG2lVsII10FLbSojvIrLsWk9MD+A0qnGf8talg8P61orS5/j9KqwbtCkBPE/KtEaLdakyYJRzq40XrunP9q0427ElxoTX2sNEtNiB0sv6Cn9OuuuuaQdl4FqK8iPOtB71r/jNaPjSnpX2z3RhxBnI1ZH/vfWn4IQ7HjNLBRGdViLWZy7Fp5CpK1jSysSuj92cRIt860ClMlaBok4k9H7w3BN/lUZ8SHYM2N91IZ1in0v6QkaTcfN1rkHgKfjI0tLbgrXziI35UH1qFBXJUymMpKgtKb3sLVEX9Jchyoi8bT7edtX7Cpsv6c7MXKAx88M7+N/5F/8QAKRABAAEDAgUEAwADAAAAAAAAAREAITFR8BBBcYGhMEBhkbHB0VBg4f/aAAgBAQABPyH/AEOJNzYp8q+f5hTTxEq5e1gDZN0vik1izxpEKdqTKsrUqS7a/sB39rJCBpMNJgA5v8KPmrTl1xwlx4V7UF8O41hQctadiRRqMP7Q09QIDy2vSiEDSHJfoQdvZq26EJKMdUgV+jNd3Jr9j8UqLFRFCANvalugfmVeljFCV5iE1+PyoIILFeJ9o5GUnN0ObT1u0ZuaXiORYQz8UAwgIg6cPE+yOxlnBF66B4jfxTrACLP9+anNLBQ963TRW06cPE+yZF7Gq9SH6GlBvZ7c/Y+K3DVW6aK2nTh4n2KT2Iy5+j5rDzoYeQaVaF8NHDW4aq3TRW06cPE+uOtBnhzWUJik69ya5oFLMLkcX4nm8dbhqrdNFbTpw8T66BiUR91IGWVMVCeRuj5tmto1463DVW6aK2nTh4n1xIyRnesqDnpw62jXjrcNVbporadOHifXbfrx62jXjrcNVbporadOHifXbfrx62jXjrcNVbporadOHifXMpK3jnhAWIXjlRZGRPC/CAtDgcI048UKJNOXECAQoTLwpV4QCFwC8mfXm1fwAYaKSSPYYL0A8MemFi1D9ErTQYZva9Nx6EUOtZB30kSnIC+NKacLfE4k5G+SgXAhIoHn1KNd8ivVrVaACdaCIaRJE9fw34cJW66tJ1dxMYqjTSFlXXS1Xtz+9oC6E9IsSTQXpSWSYooAaCoJGE7tIYExYC46ytPrnpyXD78vXjYlE+4/FWzHJWiER6VLrAmF4NYvWfFMgc6chnK+rtf40ocGuFG+8m7HapICLpsMB0q7OGsAWkjCccWE81NRDLKkg9JqFaEsN6/f8PYEF/BGFAAAgORUxjMjNGIjRVDedQtNeYEzzooChcwoVjtHL6qGJh1B0I8qx52ZnH7W+KxJLOp3oAUI8z2TWrCLYoKJddzdmBRAC+fAQHOPrLSDGm0Am/ux+6m77BdYHO96TBYoHVyABYyFICfsVLPd6IWWuJ6eyIfJMbS2qHwpy8gBvNaJfKlmkvNfJOf2Ue4s2MRFyCPmo54wDrW/Jbl3o20wFPvO9HG2Cybda3/ChpOyMizYzKv+C//aAAwDAQACAAMAAAAQ8888888888888888888841G8888888888dE/888888888L2+888888884pxq8888888885ZCq88888888xKDCq888888885qDCq88888888uqLPs38888888Q+MzAV8888888e9voG988888888sMAE888888888888888888//EACURAQABBAEDBAMBAAAAAAAAAAERACExQWEwUbFxgaHwEECRwf/aAAgBAwEBPxD9SdRJCWwTtb270KAN4N3oo8qdNKVC3YEABh126YZG2QXwd0waywU10E3AzTOVmYtjAWJlSPYWI9Yn36RSsabtw3X8F3QlARoGuEW1/goRCVfJ6LiEN1IwPECS5S73ceq1REL0pe42md8zCsj7XLXy3z0bzyRXDNKmjWjBfAUmMMYYtf1uxa/4L7XLXy3z0EKsoIJXSzYEwKW2aQdaHYiMuxbHD+vtcn4X2uWvlvnoG5GXMzgk9mm3NiK+R/uvtcn4X2uWvlvnoC1pDAu2riLsRfPVPinITZW2RxaLyPAXdGLDLn16CUCBTF4wTmKca2xM3la14KhMPjsyhGJPLTQ8IddRFemECJe76EHCAXkMHAXlT5uwEviRAMask89CCjkBMG5BzBa1FaEJuJYSzm4CWpERINq49Gbt4xbmjSXMTUkbi0KYh9qjeKCSByDI2EoMYTBoAA9gL7z+/wD/xAAnEQEAAQMDAwQDAQEAAAAAAAABEQAhQTFRYTCBoXGRsfBAwfHR4f/aAAgBAgEBPxD8SQhMUojd7eP+1H+EwR5/XTYIW8Cts7DL7XqC1WALh2bRpvrfMr6xL3v0m+BGEzlvY8uhlAvBW3Nb8MGfTUgTSPgdEDKMf2mrBkhIwbsNuN6lLSKmbWeB/pa1fe4K8P4HRiEMUNiSJd+D3tQqVtlrpM8tjBrewVvtcFeH8DoRHvYUMGAbl1Zg7uzN+vg3hYF7p4edPrcNFb7XBXh/A6CoIG5pDJzfXGK8f9a+tw0VvtcFeH8DoMgjLVDBViFms205o9F4I4aMgcyh6JyQwU9skGnodC41pfLR0ZKXfSkZc2jtt71Exwum14btHTExYmwY70RhE/zoQdUjSbUmUolbZzH6o8TGfTarv0N4tZMdqi7hGk2pAJD8/wD/xAAqEAEAAQMEAQMDBAMAAAAAAAABEQAhMUFRYfBAIDCBEHHBkaGx0VBg4f/aAAgBAQABPxD/AENHA2TJwLL8VfScEMuhYPxNLhLSlaXJ48XWBS3Mu5ClhZByVDC0YAwoJfM08z5WRytT9YokCy4fFAXYwQASMNmjwdKCBQ4LEBjDETGBbx8RWFBn3f6f1vilvzXglID7qh805nRbVzf6of1rANgmgudmL4gQUMVgBgAWfsdEgNCOFgDRsXhkZAUgZEWzSDvwDGgip0AlpXfZNc48rQxgSyopptjD/wAc0Q42AgCHik9vLV0DmphJGfHLzTVigQAYew/Oi10CAAgDBXSbPEEzaHfR6g/bLALTl8fxZhbS3zSEkkoaSH8NaBcZBAGg+nSbPCFlgGQQi40wMMDKtik5fMsbobqCVd4ACaebkDwcfb0NHOk2eE4koiy6uZTgcDYoNKFqemk6jRlvY9ABo50mzwWZgMADq7Oq+JUKasiLiXwA/VbsqtCDnJ8c3n+K6Lb0wGjnSbPfHeFjA3E1IEBn35eKnziV0Ivmwb1Cko5GwWG4ljBOWui29MBo50mz30DRIcS6qfLCt1disgVCxeFKA5RIWWfoL0W3pgNHOk2e+gUMGWpmMF9A2P7rpNvrF6Lb0wGjnSbPB+6Tb6xei29MBo50mzwfuk2+sXotvTAaOdJs98+hRzhcwV278UsMU2iSiS8SfrRbX7ivhgtXbvxSEi4DaI4aRjWeTRELjQ6aiyRVSwFLhD0sWAMtdu/FCwc+QWBT3wcbXIhkLllqYlJEvBSxK25o8Q7+ORsEQRa1EIwRAEOggvqhRj7SRuCDbDmp3NMYUVYwRlLMgNAETk4ATEI/AlSnzNnsJEwSRuUDFAtHEBtUIOYVbYLb5owvDiWESyeFTY+xj7hhSBYbSz8VOgG0uBCyov4d6eUhBczD/FXLTShIkCQGy5zUI94QOLBITGDGKCAWNDupYHKzFWxdqxqccQy4N2j3xjnBWxAxuvfSMSfgRZXQUE80hEIhgoZi1E5s1BcTCT9VwDJOKhaI5MTO0DBdM5p5qfYCkYLkYoNlh5kgAN5Jcr3KYWtRADAcGqddKmTIYYgSWYRxSEBFRACuhAo0p4ZDgvIICJnjNSMgMUcbgSjclhPAyLqs+xRijbGgCAKPkIyXaUZblxSReFc8I7BObLZpuSQUWazNop2h5UDlZeiUu0toqEOi9D7wE68ssEAtpS2KvJqjhvZElBkaRJE8JQE2aQtvHcalam9UhHH7BSmRRZJpBYLwUvT8TJbCmxghKJVpOGoZHTqWq4tFinNFpMUJk8/uN4ETKygUIlbpmdwFLAIWYrPhF79S5ZGLbxjvTYvlcjjNtpz2pWd32ELIICSQgreFGBPFGi+GVASUwYiiuIniSSYMMVEWVRSFOcmIIgSSttRnMErEFsrsIiPJG/Ot7BtJVjjU2v8A4H//2Q==" alt="UpGro Media" style="width:28px;height:28px;border-radius:8px;object-fit:contain"><span style="font-size:13px;font-weight:900;color:#0f172a">UpGro Media Mission Control</span></div><div style="margin-top:12px;font-size:12px;color:#475569;line-height:1.7">Organized by '+escapeHtml(data.organizer||cu?.name||'UpGro Media')+'</div><div style="margin-top:6px;font-size:11px;color:#94a3b8">Official premium meeting invite · UpGro Media</div></div></td></tr>'
   +'</table></td></tr></table>
-
 <script>
-/* ============================================================
-   FINAL ISHIKA LOGIN + MANAGER MASTER FIX
-   Purpose:
-   - Ishika Saxena only once in portal
-   - email: ishika.crm@upgromedia.com
-   - password: Ishika@123
-   - role/designation: CRM
-   - isManager: true
-   - removes stale localStorage password/duplicate records
-   - overrides login so old browser cache cannot block login
-   ============================================================ */
+/* =============================================================
+   MINIMAL ISHIKA SAXENA LOGIN + MANAGER FIX
+   No UI/CSS/layout changes. Only employee/auth data is normalized.
+   Login: ishika.crm@upgromedia.com / Ishika@123
+============================================================= */
 (function(){
-  'use strict';
-
   var ISHIKA_EMAIL = 'ishika.crm@upgromedia.com';
-  var ISHIKA_NAME  = 'Ishika Saxena';
   var ISHIKA_PASS  = 'Ishika@123';
-  var ISHIKA_ROLE  = 'CRM';
-
-  function E(v){ return String(v || '').trim().toLowerCase().replace(/\s+/g,''); }
-  function N(v){ return String(v || '').trim().replace(/\s+/g,' '); }
-  function isMail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(E(v)); }
-  function isIshikaLike(x){
-    x = x || {};
-    var email = E(x.email || x.Email || x.EmployeeEmail || x.empEmail || x['Email Address'] || '');
-    var name  = N(x.name || x.Name || x.EmployeeName || x.empName || x['Employee Name'] || '').toLowerCase();
-    return email.indexOf('ishika') !== -1 || name === 'ishika' || name === 'ishika saxena';
+  var ISHIKA_REC = {
+    email: ISHIKA_EMAIL,
+    name: 'Ishika Saxena',
+    pass: ISHIKA_PASS,
+    role: 'CRM',
+    desig: 'CRM',
+    isAdmin: false,
+    isManager: true,
+    active: true
+  };
+  function cleanEmail(v){ return String(v||'').trim().toLowerCase().replace(/\s+/g,''); }
+  function cleanName(v){ return String(v||'').trim().replace(/\s+/g,' ').toLowerCase(); }
+  function isIshikaLike(e){
+    var email = cleanEmail(e && (e.email || e.Email || e.EmployeeEmail || e['Email Address']));
+    var name  = cleanName(e && (e.name || e.Name || e.EmployeeName));
+    return email === ISHIKA_EMAIL || name === 'ishika saxena' || email.indexOf('ishika') !== -1;
   }
-  function makeIshika(old){
-    old = old || {};
-    return Object.assign({}, old, {
-      name: ISHIKA_NAME,
-      Name: ISHIKA_NAME,
-      EmployeeName: ISHIKA_NAME,
-      empName: ISHIKA_NAME,
-      email: ISHIKA_EMAIL,
-      Email: ISHIKA_EMAIL,
-      EmployeeEmail: ISHIKA_EMAIL,
-      empEmail: ISHIKA_EMAIL,
-      pass: ISHIKA_PASS,
-      password: ISHIKA_PASS,
-      Password: ISHIKA_PASS,
-      role: ISHIKA_ROLE,
-      Role: ISHIKA_ROLE,
-      desig: ISHIKA_ROLE,
-      Designation: ISHIKA_ROLE,
-      isAdmin: false,
-      IsAdmin: false,
-      isManager: true,
-      IsManager: true,
-      active: true,
-      Active: 'Yes'
+  function normalizeList(list){
+    var out = [], added = false, seen = {};
+    (Array.isArray(list) ? list : []).forEach(function(e){
+      if(!e) return;
+      if(isIshikaLike(e)){
+        if(!added){ out.push(Object.assign({}, e, ISHIKA_REC)); added = true; }
+        return;
+      }
+      var em = cleanEmail(e.email || e.Email || e.EmployeeEmail || '');
+      if(em && seen[em]) return;
+      if(em) seen[em] = true;
+      out.push(e);
     });
-  }
-
-  function setUsers(){
-    try{
-      if(typeof USERS === 'undefined') return;
-      Object.keys(USERS).forEach(function(k){
-        if(k === ISHIKA_EMAIL || isIshikaLike(Object.assign({}, USERS[k], {email:k}))) delete USERS[k];
-      });
-      USERS[ISHIKA_EMAIL] = makeIshika({});
-    }catch(e){}
-  }
-
-  function cleanArray(arr){
-    arr = Array.isArray(arr) ? arr : [];
-    var out = [];
-    var seen = new Set();
-    arr.forEach(function(x){
-      if(!x) return;
-      if(isIshikaLike(x)) return;
-      var email = E(x.email || x.Email || x.EmployeeEmail || x.empEmail || '');
-      if(email && seen.has(email)) return;
-      if(email) seen.add(email);
-      out.push(x);
-    });
-    out.push(makeIshika({}));
+    if(!added) out.push(Object.assign({}, ISHIKA_REC));
     return out;
   }
-
-  function cleanLocalStorage(){
-    ['upgro_emp_dyn','upgro_roles_v3'].forEach(function(key){
-      try{
-        var raw = localStorage.getItem(key);
-        if(!raw) return;
-        var data = JSON.parse(raw);
-        if(Array.isArray(data)){
-          localStorage.setItem(key, JSON.stringify(cleanArray(data)));
-        }else if(data && typeof data === 'object'){
-          Object.keys(data).forEach(function(k){ if(k.indexOf('ishika') !== -1) delete data[k]; });
-          data[ISHIKA_EMAIL] = {isAdmin:false,isManager:true,role:ISHIKA_ROLE,desig:ISHIKA_ROLE,active:true,pass:ISHIKA_PASS};
-          localStorage.setItem(key, JSON.stringify(data));
-        }
-      }catch(e){}
-    });
-  }
-
-  function cleanRegistry(){
+  function fixIshika(){
     try{
-      var arr = [];
-      if(typeof empReg !== 'undefined' && Array.isArray(empReg)) arr = empReg;
-      else if(Array.isArray(window.empReg)) arr = window.empReg;
-      arr = cleanArray(arr);
-      window.empReg = arr;
-      try{ empReg = arr; }catch(e){}
+      if(typeof USERS !== 'undefined'){
+        Object.keys(USERS).forEach(function(k){
+          var r = USERS[k] || {};
+          if(k !== ISHIKA_EMAIL && isIshikaLike(Object.assign({}, r, {email:k}))) delete USERS[k];
+        });
+        USERS[ISHIKA_EMAIL] = Object.assign({}, USERS[ISHIKA_EMAIL] || {}, ISHIKA_REC);
+      }
+    }catch(e){}
+
+    try{ if(typeof empReg !== 'undefined') empReg = normalizeList(empReg); }catch(e){}
+    try{ if(window.empReg) window.empReg = normalizeList(window.empReg); }catch(e){}
+    try{ if(typeof sheetEmpReg !== 'undefined') sheetEmpReg = normalizeList(sheetEmpReg); }catch(e){}
+
+    // Clean common employee localStorage stores so old/wrong Ishika records do not override login.
+    try{
+      Object.keys(localStorage).forEach(function(key){
+        var raw = localStorage.getItem(key);
+        if(!raw || raw.indexOf('Ishika') === -1 && raw.indexOf('ishika') === -1) return;
+        try{
+          var val = JSON.parse(raw);
+          if(Array.isArray(val)){
+            localStorage.setItem(key, JSON.stringify(normalizeList(val)));
+          }else if(val && typeof val === 'object'){
+            Object.keys(val).forEach(function(k){
+              if(k !== ISHIKA_EMAIL && isIshikaLike(Object.assign({}, val[k], {email:k}))) delete val[k];
+            });
+            val[ISHIKA_EMAIL] = Object.assign({}, val[ISHIKA_EMAIL] || {}, ISHIKA_REC);
+            localStorage.setItem(key, JSON.stringify(val));
+          }
+        }catch(_e){}
+      });
     }catch(e){}
   }
 
-  function patchDirectoryFunctions(){
-    var oldGetStored = window.getStoredEmployee;
-    window.getStoredEmployee = function(email){
-      if(E(email) === ISHIKA_EMAIL) return makeIshika({});
-      try{ return oldGetStored ? oldGetStored.apply(this, arguments) : null; }catch(e){ return null; }
-    };
+  window.fixIshikaManagerLoginNow = fixIshika;
 
-    var oldUname = window.uname;
-    window.uname = function(email){
-      if(E(email) === ISHIKA_EMAIL) return ISHIKA_NAME;
-      try{ return oldUname ? oldUname.apply(this, arguments) : String(email||'').split('@')[0]; }catch(e){ return String(email||'').split('@')[0]; }
-    };
-
-    var oldUdesig = window.udesig;
-    window.udesig = function(email){
-      if(E(email) === ISHIKA_EMAIL) return ISHIKA_ROLE;
-      try{ return oldUdesig ? oldUdesig.apply(this, arguments) : 'Team'; }catch(e){ return 'Team'; }
-    };
-  }
-
-  function refreshAll(){
-    setUsers();
-    cleanLocalStorage();
-    cleanRegistry();
-    try{ if(typeof syncUserDirectoryFromRegistry === 'function') syncUserDirectoryFromRegistry(); }catch(e){}
-    try{ if(typeof persistEmpRegistry === 'function') persistEmpRegistry(); }catch(e){}
-    try{ if(typeof renderEmpList === 'function') renderEmpList(); }catch(e){}
-    try{ if(typeof refillEmpDropdown === 'function') refillEmpDropdown(); }catch(e){}
-    try{ if(typeof populateTaskFilterOptions === 'function') populateTaskFilterOptions(); }catch(e){}
-  }
-
-  // Hard login override placed last so previous patches cannot block Ishika.
+  var oldDoLogin = window.doLogin;
   window.doLogin = async function(){
-    setUsers(); cleanLocalStorage(); cleanRegistry();
-
-    var email = E((document.getElementById('lem') || {value:''}).value);
-    var pass  = String((document.getElementById('lpw') || {value:''}).value || '').trim();
-    var err   = document.getElementById('lerr');
-    function fail(msg){ if(err){ err.textContent = '❌ ' + msg; err.style.display = 'block'; } }
-
-    if(!email || !pass) return fail('Email and password required.');
-
-    var rec = null;
+    fixIshika();
+    var email = cleanEmail((document.getElementById('lem') || {value:''}).value);
+    var pass  = String((document.getElementById('lpw') || {value:''}).value || '');
     if(email === ISHIKA_EMAIL){
-      rec = makeIshika({});
-    }else{
-      try{ if(typeof getStoredEmployee === 'function') rec = getStoredEmployee(email); }catch(e){}
-      try{ if(!rec && typeof USERS !== 'undefined' && USERS[email]) rec = Object.assign({}, USERS[email], {email:email}); }catch(e){}
-      try{ if(!rec && Array.isArray(window.empReg)) rec = window.empReg.find(function(x){ return E(x.email) === email; }); }catch(e){}
+      var err = document.getElementById('lerr');
+      if(pass !== ISHIKA_PASS){
+        if(err){ err.textContent = '❌ Wrong password.'; err.style.display = 'block'; }
+        return;
+      }
+      try{ window.cu = Object.assign({}, ISHIKA_REC); cu = window.cu; }catch(e){ window.cu = Object.assign({}, ISHIKA_REC); }
+      if(err) err.style.display = 'none';
+      try{ if(typeof saveCurrentSession === 'function') saveCurrentSession(); }catch(e){}
+      var lp = document.getElementById('lp'), app = document.getElementById('app');
+      if(lp) lp.classList.add('hidden');
+      if(app) app.classList.remove('hidden');
+      if(typeof initApp === 'function') initApp();
+      return;
     }
-
-    if(!rec) return fail('Email not found. Please check employee list.');
-    if(rec.active === false || rec.Active === 'No') return fail('This employee account is inactive.');
-
-    var savedPass = email === ISHIKA_EMAIL ? ISHIKA_PASS : String(rec.pass || rec.password || rec.Password || '').trim();
-    if(pass !== savedPass) return fail('Wrong password.');
-
-    window.cu = Object.assign({}, rec, {
-      email: email,
-      name: rec.name || rec.Name,
-      role: rec.role || rec.desig || 'Team',
-      desig: rec.desig || rec.role || 'Team',
-      isAdmin: !!rec.isAdmin,
-      isManager: email === ISHIKA_EMAIL ? true : !!rec.isManager
-    });
-    try{ cu = window.cu; }catch(e){}
-    try{ if(typeof saveCurrentSession === 'function') saveCurrentSession(); }catch(e){}
-
-    if(err) err.style.display = 'none';
-    var lp = document.getElementById('lp');
-    var app = document.getElementById('app');
-    if(lp) lp.classList.add('hidden');
-    if(app) app.classList.remove('hidden');
-    try{ if(typeof initApp === 'function') initApp(); }catch(e){}
-    setTimeout(refreshAll, 250);
+    return oldDoLogin ? oldDoLogin.apply(this, arguments) : undefined;
   };
 
-  window.fixIshikaLoginNow = function(){
-    refreshAll();
-    try{ if(typeof toast === 'function') toast('✅ Ishika login fixed. Use Ishika@123'); }catch(e){}
-  };
-
-  patchDirectoryFunctions();
   if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', function(){ setTimeout(window.fixIshikaLoginNow, 700); });
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(fixIshika, 200); });
   }else{
-    setTimeout(window.fixIshikaLoginNow, 700);
+    setTimeout(fixIshika, 200);
   }
 })();
 </script>
@@ -3869,204 +3777,113 @@ if(data.action === 'sendMeetingInvite'){
 
         +'</table></td></tr></table>'
         +'
-
 <script>
-/* ============================================================
-   FINAL ISHIKA LOGIN + MANAGER MASTER FIX
-   Purpose:
-   - Ishika Saxena only once in portal
-   - email: ishika.crm@upgromedia.com
-   - password: Ishika@123
-   - role/designation: CRM
-   - isManager: true
-   - removes stale localStorage password/duplicate records
-   - overrides login so old browser cache cannot block login
-   ============================================================ */
+/* =============================================================
+   MINIMAL ISHIKA SAXENA LOGIN + MANAGER FIX
+   No UI/CSS/layout changes. Only employee/auth data is normalized.
+   Login: ishika.crm@upgromedia.com / Ishika@123
+============================================================= */
 (function(){
-  'use strict';
-
   var ISHIKA_EMAIL = 'ishika.crm@upgromedia.com';
-  var ISHIKA_NAME  = 'Ishika Saxena';
   var ISHIKA_PASS  = 'Ishika@123';
-  var ISHIKA_ROLE  = 'CRM';
-
-  function E(v){ return String(v || '').trim().toLowerCase().replace(/\s+/g,''); }
-  function N(v){ return String(v || '').trim().replace(/\s+/g,' '); }
-  function isMail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(E(v)); }
-  function isIshikaLike(x){
-    x = x || {};
-    var email = E(x.email || x.Email || x.EmployeeEmail || x.empEmail || x['Email Address'] || '');
-    var name  = N(x.name || x.Name || x.EmployeeName || x.empName || x['Employee Name'] || '').toLowerCase();
-    return email.indexOf('ishika') !== -1 || name === 'ishika' || name === 'ishika saxena';
+  var ISHIKA_REC = {
+    email: ISHIKA_EMAIL,
+    name: 'Ishika Saxena',
+    pass: ISHIKA_PASS,
+    role: 'CRM',
+    desig: 'CRM',
+    isAdmin: false,
+    isManager: true,
+    active: true
+  };
+  function cleanEmail(v){ return String(v||'').trim().toLowerCase().replace(/\s+/g,''); }
+  function cleanName(v){ return String(v||'').trim().replace(/\s+/g,' ').toLowerCase(); }
+  function isIshikaLike(e){
+    var email = cleanEmail(e && (e.email || e.Email || e.EmployeeEmail || e['Email Address']));
+    var name  = cleanName(e && (e.name || e.Name || e.EmployeeName));
+    return email === ISHIKA_EMAIL || name === 'ishika saxena' || email.indexOf('ishika') !== -1;
   }
-  function makeIshika(old){
-    old = old || {};
-    return Object.assign({}, old, {
-      name: ISHIKA_NAME,
-      Name: ISHIKA_NAME,
-      EmployeeName: ISHIKA_NAME,
-      empName: ISHIKA_NAME,
-      email: ISHIKA_EMAIL,
-      Email: ISHIKA_EMAIL,
-      EmployeeEmail: ISHIKA_EMAIL,
-      empEmail: ISHIKA_EMAIL,
-      pass: ISHIKA_PASS,
-      password: ISHIKA_PASS,
-      Password: ISHIKA_PASS,
-      role: ISHIKA_ROLE,
-      Role: ISHIKA_ROLE,
-      desig: ISHIKA_ROLE,
-      Designation: ISHIKA_ROLE,
-      isAdmin: false,
-      IsAdmin: false,
-      isManager: true,
-      IsManager: true,
-      active: true,
-      Active: 'Yes'
+  function normalizeList(list){
+    var out = [], added = false, seen = {};
+    (Array.isArray(list) ? list : []).forEach(function(e){
+      if(!e) return;
+      if(isIshikaLike(e)){
+        if(!added){ out.push(Object.assign({}, e, ISHIKA_REC)); added = true; }
+        return;
+      }
+      var em = cleanEmail(e.email || e.Email || e.EmployeeEmail || '');
+      if(em && seen[em]) return;
+      if(em) seen[em] = true;
+      out.push(e);
     });
-  }
-
-  function setUsers(){
-    try{
-      if(typeof USERS === 'undefined') return;
-      Object.keys(USERS).forEach(function(k){
-        if(k === ISHIKA_EMAIL || isIshikaLike(Object.assign({}, USERS[k], {email:k}))) delete USERS[k];
-      });
-      USERS[ISHIKA_EMAIL] = makeIshika({});
-    }catch(e){}
-  }
-
-  function cleanArray(arr){
-    arr = Array.isArray(arr) ? arr : [];
-    var out = [];
-    var seen = new Set();
-    arr.forEach(function(x){
-      if(!x) return;
-      if(isIshikaLike(x)) return;
-      var email = E(x.email || x.Email || x.EmployeeEmail || x.empEmail || '');
-      if(email && seen.has(email)) return;
-      if(email) seen.add(email);
-      out.push(x);
-    });
-    out.push(makeIshika({}));
+    if(!added) out.push(Object.assign({}, ISHIKA_REC));
     return out;
   }
-
-  function cleanLocalStorage(){
-    ['upgro_emp_dyn','upgro_roles_v3'].forEach(function(key){
-      try{
-        var raw = localStorage.getItem(key);
-        if(!raw) return;
-        var data = JSON.parse(raw);
-        if(Array.isArray(data)){
-          localStorage.setItem(key, JSON.stringify(cleanArray(data)));
-        }else if(data && typeof data === 'object'){
-          Object.keys(data).forEach(function(k){ if(k.indexOf('ishika') !== -1) delete data[k]; });
-          data[ISHIKA_EMAIL] = {isAdmin:false,isManager:true,role:ISHIKA_ROLE,desig:ISHIKA_ROLE,active:true,pass:ISHIKA_PASS};
-          localStorage.setItem(key, JSON.stringify(data));
-        }
-      }catch(e){}
-    });
-  }
-
-  function cleanRegistry(){
+  function fixIshika(){
     try{
-      var arr = [];
-      if(typeof empReg !== 'undefined' && Array.isArray(empReg)) arr = empReg;
-      else if(Array.isArray(window.empReg)) arr = window.empReg;
-      arr = cleanArray(arr);
-      window.empReg = arr;
-      try{ empReg = arr; }catch(e){}
+      if(typeof USERS !== 'undefined'){
+        Object.keys(USERS).forEach(function(k){
+          var r = USERS[k] || {};
+          if(k !== ISHIKA_EMAIL && isIshikaLike(Object.assign({}, r, {email:k}))) delete USERS[k];
+        });
+        USERS[ISHIKA_EMAIL] = Object.assign({}, USERS[ISHIKA_EMAIL] || {}, ISHIKA_REC);
+      }
+    }catch(e){}
+
+    try{ if(typeof empReg !== 'undefined') empReg = normalizeList(empReg); }catch(e){}
+    try{ if(window.empReg) window.empReg = normalizeList(window.empReg); }catch(e){}
+    try{ if(typeof sheetEmpReg !== 'undefined') sheetEmpReg = normalizeList(sheetEmpReg); }catch(e){}
+
+    // Clean common employee localStorage stores so old/wrong Ishika records do not override login.
+    try{
+      Object.keys(localStorage).forEach(function(key){
+        var raw = localStorage.getItem(key);
+        if(!raw || raw.indexOf('Ishika') === -1 && raw.indexOf('ishika') === -1) return;
+        try{
+          var val = JSON.parse(raw);
+          if(Array.isArray(val)){
+            localStorage.setItem(key, JSON.stringify(normalizeList(val)));
+          }else if(val && typeof val === 'object'){
+            Object.keys(val).forEach(function(k){
+              if(k !== ISHIKA_EMAIL && isIshikaLike(Object.assign({}, val[k], {email:k}))) delete val[k];
+            });
+            val[ISHIKA_EMAIL] = Object.assign({}, val[ISHIKA_EMAIL] || {}, ISHIKA_REC);
+            localStorage.setItem(key, JSON.stringify(val));
+          }
+        }catch(_e){}
+      });
     }catch(e){}
   }
 
-  function patchDirectoryFunctions(){
-    var oldGetStored = window.getStoredEmployee;
-    window.getStoredEmployee = function(email){
-      if(E(email) === ISHIKA_EMAIL) return makeIshika({});
-      try{ return oldGetStored ? oldGetStored.apply(this, arguments) : null; }catch(e){ return null; }
-    };
+  window.fixIshikaManagerLoginNow = fixIshika;
 
-    var oldUname = window.uname;
-    window.uname = function(email){
-      if(E(email) === ISHIKA_EMAIL) return ISHIKA_NAME;
-      try{ return oldUname ? oldUname.apply(this, arguments) : String(email||'').split('@')[0]; }catch(e){ return String(email||'').split('@')[0]; }
-    };
-
-    var oldUdesig = window.udesig;
-    window.udesig = function(email){
-      if(E(email) === ISHIKA_EMAIL) return ISHIKA_ROLE;
-      try{ return oldUdesig ? oldUdesig.apply(this, arguments) : 'Team'; }catch(e){ return 'Team'; }
-    };
-  }
-
-  function refreshAll(){
-    setUsers();
-    cleanLocalStorage();
-    cleanRegistry();
-    try{ if(typeof syncUserDirectoryFromRegistry === 'function') syncUserDirectoryFromRegistry(); }catch(e){}
-    try{ if(typeof persistEmpRegistry === 'function') persistEmpRegistry(); }catch(e){}
-    try{ if(typeof renderEmpList === 'function') renderEmpList(); }catch(e){}
-    try{ if(typeof refillEmpDropdown === 'function') refillEmpDropdown(); }catch(e){}
-    try{ if(typeof populateTaskFilterOptions === 'function') populateTaskFilterOptions(); }catch(e){}
-  }
-
-  // Hard login override placed last so previous patches cannot block Ishika.
+  var oldDoLogin = window.doLogin;
   window.doLogin = async function(){
-    setUsers(); cleanLocalStorage(); cleanRegistry();
-
-    var email = E((document.getElementById('lem') || {value:''}).value);
-    var pass  = String((document.getElementById('lpw') || {value:''}).value || '').trim();
-    var err   = document.getElementById('lerr');
-    function fail(msg){ if(err){ err.textContent = '❌ ' + msg; err.style.display = 'block'; } }
-
-    if(!email || !pass) return fail('Email and password required.');
-
-    var rec = null;
+    fixIshika();
+    var email = cleanEmail((document.getElementById('lem') || {value:''}).value);
+    var pass  = String((document.getElementById('lpw') || {value:''}).value || '');
     if(email === ISHIKA_EMAIL){
-      rec = makeIshika({});
-    }else{
-      try{ if(typeof getStoredEmployee === 'function') rec = getStoredEmployee(email); }catch(e){}
-      try{ if(!rec && typeof USERS !== 'undefined' && USERS[email]) rec = Object.assign({}, USERS[email], {email:email}); }catch(e){}
-      try{ if(!rec && Array.isArray(window.empReg)) rec = window.empReg.find(function(x){ return E(x.email) === email; }); }catch(e){}
+      var err = document.getElementById('lerr');
+      if(pass !== ISHIKA_PASS){
+        if(err){ err.textContent = '❌ Wrong password.'; err.style.display = 'block'; }
+        return;
+      }
+      try{ window.cu = Object.assign({}, ISHIKA_REC); cu = window.cu; }catch(e){ window.cu = Object.assign({}, ISHIKA_REC); }
+      if(err) err.style.display = 'none';
+      try{ if(typeof saveCurrentSession === 'function') saveCurrentSession(); }catch(e){}
+      var lp = document.getElementById('lp'), app = document.getElementById('app');
+      if(lp) lp.classList.add('hidden');
+      if(app) app.classList.remove('hidden');
+      if(typeof initApp === 'function') initApp();
+      return;
     }
-
-    if(!rec) return fail('Email not found. Please check employee list.');
-    if(rec.active === false || rec.Active === 'No') return fail('This employee account is inactive.');
-
-    var savedPass = email === ISHIKA_EMAIL ? ISHIKA_PASS : String(rec.pass || rec.password || rec.Password || '').trim();
-    if(pass !== savedPass) return fail('Wrong password.');
-
-    window.cu = Object.assign({}, rec, {
-      email: email,
-      name: rec.name || rec.Name,
-      role: rec.role || rec.desig || 'Team',
-      desig: rec.desig || rec.role || 'Team',
-      isAdmin: !!rec.isAdmin,
-      isManager: email === ISHIKA_EMAIL ? true : !!rec.isManager
-    });
-    try{ cu = window.cu; }catch(e){}
-    try{ if(typeof saveCurrentSession === 'function') saveCurrentSession(); }catch(e){}
-
-    if(err) err.style.display = 'none';
-    var lp = document.getElementById('lp');
-    var app = document.getElementById('app');
-    if(lp) lp.classList.add('hidden');
-    if(app) app.classList.remove('hidden');
-    try{ if(typeof initApp === 'function') initApp(); }catch(e){}
-    setTimeout(refreshAll, 250);
+    return oldDoLogin ? oldDoLogin.apply(this, arguments) : undefined;
   };
 
-  window.fixIshikaLoginNow = function(){
-    refreshAll();
-    try{ if(typeof toast === 'function') toast('✅ Ishika login fixed. Use Ishika@123'); }catch(e){}
-  };
-
-  patchDirectoryFunctions();
   if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', function(){ setTimeout(window.fixIshikaLoginNow, 700); });
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(fixIshika, 200); });
   }else{
-    setTimeout(window.fixIshikaLoginNow, 700);
+    setTimeout(fixIshika, 200);
   }
 })();
 </script>
@@ -4563,6 +4380,7 @@ function deleteMeeting(id){
     {name:'Neeraj Kumar Yadav', email:'neeraj.meta@upgromedia.com', pass:'Neeraj@1015', role:'Manager - Meta', desig:'Meta Media Buyer', isManager:true},
     {name:'Chandrakala Waldia', email:'chandrakala.meta@upgromedia.com', pass:'Chandrakala@1016', role:'Meta Media Buyer', desig:'Meta Media Buyer'},
     {name:'Ranveer Singh', email:'ranveer.copywriter@upgromedia.com', pass:'Ranveer@123', role:'Copywriter', desig:'Copywriter', isManager:true},
+    {name:'Ishika Saxena', email:'ishika.crm@upgromedia.com', pass:'Ishika@123', role:'CRM', desig:'CRM', isManager:true},
     {name:'Subhi Singh', email:'subhi.meta@upgromedia.com', pass:'Shubhi@123', role:'Meta Media Buyer', desig:'Meta Media Buyer', isManager:true},
     {name:'Surya Singh', email:'surya.meta@upgromedia.com', pass:'Surya@123', role:'Meta Media Buyer', desig:'Meta Media Buyer', isManager:true}
   ];
@@ -5116,204 +4934,113 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
 /* =========================================================
    MULTI TASK ASSIGN PATCH
    Paste this just before 
-
 <script>
-/* ============================================================
-   FINAL ISHIKA LOGIN + MANAGER MASTER FIX
-   Purpose:
-   - Ishika Saxena only once in portal
-   - email: ishika.crm@upgromedia.com
-   - password: Ishika@123
-   - role/designation: CRM
-   - isManager: true
-   - removes stale localStorage password/duplicate records
-   - overrides login so old browser cache cannot block login
-   ============================================================ */
+/* =============================================================
+   MINIMAL ISHIKA SAXENA LOGIN + MANAGER FIX
+   No UI/CSS/layout changes. Only employee/auth data is normalized.
+   Login: ishika.crm@upgromedia.com / Ishika@123
+============================================================= */
 (function(){
-  'use strict';
-
   var ISHIKA_EMAIL = 'ishika.crm@upgromedia.com';
-  var ISHIKA_NAME  = 'Ishika Saxena';
   var ISHIKA_PASS  = 'Ishika@123';
-  var ISHIKA_ROLE  = 'CRM';
-
-  function E(v){ return String(v || '').trim().toLowerCase().replace(/\s+/g,''); }
-  function N(v){ return String(v || '').trim().replace(/\s+/g,' '); }
-  function isMail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(E(v)); }
-  function isIshikaLike(x){
-    x = x || {};
-    var email = E(x.email || x.Email || x.EmployeeEmail || x.empEmail || x['Email Address'] || '');
-    var name  = N(x.name || x.Name || x.EmployeeName || x.empName || x['Employee Name'] || '').toLowerCase();
-    return email.indexOf('ishika') !== -1 || name === 'ishika' || name === 'ishika saxena';
+  var ISHIKA_REC = {
+    email: ISHIKA_EMAIL,
+    name: 'Ishika Saxena',
+    pass: ISHIKA_PASS,
+    role: 'CRM',
+    desig: 'CRM',
+    isAdmin: false,
+    isManager: true,
+    active: true
+  };
+  function cleanEmail(v){ return String(v||'').trim().toLowerCase().replace(/\s+/g,''); }
+  function cleanName(v){ return String(v||'').trim().replace(/\s+/g,' ').toLowerCase(); }
+  function isIshikaLike(e){
+    var email = cleanEmail(e && (e.email || e.Email || e.EmployeeEmail || e['Email Address']));
+    var name  = cleanName(e && (e.name || e.Name || e.EmployeeName));
+    return email === ISHIKA_EMAIL || name === 'ishika saxena' || email.indexOf('ishika') !== -1;
   }
-  function makeIshika(old){
-    old = old || {};
-    return Object.assign({}, old, {
-      name: ISHIKA_NAME,
-      Name: ISHIKA_NAME,
-      EmployeeName: ISHIKA_NAME,
-      empName: ISHIKA_NAME,
-      email: ISHIKA_EMAIL,
-      Email: ISHIKA_EMAIL,
-      EmployeeEmail: ISHIKA_EMAIL,
-      empEmail: ISHIKA_EMAIL,
-      pass: ISHIKA_PASS,
-      password: ISHIKA_PASS,
-      Password: ISHIKA_PASS,
-      role: ISHIKA_ROLE,
-      Role: ISHIKA_ROLE,
-      desig: ISHIKA_ROLE,
-      Designation: ISHIKA_ROLE,
-      isAdmin: false,
-      IsAdmin: false,
-      isManager: true,
-      IsManager: true,
-      active: true,
-      Active: 'Yes'
+  function normalizeList(list){
+    var out = [], added = false, seen = {};
+    (Array.isArray(list) ? list : []).forEach(function(e){
+      if(!e) return;
+      if(isIshikaLike(e)){
+        if(!added){ out.push(Object.assign({}, e, ISHIKA_REC)); added = true; }
+        return;
+      }
+      var em = cleanEmail(e.email || e.Email || e.EmployeeEmail || '');
+      if(em && seen[em]) return;
+      if(em) seen[em] = true;
+      out.push(e);
     });
-  }
-
-  function setUsers(){
-    try{
-      if(typeof USERS === 'undefined') return;
-      Object.keys(USERS).forEach(function(k){
-        if(k === ISHIKA_EMAIL || isIshikaLike(Object.assign({}, USERS[k], {email:k}))) delete USERS[k];
-      });
-      USERS[ISHIKA_EMAIL] = makeIshika({});
-    }catch(e){}
-  }
-
-  function cleanArray(arr){
-    arr = Array.isArray(arr) ? arr : [];
-    var out = [];
-    var seen = new Set();
-    arr.forEach(function(x){
-      if(!x) return;
-      if(isIshikaLike(x)) return;
-      var email = E(x.email || x.Email || x.EmployeeEmail || x.empEmail || '');
-      if(email && seen.has(email)) return;
-      if(email) seen.add(email);
-      out.push(x);
-    });
-    out.push(makeIshika({}));
+    if(!added) out.push(Object.assign({}, ISHIKA_REC));
     return out;
   }
-
-  function cleanLocalStorage(){
-    ['upgro_emp_dyn','upgro_roles_v3'].forEach(function(key){
-      try{
-        var raw = localStorage.getItem(key);
-        if(!raw) return;
-        var data = JSON.parse(raw);
-        if(Array.isArray(data)){
-          localStorage.setItem(key, JSON.stringify(cleanArray(data)));
-        }else if(data && typeof data === 'object'){
-          Object.keys(data).forEach(function(k){ if(k.indexOf('ishika') !== -1) delete data[k]; });
-          data[ISHIKA_EMAIL] = {isAdmin:false,isManager:true,role:ISHIKA_ROLE,desig:ISHIKA_ROLE,active:true,pass:ISHIKA_PASS};
-          localStorage.setItem(key, JSON.stringify(data));
-        }
-      }catch(e){}
-    });
-  }
-
-  function cleanRegistry(){
+  function fixIshika(){
     try{
-      var arr = [];
-      if(typeof empReg !== 'undefined' && Array.isArray(empReg)) arr = empReg;
-      else if(Array.isArray(window.empReg)) arr = window.empReg;
-      arr = cleanArray(arr);
-      window.empReg = arr;
-      try{ empReg = arr; }catch(e){}
+      if(typeof USERS !== 'undefined'){
+        Object.keys(USERS).forEach(function(k){
+          var r = USERS[k] || {};
+          if(k !== ISHIKA_EMAIL && isIshikaLike(Object.assign({}, r, {email:k}))) delete USERS[k];
+        });
+        USERS[ISHIKA_EMAIL] = Object.assign({}, USERS[ISHIKA_EMAIL] || {}, ISHIKA_REC);
+      }
+    }catch(e){}
+
+    try{ if(typeof empReg !== 'undefined') empReg = normalizeList(empReg); }catch(e){}
+    try{ if(window.empReg) window.empReg = normalizeList(window.empReg); }catch(e){}
+    try{ if(typeof sheetEmpReg !== 'undefined') sheetEmpReg = normalizeList(sheetEmpReg); }catch(e){}
+
+    // Clean common employee localStorage stores so old/wrong Ishika records do not override login.
+    try{
+      Object.keys(localStorage).forEach(function(key){
+        var raw = localStorage.getItem(key);
+        if(!raw || raw.indexOf('Ishika') === -1 && raw.indexOf('ishika') === -1) return;
+        try{
+          var val = JSON.parse(raw);
+          if(Array.isArray(val)){
+            localStorage.setItem(key, JSON.stringify(normalizeList(val)));
+          }else if(val && typeof val === 'object'){
+            Object.keys(val).forEach(function(k){
+              if(k !== ISHIKA_EMAIL && isIshikaLike(Object.assign({}, val[k], {email:k}))) delete val[k];
+            });
+            val[ISHIKA_EMAIL] = Object.assign({}, val[ISHIKA_EMAIL] || {}, ISHIKA_REC);
+            localStorage.setItem(key, JSON.stringify(val));
+          }
+        }catch(_e){}
+      });
     }catch(e){}
   }
 
-  function patchDirectoryFunctions(){
-    var oldGetStored = window.getStoredEmployee;
-    window.getStoredEmployee = function(email){
-      if(E(email) === ISHIKA_EMAIL) return makeIshika({});
-      try{ return oldGetStored ? oldGetStored.apply(this, arguments) : null; }catch(e){ return null; }
-    };
+  window.fixIshikaManagerLoginNow = fixIshika;
 
-    var oldUname = window.uname;
-    window.uname = function(email){
-      if(E(email) === ISHIKA_EMAIL) return ISHIKA_NAME;
-      try{ return oldUname ? oldUname.apply(this, arguments) : String(email||'').split('@')[0]; }catch(e){ return String(email||'').split('@')[0]; }
-    };
-
-    var oldUdesig = window.udesig;
-    window.udesig = function(email){
-      if(E(email) === ISHIKA_EMAIL) return ISHIKA_ROLE;
-      try{ return oldUdesig ? oldUdesig.apply(this, arguments) : 'Team'; }catch(e){ return 'Team'; }
-    };
-  }
-
-  function refreshAll(){
-    setUsers();
-    cleanLocalStorage();
-    cleanRegistry();
-    try{ if(typeof syncUserDirectoryFromRegistry === 'function') syncUserDirectoryFromRegistry(); }catch(e){}
-    try{ if(typeof persistEmpRegistry === 'function') persistEmpRegistry(); }catch(e){}
-    try{ if(typeof renderEmpList === 'function') renderEmpList(); }catch(e){}
-    try{ if(typeof refillEmpDropdown === 'function') refillEmpDropdown(); }catch(e){}
-    try{ if(typeof populateTaskFilterOptions === 'function') populateTaskFilterOptions(); }catch(e){}
-  }
-
-  // Hard login override placed last so previous patches cannot block Ishika.
+  var oldDoLogin = window.doLogin;
   window.doLogin = async function(){
-    setUsers(); cleanLocalStorage(); cleanRegistry();
-
-    var email = E((document.getElementById('lem') || {value:''}).value);
-    var pass  = String((document.getElementById('lpw') || {value:''}).value || '').trim();
-    var err   = document.getElementById('lerr');
-    function fail(msg){ if(err){ err.textContent = '❌ ' + msg; err.style.display = 'block'; } }
-
-    if(!email || !pass) return fail('Email and password required.');
-
-    var rec = null;
+    fixIshika();
+    var email = cleanEmail((document.getElementById('lem') || {value:''}).value);
+    var pass  = String((document.getElementById('lpw') || {value:''}).value || '');
     if(email === ISHIKA_EMAIL){
-      rec = makeIshika({});
-    }else{
-      try{ if(typeof getStoredEmployee === 'function') rec = getStoredEmployee(email); }catch(e){}
-      try{ if(!rec && typeof USERS !== 'undefined' && USERS[email]) rec = Object.assign({}, USERS[email], {email:email}); }catch(e){}
-      try{ if(!rec && Array.isArray(window.empReg)) rec = window.empReg.find(function(x){ return E(x.email) === email; }); }catch(e){}
+      var err = document.getElementById('lerr');
+      if(pass !== ISHIKA_PASS){
+        if(err){ err.textContent = '❌ Wrong password.'; err.style.display = 'block'; }
+        return;
+      }
+      try{ window.cu = Object.assign({}, ISHIKA_REC); cu = window.cu; }catch(e){ window.cu = Object.assign({}, ISHIKA_REC); }
+      if(err) err.style.display = 'none';
+      try{ if(typeof saveCurrentSession === 'function') saveCurrentSession(); }catch(e){}
+      var lp = document.getElementById('lp'), app = document.getElementById('app');
+      if(lp) lp.classList.add('hidden');
+      if(app) app.classList.remove('hidden');
+      if(typeof initApp === 'function') initApp();
+      return;
     }
-
-    if(!rec) return fail('Email not found. Please check employee list.');
-    if(rec.active === false || rec.Active === 'No') return fail('This employee account is inactive.');
-
-    var savedPass = email === ISHIKA_EMAIL ? ISHIKA_PASS : String(rec.pass || rec.password || rec.Password || '').trim();
-    if(pass !== savedPass) return fail('Wrong password.');
-
-    window.cu = Object.assign({}, rec, {
-      email: email,
-      name: rec.name || rec.Name,
-      role: rec.role || rec.desig || 'Team',
-      desig: rec.desig || rec.role || 'Team',
-      isAdmin: !!rec.isAdmin,
-      isManager: email === ISHIKA_EMAIL ? true : !!rec.isManager
-    });
-    try{ cu = window.cu; }catch(e){}
-    try{ if(typeof saveCurrentSession === 'function') saveCurrentSession(); }catch(e){}
-
-    if(err) err.style.display = 'none';
-    var lp = document.getElementById('lp');
-    var app = document.getElementById('app');
-    if(lp) lp.classList.add('hidden');
-    if(app) app.classList.remove('hidden');
-    try{ if(typeof initApp === 'function') initApp(); }catch(e){}
-    setTimeout(refreshAll, 250);
+    return oldDoLogin ? oldDoLogin.apply(this, arguments) : undefined;
   };
 
-  window.fixIshikaLoginNow = function(){
-    refreshAll();
-    try{ if(typeof toast === 'function') toast('✅ Ishika login fixed. Use Ishika@123'); }catch(e){}
-  };
-
-  patchDirectoryFunctions();
   if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', function(){ setTimeout(window.fixIshikaLoginNow, 700); });
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(fixIshika, 200); });
   }else{
-    setTimeout(window.fixIshikaLoginNow, 700);
+    setTimeout(fixIshika, 200);
   }
 })();
 </script>
@@ -5752,308 +5479,182 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
 </script>
   <script>
 /* ============================================================
-   ISHIKA SAXENA — SINGLE MANAGER RECORD FIX
-   Paste before 
-
+   EMPLOYEE EMAIL EDITABLE PATCH + ISHIKA SAXENA EMAIL FIX
+   Paste this just before 
 <script>
-/* ============================================================
-   FINAL ISHIKA LOGIN + MANAGER MASTER FIX
-   Purpose:
-   - Ishika Saxena only once in portal
-   - email: ishika.crm@upgromedia.com
-   - password: Ishika@123
-   - role/designation: CRM
-   - isManager: true
-   - removes stale localStorage password/duplicate records
-   - overrides login so old browser cache cannot block login
-   ============================================================ */
+/* =============================================================
+   MINIMAL ISHIKA SAXENA LOGIN + MANAGER FIX
+   No UI/CSS/layout changes. Only employee/auth data is normalized.
+   Login: ishika.crm@upgromedia.com / Ishika@123
+============================================================= */
 (function(){
-  'use strict';
-
   var ISHIKA_EMAIL = 'ishika.crm@upgromedia.com';
-  var ISHIKA_NAME  = 'Ishika Saxena';
   var ISHIKA_PASS  = 'Ishika@123';
-  var ISHIKA_ROLE  = 'CRM';
-
-  function E(v){ return String(v || '').trim().toLowerCase().replace(/\s+/g,''); }
-  function N(v){ return String(v || '').trim().replace(/\s+/g,' '); }
-  function isMail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(E(v)); }
-  function isIshikaLike(x){
-    x = x || {};
-    var email = E(x.email || x.Email || x.EmployeeEmail || x.empEmail || x['Email Address'] || '');
-    var name  = N(x.name || x.Name || x.EmployeeName || x.empName || x['Employee Name'] || '').toLowerCase();
-    return email.indexOf('ishika') !== -1 || name === 'ishika' || name === 'ishika saxena';
+  var ISHIKA_REC = {
+    email: ISHIKA_EMAIL,
+    name: 'Ishika Saxena',
+    pass: ISHIKA_PASS,
+    role: 'CRM',
+    desig: 'CRM',
+    isAdmin: false,
+    isManager: true,
+    active: true
+  };
+  function cleanEmail(v){ return String(v||'').trim().toLowerCase().replace(/\s+/g,''); }
+  function cleanName(v){ return String(v||'').trim().replace(/\s+/g,' ').toLowerCase(); }
+  function isIshikaLike(e){
+    var email = cleanEmail(e && (e.email || e.Email || e.EmployeeEmail || e['Email Address']));
+    var name  = cleanName(e && (e.name || e.Name || e.EmployeeName));
+    return email === ISHIKA_EMAIL || name === 'ishika saxena' || email.indexOf('ishika') !== -1;
   }
-  function makeIshika(old){
-    old = old || {};
-    return Object.assign({}, old, {
-      name: ISHIKA_NAME,
-      Name: ISHIKA_NAME,
-      EmployeeName: ISHIKA_NAME,
-      empName: ISHIKA_NAME,
-      email: ISHIKA_EMAIL,
-      Email: ISHIKA_EMAIL,
-      EmployeeEmail: ISHIKA_EMAIL,
-      empEmail: ISHIKA_EMAIL,
-      pass: ISHIKA_PASS,
-      password: ISHIKA_PASS,
-      Password: ISHIKA_PASS,
-      role: ISHIKA_ROLE,
-      Role: ISHIKA_ROLE,
-      desig: ISHIKA_ROLE,
-      Designation: ISHIKA_ROLE,
-      isAdmin: false,
-      IsAdmin: false,
-      isManager: true,
-      IsManager: true,
-      active: true,
-      Active: 'Yes'
+  function normalizeList(list){
+    var out = [], added = false, seen = {};
+    (Array.isArray(list) ? list : []).forEach(function(e){
+      if(!e) return;
+      if(isIshikaLike(e)){
+        if(!added){ out.push(Object.assign({}, e, ISHIKA_REC)); added = true; }
+        return;
+      }
+      var em = cleanEmail(e.email || e.Email || e.EmployeeEmail || '');
+      if(em && seen[em]) return;
+      if(em) seen[em] = true;
+      out.push(e);
     });
-  }
-
-  function setUsers(){
-    try{
-      if(typeof USERS === 'undefined') return;
-      Object.keys(USERS).forEach(function(k){
-        if(k === ISHIKA_EMAIL || isIshikaLike(Object.assign({}, USERS[k], {email:k}))) delete USERS[k];
-      });
-      USERS[ISHIKA_EMAIL] = makeIshika({});
-    }catch(e){}
-  }
-
-  function cleanArray(arr){
-    arr = Array.isArray(arr) ? arr : [];
-    var out = [];
-    var seen = new Set();
-    arr.forEach(function(x){
-      if(!x) return;
-      if(isIshikaLike(x)) return;
-      var email = E(x.email || x.Email || x.EmployeeEmail || x.empEmail || '');
-      if(email && seen.has(email)) return;
-      if(email) seen.add(email);
-      out.push(x);
-    });
-    out.push(makeIshika({}));
+    if(!added) out.push(Object.assign({}, ISHIKA_REC));
     return out;
   }
-
-  function cleanLocalStorage(){
-    ['upgro_emp_dyn','upgro_roles_v3'].forEach(function(key){
-      try{
-        var raw = localStorage.getItem(key);
-        if(!raw) return;
-        var data = JSON.parse(raw);
-        if(Array.isArray(data)){
-          localStorage.setItem(key, JSON.stringify(cleanArray(data)));
-        }else if(data && typeof data === 'object'){
-          Object.keys(data).forEach(function(k){ if(k.indexOf('ishika') !== -1) delete data[k]; });
-          data[ISHIKA_EMAIL] = {isAdmin:false,isManager:true,role:ISHIKA_ROLE,desig:ISHIKA_ROLE,active:true,pass:ISHIKA_PASS};
-          localStorage.setItem(key, JSON.stringify(data));
-        }
-      }catch(e){}
-    });
-  }
-
-  function cleanRegistry(){
+  function fixIshika(){
     try{
-      var arr = [];
-      if(typeof empReg !== 'undefined' && Array.isArray(empReg)) arr = empReg;
-      else if(Array.isArray(window.empReg)) arr = window.empReg;
-      arr = cleanArray(arr);
-      window.empReg = arr;
-      try{ empReg = arr; }catch(e){}
+      if(typeof USERS !== 'undefined'){
+        Object.keys(USERS).forEach(function(k){
+          var r = USERS[k] || {};
+          if(k !== ISHIKA_EMAIL && isIshikaLike(Object.assign({}, r, {email:k}))) delete USERS[k];
+        });
+        USERS[ISHIKA_EMAIL] = Object.assign({}, USERS[ISHIKA_EMAIL] || {}, ISHIKA_REC);
+      }
+    }catch(e){}
+
+    try{ if(typeof empReg !== 'undefined') empReg = normalizeList(empReg); }catch(e){}
+    try{ if(window.empReg) window.empReg = normalizeList(window.empReg); }catch(e){}
+    try{ if(typeof sheetEmpReg !== 'undefined') sheetEmpReg = normalizeList(sheetEmpReg); }catch(e){}
+
+    // Clean common employee localStorage stores so old/wrong Ishika records do not override login.
+    try{
+      Object.keys(localStorage).forEach(function(key){
+        var raw = localStorage.getItem(key);
+        if(!raw || raw.indexOf('Ishika') === -1 && raw.indexOf('ishika') === -1) return;
+        try{
+          var val = JSON.parse(raw);
+          if(Array.isArray(val)){
+            localStorage.setItem(key, JSON.stringify(normalizeList(val)));
+          }else if(val && typeof val === 'object'){
+            Object.keys(val).forEach(function(k){
+              if(k !== ISHIKA_EMAIL && isIshikaLike(Object.assign({}, val[k], {email:k}))) delete val[k];
+            });
+            val[ISHIKA_EMAIL] = Object.assign({}, val[ISHIKA_EMAIL] || {}, ISHIKA_REC);
+            localStorage.setItem(key, JSON.stringify(val));
+          }
+        }catch(_e){}
+      });
     }catch(e){}
   }
 
-  function patchDirectoryFunctions(){
-    var oldGetStored = window.getStoredEmployee;
-    window.getStoredEmployee = function(email){
-      if(E(email) === ISHIKA_EMAIL) return makeIshika({});
-      try{ return oldGetStored ? oldGetStored.apply(this, arguments) : null; }catch(e){ return null; }
-    };
+  window.fixIshikaManagerLoginNow = fixIshika;
 
-    var oldUname = window.uname;
-    window.uname = function(email){
-      if(E(email) === ISHIKA_EMAIL) return ISHIKA_NAME;
-      try{ return oldUname ? oldUname.apply(this, arguments) : String(email||'').split('@')[0]; }catch(e){ return String(email||'').split('@')[0]; }
-    };
-
-    var oldUdesig = window.udesig;
-    window.udesig = function(email){
-      if(E(email) === ISHIKA_EMAIL) return ISHIKA_ROLE;
-      try{ return oldUdesig ? oldUdesig.apply(this, arguments) : 'Team'; }catch(e){ return 'Team'; }
-    };
-  }
-
-  function refreshAll(){
-    setUsers();
-    cleanLocalStorage();
-    cleanRegistry();
-    try{ if(typeof syncUserDirectoryFromRegistry === 'function') syncUserDirectoryFromRegistry(); }catch(e){}
-    try{ if(typeof persistEmpRegistry === 'function') persistEmpRegistry(); }catch(e){}
-    try{ if(typeof renderEmpList === 'function') renderEmpList(); }catch(e){}
-    try{ if(typeof refillEmpDropdown === 'function') refillEmpDropdown(); }catch(e){}
-    try{ if(typeof populateTaskFilterOptions === 'function') populateTaskFilterOptions(); }catch(e){}
-  }
-
-  // Hard login override placed last so previous patches cannot block Ishika.
+  var oldDoLogin = window.doLogin;
   window.doLogin = async function(){
-    setUsers(); cleanLocalStorage(); cleanRegistry();
-
-    var email = E((document.getElementById('lem') || {value:''}).value);
-    var pass  = String((document.getElementById('lpw') || {value:''}).value || '').trim();
-    var err   = document.getElementById('lerr');
-    function fail(msg){ if(err){ err.textContent = '❌ ' + msg; err.style.display = 'block'; } }
-
-    if(!email || !pass) return fail('Email and password required.');
-
-    var rec = null;
+    fixIshika();
+    var email = cleanEmail((document.getElementById('lem') || {value:''}).value);
+    var pass  = String((document.getElementById('lpw') || {value:''}).value || '');
     if(email === ISHIKA_EMAIL){
-      rec = makeIshika({});
-    }else{
-      try{ if(typeof getStoredEmployee === 'function') rec = getStoredEmployee(email); }catch(e){}
-      try{ if(!rec && typeof USERS !== 'undefined' && USERS[email]) rec = Object.assign({}, USERS[email], {email:email}); }catch(e){}
-      try{ if(!rec && Array.isArray(window.empReg)) rec = window.empReg.find(function(x){ return E(x.email) === email; }); }catch(e){}
+      var err = document.getElementById('lerr');
+      if(pass !== ISHIKA_PASS){
+        if(err){ err.textContent = '❌ Wrong password.'; err.style.display = 'block'; }
+        return;
+      }
+      try{ window.cu = Object.assign({}, ISHIKA_REC); cu = window.cu; }catch(e){ window.cu = Object.assign({}, ISHIKA_REC); }
+      if(err) err.style.display = 'none';
+      try{ if(typeof saveCurrentSession === 'function') saveCurrentSession(); }catch(e){}
+      var lp = document.getElementById('lp'), app = document.getElementById('app');
+      if(lp) lp.classList.add('hidden');
+      if(app) app.classList.remove('hidden');
+      if(typeof initApp === 'function') initApp();
+      return;
     }
-
-    if(!rec) return fail('Email not found. Please check employee list.');
-    if(rec.active === false || rec.Active === 'No') return fail('This employee account is inactive.');
-
-    var savedPass = email === ISHIKA_EMAIL ? ISHIKA_PASS : String(rec.pass || rec.password || rec.Password || '').trim();
-    if(pass !== savedPass) return fail('Wrong password.');
-
-    window.cu = Object.assign({}, rec, {
-      email: email,
-      name: rec.name || rec.Name,
-      role: rec.role || rec.desig || 'Team',
-      desig: rec.desig || rec.role || 'Team',
-      isAdmin: !!rec.isAdmin,
-      isManager: email === ISHIKA_EMAIL ? true : !!rec.isManager
-    });
-    try{ cu = window.cu; }catch(e){}
-    try{ if(typeof saveCurrentSession === 'function') saveCurrentSession(); }catch(e){}
-
-    if(err) err.style.display = 'none';
-    var lp = document.getElementById('lp');
-    var app = document.getElementById('app');
-    if(lp) lp.classList.add('hidden');
-    if(app) app.classList.remove('hidden');
-    try{ if(typeof initApp === 'function') initApp(); }catch(e){}
-    setTimeout(refreshAll, 250);
+    return oldDoLogin ? oldDoLogin.apply(this, arguments) : undefined;
   };
 
-  window.fixIshikaLoginNow = function(){
-    refreshAll();
-    try{ if(typeof toast === 'function') toast('✅ Ishika login fixed. Use Ishika@123'); }catch(e){}
-  };
-
-  patchDirectoryFunctions();
   if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', function(){ setTimeout(window.fixIshikaLoginNow, 700); });
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(fixIshika, 200); });
   }else{
-    setTimeout(window.fixIshikaLoginNow, 700);
+    setTimeout(fixIshika, 200);
   }
 })();
 </script>
 
-</body>. This keeps only one Ishika record:
-   name: Ishika Saxena
-   email: ishika.crm@upgromedia.com
-   role/designation: CRM
-   isManager: true
+</body>
+   Do not change any existing code above.
    ============================================================ */
 (function(){
   'use strict';
 
-  const ISHIKA_EMAIL = 'ishika.crm@upgromedia.com';
-  const ISHIKA_NAME  = 'Ishika Saxena';
-  const ISHIKA_ROLE  = 'CRM';
-  const ISHIKA_PASS  = 'Ishika@123';
+  const ISHIKA_NAME_KEY = 'ishika saxena';
 
-  function clean(v){
-    return String(v || '').trim().toLowerCase().replace(/\s+/g, '');
+  /*
+    Default corrected email.
+    Agar actual email alag ho, Employee section me Ishika Saxena select karke
+    email field se directly change kar sakte ho.
+  */
+  const ISHIKA_CORRECT_EMAIL = 'ishika.crm@upgromedia.com';
+
+  function $(id){
+    return document.getElementById(id);
+  }
+
+  function cleanEmail(v){
+    return String(v || '')
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '');
   }
 
   function cleanName(v){
-    return String(v || '').trim().replace(/\s+/g, ' ').toLowerCase();
+    return String(v || '')
+      .trim()
+      .replace(/\s+/g, ' ')
+      .toLowerCase();
   }
 
-  function isIshikaLike(emp){
-    if(!emp) return false;
-
-    const name = cleanName(emp.name || emp.Name || emp.EmployeeName || emp.empName || '');
-    const email = clean(emp.email || emp.Email || emp.EmployeeEmail || emp.empEmail || '');
-
-    return (
-      name === 'ishika saxena' ||
-      name === 'ishika' ||
-      email.includes('ishika')
-    );
+  function isEmail(v){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail(v));
   }
 
-  function makeIshika(existing){
-    existing = existing || {};
-
-    return {
-      ...existing,
-
-      name: ISHIKA_NAME,
-      Name: ISHIKA_NAME,
-      EmployeeName: ISHIKA_NAME,
-      empName: ISHIKA_NAME,
-
-      email: ISHIKA_EMAIL,
-      Email: ISHIKA_EMAIL,
-      EmployeeEmail: ISHIKA_EMAIL,
-      empEmail: ISHIKA_EMAIL,
-
-      pass: existing.pass || existing.password || ISHIKA_PASS,
-      password: existing.password || existing.pass || ISHIKA_PASS,
-
-      role: ISHIKA_ROLE,
-      Role: ISHIKA_ROLE,
-      desig: ISHIKA_ROLE,
-      Designation: ISHIKA_ROLE,
-
-      isAdmin: false,
-      isManager: true,
-
-      active: true,
-      Active: 'Yes'
-    };
+  function showToast(msg){
+    if(typeof toast === 'function') toast(msg);
+    else alert(msg);
   }
 
-  function fixUsersObject(){
+  function ensureEmpGlobals(){
+    if(typeof window.empReg === 'undefined') window.empReg = [];
     try{
-      if(typeof USERS === 'undefined') return;
-
-      let oldIshika = null;
-
-      Object.keys(USERS).forEach(function(email){
-        const rec = USERS[email] || {};
-        if(email === ISHIKA_EMAIL || isIshikaLike({...rec, email: email})){
-          oldIshika = {...rec, email: email};
-          delete USERS[email];
-        }
-      });
-
-      USERS[ISHIKA_EMAIL] = makeIshika(oldIshika);
-    }catch(e){
-      console.warn('Ishika USERS fix failed:', e);
+      if(typeof empReg === 'undefined') empReg = window.empReg;
+    }catch(e){}
+    if(typeof window.USERS === 'undefined' && typeof USERS !== 'undefined'){
+      window.USERS = USERS;
     }
   }
 
   function getEmpArray(){
+    ensureEmpGlobals();
+
     try{
       if(typeof initEmpReg === 'function') initEmpReg(true);
     }catch(e){}
 
-    try{
-      if(Array.isArray(window.empReg)) return window.empReg;
-    }catch(e){}
+    if(Array.isArray(window.empReg)) return window.empReg;
 
     try{
-      if(typeof empReg !== 'undefined' && Array.isArray(empReg)){
+      if(Array.isArray(empReg)){
         window.empReg = empReg;
         return empReg;
       }
@@ -6064,126 +5665,802 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
   }
 
   function setEmpArray(arr){
-    try{ window.empReg = arr; }catch(e){}
-    try{ empReg = arr; }catch(e){}
+    window.empReg = arr;
+
+    try{
+      empReg = arr;
+    }catch(e){}
   }
 
-  function fixEmployeeRegistry(){
-    let arr = getEmpArray();
-    if(!Array.isArray(arr)) arr = [];
+  function syncUsersAfterEmailChange(oldEmail, newEmp){
+    oldEmail = cleanEmail(oldEmail);
+    const newEmail = cleanEmail(newEmp.email);
 
-    let keep = null;
-    const cleaned = [];
+    try{
+      if(typeof USERS !== 'undefined'){
+        if(oldEmail && oldEmail !== newEmail && USERS[oldEmail]){
+          delete USERS[oldEmail];
+        }
 
-    arr.forEach(function(emp){
-      if(isIshikaLike(emp)){
-        keep = keep || emp;
-        return;
+        USERS[newEmail] = {
+          ...(USERS[newEmail] || {}),
+          ...newEmp,
+          email: newEmail,
+          name: newEmp.name,
+          pass: newEmp.pass,
+          role: newEmp.role || newEmp.desig || 'Team',
+          desig: newEmp.desig || newEmp.role || 'Team',
+          isAdmin: !!newEmp.isAdmin,
+          isManager: !!newEmp.isManager,
+          active: newEmp.active !== false
+        };
       }
-      cleaned.push(emp);
-    });
-
-    cleaned.push(makeIshika(keep));
-    setEmpArray(cleaned);
-  }
-
-  function fixDynamicEmployeesStorage(){
-    try{
-      const key = typeof EMP_STORE_KEY !== 'undefined' ? EMP_STORE_KEY : 'upgro_emp_dyn';
-      let arr = JSON.parse(localStorage.getItem(key) || '[]');
-      if(!Array.isArray(arr)) arr = [];
-
-      let keep = null;
-      const cleaned = [];
-
-      arr.forEach(function(emp){
-        if(isIshikaLike(emp)){
-          keep = keep || emp;
-          return;
-        }
-        cleaned.push(emp);
-      });
-
-      cleaned.push(makeIshika(keep));
-      localStorage.setItem(key, JSON.stringify(cleaned));
     }catch(e){}
   }
 
-  function fixStoredRoles(){
-    try{
-      const key = typeof ROLE_STORE_KEY !== 'undefined' ? ROLE_STORE_KEY : 'upgro_roles_v3';
-      const roles = JSON.parse(localStorage.getItem(key) || '{}') || {};
+  function syncTasksAfterEmailChange(oldEmail, newEmail, empName, empDesig){
+    oldEmail = cleanEmail(oldEmail);
+    newEmail = cleanEmail(newEmail);
 
-      Object.keys(roles).forEach(function(email){
-        if(clean(email).includes('ishika') && clean(email) !== ISHIKA_EMAIL){
-          delete roles[email];
-        }
-      });
+    if(!oldEmail || !newEmail || oldEmail === newEmail) return;
 
-      roles[ISHIKA_EMAIL] = {
-        role: ISHIKA_ROLE,
-        desig: ISHIKA_ROLE,
-        isAdmin: false,
-        isManager: true,
-        active: true
-      };
+    const keys = [
+      'email',
+      'assignedToEmail',
+      'empEmail',
+      'AssignedTo_Email',
+      'AssignedToEmail',
+      'EmployeeEmail',
+      'Assigned Email',
+      'Assigned To Email',
+      'Assigned To (Email)'
+    ];
 
-      localStorage.setItem(key, JSON.stringify(roles));
-    }catch(e){}
-  }
+    const nameKeys = [
+      'empName',
+      'assignedTo',
+      'AssignedTo_Name',
+      'AssignedToName',
+      'EmployeeName',
+      'Assigned To',
+      'Assigned To Name',
+      'Assigned To (Name)'
+    ];
 
-  function fixTasks(){
     function patchTask(t){
       if(!t || typeof t !== 'object') return t;
 
-      const emailKeys = [
-        'email','empEmail','assignedToEmail','AssignedTo_Email','AssignedToEmail',
-        'EmployeeEmail','Email','Assigned Email','Assigned To Email','Assigned To (Email)'
-      ];
-
-      const nameKeys = [
-        'empName','assignedTo','AssignedTo_Name','AssignedToName','EmployeeName',
-        'Name','Assigned To','Assigned To Name','Assigned To (Name)'
-      ];
-
       let matched = false;
 
-      emailKeys.forEach(function(k){
-        if(clean(t[k]).includes('ishika')){
-          t[k] = ISHIKA_EMAIL;
-          matched = true;
-        }
-      });
-
-      nameKeys.forEach(function(k){
-        if(cleanName(t[k]) === 'ishika' || cleanName(t[k]) === 'ishika saxena'){
-          t[k] = ISHIKA_NAME;
+      keys.forEach(function(k){
+        if(cleanEmail(t[k]) === oldEmail){
+          t[k] = newEmail;
           matched = true;
         }
       });
 
       if(matched){
-        t.email = ISHIKA_EMAIL;
-        t.empEmail = ISHIKA_EMAIL;
-        t.assignedToEmail = ISHIKA_EMAIL;
-        t.AssignedTo_Email = ISHIKA_EMAIL;
-        t['Assigned To (Email)'] = ISHIKA_EMAIL;
+        nameKeys.forEach(function(k){
+          t[k] = empName;
+        });
 
-        t.empName = ISHIKA_NAME;
-        t.assignedTo = ISHIKA_NAME;
-        t.AssignedTo_Name = ISHIKA_NAME;
-        t['Assigned To (Name)'] = ISHIKA_NAME;
+        t.email = newEmail;
+        t.assignedToEmail = newEmail;
+        t.empEmail = newEmail;
+        t.AssignedTo_Email = newEmail;
+        t['Assigned To (Email)'] = newEmail;
 
-        t.role = ISHIKA_ROLE;
-        t.desig = ISHIKA_ROLE;
-        t.Designation = ISHIKA_ROLE;
+        t.empName = empName;
+        t.assignedTo = empName;
+        t.AssignedTo_Name = empName;
+        t['Assigned To (Name)'] = empName;
+
+        if(empDesig){
+          t.desig = empDesig;
+          t.Designation = empDesig;
+        }
       }
 
       return t;
     }
 
     try{
-      if(Array.isArray(window.allTasks)) window.allTasks = window.allTasks.map(patchTask);
+      if(Array.isArray(window.allTasks)){
+        window.allTasks = window.allTasks.map(patchTask);
+      }
+    }catch(e){}
+
+    try{
+      if(Array.isArray(allTasks)){
+        allTasks = allTasks.map(patchTask);
+        window.allTasks = allTasks;
+      }
+    }catch(e){}
+  }
+
+  function persistEverything(){
+    try{
+      if(typeof persistEmpRegistry === 'function') persistEmpRegistry();
+    }catch(e){}
+
+    try{
+      if(typeof syncUserDirectoryFromRegistry === 'function') syncUserDirectoryFromRegistry();
+    }catch(e){}
+
+    try{
+      if(typeof emitEmpSync === 'function') emitEmpSync();
+    }catch(e){}
+
+    try{
+      if(typeof refillEmpDropdown === 'function') refillEmpDropdown();
+    }catch(e){}
+
+    try{
+      if(typeof populateTaskFilterOptions === 'function') populateTaskFilterOptions();
+    }catch(e){}
+
+    try{
+      if(typeof renderEmpList === 'function') renderEmpList();
+    }catch(e){}
+
+    try{
+      if(typeof buildUI === 'function') buildUI();
+    }catch(e){}
+  }
+
+  function autoFixIshikaEmail(){
+    const arr = getEmpArray();
+    let changed = false;
+
+    arr.forEach(function(emp){
+      if(!emp) return;
+
+      const nm = cleanName(emp.name || emp.Name || emp.EmployeeName || '');
+      const currentEmail = cleanEmail(emp.email || emp.Email || emp.EmployeeEmail || '');
+
+      if(nm === ISHIKA_NAME_KEY && currentEmail !== ISHIKA_CORRECT_EMAIL){
+        const oldEmail = currentEmail;
+
+        emp.email = ISHIKA_CORRECT_EMAIL;
+        emp.Email = ISHIKA_CORRECT_EMAIL;
+        emp.EmployeeEmail = ISHIKA_CORRECT_EMAIL;
+        emp.name = emp.name || 'Ishika Saxena';
+        emp.Name = emp.name;
+        emp.active = emp.active !== false;
+
+        syncUsersAfterEmailChange(oldEmail, emp);
+        syncTasksAfterEmailChange(
+          oldEmail,
+          ISHIKA_CORRECT_EMAIL,
+          emp.name || 'Ishika Saxena',
+          emp.desig || emp.role || 'Team'
+        );
+
+        changed = true;
+      }
+    });
+
+    if(changed){
+      setEmpArray(arr);
+      persistEverything();
+    }
+  }
+
+  function makeEmailFieldEditable(){
+    const fp = $('emp-fp');
+    if(!fp) return;
+
+    const nameInput = $('ef-n');
+    let emailInput = $('ef-e');
+
+    if(!nameInput) return;
+
+    const selectedName = cleanName(nameInput.value);
+
+    /*
+      Agar edit form me email input already hai but readonly/disabled hai,
+      usko editable kar do.
+    */
+    if(emailInput){
+      emailInput.removeAttribute('readonly');
+      emailInput.removeAttribute('disabled');
+      emailInput.type = 'email';
+      emailInput.classList.add('fc');
+      emailInput.placeholder = 'employee@upgromedia.com';
+
+      const wrap = emailInput.closest('.fg');
+      if(wrap){
+        const label = wrap.querySelector('label');
+        if(label) label.textContent = 'Email *';
+      }
+
+      if(selectedName === ISHIKA_NAME_KEY && cleanEmail(emailInput.value) !== ISHIKA_CORRECT_EMAIL){
+        emailInput.value = ISHIKA_CORRECT_EMAIL;
+      }
+
+      return;
+    }
+
+    /*
+      Agar edit form me email field missing hai,
+      name field ke neeche new editable email field inject kar do.
+    */
+    const empList = getEmpArray();
+    const emp = empList.find(function(e){
+      return cleanName(e.name || e.Name || '') === selectedName;
+    });
+
+    const currentEmail = selectedName === ISHIKA_NAME_KEY
+      ? ISHIKA_CORRECT_EMAIL
+      : cleanEmail(emp && emp.email);
+
+    const nameWrap = nameInput.closest('.fg') || nameInput.parentElement;
+
+    const div = document.createElement('div');
+    div.className = 'fg';
+    div.innerHTML =
+      '<label class="fl2">Email *</label>' +
+      '<input id="ef-e" type="email" class="fc" placeholder="employee@upgromedia.com" value="' + currentEmail + '">';
+
+    if(nameWrap && nameWrap.parentNode){
+      nameWrap.parentNode.insertBefore(div, nameWrap.nextSibling);
+    }
+  }
+
+  const oldSelectEmp = window.selectEmp;
+  window.selectEmp = function(email){
+    const result = oldSelectEmp ? oldSelectEmp.apply(this, arguments) : undefined;
+
+    setTimeout(function(){
+      autoFixIshikaEmail();
+      makeEmailFieldEditable();
+    }, 80);
+
+    return result;
+  };
+
+  const oldSelectNewEmp = window.selectNewEmp;
+  window.selectNewEmp = function(){
+    const result = oldSelectNewEmp ? oldSelectNewEmp.apply(this, arguments) : undefined;
+
+    setTimeout(function(){
+      const emailInput = $('ef-e');
+      if(emailInput){
+        emailInput.removeAttribute('readonly');
+        emailInput.removeAttribute('disabled');
+        emailInput.type = 'email';
+      }
+    }, 80);
+
+    return result;
+  };
+
+  /*
+    Complete safe save override:
+    - Name editable
+    - Email editable
+    - Password editable
+    - Designation editable
+    - Role editable
+    - Admin / Manager / Active checkbox working
+    - Old email se new email migration
+  */
+  window.saveEmp = async function(oldEmail){
+    const arr = getEmpArray();
+
+    const name = (($('ef-n') || {}).value || '').trim();
+    const newEmail = cleanEmail(($('ef-e') || {}).value || oldEmail || '');
+    const pass = (($('ef-p') || {}).value || '').trim();
+
+    const desig = (($('ef-d') || {}).value || 'Team').trim();
+    const roleVal = ((($('ef-r') || {}).value || desig) || 'Team').trim();
+
+    const isAdminCk = !!(($('ef-admin') || {}).checked);
+    const isMgrCk = !!(($('ef-mgr') || {}).checked);
+    const active = $('ef-ac') ? !!$('ef-ac').checked : true;
+
+    const oldClean = cleanEmail(oldEmail);
+
+    if(!name){
+      showToast('⚠ Name required');
+      return;
+    }
+
+    if(!newEmail || !isEmail(newEmail)){
+      showToast('⚠ Valid email required');
+      return;
+    }
+
+    const oldIndex = arr.findIndex(function(e){
+      return cleanEmail(e.email) === oldClean;
+    });
+
+    let index = oldIndex;
+
+    /*
+      Fallback: if old email mismatch ho gaya ho, name se record find karo.
+    */
+    if(index < 0){
+      index = arr.findIndex(function(e){
+        return cleanName(e.name) === cleanName(name);
+      });
+    }
+
+    if(index < 0){
+      showToast('⚠ Employee not found');
+      return;
+    }
+
+    const duplicate = arr.find(function(e, i){
+      return i !== index && cleanEmail(e.email) === newEmail;
+    });
+
+    if(duplicate){
+      showToast('⚠ This email already exists for another employee');
+      return;
+    }
+
+    const previousEmail = cleanEmail(arr[index].email || oldEmail);
+
+    const oldEmp = arr[index] || {};
+
+    const managerFlag = !!(
+      isMgrCk ||
+      (
+        typeof isForcedAssigner === 'function' &&
+        isForcedAssigner({
+          email: newEmail,
+          name: name,
+          desig: desig,
+          role: roleVal
+        })
+      )
+    );
+
+    const updatedEmp = {
+      ...oldEmp,
+      email: newEmail,
+      Email: newEmail,
+      EmployeeEmail: newEmail,
+      name: name,
+      Name: name,
+      pass: pass || oldEmp.pass || oldEmp.password || '',
+      password: pass || oldEmp.pass || oldEmp.password || '',
+      role: roleVal,
+      Role: roleVal,
+      desig: desig,
+      Designation: desig,
+      isAdmin: isAdminCk,
+      isManager: managerFlag,
+      active: active,
+      Active: active ? 'Yes' : 'No',
+      bg: oldEmp.bg || (typeof CLRS !== 'undefined' ? CLRS[index % CLRS.length] : '#0B84FF'),
+      joinDate: oldEmp.joinDate || oldEmp.JoinDate || (typeof TODAY !== 'undefined' ? TODAY : '')
+    };
+
+    arr[index] = updatedEmp;
+    setEmpArray(arr);
+
+    syncUsersAfterEmailChange(previousEmail, updatedEmp);
+    syncTasksAfterEmailChange(previousEmail, newEmail, name, desig);
+
+    /*
+      Current logged-in user ka email bhi update karo agar wahi employee edit hua hai.
+    */
+    try{
+      if(typeof cu !== 'undefined' && cu && cleanEmail(cu.email) === previousEmail){
+        cu = {
+          ...cu,
+          ...updatedEmp,
+          email: newEmail,
+          role: roleVal,
+          desig: desig
+        };
+        window.cu = cu;
+
+        if(typeof saveCurrentSession === 'function'){
+          saveCurrentSession();
+        }else{
+          localStorage.setItem('upgro_current_session_v1', JSON.stringify(cu));
+        }
+      }
+    }catch(e){}
+
+    try{
+      if(typeof persistEmpRegistry === 'function') persistEmpRegistry();
+    }catch(e){}
+
+    try{
+      if(typeof syncUserDirectoryFromRegistry === 'function') syncUserDirectoryFromRegistry();
+    }catch(e){}
+
+    try{
+      if(typeof emitEmpSync === 'function') emitEmpSync();
+    }catch(e){}
+
+    /*
+      Google Sheet sync available ho to update bhej do.
+    */
+    try{
+      if(typeof syncEmployeeToServer === 'function'){
+        await syncEmployeeToServer(updatedEmp, 'upsertEmployee');
+      }else if(typeof SURL !== 'undefined' && SURL){
+        await fetch(SURL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'upsertEmployee',
+            ...updatedEmp,
+            oldEmail: previousEmail,
+            email: newEmail
+          })
+        });
+      }
+    }catch(e){
+      console.warn('Employee sheet sync failed, local portal updated:', e);
+    }
+
+    try{
+      if(typeof initEmpReg === 'function') initEmpReg(true);
+    }catch(e){}
+
+    try{
+      if(typeof renderEmpList === 'function') renderEmpList();
+    }catch(e){}
+
+    try{
+      if(typeof selectEmp === 'function') selectEmp(newEmail);
+    }catch(e){}
+
+    try{
+      if(typeof refillEmpDropdown === 'function') refillEmpDropdown();
+    }catch(e){}
+
+    try{
+      if(typeof populateTaskFilterOptions === 'function') populateTaskFilterOptions();
+    }catch(e){}
+
+    try{
+      if(typeof buildUI === 'function') buildUI();
+    }catch(e){}
+
+    showToast('✅ Employee updated successfully');
+  };
+
+  /*
+    Page load pe bhi Ishika email auto-fix.
+  */
+  window.addEventListener('DOMContentLoaded', function(){
+    setTimeout(function(){
+      autoFixIshikaEmail();
+      makeEmailFieldEditable();
+    }, 900);
+  });
+
+  setTimeout(function(){
+    autoFixIshikaEmail();
+  }, 1200);
+
+})();
+</script>
+  <script>
+/* ============================================================
+   ONLY ISHIKA SAXENA EMAIL FIX
+   Correct email: ishika.crm@upgromedia.com
+   Paste just before 
+<script>
+/* =============================================================
+   MINIMAL ISHIKA SAXENA LOGIN + MANAGER FIX
+   No UI/CSS/layout changes. Only employee/auth data is normalized.
+   Login: ishika.crm@upgromedia.com / Ishika@123
+============================================================= */
+(function(){
+  var ISHIKA_EMAIL = 'ishika.crm@upgromedia.com';
+  var ISHIKA_PASS  = 'Ishika@123';
+  var ISHIKA_REC = {
+    email: ISHIKA_EMAIL,
+    name: 'Ishika Saxena',
+    pass: ISHIKA_PASS,
+    role: 'CRM',
+    desig: 'CRM',
+    isAdmin: false,
+    isManager: true,
+    active: true
+  };
+  function cleanEmail(v){ return String(v||'').trim().toLowerCase().replace(/\s+/g,''); }
+  function cleanName(v){ return String(v||'').trim().replace(/\s+/g,' ').toLowerCase(); }
+  function isIshikaLike(e){
+    var email = cleanEmail(e && (e.email || e.Email || e.EmployeeEmail || e['Email Address']));
+    var name  = cleanName(e && (e.name || e.Name || e.EmployeeName));
+    return email === ISHIKA_EMAIL || name === 'ishika saxena' || email.indexOf('ishika') !== -1;
+  }
+  function normalizeList(list){
+    var out = [], added = false, seen = {};
+    (Array.isArray(list) ? list : []).forEach(function(e){
+      if(!e) return;
+      if(isIshikaLike(e)){
+        if(!added){ out.push(Object.assign({}, e, ISHIKA_REC)); added = true; }
+        return;
+      }
+      var em = cleanEmail(e.email || e.Email || e.EmployeeEmail || '');
+      if(em && seen[em]) return;
+      if(em) seen[em] = true;
+      out.push(e);
+    });
+    if(!added) out.push(Object.assign({}, ISHIKA_REC));
+    return out;
+  }
+  function fixIshika(){
+    try{
+      if(typeof USERS !== 'undefined'){
+        Object.keys(USERS).forEach(function(k){
+          var r = USERS[k] || {};
+          if(k !== ISHIKA_EMAIL && isIshikaLike(Object.assign({}, r, {email:k}))) delete USERS[k];
+        });
+        USERS[ISHIKA_EMAIL] = Object.assign({}, USERS[ISHIKA_EMAIL] || {}, ISHIKA_REC);
+      }
+    }catch(e){}
+
+    try{ if(typeof empReg !== 'undefined') empReg = normalizeList(empReg); }catch(e){}
+    try{ if(window.empReg) window.empReg = normalizeList(window.empReg); }catch(e){}
+    try{ if(typeof sheetEmpReg !== 'undefined') sheetEmpReg = normalizeList(sheetEmpReg); }catch(e){}
+
+    // Clean common employee localStorage stores so old/wrong Ishika records do not override login.
+    try{
+      Object.keys(localStorage).forEach(function(key){
+        var raw = localStorage.getItem(key);
+        if(!raw || raw.indexOf('Ishika') === -1 && raw.indexOf('ishika') === -1) return;
+        try{
+          var val = JSON.parse(raw);
+          if(Array.isArray(val)){
+            localStorage.setItem(key, JSON.stringify(normalizeList(val)));
+          }else if(val && typeof val === 'object'){
+            Object.keys(val).forEach(function(k){
+              if(k !== ISHIKA_EMAIL && isIshikaLike(Object.assign({}, val[k], {email:k}))) delete val[k];
+            });
+            val[ISHIKA_EMAIL] = Object.assign({}, val[ISHIKA_EMAIL] || {}, ISHIKA_REC);
+            localStorage.setItem(key, JSON.stringify(val));
+          }
+        }catch(_e){}
+      });
+    }catch(e){}
+  }
+
+  window.fixIshikaManagerLoginNow = fixIshika;
+
+  var oldDoLogin = window.doLogin;
+  window.doLogin = async function(){
+    fixIshika();
+    var email = cleanEmail((document.getElementById('lem') || {value:''}).value);
+    var pass  = String((document.getElementById('lpw') || {value:''}).value || '');
+    if(email === ISHIKA_EMAIL){
+      var err = document.getElementById('lerr');
+      if(pass !== ISHIKA_PASS){
+        if(err){ err.textContent = '❌ Wrong password.'; err.style.display = 'block'; }
+        return;
+      }
+      try{ window.cu = Object.assign({}, ISHIKA_REC); cu = window.cu; }catch(e){ window.cu = Object.assign({}, ISHIKA_REC); }
+      if(err) err.style.display = 'none';
+      try{ if(typeof saveCurrentSession === 'function') saveCurrentSession(); }catch(e){}
+      var lp = document.getElementById('lp'), app = document.getElementById('app');
+      if(lp) lp.classList.add('hidden');
+      if(app) app.classList.remove('hidden');
+      if(typeof initApp === 'function') initApp();
+      return;
+    }
+    return oldDoLogin ? oldDoLogin.apply(this, arguments) : undefined;
+  };
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(fixIshika, 200); });
+  }else{
+    setTimeout(fixIshika, 200);
+  }
+})();
+</script>
+
+</body>
+   ============================================================ */
+(function(){
+  'use strict';
+
+  const OLD_EMAILS = [
+    'ishika.crm@upgromedia.com',
+    'ishika.crm@upgromedia.com',
+    'ishika.crm@upgromedia.com'
+  ];
+
+  const CORRECT_EMAIL = 'ishika.crm@upgromedia.com';
+
+  function clean(v){
+    return String(v || '').trim().toLowerCase().replace(/\s+/g, '');
+  }
+
+  function cleanName(v){
+    return String(v || '').trim().replace(/\s+/g, ' ').toLowerCase();
+  }
+
+  function isIshika(emp){
+    if(!emp) return false;
+
+    const name = cleanName(emp.name || emp.Name || emp.EmployeeName || emp.empName || '');
+    const email = clean(emp.email || emp.Email || emp.EmployeeEmail || emp.empEmail || '');
+
+    return (
+      name === 'ishika saxena' ||
+      OLD_EMAILS.includes(email) ||
+      email === CORRECT_EMAIL
+    );
+  }
+
+  function patchEmployeeObject(emp){
+    if(!emp || !isIshika(emp)) return emp;
+
+    emp.name = 'Ishika Saxena';
+    emp.Name = 'Ishika Saxena';
+    emp.EmployeeName = 'Ishika Saxena';
+
+    emp.email = CORRECT_EMAIL;
+    emp.Email = CORRECT_EMAIL;
+    emp.EmployeeEmail = CORRECT_EMAIL;
+    emp.empEmail = CORRECT_EMAIL;
+
+    emp.role = emp.role || emp.Role || 'CRM';
+    emp.Role = emp.role;
+
+    emp.desig = emp.desig || emp.Designation || 'CRM';
+    emp.Designation = emp.desig;
+
+    emp.active = true;
+    emp.Active = 'Yes';
+
+    return emp;
+  }
+
+  function fixUsers(){
+    try{
+      if(typeof USERS === 'undefined') return;
+
+      OLD_EMAILS.forEach(function(oldEmail){
+        oldEmail = clean(oldEmail);
+
+        if(USERS[oldEmail]){
+          USERS[CORRECT_EMAIL] = Object.assign({}, USERS[oldEmail], {
+            email: CORRECT_EMAIL,
+            name: 'Ishika Saxena',
+            role: USERS[oldEmail].role || USERS[oldEmail].desig || 'CRM',
+            desig: USERS[oldEmail].desig || USERS[oldEmail].role || 'CRM',
+            active: true
+          });
+
+          delete USERS[oldEmail];
+        }
+      });
+
+      if(!USERS[CORRECT_EMAIL]){
+        USERS[CORRECT_EMAIL] = {
+          name: 'Ishika Saxena',
+          email: CORRECT_EMAIL,
+          pass: 'Ishika@123',
+          role: 'CRM',
+          desig: 'CRM',
+          active: true,
+          isAdmin: false,
+          isManager: true
+        };
+      }else{
+        USERS[CORRECT_EMAIL] = patchEmployeeObject(USERS[CORRECT_EMAIL]);
+      }
+    }catch(e){
+      console.warn('USERS Ishika email fix failed:', e);
+    }
+  }
+
+  function fixEmpRegistry(){
+    let arr = [];
+
+    try{
+      if(Array.isArray(window.empReg)) arr = window.empReg;
+    }catch(e){}
+
+    try{
+      if((!arr || !arr.length) && typeof empReg !== 'undefined' && Array.isArray(empReg)){
+        arr = empReg;
+      }
+    }catch(e){}
+
+    if(!Array.isArray(arr)) arr = [];
+
+    let found = false;
+
+    arr.forEach(function(emp){
+      if(isIshika(emp)){
+        patchEmployeeObject(emp);
+        found = true;
+      }
+    });
+
+    if(!found){
+      arr.push({
+        name: 'Ishika Saxena',
+        email: CORRECT_EMAIL,
+        pass: 'Ishika@123',
+        role: 'CRM',
+        desig: 'CRM',
+        active: true,
+        isAdmin: false,
+        isManager: true
+      });
+    }
+
+    try{ window.empReg = arr; }catch(e){}
+    try{ empReg = arr; }catch(e){}
+  }
+
+  function fixTasks(){
+    function patchTask(t){
+      if(!t || typeof t !== 'object') return t;
+
+      const possibleEmailKeys = [
+        'email',
+        'empEmail',
+        'assignedToEmail',
+        'AssignedTo_Email',
+        'AssignedToEmail',
+        'EmployeeEmail',
+        'Assigned Email',
+        'Assigned To Email',
+        'Assigned To (Email)'
+      ];
+
+      let matched = false;
+
+      possibleEmailKeys.forEach(function(k){
+        if(OLD_EMAILS.includes(clean(t[k])) || clean(t[k]) === CORRECT_EMAIL){
+          t[k] = CORRECT_EMAIL;
+          matched = true;
+        }
+      });
+
+      const possibleNameKeys = [
+        'empName',
+        'assignedTo',
+        'AssignedTo_Name',
+        'AssignedToName',
+        'EmployeeName',
+        'Assigned To',
+        'Assigned To Name',
+        'Assigned To (Name)'
+      ];
+
+      possibleNameKeys.forEach(function(k){
+        if(cleanName(t[k]) === 'ishika saxena'){
+          matched = true;
+        }
+      });
+
+      if(matched){
+        t.email = CORRECT_EMAIL;
+        t.empEmail = CORRECT_EMAIL;
+        t.assignedToEmail = CORRECT_EMAIL;
+        t.AssignedTo_Email = CORRECT_EMAIL;
+        t['Assigned To (Email)'] = CORRECT_EMAIL;
+
+        t.empName = 'Ishika Saxena';
+        t.assignedTo = 'Ishika Saxena';
+        t.AssignedTo_Name = 'Ishika Saxena';
+        t['Assigned To (Name)'] = 'Ishika Saxena';
+
+        t.desig = t.desig || 'CRM';
+        t.Designation = t.Designation || 'CRM';
+      }
+
+      return t;
+    }
+
+    try{
+      if(Array.isArray(window.allTasks)){
+        window.allTasks = window.allTasks.map(patchTask);
+      }
     }catch(e){}
 
     try{
@@ -6194,17 +6471,7 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
     }catch(e){}
   }
 
-  function fixCurrentSession(){
-    try{
-      if(typeof cu !== 'undefined' && cu && isIshikaLike(cu)){
-        cu = makeIshika(cu);
-        window.cu = cu;
-        if(typeof saveCurrentSession === 'function') saveCurrentSession();
-      }
-    }catch(e){}
-  }
-
-  function refreshPortal(){
+  function refreshUI(){
     try{ if(typeof persistEmpRegistry === 'function') persistEmpRegistry(); }catch(e){}
     try{ if(typeof syncUserDirectoryFromRegistry === 'function') syncUserDirectoryFromRegistry(); }catch(e){}
     try{ if(typeof emitEmpSync === 'function') emitEmpSync(); }catch(e){}
@@ -6215,239 +6482,153 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
     try{ if(typeof populateTaskFilterOptions === 'function') populateTaskFilterOptions(); }catch(e){}
     try{ if(typeof buildUI === 'function') buildUI(); }catch(e){}
 
+    const emailInput = document.getElementById('ef-e');
+    if(emailInput){
+      emailInput.value = CORRECT_EMAIL;
+      emailInput.removeAttribute('readonly');
+      emailInput.removeAttribute('disabled');
+    }
+
     try{
       if(typeof selectEmp === 'function'){
-        setTimeout(function(){ selectEmp(ISHIKA_EMAIL); }, 150);
+        setTimeout(function(){
+          try{ selectEmp(CORRECT_EMAIL); }catch(e){}
+        }, 150);
       }
     }catch(e){}
   }
 
-  function runIshikaFix(){
-    fixUsersObject();
-    fixDynamicEmployeesStorage();
-    fixStoredRoles();
-    fixEmployeeRegistry();
+  function runFix(){
+    fixUsers();
+    fixEmpRegistry();
     fixTasks();
-    fixCurrentSession();
-    refreshPortal();
+    refreshUI();
 
-    try{
-      if(typeof toast === 'function'){
-        toast('✅ Ishika Saxena fixed as CRM Manager');
-      }
-    }catch(e){}
+    if(typeof toast === 'function'){
+      toast('✅ Ishika Saxena email fixed: ' + CORRECT_EMAIL);
+    }
   }
 
-  window.fixIshikaManagerNow = runIshikaFix;
+  window.fixIshikaEmailNow = runFix;
 
   if(document.readyState === 'loading'){
     document.addEventListener('DOMContentLoaded', function(){
-      setTimeout(runIshikaFix, 500);
+      setTimeout(runFix, 500);
     });
   }else{
-    setTimeout(runIshikaFix, 500);
+    setTimeout(runFix, 500);
   }
+
 })();
 </script>
 
-
 <script>
-/* ============================================================
-   FINAL ISHIKA LOGIN + MANAGER MASTER FIX
-   Purpose:
-   - Ishika Saxena only once in portal
-   - email: ishika.crm@upgromedia.com
-   - password: Ishika@123
-   - role/designation: CRM
-   - isManager: true
-   - removes stale localStorage password/duplicate records
-   - overrides login so old browser cache cannot block login
-   ============================================================ */
+/* =============================================================
+   MINIMAL ISHIKA SAXENA LOGIN + MANAGER FIX
+   No UI/CSS/layout changes. Only employee/auth data is normalized.
+   Login: ishika.crm@upgromedia.com / Ishika@123
+============================================================= */
 (function(){
-  'use strict';
-
   var ISHIKA_EMAIL = 'ishika.crm@upgromedia.com';
-  var ISHIKA_NAME  = 'Ishika Saxena';
   var ISHIKA_PASS  = 'Ishika@123';
-  var ISHIKA_ROLE  = 'CRM';
-
-  function E(v){ return String(v || '').trim().toLowerCase().replace(/\s+/g,''); }
-  function N(v){ return String(v || '').trim().replace(/\s+/g,' '); }
-  function isMail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(E(v)); }
-  function isIshikaLike(x){
-    x = x || {};
-    var email = E(x.email || x.Email || x.EmployeeEmail || x.empEmail || x['Email Address'] || '');
-    var name  = N(x.name || x.Name || x.EmployeeName || x.empName || x['Employee Name'] || '').toLowerCase();
-    return email.indexOf('ishika') !== -1 || name === 'ishika' || name === 'ishika saxena';
+  var ISHIKA_REC = {
+    email: ISHIKA_EMAIL,
+    name: 'Ishika Saxena',
+    pass: ISHIKA_PASS,
+    role: 'CRM',
+    desig: 'CRM',
+    isAdmin: false,
+    isManager: true,
+    active: true
+  };
+  function cleanEmail(v){ return String(v||'').trim().toLowerCase().replace(/\s+/g,''); }
+  function cleanName(v){ return String(v||'').trim().replace(/\s+/g,' ').toLowerCase(); }
+  function isIshikaLike(e){
+    var email = cleanEmail(e && (e.email || e.Email || e.EmployeeEmail || e['Email Address']));
+    var name  = cleanName(e && (e.name || e.Name || e.EmployeeName));
+    return email === ISHIKA_EMAIL || name === 'ishika saxena' || email.indexOf('ishika') !== -1;
   }
-  function makeIshika(old){
-    old = old || {};
-    return Object.assign({}, old, {
-      name: ISHIKA_NAME,
-      Name: ISHIKA_NAME,
-      EmployeeName: ISHIKA_NAME,
-      empName: ISHIKA_NAME,
-      email: ISHIKA_EMAIL,
-      Email: ISHIKA_EMAIL,
-      EmployeeEmail: ISHIKA_EMAIL,
-      empEmail: ISHIKA_EMAIL,
-      pass: ISHIKA_PASS,
-      password: ISHIKA_PASS,
-      Password: ISHIKA_PASS,
-      role: ISHIKA_ROLE,
-      Role: ISHIKA_ROLE,
-      desig: ISHIKA_ROLE,
-      Designation: ISHIKA_ROLE,
-      isAdmin: false,
-      IsAdmin: false,
-      isManager: true,
-      IsManager: true,
-      active: true,
-      Active: 'Yes'
+  function normalizeList(list){
+    var out = [], added = false, seen = {};
+    (Array.isArray(list) ? list : []).forEach(function(e){
+      if(!e) return;
+      if(isIshikaLike(e)){
+        if(!added){ out.push(Object.assign({}, e, ISHIKA_REC)); added = true; }
+        return;
+      }
+      var em = cleanEmail(e.email || e.Email || e.EmployeeEmail || '');
+      if(em && seen[em]) return;
+      if(em) seen[em] = true;
+      out.push(e);
     });
-  }
-
-  function setUsers(){
-    try{
-      if(typeof USERS === 'undefined') return;
-      Object.keys(USERS).forEach(function(k){
-        if(k === ISHIKA_EMAIL || isIshikaLike(Object.assign({}, USERS[k], {email:k}))) delete USERS[k];
-      });
-      USERS[ISHIKA_EMAIL] = makeIshika({});
-    }catch(e){}
-  }
-
-  function cleanArray(arr){
-    arr = Array.isArray(arr) ? arr : [];
-    var out = [];
-    var seen = new Set();
-    arr.forEach(function(x){
-      if(!x) return;
-      if(isIshikaLike(x)) return;
-      var email = E(x.email || x.Email || x.EmployeeEmail || x.empEmail || '');
-      if(email && seen.has(email)) return;
-      if(email) seen.add(email);
-      out.push(x);
-    });
-    out.push(makeIshika({}));
+    if(!added) out.push(Object.assign({}, ISHIKA_REC));
     return out;
   }
-
-  function cleanLocalStorage(){
-    ['upgro_emp_dyn','upgro_roles_v3'].forEach(function(key){
-      try{
-        var raw = localStorage.getItem(key);
-        if(!raw) return;
-        var data = JSON.parse(raw);
-        if(Array.isArray(data)){
-          localStorage.setItem(key, JSON.stringify(cleanArray(data)));
-        }else if(data && typeof data === 'object'){
-          Object.keys(data).forEach(function(k){ if(k.indexOf('ishika') !== -1) delete data[k]; });
-          data[ISHIKA_EMAIL] = {isAdmin:false,isManager:true,role:ISHIKA_ROLE,desig:ISHIKA_ROLE,active:true,pass:ISHIKA_PASS};
-          localStorage.setItem(key, JSON.stringify(data));
-        }
-      }catch(e){}
-    });
-  }
-
-  function cleanRegistry(){
+  function fixIshika(){
     try{
-      var arr = [];
-      if(typeof empReg !== 'undefined' && Array.isArray(empReg)) arr = empReg;
-      else if(Array.isArray(window.empReg)) arr = window.empReg;
-      arr = cleanArray(arr);
-      window.empReg = arr;
-      try{ empReg = arr; }catch(e){}
+      if(typeof USERS !== 'undefined'){
+        Object.keys(USERS).forEach(function(k){
+          var r = USERS[k] || {};
+          if(k !== ISHIKA_EMAIL && isIshikaLike(Object.assign({}, r, {email:k}))) delete USERS[k];
+        });
+        USERS[ISHIKA_EMAIL] = Object.assign({}, USERS[ISHIKA_EMAIL] || {}, ISHIKA_REC);
+      }
+    }catch(e){}
+
+    try{ if(typeof empReg !== 'undefined') empReg = normalizeList(empReg); }catch(e){}
+    try{ if(window.empReg) window.empReg = normalizeList(window.empReg); }catch(e){}
+    try{ if(typeof sheetEmpReg !== 'undefined') sheetEmpReg = normalizeList(sheetEmpReg); }catch(e){}
+
+    // Clean common employee localStorage stores so old/wrong Ishika records do not override login.
+    try{
+      Object.keys(localStorage).forEach(function(key){
+        var raw = localStorage.getItem(key);
+        if(!raw || raw.indexOf('Ishika') === -1 && raw.indexOf('ishika') === -1) return;
+        try{
+          var val = JSON.parse(raw);
+          if(Array.isArray(val)){
+            localStorage.setItem(key, JSON.stringify(normalizeList(val)));
+          }else if(val && typeof val === 'object'){
+            Object.keys(val).forEach(function(k){
+              if(k !== ISHIKA_EMAIL && isIshikaLike(Object.assign({}, val[k], {email:k}))) delete val[k];
+            });
+            val[ISHIKA_EMAIL] = Object.assign({}, val[ISHIKA_EMAIL] || {}, ISHIKA_REC);
+            localStorage.setItem(key, JSON.stringify(val));
+          }
+        }catch(_e){}
+      });
     }catch(e){}
   }
 
-  function patchDirectoryFunctions(){
-    var oldGetStored = window.getStoredEmployee;
-    window.getStoredEmployee = function(email){
-      if(E(email) === ISHIKA_EMAIL) return makeIshika({});
-      try{ return oldGetStored ? oldGetStored.apply(this, arguments) : null; }catch(e){ return null; }
-    };
+  window.fixIshikaManagerLoginNow = fixIshika;
 
-    var oldUname = window.uname;
-    window.uname = function(email){
-      if(E(email) === ISHIKA_EMAIL) return ISHIKA_NAME;
-      try{ return oldUname ? oldUname.apply(this, arguments) : String(email||'').split('@')[0]; }catch(e){ return String(email||'').split('@')[0]; }
-    };
-
-    var oldUdesig = window.udesig;
-    window.udesig = function(email){
-      if(E(email) === ISHIKA_EMAIL) return ISHIKA_ROLE;
-      try{ return oldUdesig ? oldUdesig.apply(this, arguments) : 'Team'; }catch(e){ return 'Team'; }
-    };
-  }
-
-  function refreshAll(){
-    setUsers();
-    cleanLocalStorage();
-    cleanRegistry();
-    try{ if(typeof syncUserDirectoryFromRegistry === 'function') syncUserDirectoryFromRegistry(); }catch(e){}
-    try{ if(typeof persistEmpRegistry === 'function') persistEmpRegistry(); }catch(e){}
-    try{ if(typeof renderEmpList === 'function') renderEmpList(); }catch(e){}
-    try{ if(typeof refillEmpDropdown === 'function') refillEmpDropdown(); }catch(e){}
-    try{ if(typeof populateTaskFilterOptions === 'function') populateTaskFilterOptions(); }catch(e){}
-  }
-
-  // Hard login override placed last so previous patches cannot block Ishika.
+  var oldDoLogin = window.doLogin;
   window.doLogin = async function(){
-    setUsers(); cleanLocalStorage(); cleanRegistry();
-
-    var email = E((document.getElementById('lem') || {value:''}).value);
-    var pass  = String((document.getElementById('lpw') || {value:''}).value || '').trim();
-    var err   = document.getElementById('lerr');
-    function fail(msg){ if(err){ err.textContent = '❌ ' + msg; err.style.display = 'block'; } }
-
-    if(!email || !pass) return fail('Email and password required.');
-
-    var rec = null;
+    fixIshika();
+    var email = cleanEmail((document.getElementById('lem') || {value:''}).value);
+    var pass  = String((document.getElementById('lpw') || {value:''}).value || '');
     if(email === ISHIKA_EMAIL){
-      rec = makeIshika({});
-    }else{
-      try{ if(typeof getStoredEmployee === 'function') rec = getStoredEmployee(email); }catch(e){}
-      try{ if(!rec && typeof USERS !== 'undefined' && USERS[email]) rec = Object.assign({}, USERS[email], {email:email}); }catch(e){}
-      try{ if(!rec && Array.isArray(window.empReg)) rec = window.empReg.find(function(x){ return E(x.email) === email; }); }catch(e){}
+      var err = document.getElementById('lerr');
+      if(pass !== ISHIKA_PASS){
+        if(err){ err.textContent = '❌ Wrong password.'; err.style.display = 'block'; }
+        return;
+      }
+      try{ window.cu = Object.assign({}, ISHIKA_REC); cu = window.cu; }catch(e){ window.cu = Object.assign({}, ISHIKA_REC); }
+      if(err) err.style.display = 'none';
+      try{ if(typeof saveCurrentSession === 'function') saveCurrentSession(); }catch(e){}
+      var lp = document.getElementById('lp'), app = document.getElementById('app');
+      if(lp) lp.classList.add('hidden');
+      if(app) app.classList.remove('hidden');
+      if(typeof initApp === 'function') initApp();
+      return;
     }
-
-    if(!rec) return fail('Email not found. Please check employee list.');
-    if(rec.active === false || rec.Active === 'No') return fail('This employee account is inactive.');
-
-    var savedPass = email === ISHIKA_EMAIL ? ISHIKA_PASS : String(rec.pass || rec.password || rec.Password || '').trim();
-    if(pass !== savedPass) return fail('Wrong password.');
-
-    window.cu = Object.assign({}, rec, {
-      email: email,
-      name: rec.name || rec.Name,
-      role: rec.role || rec.desig || 'Team',
-      desig: rec.desig || rec.role || 'Team',
-      isAdmin: !!rec.isAdmin,
-      isManager: email === ISHIKA_EMAIL ? true : !!rec.isManager
-    });
-    try{ cu = window.cu; }catch(e){}
-    try{ if(typeof saveCurrentSession === 'function') saveCurrentSession(); }catch(e){}
-
-    if(err) err.style.display = 'none';
-    var lp = document.getElementById('lp');
-    var app = document.getElementById('app');
-    if(lp) lp.classList.add('hidden');
-    if(app) app.classList.remove('hidden');
-    try{ if(typeof initApp === 'function') initApp(); }catch(e){}
-    setTimeout(refreshAll, 250);
+    return oldDoLogin ? oldDoLogin.apply(this, arguments) : undefined;
   };
 
-  window.fixIshikaLoginNow = function(){
-    refreshAll();
-    try{ if(typeof toast === 'function') toast('✅ Ishika login fixed. Use Ishika@123'); }catch(e){}
-  };
-
-  patchDirectoryFunctions();
   if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', function(){ setTimeout(window.fixIshikaLoginNow, 700); });
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(fixIshika, 200); });
   }else{
-    setTimeout(window.fixIshikaLoginNow, 700);
+    setTimeout(fixIshika, 200);
   }
 })();
 </script>
