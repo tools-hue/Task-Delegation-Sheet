@@ -1806,7 +1806,322 @@ function buildMeetingMailHtml(data){
   +(data.notes?'<tr><td style="padding:18px 28px 0"><div style="background:linear-gradient(180deg,#ffffff,#f5f3ff);border:1px solid #ddd6fe;border-radius:24px;padding:18px 20px;box-shadow:0 12px 30px rgba(124,58,237,.08)"><div style="font-size:11px;font-weight:900;letter-spacing:2px;color:#7c3aed;text-transform:uppercase;margin-bottom:10px">Notes</div><div style="font-size:13px;color:#334155;line-height:1.75">'+escapeHtml(data.notes)+'</div></div></td></tr>':'')
 
   +'<tr><td style="padding:24px 28px 30px"><div style="background:linear-gradient(180deg,#f8fafc,#e2e8f0);border:1px solid #cbd5e1;border-radius:24px;padding:20px;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.9)"><div style="display:inline-flex;align-items:center;gap:10px;background:#ffffff;border:1px solid #ccfbf1;border-radius:999px;padding:8px 14px;box-shadow:0 8px 20px rgba(15,23,42,.08)"><img src="data:image/jpeg;base64,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8888888888888888888841G8888888888dE/888888888L2+888888884pxq8888888885ZCq88888888xKDCq888888885qDCq88888888uqLPs38888888Q+MzAV8888888e9voG988888888sMAE888888888888888888//EACURAQABBAEDBAMBAAAAAAAAAAERACExQWEwUbFxgaHwEECRwf/aAAgBAwEBPxD9SdRJCWwTtb270KAN4N3oo8qdNKVC3YEABh126YZG2QXwd0waywU10E3AzTOVmYtjAWJlSPYWI9Yn36RSsabtw3X8F3QlARoGuEW1/goRCVfJ6LiEN1IwPECS5S73ceq1REL0pe42md8zCsj7XLXy3z0bzyRXDNKmjWjBfAUmMMYYtf1uxa/4L7XLXy3z0EKsoIJXSzYEwKW2aQdaHYiMuxbHD+vtcn4X2uWvlvnoG5GXMzgk9mm3NiK+R/uvtcn4X2uWvlvnoC1pDAu2riLsRfPVPinITZW2RxaLyPAXdGLDLn16CUCBTF4wTmKca2xM3la14KhMPjsyhGJPLTQ8IddRFemECJe76EHCAXkMHAXlT5uwEviRAMask89CCjkBMG5BzBa1FaEJuJYSzm4CWpERINq49Gbt4xbmjSXMTUkbi0KYh9qjeKCSByDI2EoMYTBoAA9gL7z+/wD/xAAnEQEAAQMDAwQDAQEAAAAAAAABEQAhQTFRYTCBoXGRsfBAwfHR4f/aAAgBAgEBPxD8SQhMUojd7eP+1H+EwR5/XTYIW8Cts7DL7XqC1WALh2bRpvrfMr6xL3v0m+BGEzlvY8uhlAvBW3Nb8MGfTUgTSPgdEDKMf2mrBkhIwbsNuN6lLSKmbWeB/pa1fe4K8P4HRiEMUNiSJd+D3tQqVtlrpM8tjBrewVvtcFeH8DoRHvYUMGAbl1Zg7uzN+vg3hYF7p4edPrcNFb7XBXh/A6CoIG5pDJzfXGK8f9a+tw0VvtcFeH8DoMgjLVDBViFms205o9F4I4aMgcyh6JyQwU9skGnodC41pfLR0ZKXfSkZc2jtt71Exwum14btHTExYmwY70RhE/zoQdUjSbUmUolbZzH6o8TGfTarv0N4tZMdqi7hGk2pAJD8/wD/xAAqEAEAAQMEAQMDBAMAAAAAAAABEQAhMUFRYfBAIDCBEHHBkaGx0VBg4f/aAAgBAQABPxD/AENHA2TJwLL8VfScEMuhYPxNLhLSlaXJ48XWBS3Mu5ClhZByVDC0YAwoJfM08z5WRytT9YokCy4fFAXYwQASMNmjwdKCBQ4LEBjDETGBbx8RWFBn3f6f1vilvzXglID7qh805nRbVzf6of1rANgmgudmL4gQUMVgBgAWfsdEgNCOFgDRsXhkZAUgZEWzSDvwDGgip0AlpXfZNc48rQxgSyopptjD/wAc0Q42AgCHik9vLV0DmphJGfHLzTVigQAYew/Oi10CAAgDBXSbPEEzaHfR6g/bLALTl8fxZhbS3zSEkkoaSH8NaBcZBAGg+nSbPCFlgGQQi40wMMDKtik5fMsbobqCVd4ACaebkDwcfb0NHOk2eE4koiy6uZTgcDYoNKFqemk6jRlvY9ABo50mzwWZgMADq7Oq+JUKasiLiXwA/VbsqtCDnJ8c3n+K6Lb0wGjnSbPfHeFjA3E1IEBn35eKnziV0Ivmwb1Cko5GwWG4ljBOWui29MBo50mz30DRIcS6qfLCt1disgVCxeFKA5RIWWfoL0W3pgNHOk2e+gUMGWpmMF9A2P7rpNvrF6Lb0wGjnSbPB+6Tb6xei29MBo50mzwfuk2+sXotvTAaOdJs98+hRzhcwV278UsMU2iSiS8SfrRbX7ivhgtXbvxSEi4DaI4aRjWeTRELjQ6aiyRVSwFLhD0sWAMtdu/FCwc+QWBT3wcbXIhkLllqYlJEvBSxK25o8Q7+ORsEQRa1EIwRAEOggvqhRj7SRuCDbDmp3NMYUVYwRlLMgNAETk4ATEI/AlSnzNnsJEwSRuUDFAtHEBtUIOYVbYLb5owvDiWESyeFTY+xj7hhSBYbSz8VOgG0uBCyov4d6eUhBczD/FXLTShIkCQGy5zUI94QOLBITGDGKCAWNDupYHKzFWxdqxqccQy4N2j3xjnBWxAxuvfSMSfgRZXQUE80hEIhgoZi1E5s1BcTCT9VwDJOKhaI5MTO0DBdM5p5qfYCkYLkYoNlh5kgAN5Jcr3KYWtRADAcGqddKmTIYYgSWYRxSEBFRACuhAo0p4ZDgvIICJnjNSMgMUcbgSjclhPAyLqs+xRijbGgCAKPkIyXaUZblxSReFc8I7BObLZpuSQUWazNop2h5UDlZeiUu0toqEOi9D7wE68ssEAtpS2KvJqjhvZElBkaRJE8JQE2aQtvHcalam9UhHH7BSmRRZJpBYLwUvT8TJbCmxghKJVpOGoZHTqWq4tFinNFpMUJk8/uN4ETKygUIlbpmdwFLAIWYrPhF79S5ZGLbxjvTYvlcjjNtpz2pWd32ELIICSQgreFGBPFGi+GVASUwYiiuIniSSYMMVEWVRSFOcmIIgSSttRnMErEFsrsIiPJG/Ot7BtJVjjU2v8A4H//2Q==" alt="UpGro Media" style="width:28px;height:28px;border-radius:8px;object-fit:contain"><span style="font-size:13px;font-weight:900;color:#0f172a">UpGro Media Mission Control</span></div><div style="margin-top:12px;font-size:12px;color:#475569;line-height:1.7">Organized by '+escapeHtml(data.organizer||cu?.name||'UpGro Media')+'</div><div style="margin-top:6px;font-size:11px;color:#94a3b8">Official premium meeting invite · UpGro Media</div></div></td></tr>'
-  +'</table></td></tr></table></body></html>';
+  +'</table></td></tr></table>
+<script>
+(function(){
+  var STORE_KEY = 'upgro_emp_dyn';
+  var RESET_KEY = 'upgro_emp_seed_reset_v20260506';
+  var ACTIVE_FILE_VERSION = 'EMP_IMG_SEED_V1';
+  var SEED = [
+    {empId:'1001', name:'Ritu Tyagi', desig:'EA', dept:'Admin', email:'ritutyagiea@upgromedia.com', role:'Admin', status:'Active'},
+    {empId:'1002', name:'Vishal Srivastava', desig:'Video Editor', dept:'Production', email:'vishal.editor@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1003', name:'Ankit Prajapati', desig:'SEO Executive', dept:'Marketing', email:'ankit.seo@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1004', name:'Harsh Kumar', desig:'Graphic Designer', dept:'Design', email:'harsh.graphic@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1005', name:'Vikas Pandey', desig:'Video Editor', dept:'Production', email:'vikasvideoedit@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1006', name:'Abhishek Kasaudhan', desig:'Meta Media Buyer', dept:'Marketing', email:'abhishek.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1007', name:'Harsh Verma', desig:'Video Editor', dept:'Production', email:'harsh.editor@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1008', name:'Dharmendra Sharma', desig:'Web Developer', dept:'Tech', email:'dharmendra.web@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1009', name:'Shubhi Singh', desig:'Meta Media Buyer', dept:'Manager', email:'shubhi.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1010', name:'Adarsh Srivastava', desig:'Web Developer', dept:'Tech', email:'adarsh.web@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1011', name:'Arpit Yadav', desig:'Accountant', dept:'Finance', email:'arpit@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1012', name:'Adarsh Singh', desig:'MIS', dept:'Admin', email:'adarsh.mis@upgromedia.com', role:'Admin', status:'Active'},
+    {empId:'1013', name:'Dheeraj Sir', desig:'CEO', dept:'Admin', email:'dhiraj.jaiswal@upgromedia.com', role:'Admin', status:'Active'},
+    {empId:'1014', name:'Surya Singh', desig:'Meta Media Buyer', dept:'Marketing', email:'surya.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1015', name:'Neeraj Kumar Yadav', desig:'Meta Media Buyer', dept:'Marketing', email:'neeraj.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1016', name:'Chandrakala Waldia', desig:'Meta Media Buyer', dept:'Marketing', email:'chandrakala.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1017', name:'Tarun Verma', desig:'Tech', dept:'Admin', email:'vraj9424@gmail.com', role:'Admin', status:'Active'},
+    {empId:'1018', name:'Ravi Singh', desig:'Graphic Designer', dept:'Marketing', email:'ravi.graphics@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1019', name:'Ishika Saxena', desig:'Client Relationship Manager', dept:'Marketing', email:'ishika.crm@upgromedia.com', role:'Manager', status:'Active'}
+  ];
+
+  function $(id){ return document.getElementById(id); }
+  function safeToast(msg){ try{ if(typeof toast==='function') toast(msg); }catch(e){} }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; }); }
+  function em(v){ return String(v||'').trim().toLowerCase(); }
+  function cap(v){ return String(v||'').trim(); }
+  function boolRole(role, type){ role = String(role||'').toLowerCase(); return role===type; }
+  function defaultPass(name, empId){ var first = String(name||'User').trim().split(/\s+/)[0] || 'User'; return first.replace(/[^A-Za-z]/g,'') + '@' + (empId || '1000'); }
+  function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
+  function nextEmpId(list){
+    var max = 1019;
+    (list||[]).forEach(function(e){ var n = parseInt(e.empId,10); if(!isNaN(n) && n>max) max=n; });
+    return String(max+1);
+  }
+  function badgeColor(i){
+    try{ if(Array.isArray(CLRS) && CLRS.length) return CLRS[i % CLRS.length]; }catch(e){}
+    var cols=['#0B84FF','#7C3AED','#00B67A','#F59E0B','#E53935','#0E9F8E'];
+    return cols[i % cols.length];
+  }
+  function normalizeEmp(raw, idx, existing){
+    existing = existing || {};
+    var role = cap(raw.role || existing.role || 'User');
+    var emp = {
+      empId: cap(raw.empId || existing.empId || ''),
+      name: cap(raw.name || existing.name || ''),
+      desig: cap(raw.desig || existing.desig || 'Team'),
+      dept: cap(raw.dept || existing.dept || 'General'),
+      email: em(raw.email || existing.email || ''),
+      role: role,
+      status: cap(raw.status || existing.status || 'Active'),
+      pass: cap(raw.pass || existing.pass || defaultPass(raw.name || existing.name, raw.empId || existing.empId)),
+      active: String(raw.status || existing.status || 'Active').toLowerCase() !== 'inactive',
+      isAdmin: role.toLowerCase() === 'admin',
+      isManager: role.toLowerCase() === 'manager',
+      bg: raw.bg || existing.bg || badgeColor(idx),
+      joinDate: raw.joinDate || existing.joinDate || (typeof TODAY!=='undefined' ? TODAY : new Date().toISOString().slice(0,10))
+    };
+    if(emp.isAdmin) emp.isManager = false;
+    return emp;
+  }
+  function combineExisting(){
+    var map = new Map();
+    function add(arr){ (arr||[]).forEach(function(e){ if(!e) return; var email = em(e.email); if(!email) return; map.set(email, Object.assign({}, map.get(email)||{}, e)); }); }
+    try{ add(JSON.parse(localStorage.getItem(STORE_KEY)||'[]')); }catch(e){}
+    try{ add(window.empReg||[]); }catch(e){}
+    try{ add(typeof empReg!=='undefined' ? empReg : []); }catch(e){}
+    try{ if(typeof USERS!=='undefined'){ Object.keys(USERS).forEach(function(k){ add([Object.assign({email:k}, USERS[k])]); }); } }catch(e){}
+    return map;
+  }
+  function seedRegistry(force){
+    var already = localStorage.getItem(RESET_KEY) === ACTIVE_FILE_VERSION;
+    if(already && !force){ return loadRegistry(); }
+    var existingMap = combineExisting();
+    var seeded = SEED.map(function(row, idx){ var ex = existingMap.get(em(row.email)) || {}; return normalizeEmp(row, idx, ex); });
+    saveRegistry(seeded, true);
+    localStorage.setItem(RESET_KEY, ACTIVE_FILE_VERSION);
+    return seeded;
+  }
+  function dedupe(list){
+    var emailMap = new Map();
+    (list||[]).forEach(function(e, idx){
+      var emp = normalizeEmp(e, idx, emailMap.get(em(e.email)) || {});
+      if(!emp.email) return;
+      emailMap.set(emp.email, emp);
+    });
+    var usedIds = new Set();
+    var out = Array.from(emailMap.values()).sort(function(a,b){ return (parseInt(a.empId,10)||0) - (parseInt(b.empId,10)||0) || a.name.localeCompare(b.name); });
+    out.forEach(function(e){
+      if(!e.empId || usedIds.has(e.empId)){
+        e.empId = nextEmpId(Array.from(usedIds).map(function(id){ return {empId:id}; }).concat(out));
+      }
+      usedIds.add(e.empId);
+    });
+    return out;
+  }
+  function loadRegistry(){
+    var list = [];
+    try{ list = JSON.parse(localStorage.getItem(STORE_KEY)||'[]'); }catch(e){ list=[]; }
+    if(!Array.isArray(list) || !list.length){ list = seedRegistry(true); }
+    list = dedupe(list);
+    syncGlobals(list);
+    return list;
+  }
+  function saveRegistry(list, skipToast){
+    list = dedupe(list);
+    localStorage.setItem(STORE_KEY, JSON.stringify(list));
+    syncGlobals(list);
+    if(!skipToast) safeToast('✅ Employees saved successfully');
+    return list;
+  }
+  function syncGlobals(list){
+    try{ window.empReg = list; }catch(e){}
+    try{ empReg = list; }catch(e){}
+    try{
+      if(typeof USERS!=='undefined'){
+        Object.keys(USERS).forEach(function(k){ if(!list.some(function(e){ return e.email===em(k); })) USERS[k].active = false; });
+        list.forEach(function(e){
+          USERS[e.email] = Object.assign({}, USERS[e.email]||{}, {
+            name:e.name,
+            pass:e.pass,
+            role:e.role,
+            desig:e.desig,
+            dept:e.dept,
+            empId:e.empId,
+            isAdmin:e.isAdmin,
+            isManager:e.isManager,
+            active:e.active
+          });
+        });
+      }
+    }catch(e){}
+  }
+  function activeEmployees(){ return loadRegistry().filter(function(e){ return e.active!==false; }); }
+  function renderCounters(list){
+    var cont = $('emp-counters'); if(!cont) return;
+    var active = list.filter(function(e){ return e.active!==false; });
+    var inactive = list.filter(function(e){ return e.active===false; });
+    var admins = active.filter(function(e){ return e.role==='Admin'; });
+    var managers = active.filter(function(e){ return e.role==='Manager'; });
+    var users = active.filter(function(e){ return e.role==='User'; });
+    cont.innerHTML = [
+      ['Total Active', active.length, 'tctr-blue'],
+      ['Admins', admins.length, 'tctr-purple'],
+      ['Managers', managers.length, 'tctr-orange'],
+      ['Users', users.length, 'tctr-green'],
+      ['Inactive', inactive.length, 'tctr-red']
+    ].map(function(x){ return '<div class="tctr '+x[2]+'"><div class="tctr-v">'+x[1]+'</div><div class="tctr-l">'+x[0]+'</div></div>'; }).join('');
+  }
+  function renderEmployeeForm(mode, rec){
+    var fp = $('emp-fp'); if(!fp) return;
+    rec = rec || {empId:'',name:'',desig:'',dept:'',email:'',role:'User',status:'Active',pass:''};
+    var roleOpts = ['Admin','Manager','User'];
+    var desigOpts = ['EA','Video Editor','SEO Executive','Graphic Designer','Meta Media Buyer','Web Developer','Accountant','MIS','CEO','Tech','Client Relationship Manager'];
+    var deptOpts = ['Admin','Production','Marketing','Design','Tech','Finance','Manager','General'];
+    function opts(arr, val){ return arr.map(function(o){ return '<option value="'+esc(o)+'"'+(o===val?' selected':'')+'>'+esc(o)+'</option>'; }).join(''); }
+    fp.innerHTML = ''+
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px">'+
+        '<div><div style="font-weight:800;font-size:18px">'+(mode==='new'?'Add New Employee':'Edit Employee')+'</div><div style="font-size:12px;color:var(--muted)">Employee master registry</div></div>'+
+        '<div class="role-badge '+(rec.role==='Admin'?'rb-admin':rec.role==='Manager'?'rb-manager':'rb-user')+'">'+esc(rec.role||'User')+'</div>'+
+      '</div>'+
+      '<div class="fr">'+
+        '<div class="fg"><label class="fl2">Emp ID *</label><input id="ef-id" class="fc" value="'+esc(rec.empId||'')+'" '+(mode==='edit'?'readonly style="background:#f9f9f9;color:var(--muted)"':'placeholder="Auto if blank"')+'></div>'+
+        '<div class="fg"><label class="fl2">Full Name *</label><input id="ef-n" class="fc" value="'+esc(rec.name||'')+'" placeholder="Employee full name"></div>'+
+        '<div class="fg"><label class="fl2">Designation *</label><select id="ef-d" class="fc">'+opts(desigOpts, rec.desig||desigOpts[0])+'</select></div>'+
+        '<div class="fg"><label class="fl2">Department *</label><select id="ef-dept" class="fc">'+opts(deptOpts, rec.dept||deptOpts[0])+'</select></div>'+
+        '<div class="fg"><label class="fl2">Email *</label><input id="ef-e" type="email" class="fc" value="'+esc(rec.email||'')+'" '+(mode==='edit'?'readonly style="background:#f9f9f9;color:var(--muted)"':'placeholder="employee@upgromedia.com"')+'></div>'+
+        '<div class="fg"><label class="fl2">Password '+(mode==='edit'?'':'*')+'</label><input id="ef-p" type="text" class="fc" value="'+esc(rec.pass||'')+'" placeholder="Auto if blank"></div>'+
+        '<div class="fg"><label class="fl2">Portal Role *</label><select id="ef-r" class="fc">'+opts(roleOpts, rec.role||'User')+'</select></div>'+
+        '<div class="fg"><label class="fl2">Status *</label><select id="ef-status" class="fc"><option value="Active"'+((rec.status||'Active')==='Active'?' selected':'')+'>Active</option><option value="Inactive"'+((rec.status||'Active')==='Inactive'?' selected':'')+'>Inactive</option></select></div>'+
+      '</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">'+
+        '<button class="btn bp bsm" onclick="'+(mode==='new'?'saveNewEmp()':'saveEmp(\''+esc(rec.email)+'\')')+'">💾 Save</button>'+
+        (mode==='edit' ? '<button class="btn bd bsm" onclick="delEmp(\''+esc(rec.email)+'\')">🗑 Remove</button>' : '')+
+        '<button class="btn bo bsm" onclick="selectNewEmp()">➕ New</button>'+
+      '</div>';
+  }
+  window.selectNewEmp = function(){ renderEmployeeForm('new'); };
+  window.editEmp = function(email){ var rec = loadRegistry().find(function(e){ return e.email===em(email); }); if(rec) renderEmployeeForm('edit', rec); };
+  window.saveNewEmp = function(){
+    var list = loadRegistry();
+    var email = em(($('ef-e')||{}).value);
+    var empId = cap(($('ef-id')||{}).value) || nextEmpId(list);
+    var name = cap(($('ef-n')||{}).value);
+    var desig = cap(($('ef-d')||{}).value);
+    var dept = cap(($('ef-dept')||{}).value);
+    var role = cap(($('ef-r')||{}).value || 'User');
+    var status = cap(($('ef-status')||{}).value || 'Active');
+    var pass = cap(($('ef-p')||{}).value) || defaultPass(name, empId);
+    if(!name || !email || !desig || !dept){ return safeToast('⚠ Please fill all required employee fields'); }
+    if(list.some(function(e){ return e.email===email; })) return safeToast('⚠ This email already exists');
+    if(list.some(function(e){ return e.empId===empId; })) return safeToast('⚠ This Emp ID already exists');
+    list.push(normalizeEmp({empId:empId,name:name,desig:desig,dept:dept,email:email,role:role,status:status,pass:pass}, list.length));
+    saveRegistry(list);
+    renderEmpList();
+    renderEmployeeForm('edit', loadRegistry().find(function(e){ return e.email===email; }));
+    try{ if(typeof refillEmpDropdown==='function') refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+  };
+  window.saveEmp = function(oldEmail){
+    var email = em(oldEmail);
+    var list = loadRegistry();
+    var idx = list.findIndex(function(e){ return e.email===email; });
+    if(idx<0) return safeToast('⚠ Employee not found');
+    var empId = cap(($('ef-id')||{}).value) || list[idx].empId;
+    var name = cap(($('ef-n')||{}).value);
+    var desig = cap(($('ef-d')||{}).value);
+    var dept = cap(($('ef-dept')||{}).value);
+    var role = cap(($('ef-r')||{}).value || 'User');
+    var status = cap(($('ef-status')||{}).value || 'Active');
+    var pass = cap(($('ef-p')||{}).value) || list[idx].pass || defaultPass(name, empId);
+    if(!name || !desig || !dept) return safeToast('⚠ Please fill all required employee fields');
+    if(list.some(function(e, i){ return i!==idx && e.empId===empId; })) return safeToast('⚠ This Emp ID already exists');
+    list[idx] = normalizeEmp({empId:empId,name:name,desig:desig,dept:dept,email:email,role:role,status:status,pass:pass}, idx, list[idx]);
+    saveRegistry(list);
+    renderEmpList();
+    renderEmployeeForm('edit', list[idx]);
+    try{ if(typeof refillEmpDropdown==='function') refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+  };
+  window.delEmp = function(email){
+    email = em(email);
+    var list = loadRegistry();
+    var idx = list.findIndex(function(e){ return e.email===email; });
+    if(idx<0) return;
+    if(!confirm('Remove '+list[idx].name+' from active employee list?')) return;
+    list[idx].status = 'Inactive';
+    list[idx].active = false;
+    saveRegistry(list);
+    renderEmpList();
+    $('emp-fp').innerHTML = '<div style="text-align:center;padding:50px 20px;color:var(--muted)"><div style="font-size:40px;margin-bottom:10px">🗑</div><div style="font-weight:700;margin-bottom:4px">Employee removed from active portal list</div><div style="font-size:12px">Record saved as inactive</div></div>';
+    try{ if(typeof refillEmpDropdown==='function') refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+  };
+  window.renderEmpList = function(){
+    var q = String((($('emp-q')||{}).value)||'').trim().toLowerCase();
+    var list = loadRegistry();
+    renderCounters(list);
+    var filtered = list.filter(function(e){
+      var blob = [e.empId,e.name,e.desig,e.dept,e.email,e.role,e.status].join(' ').toLowerCase();
+      return blob.indexOf(q)>-1;
+    });
+    var cont = $('emp-items'); if(!cont) return;
+    if(!filtered.length){ cont.innerHTML = '<div style="padding:16px;color:var(--muted)">No employees matched your search.</div>'; return; }
+    cont.innerHTML = filtered.map(function(e, i){
+      var active = e.active!==false && e.status!=='Inactive';
+      return ''+
+        '<div class="ei" onclick="editEmp(\''+esc(e.email)+'\')">'+
+          '<div class="ei-av" style="background:'+esc(e.bg||badgeColor(i))+'">'+esc(String(e.name||'?').trim().charAt(0).toUpperCase())+'</div>'+
+          '<div class="ei-info">'+
+            '<div class="ei-name">'+esc(e.empId)+' · '+esc(e.name)+'</div>'+
+            '<div class="ei-role">'+esc(e.desig)+' · '+esc(e.dept)+' · '+esc(e.role)+'</div>'+
+            '<div class="ei-role">'+esc(e.email)+'</div>'+
+          '</div>'+
+          '<div class="ei-dot" style="background:'+(active?'#00B67A':'#E53935')+'"></div>'+
+        '</div>';
+    }).join('');
+  };
+  window.initEmpReg = function(force){
+    if(force) seedRegistry(true);
+    return loadRegistry();
+  };
+  var oldRefill = window.refillEmpDropdown;
+  window.refillEmpDropdown = function(){
+    var list = activeEmployees();
+    var candidates = [];
+    ['task-emp','assignEmployee','assign-to','assignee','emp-select','taskAssignee','task-assignee','meeting-attendees'].forEach(function(id){ var el=$(id); if(el) candidates.push(el); });
+    document.querySelectorAll('select').forEach(function(sel){
+      var label = ((sel.id||'')+' '+(sel.name||'')+' '+(sel.getAttribute('aria-label')||'')+' '+(sel.closest('.fg')?sel.closest('.fg').innerText:'')).toLowerCase();
+      if(/assign|employee|attendee|assignee|member/.test(label)) candidates.push(sel);
+    });
+    var seen = new Set();
+    candidates.forEach(function(sel){
+      if(!sel || seen.has(sel)) return;
+      seen.add(sel);
+      var keep = em(sel.value);
+      var first = sel.querySelector('option[value=""]') || sel.querySelector('option');
+      var ph = (first && !String(first.value||'').includes('@')) ? (first.textContent||'— Select Employee —') : '— Select Employee —';
+      sel.innerHTML = '<option value="">'+esc(ph)+'</option>';
+      list.forEach(function(e){
+        var opt = document.createElement('option');
+        opt.value = e.email;
+        opt.textContent = e.empId + ' — ' + e.name + ' — ' + e.desig;
+        sel.appendChild(opt);
+      });
+      if(keep && Array.from(sel.options).some(function(o){ return em(o.value)===keep; })) sel.value = keep;
+    });
+    if(typeof oldRefill==='function'){ try{ oldRefill(); }catch(e){} }
+  };
+  window.fixDuplicateEmployeesNow = function(){
+    saveRegistry(loadRegistry(), true);
+    renderEmpList();
+    try{ window.refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+    safeToast('✅ Employees cleared and rebuilt from master list');
+  };
+  window.resetEmployeesFromMasterImage = function(){
+    seedRegistry(true);
+    renderEmpList();
+    try{ window.refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+    safeToast('✅ Employee master list reset successfully');
+  };
+  // initialize once for this file version
+  seedRegistry(false);
+  try{ window.refillEmpDropdown(); }catch(e){}
+})();
+</script>
+
+</body></html>';
 }
 function getTestMailTarget(){
   const el=$('test-mail-email');
@@ -3663,7 +3978,322 @@ if(data.action === 'sendMeetingInvite'){
         +'</td></tr>'
 
         +'</table></td></tr></table>'
-        +'</body></html>';
+        +'
+<script>
+(function(){
+  var STORE_KEY = 'upgro_emp_dyn';
+  var RESET_KEY = 'upgro_emp_seed_reset_v20260506';
+  var ACTIVE_FILE_VERSION = 'EMP_IMG_SEED_V1';
+  var SEED = [
+    {empId:'1001', name:'Ritu Tyagi', desig:'EA', dept:'Admin', email:'ritutyagiea@upgromedia.com', role:'Admin', status:'Active'},
+    {empId:'1002', name:'Vishal Srivastava', desig:'Video Editor', dept:'Production', email:'vishal.editor@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1003', name:'Ankit Prajapati', desig:'SEO Executive', dept:'Marketing', email:'ankit.seo@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1004', name:'Harsh Kumar', desig:'Graphic Designer', dept:'Design', email:'harsh.graphic@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1005', name:'Vikas Pandey', desig:'Video Editor', dept:'Production', email:'vikasvideoedit@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1006', name:'Abhishek Kasaudhan', desig:'Meta Media Buyer', dept:'Marketing', email:'abhishek.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1007', name:'Harsh Verma', desig:'Video Editor', dept:'Production', email:'harsh.editor@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1008', name:'Dharmendra Sharma', desig:'Web Developer', dept:'Tech', email:'dharmendra.web@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1009', name:'Shubhi Singh', desig:'Meta Media Buyer', dept:'Manager', email:'shubhi.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1010', name:'Adarsh Srivastava', desig:'Web Developer', dept:'Tech', email:'adarsh.web@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1011', name:'Arpit Yadav', desig:'Accountant', dept:'Finance', email:'arpit@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1012', name:'Adarsh Singh', desig:'MIS', dept:'Admin', email:'adarsh.mis@upgromedia.com', role:'Admin', status:'Active'},
+    {empId:'1013', name:'Dheeraj Sir', desig:'CEO', dept:'Admin', email:'dhiraj.jaiswal@upgromedia.com', role:'Admin', status:'Active'},
+    {empId:'1014', name:'Surya Singh', desig:'Meta Media Buyer', dept:'Marketing', email:'surya.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1015', name:'Neeraj Kumar Yadav', desig:'Meta Media Buyer', dept:'Marketing', email:'neeraj.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1016', name:'Chandrakala Waldia', desig:'Meta Media Buyer', dept:'Marketing', email:'chandrakala.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1017', name:'Tarun Verma', desig:'Tech', dept:'Admin', email:'vraj9424@gmail.com', role:'Admin', status:'Active'},
+    {empId:'1018', name:'Ravi Singh', desig:'Graphic Designer', dept:'Marketing', email:'ravi.graphics@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1019', name:'Ishika Saxena', desig:'Client Relationship Manager', dept:'Marketing', email:'ishika.crm@upgromedia.com', role:'Manager', status:'Active'}
+  ];
+
+  function $(id){ return document.getElementById(id); }
+  function safeToast(msg){ try{ if(typeof toast==='function') toast(msg); }catch(e){} }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; }); }
+  function em(v){ return String(v||'').trim().toLowerCase(); }
+  function cap(v){ return String(v||'').trim(); }
+  function boolRole(role, type){ role = String(role||'').toLowerCase(); return role===type; }
+  function defaultPass(name, empId){ var first = String(name||'User').trim().split(/\s+/)[0] || 'User'; return first.replace(/[^A-Za-z]/g,'') + '@' + (empId || '1000'); }
+  function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
+  function nextEmpId(list){
+    var max = 1019;
+    (list||[]).forEach(function(e){ var n = parseInt(e.empId,10); if(!isNaN(n) && n>max) max=n; });
+    return String(max+1);
+  }
+  function badgeColor(i){
+    try{ if(Array.isArray(CLRS) && CLRS.length) return CLRS[i % CLRS.length]; }catch(e){}
+    var cols=['#0B84FF','#7C3AED','#00B67A','#F59E0B','#E53935','#0E9F8E'];
+    return cols[i % cols.length];
+  }
+  function normalizeEmp(raw, idx, existing){
+    existing = existing || {};
+    var role = cap(raw.role || existing.role || 'User');
+    var emp = {
+      empId: cap(raw.empId || existing.empId || ''),
+      name: cap(raw.name || existing.name || ''),
+      desig: cap(raw.desig || existing.desig || 'Team'),
+      dept: cap(raw.dept || existing.dept || 'General'),
+      email: em(raw.email || existing.email || ''),
+      role: role,
+      status: cap(raw.status || existing.status || 'Active'),
+      pass: cap(raw.pass || existing.pass || defaultPass(raw.name || existing.name, raw.empId || existing.empId)),
+      active: String(raw.status || existing.status || 'Active').toLowerCase() !== 'inactive',
+      isAdmin: role.toLowerCase() === 'admin',
+      isManager: role.toLowerCase() === 'manager',
+      bg: raw.bg || existing.bg || badgeColor(idx),
+      joinDate: raw.joinDate || existing.joinDate || (typeof TODAY!=='undefined' ? TODAY : new Date().toISOString().slice(0,10))
+    };
+    if(emp.isAdmin) emp.isManager = false;
+    return emp;
+  }
+  function combineExisting(){
+    var map = new Map();
+    function add(arr){ (arr||[]).forEach(function(e){ if(!e) return; var email = em(e.email); if(!email) return; map.set(email, Object.assign({}, map.get(email)||{}, e)); }); }
+    try{ add(JSON.parse(localStorage.getItem(STORE_KEY)||'[]')); }catch(e){}
+    try{ add(window.empReg||[]); }catch(e){}
+    try{ add(typeof empReg!=='undefined' ? empReg : []); }catch(e){}
+    try{ if(typeof USERS!=='undefined'){ Object.keys(USERS).forEach(function(k){ add([Object.assign({email:k}, USERS[k])]); }); } }catch(e){}
+    return map;
+  }
+  function seedRegistry(force){
+    var already = localStorage.getItem(RESET_KEY) === ACTIVE_FILE_VERSION;
+    if(already && !force){ return loadRegistry(); }
+    var existingMap = combineExisting();
+    var seeded = SEED.map(function(row, idx){ var ex = existingMap.get(em(row.email)) || {}; return normalizeEmp(row, idx, ex); });
+    saveRegistry(seeded, true);
+    localStorage.setItem(RESET_KEY, ACTIVE_FILE_VERSION);
+    return seeded;
+  }
+  function dedupe(list){
+    var emailMap = new Map();
+    (list||[]).forEach(function(e, idx){
+      var emp = normalizeEmp(e, idx, emailMap.get(em(e.email)) || {});
+      if(!emp.email) return;
+      emailMap.set(emp.email, emp);
+    });
+    var usedIds = new Set();
+    var out = Array.from(emailMap.values()).sort(function(a,b){ return (parseInt(a.empId,10)||0) - (parseInt(b.empId,10)||0) || a.name.localeCompare(b.name); });
+    out.forEach(function(e){
+      if(!e.empId || usedIds.has(e.empId)){
+        e.empId = nextEmpId(Array.from(usedIds).map(function(id){ return {empId:id}; }).concat(out));
+      }
+      usedIds.add(e.empId);
+    });
+    return out;
+  }
+  function loadRegistry(){
+    var list = [];
+    try{ list = JSON.parse(localStorage.getItem(STORE_KEY)||'[]'); }catch(e){ list=[]; }
+    if(!Array.isArray(list) || !list.length){ list = seedRegistry(true); }
+    list = dedupe(list);
+    syncGlobals(list);
+    return list;
+  }
+  function saveRegistry(list, skipToast){
+    list = dedupe(list);
+    localStorage.setItem(STORE_KEY, JSON.stringify(list));
+    syncGlobals(list);
+    if(!skipToast) safeToast('✅ Employees saved successfully');
+    return list;
+  }
+  function syncGlobals(list){
+    try{ window.empReg = list; }catch(e){}
+    try{ empReg = list; }catch(e){}
+    try{
+      if(typeof USERS!=='undefined'){
+        Object.keys(USERS).forEach(function(k){ if(!list.some(function(e){ return e.email===em(k); })) USERS[k].active = false; });
+        list.forEach(function(e){
+          USERS[e.email] = Object.assign({}, USERS[e.email]||{}, {
+            name:e.name,
+            pass:e.pass,
+            role:e.role,
+            desig:e.desig,
+            dept:e.dept,
+            empId:e.empId,
+            isAdmin:e.isAdmin,
+            isManager:e.isManager,
+            active:e.active
+          });
+        });
+      }
+    }catch(e){}
+  }
+  function activeEmployees(){ return loadRegistry().filter(function(e){ return e.active!==false; }); }
+  function renderCounters(list){
+    var cont = $('emp-counters'); if(!cont) return;
+    var active = list.filter(function(e){ return e.active!==false; });
+    var inactive = list.filter(function(e){ return e.active===false; });
+    var admins = active.filter(function(e){ return e.role==='Admin'; });
+    var managers = active.filter(function(e){ return e.role==='Manager'; });
+    var users = active.filter(function(e){ return e.role==='User'; });
+    cont.innerHTML = [
+      ['Total Active', active.length, 'tctr-blue'],
+      ['Admins', admins.length, 'tctr-purple'],
+      ['Managers', managers.length, 'tctr-orange'],
+      ['Users', users.length, 'tctr-green'],
+      ['Inactive', inactive.length, 'tctr-red']
+    ].map(function(x){ return '<div class="tctr '+x[2]+'"><div class="tctr-v">'+x[1]+'</div><div class="tctr-l">'+x[0]+'</div></div>'; }).join('');
+  }
+  function renderEmployeeForm(mode, rec){
+    var fp = $('emp-fp'); if(!fp) return;
+    rec = rec || {empId:'',name:'',desig:'',dept:'',email:'',role:'User',status:'Active',pass:''};
+    var roleOpts = ['Admin','Manager','User'];
+    var desigOpts = ['EA','Video Editor','SEO Executive','Graphic Designer','Meta Media Buyer','Web Developer','Accountant','MIS','CEO','Tech','Client Relationship Manager'];
+    var deptOpts = ['Admin','Production','Marketing','Design','Tech','Finance','Manager','General'];
+    function opts(arr, val){ return arr.map(function(o){ return '<option value="'+esc(o)+'"'+(o===val?' selected':'')+'>'+esc(o)+'</option>'; }).join(''); }
+    fp.innerHTML = ''+
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px">'+
+        '<div><div style="font-weight:800;font-size:18px">'+(mode==='new'?'Add New Employee':'Edit Employee')+'</div><div style="font-size:12px;color:var(--muted)">Employee master registry</div></div>'+
+        '<div class="role-badge '+(rec.role==='Admin'?'rb-admin':rec.role==='Manager'?'rb-manager':'rb-user')+'">'+esc(rec.role||'User')+'</div>'+
+      '</div>'+
+      '<div class="fr">'+
+        '<div class="fg"><label class="fl2">Emp ID *</label><input id="ef-id" class="fc" value="'+esc(rec.empId||'')+'" '+(mode==='edit'?'readonly style="background:#f9f9f9;color:var(--muted)"':'placeholder="Auto if blank"')+'></div>'+
+        '<div class="fg"><label class="fl2">Full Name *</label><input id="ef-n" class="fc" value="'+esc(rec.name||'')+'" placeholder="Employee full name"></div>'+
+        '<div class="fg"><label class="fl2">Designation *</label><select id="ef-d" class="fc">'+opts(desigOpts, rec.desig||desigOpts[0])+'</select></div>'+
+        '<div class="fg"><label class="fl2">Department *</label><select id="ef-dept" class="fc">'+opts(deptOpts, rec.dept||deptOpts[0])+'</select></div>'+
+        '<div class="fg"><label class="fl2">Email *</label><input id="ef-e" type="email" class="fc" value="'+esc(rec.email||'')+'" '+(mode==='edit'?'readonly style="background:#f9f9f9;color:var(--muted)"':'placeholder="employee@upgromedia.com"')+'></div>'+
+        '<div class="fg"><label class="fl2">Password '+(mode==='edit'?'':'*')+'</label><input id="ef-p" type="text" class="fc" value="'+esc(rec.pass||'')+'" placeholder="Auto if blank"></div>'+
+        '<div class="fg"><label class="fl2">Portal Role *</label><select id="ef-r" class="fc">'+opts(roleOpts, rec.role||'User')+'</select></div>'+
+        '<div class="fg"><label class="fl2">Status *</label><select id="ef-status" class="fc"><option value="Active"'+((rec.status||'Active')==='Active'?' selected':'')+'>Active</option><option value="Inactive"'+((rec.status||'Active')==='Inactive'?' selected':'')+'>Inactive</option></select></div>'+
+      '</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">'+
+        '<button class="btn bp bsm" onclick="'+(mode==='new'?'saveNewEmp()':'saveEmp(\''+esc(rec.email)+'\')')+'">💾 Save</button>'+
+        (mode==='edit' ? '<button class="btn bd bsm" onclick="delEmp(\''+esc(rec.email)+'\')">🗑 Remove</button>' : '')+
+        '<button class="btn bo bsm" onclick="selectNewEmp()">➕ New</button>'+
+      '</div>';
+  }
+  window.selectNewEmp = function(){ renderEmployeeForm('new'); };
+  window.editEmp = function(email){ var rec = loadRegistry().find(function(e){ return e.email===em(email); }); if(rec) renderEmployeeForm('edit', rec); };
+  window.saveNewEmp = function(){
+    var list = loadRegistry();
+    var email = em(($('ef-e')||{}).value);
+    var empId = cap(($('ef-id')||{}).value) || nextEmpId(list);
+    var name = cap(($('ef-n')||{}).value);
+    var desig = cap(($('ef-d')||{}).value);
+    var dept = cap(($('ef-dept')||{}).value);
+    var role = cap(($('ef-r')||{}).value || 'User');
+    var status = cap(($('ef-status')||{}).value || 'Active');
+    var pass = cap(($('ef-p')||{}).value) || defaultPass(name, empId);
+    if(!name || !email || !desig || !dept){ return safeToast('⚠ Please fill all required employee fields'); }
+    if(list.some(function(e){ return e.email===email; })) return safeToast('⚠ This email already exists');
+    if(list.some(function(e){ return e.empId===empId; })) return safeToast('⚠ This Emp ID already exists');
+    list.push(normalizeEmp({empId:empId,name:name,desig:desig,dept:dept,email:email,role:role,status:status,pass:pass}, list.length));
+    saveRegistry(list);
+    renderEmpList();
+    renderEmployeeForm('edit', loadRegistry().find(function(e){ return e.email===email; }));
+    try{ if(typeof refillEmpDropdown==='function') refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+  };
+  window.saveEmp = function(oldEmail){
+    var email = em(oldEmail);
+    var list = loadRegistry();
+    var idx = list.findIndex(function(e){ return e.email===email; });
+    if(idx<0) return safeToast('⚠ Employee not found');
+    var empId = cap(($('ef-id')||{}).value) || list[idx].empId;
+    var name = cap(($('ef-n')||{}).value);
+    var desig = cap(($('ef-d')||{}).value);
+    var dept = cap(($('ef-dept')||{}).value);
+    var role = cap(($('ef-r')||{}).value || 'User');
+    var status = cap(($('ef-status')||{}).value || 'Active');
+    var pass = cap(($('ef-p')||{}).value) || list[idx].pass || defaultPass(name, empId);
+    if(!name || !desig || !dept) return safeToast('⚠ Please fill all required employee fields');
+    if(list.some(function(e, i){ return i!==idx && e.empId===empId; })) return safeToast('⚠ This Emp ID already exists');
+    list[idx] = normalizeEmp({empId:empId,name:name,desig:desig,dept:dept,email:email,role:role,status:status,pass:pass}, idx, list[idx]);
+    saveRegistry(list);
+    renderEmpList();
+    renderEmployeeForm('edit', list[idx]);
+    try{ if(typeof refillEmpDropdown==='function') refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+  };
+  window.delEmp = function(email){
+    email = em(email);
+    var list = loadRegistry();
+    var idx = list.findIndex(function(e){ return e.email===email; });
+    if(idx<0) return;
+    if(!confirm('Remove '+list[idx].name+' from active employee list?')) return;
+    list[idx].status = 'Inactive';
+    list[idx].active = false;
+    saveRegistry(list);
+    renderEmpList();
+    $('emp-fp').innerHTML = '<div style="text-align:center;padding:50px 20px;color:var(--muted)"><div style="font-size:40px;margin-bottom:10px">🗑</div><div style="font-weight:700;margin-bottom:4px">Employee removed from active portal list</div><div style="font-size:12px">Record saved as inactive</div></div>';
+    try{ if(typeof refillEmpDropdown==='function') refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+  };
+  window.renderEmpList = function(){
+    var q = String((($('emp-q')||{}).value)||'').trim().toLowerCase();
+    var list = loadRegistry();
+    renderCounters(list);
+    var filtered = list.filter(function(e){
+      var blob = [e.empId,e.name,e.desig,e.dept,e.email,e.role,e.status].join(' ').toLowerCase();
+      return blob.indexOf(q)>-1;
+    });
+    var cont = $('emp-items'); if(!cont) return;
+    if(!filtered.length){ cont.innerHTML = '<div style="padding:16px;color:var(--muted)">No employees matched your search.</div>'; return; }
+    cont.innerHTML = filtered.map(function(e, i){
+      var active = e.active!==false && e.status!=='Inactive';
+      return ''+
+        '<div class="ei" onclick="editEmp(\''+esc(e.email)+'\')">'+
+          '<div class="ei-av" style="background:'+esc(e.bg||badgeColor(i))+'">'+esc(String(e.name||'?').trim().charAt(0).toUpperCase())+'</div>'+
+          '<div class="ei-info">'+
+            '<div class="ei-name">'+esc(e.empId)+' · '+esc(e.name)+'</div>'+
+            '<div class="ei-role">'+esc(e.desig)+' · '+esc(e.dept)+' · '+esc(e.role)+'</div>'+
+            '<div class="ei-role">'+esc(e.email)+'</div>'+
+          '</div>'+
+          '<div class="ei-dot" style="background:'+(active?'#00B67A':'#E53935')+'"></div>'+
+        '</div>';
+    }).join('');
+  };
+  window.initEmpReg = function(force){
+    if(force) seedRegistry(true);
+    return loadRegistry();
+  };
+  var oldRefill = window.refillEmpDropdown;
+  window.refillEmpDropdown = function(){
+    var list = activeEmployees();
+    var candidates = [];
+    ['task-emp','assignEmployee','assign-to','assignee','emp-select','taskAssignee','task-assignee','meeting-attendees'].forEach(function(id){ var el=$(id); if(el) candidates.push(el); });
+    document.querySelectorAll('select').forEach(function(sel){
+      var label = ((sel.id||'')+' '+(sel.name||'')+' '+(sel.getAttribute('aria-label')||'')+' '+(sel.closest('.fg')?sel.closest('.fg').innerText:'')).toLowerCase();
+      if(/assign|employee|attendee|assignee|member/.test(label)) candidates.push(sel);
+    });
+    var seen = new Set();
+    candidates.forEach(function(sel){
+      if(!sel || seen.has(sel)) return;
+      seen.add(sel);
+      var keep = em(sel.value);
+      var first = sel.querySelector('option[value=""]') || sel.querySelector('option');
+      var ph = (first && !String(first.value||'').includes('@')) ? (first.textContent||'— Select Employee —') : '— Select Employee —';
+      sel.innerHTML = '<option value="">'+esc(ph)+'</option>';
+      list.forEach(function(e){
+        var opt = document.createElement('option');
+        opt.value = e.email;
+        opt.textContent = e.empId + ' — ' + e.name + ' — ' + e.desig;
+        sel.appendChild(opt);
+      });
+      if(keep && Array.from(sel.options).some(function(o){ return em(o.value)===keep; })) sel.value = keep;
+    });
+    if(typeof oldRefill==='function'){ try{ oldRefill(); }catch(e){} }
+  };
+  window.fixDuplicateEmployeesNow = function(){
+    saveRegistry(loadRegistry(), true);
+    renderEmpList();
+    try{ window.refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+    safeToast('✅ Employees cleared and rebuilt from master list');
+  };
+  window.resetEmployeesFromMasterImage = function(){
+    seedRegistry(true);
+    renderEmpList();
+    try{ window.refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+    safeToast('✅ Employee master list reset successfully');
+  };
+  // initialize once for this file version
+  seedRegistry(false);
+  try{ window.refillEmpDropdown(); }catch(e){}
+})();
+</script>
+
+</body></html>';
 
       GmailApp.sendEmail(att.email, data.subject || subject, 'Please enable HTML to view this email.', {
         htmlBody: htmlBody,
@@ -4707,7 +5337,322 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
   <script>
 /* =========================================================
    MULTI TASK ASSIGN PATCH
-   Paste this just before </body>
+   Paste this just before 
+<script>
+(function(){
+  var STORE_KEY = 'upgro_emp_dyn';
+  var RESET_KEY = 'upgro_emp_seed_reset_v20260506';
+  var ACTIVE_FILE_VERSION = 'EMP_IMG_SEED_V1';
+  var SEED = [
+    {empId:'1001', name:'Ritu Tyagi', desig:'EA', dept:'Admin', email:'ritutyagiea@upgromedia.com', role:'Admin', status:'Active'},
+    {empId:'1002', name:'Vishal Srivastava', desig:'Video Editor', dept:'Production', email:'vishal.editor@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1003', name:'Ankit Prajapati', desig:'SEO Executive', dept:'Marketing', email:'ankit.seo@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1004', name:'Harsh Kumar', desig:'Graphic Designer', dept:'Design', email:'harsh.graphic@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1005', name:'Vikas Pandey', desig:'Video Editor', dept:'Production', email:'vikasvideoedit@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1006', name:'Abhishek Kasaudhan', desig:'Meta Media Buyer', dept:'Marketing', email:'abhishek.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1007', name:'Harsh Verma', desig:'Video Editor', dept:'Production', email:'harsh.editor@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1008', name:'Dharmendra Sharma', desig:'Web Developer', dept:'Tech', email:'dharmendra.web@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1009', name:'Shubhi Singh', desig:'Meta Media Buyer', dept:'Manager', email:'shubhi.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1010', name:'Adarsh Srivastava', desig:'Web Developer', dept:'Tech', email:'adarsh.web@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1011', name:'Arpit Yadav', desig:'Accountant', dept:'Finance', email:'arpit@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1012', name:'Adarsh Singh', desig:'MIS', dept:'Admin', email:'adarsh.mis@upgromedia.com', role:'Admin', status:'Active'},
+    {empId:'1013', name:'Dheeraj Sir', desig:'CEO', dept:'Admin', email:'dhiraj.jaiswal@upgromedia.com', role:'Admin', status:'Active'},
+    {empId:'1014', name:'Surya Singh', desig:'Meta Media Buyer', dept:'Marketing', email:'surya.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1015', name:'Neeraj Kumar Yadav', desig:'Meta Media Buyer', dept:'Marketing', email:'neeraj.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1016', name:'Chandrakala Waldia', desig:'Meta Media Buyer', dept:'Marketing', email:'chandrakala.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1017', name:'Tarun Verma', desig:'Tech', dept:'Admin', email:'vraj9424@gmail.com', role:'Admin', status:'Active'},
+    {empId:'1018', name:'Ravi Singh', desig:'Graphic Designer', dept:'Marketing', email:'ravi.graphics@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1019', name:'Ishika Saxena', desig:'Client Relationship Manager', dept:'Marketing', email:'ishika.crm@upgromedia.com', role:'Manager', status:'Active'}
+  ];
+
+  function $(id){ return document.getElementById(id); }
+  function safeToast(msg){ try{ if(typeof toast==='function') toast(msg); }catch(e){} }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; }); }
+  function em(v){ return String(v||'').trim().toLowerCase(); }
+  function cap(v){ return String(v||'').trim(); }
+  function boolRole(role, type){ role = String(role||'').toLowerCase(); return role===type; }
+  function defaultPass(name, empId){ var first = String(name||'User').trim().split(/\s+/)[0] || 'User'; return first.replace(/[^A-Za-z]/g,'') + '@' + (empId || '1000'); }
+  function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
+  function nextEmpId(list){
+    var max = 1019;
+    (list||[]).forEach(function(e){ var n = parseInt(e.empId,10); if(!isNaN(n) && n>max) max=n; });
+    return String(max+1);
+  }
+  function badgeColor(i){
+    try{ if(Array.isArray(CLRS) && CLRS.length) return CLRS[i % CLRS.length]; }catch(e){}
+    var cols=['#0B84FF','#7C3AED','#00B67A','#F59E0B','#E53935','#0E9F8E'];
+    return cols[i % cols.length];
+  }
+  function normalizeEmp(raw, idx, existing){
+    existing = existing || {};
+    var role = cap(raw.role || existing.role || 'User');
+    var emp = {
+      empId: cap(raw.empId || existing.empId || ''),
+      name: cap(raw.name || existing.name || ''),
+      desig: cap(raw.desig || existing.desig || 'Team'),
+      dept: cap(raw.dept || existing.dept || 'General'),
+      email: em(raw.email || existing.email || ''),
+      role: role,
+      status: cap(raw.status || existing.status || 'Active'),
+      pass: cap(raw.pass || existing.pass || defaultPass(raw.name || existing.name, raw.empId || existing.empId)),
+      active: String(raw.status || existing.status || 'Active').toLowerCase() !== 'inactive',
+      isAdmin: role.toLowerCase() === 'admin',
+      isManager: role.toLowerCase() === 'manager',
+      bg: raw.bg || existing.bg || badgeColor(idx),
+      joinDate: raw.joinDate || existing.joinDate || (typeof TODAY!=='undefined' ? TODAY : new Date().toISOString().slice(0,10))
+    };
+    if(emp.isAdmin) emp.isManager = false;
+    return emp;
+  }
+  function combineExisting(){
+    var map = new Map();
+    function add(arr){ (arr||[]).forEach(function(e){ if(!e) return; var email = em(e.email); if(!email) return; map.set(email, Object.assign({}, map.get(email)||{}, e)); }); }
+    try{ add(JSON.parse(localStorage.getItem(STORE_KEY)||'[]')); }catch(e){}
+    try{ add(window.empReg||[]); }catch(e){}
+    try{ add(typeof empReg!=='undefined' ? empReg : []); }catch(e){}
+    try{ if(typeof USERS!=='undefined'){ Object.keys(USERS).forEach(function(k){ add([Object.assign({email:k}, USERS[k])]); }); } }catch(e){}
+    return map;
+  }
+  function seedRegistry(force){
+    var already = localStorage.getItem(RESET_KEY) === ACTIVE_FILE_VERSION;
+    if(already && !force){ return loadRegistry(); }
+    var existingMap = combineExisting();
+    var seeded = SEED.map(function(row, idx){ var ex = existingMap.get(em(row.email)) || {}; return normalizeEmp(row, idx, ex); });
+    saveRegistry(seeded, true);
+    localStorage.setItem(RESET_KEY, ACTIVE_FILE_VERSION);
+    return seeded;
+  }
+  function dedupe(list){
+    var emailMap = new Map();
+    (list||[]).forEach(function(e, idx){
+      var emp = normalizeEmp(e, idx, emailMap.get(em(e.email)) || {});
+      if(!emp.email) return;
+      emailMap.set(emp.email, emp);
+    });
+    var usedIds = new Set();
+    var out = Array.from(emailMap.values()).sort(function(a,b){ return (parseInt(a.empId,10)||0) - (parseInt(b.empId,10)||0) || a.name.localeCompare(b.name); });
+    out.forEach(function(e){
+      if(!e.empId || usedIds.has(e.empId)){
+        e.empId = nextEmpId(Array.from(usedIds).map(function(id){ return {empId:id}; }).concat(out));
+      }
+      usedIds.add(e.empId);
+    });
+    return out;
+  }
+  function loadRegistry(){
+    var list = [];
+    try{ list = JSON.parse(localStorage.getItem(STORE_KEY)||'[]'); }catch(e){ list=[]; }
+    if(!Array.isArray(list) || !list.length){ list = seedRegistry(true); }
+    list = dedupe(list);
+    syncGlobals(list);
+    return list;
+  }
+  function saveRegistry(list, skipToast){
+    list = dedupe(list);
+    localStorage.setItem(STORE_KEY, JSON.stringify(list));
+    syncGlobals(list);
+    if(!skipToast) safeToast('✅ Employees saved successfully');
+    return list;
+  }
+  function syncGlobals(list){
+    try{ window.empReg = list; }catch(e){}
+    try{ empReg = list; }catch(e){}
+    try{
+      if(typeof USERS!=='undefined'){
+        Object.keys(USERS).forEach(function(k){ if(!list.some(function(e){ return e.email===em(k); })) USERS[k].active = false; });
+        list.forEach(function(e){
+          USERS[e.email] = Object.assign({}, USERS[e.email]||{}, {
+            name:e.name,
+            pass:e.pass,
+            role:e.role,
+            desig:e.desig,
+            dept:e.dept,
+            empId:e.empId,
+            isAdmin:e.isAdmin,
+            isManager:e.isManager,
+            active:e.active
+          });
+        });
+      }
+    }catch(e){}
+  }
+  function activeEmployees(){ return loadRegistry().filter(function(e){ return e.active!==false; }); }
+  function renderCounters(list){
+    var cont = $('emp-counters'); if(!cont) return;
+    var active = list.filter(function(e){ return e.active!==false; });
+    var inactive = list.filter(function(e){ return e.active===false; });
+    var admins = active.filter(function(e){ return e.role==='Admin'; });
+    var managers = active.filter(function(e){ return e.role==='Manager'; });
+    var users = active.filter(function(e){ return e.role==='User'; });
+    cont.innerHTML = [
+      ['Total Active', active.length, 'tctr-blue'],
+      ['Admins', admins.length, 'tctr-purple'],
+      ['Managers', managers.length, 'tctr-orange'],
+      ['Users', users.length, 'tctr-green'],
+      ['Inactive', inactive.length, 'tctr-red']
+    ].map(function(x){ return '<div class="tctr '+x[2]+'"><div class="tctr-v">'+x[1]+'</div><div class="tctr-l">'+x[0]+'</div></div>'; }).join('');
+  }
+  function renderEmployeeForm(mode, rec){
+    var fp = $('emp-fp'); if(!fp) return;
+    rec = rec || {empId:'',name:'',desig:'',dept:'',email:'',role:'User',status:'Active',pass:''};
+    var roleOpts = ['Admin','Manager','User'];
+    var desigOpts = ['EA','Video Editor','SEO Executive','Graphic Designer','Meta Media Buyer','Web Developer','Accountant','MIS','CEO','Tech','Client Relationship Manager'];
+    var deptOpts = ['Admin','Production','Marketing','Design','Tech','Finance','Manager','General'];
+    function opts(arr, val){ return arr.map(function(o){ return '<option value="'+esc(o)+'"'+(o===val?' selected':'')+'>'+esc(o)+'</option>'; }).join(''); }
+    fp.innerHTML = ''+
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px">'+
+        '<div><div style="font-weight:800;font-size:18px">'+(mode==='new'?'Add New Employee':'Edit Employee')+'</div><div style="font-size:12px;color:var(--muted)">Employee master registry</div></div>'+
+        '<div class="role-badge '+(rec.role==='Admin'?'rb-admin':rec.role==='Manager'?'rb-manager':'rb-user')+'">'+esc(rec.role||'User')+'</div>'+
+      '</div>'+
+      '<div class="fr">'+
+        '<div class="fg"><label class="fl2">Emp ID *</label><input id="ef-id" class="fc" value="'+esc(rec.empId||'')+'" '+(mode==='edit'?'readonly style="background:#f9f9f9;color:var(--muted)"':'placeholder="Auto if blank"')+'></div>'+
+        '<div class="fg"><label class="fl2">Full Name *</label><input id="ef-n" class="fc" value="'+esc(rec.name||'')+'" placeholder="Employee full name"></div>'+
+        '<div class="fg"><label class="fl2">Designation *</label><select id="ef-d" class="fc">'+opts(desigOpts, rec.desig||desigOpts[0])+'</select></div>'+
+        '<div class="fg"><label class="fl2">Department *</label><select id="ef-dept" class="fc">'+opts(deptOpts, rec.dept||deptOpts[0])+'</select></div>'+
+        '<div class="fg"><label class="fl2">Email *</label><input id="ef-e" type="email" class="fc" value="'+esc(rec.email||'')+'" '+(mode==='edit'?'readonly style="background:#f9f9f9;color:var(--muted)"':'placeholder="employee@upgromedia.com"')+'></div>'+
+        '<div class="fg"><label class="fl2">Password '+(mode==='edit'?'':'*')+'</label><input id="ef-p" type="text" class="fc" value="'+esc(rec.pass||'')+'" placeholder="Auto if blank"></div>'+
+        '<div class="fg"><label class="fl2">Portal Role *</label><select id="ef-r" class="fc">'+opts(roleOpts, rec.role||'User')+'</select></div>'+
+        '<div class="fg"><label class="fl2">Status *</label><select id="ef-status" class="fc"><option value="Active"'+((rec.status||'Active')==='Active'?' selected':'')+'>Active</option><option value="Inactive"'+((rec.status||'Active')==='Inactive'?' selected':'')+'>Inactive</option></select></div>'+
+      '</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">'+
+        '<button class="btn bp bsm" onclick="'+(mode==='new'?'saveNewEmp()':'saveEmp(\''+esc(rec.email)+'\')')+'">💾 Save</button>'+
+        (mode==='edit' ? '<button class="btn bd bsm" onclick="delEmp(\''+esc(rec.email)+'\')">🗑 Remove</button>' : '')+
+        '<button class="btn bo bsm" onclick="selectNewEmp()">➕ New</button>'+
+      '</div>';
+  }
+  window.selectNewEmp = function(){ renderEmployeeForm('new'); };
+  window.editEmp = function(email){ var rec = loadRegistry().find(function(e){ return e.email===em(email); }); if(rec) renderEmployeeForm('edit', rec); };
+  window.saveNewEmp = function(){
+    var list = loadRegistry();
+    var email = em(($('ef-e')||{}).value);
+    var empId = cap(($('ef-id')||{}).value) || nextEmpId(list);
+    var name = cap(($('ef-n')||{}).value);
+    var desig = cap(($('ef-d')||{}).value);
+    var dept = cap(($('ef-dept')||{}).value);
+    var role = cap(($('ef-r')||{}).value || 'User');
+    var status = cap(($('ef-status')||{}).value || 'Active');
+    var pass = cap(($('ef-p')||{}).value) || defaultPass(name, empId);
+    if(!name || !email || !desig || !dept){ return safeToast('⚠ Please fill all required employee fields'); }
+    if(list.some(function(e){ return e.email===email; })) return safeToast('⚠ This email already exists');
+    if(list.some(function(e){ return e.empId===empId; })) return safeToast('⚠ This Emp ID already exists');
+    list.push(normalizeEmp({empId:empId,name:name,desig:desig,dept:dept,email:email,role:role,status:status,pass:pass}, list.length));
+    saveRegistry(list);
+    renderEmpList();
+    renderEmployeeForm('edit', loadRegistry().find(function(e){ return e.email===email; }));
+    try{ if(typeof refillEmpDropdown==='function') refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+  };
+  window.saveEmp = function(oldEmail){
+    var email = em(oldEmail);
+    var list = loadRegistry();
+    var idx = list.findIndex(function(e){ return e.email===email; });
+    if(idx<0) return safeToast('⚠ Employee not found');
+    var empId = cap(($('ef-id')||{}).value) || list[idx].empId;
+    var name = cap(($('ef-n')||{}).value);
+    var desig = cap(($('ef-d')||{}).value);
+    var dept = cap(($('ef-dept')||{}).value);
+    var role = cap(($('ef-r')||{}).value || 'User');
+    var status = cap(($('ef-status')||{}).value || 'Active');
+    var pass = cap(($('ef-p')||{}).value) || list[idx].pass || defaultPass(name, empId);
+    if(!name || !desig || !dept) return safeToast('⚠ Please fill all required employee fields');
+    if(list.some(function(e, i){ return i!==idx && e.empId===empId; })) return safeToast('⚠ This Emp ID already exists');
+    list[idx] = normalizeEmp({empId:empId,name:name,desig:desig,dept:dept,email:email,role:role,status:status,pass:pass}, idx, list[idx]);
+    saveRegistry(list);
+    renderEmpList();
+    renderEmployeeForm('edit', list[idx]);
+    try{ if(typeof refillEmpDropdown==='function') refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+  };
+  window.delEmp = function(email){
+    email = em(email);
+    var list = loadRegistry();
+    var idx = list.findIndex(function(e){ return e.email===email; });
+    if(idx<0) return;
+    if(!confirm('Remove '+list[idx].name+' from active employee list?')) return;
+    list[idx].status = 'Inactive';
+    list[idx].active = false;
+    saveRegistry(list);
+    renderEmpList();
+    $('emp-fp').innerHTML = '<div style="text-align:center;padding:50px 20px;color:var(--muted)"><div style="font-size:40px;margin-bottom:10px">🗑</div><div style="font-weight:700;margin-bottom:4px">Employee removed from active portal list</div><div style="font-size:12px">Record saved as inactive</div></div>';
+    try{ if(typeof refillEmpDropdown==='function') refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+  };
+  window.renderEmpList = function(){
+    var q = String((($('emp-q')||{}).value)||'').trim().toLowerCase();
+    var list = loadRegistry();
+    renderCounters(list);
+    var filtered = list.filter(function(e){
+      var blob = [e.empId,e.name,e.desig,e.dept,e.email,e.role,e.status].join(' ').toLowerCase();
+      return blob.indexOf(q)>-1;
+    });
+    var cont = $('emp-items'); if(!cont) return;
+    if(!filtered.length){ cont.innerHTML = '<div style="padding:16px;color:var(--muted)">No employees matched your search.</div>'; return; }
+    cont.innerHTML = filtered.map(function(e, i){
+      var active = e.active!==false && e.status!=='Inactive';
+      return ''+
+        '<div class="ei" onclick="editEmp(\''+esc(e.email)+'\')">'+
+          '<div class="ei-av" style="background:'+esc(e.bg||badgeColor(i))+'">'+esc(String(e.name||'?').trim().charAt(0).toUpperCase())+'</div>'+
+          '<div class="ei-info">'+
+            '<div class="ei-name">'+esc(e.empId)+' · '+esc(e.name)+'</div>'+
+            '<div class="ei-role">'+esc(e.desig)+' · '+esc(e.dept)+' · '+esc(e.role)+'</div>'+
+            '<div class="ei-role">'+esc(e.email)+'</div>'+
+          '</div>'+
+          '<div class="ei-dot" style="background:'+(active?'#00B67A':'#E53935')+'"></div>'+
+        '</div>';
+    }).join('');
+  };
+  window.initEmpReg = function(force){
+    if(force) seedRegistry(true);
+    return loadRegistry();
+  };
+  var oldRefill = window.refillEmpDropdown;
+  window.refillEmpDropdown = function(){
+    var list = activeEmployees();
+    var candidates = [];
+    ['task-emp','assignEmployee','assign-to','assignee','emp-select','taskAssignee','task-assignee','meeting-attendees'].forEach(function(id){ var el=$(id); if(el) candidates.push(el); });
+    document.querySelectorAll('select').forEach(function(sel){
+      var label = ((sel.id||'')+' '+(sel.name||'')+' '+(sel.getAttribute('aria-label')||'')+' '+(sel.closest('.fg')?sel.closest('.fg').innerText:'')).toLowerCase();
+      if(/assign|employee|attendee|assignee|member/.test(label)) candidates.push(sel);
+    });
+    var seen = new Set();
+    candidates.forEach(function(sel){
+      if(!sel || seen.has(sel)) return;
+      seen.add(sel);
+      var keep = em(sel.value);
+      var first = sel.querySelector('option[value=""]') || sel.querySelector('option');
+      var ph = (first && !String(first.value||'').includes('@')) ? (first.textContent||'— Select Employee —') : '— Select Employee —';
+      sel.innerHTML = '<option value="">'+esc(ph)+'</option>';
+      list.forEach(function(e){
+        var opt = document.createElement('option');
+        opt.value = e.email;
+        opt.textContent = e.empId + ' — ' + e.name + ' — ' + e.desig;
+        sel.appendChild(opt);
+      });
+      if(keep && Array.from(sel.options).some(function(o){ return em(o.value)===keep; })) sel.value = keep;
+    });
+    if(typeof oldRefill==='function'){ try{ oldRefill(); }catch(e){} }
+  };
+  window.fixDuplicateEmployeesNow = function(){
+    saveRegistry(loadRegistry(), true);
+    renderEmpList();
+    try{ window.refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+    safeToast('✅ Employees cleared and rebuilt from master list');
+  };
+  window.resetEmployeesFromMasterImage = function(){
+    seedRegistry(true);
+    renderEmpList();
+    try{ window.refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+    safeToast('✅ Employee master list reset successfully');
+  };
+  // initialize once for this file version
+  seedRegistry(false);
+  try{ window.refillEmpDropdown(); }catch(e){}
+})();
+</script>
+
+</body>
    No existing code change required.
    ========================================================= */
 (function(){
@@ -5142,7 +6087,322 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
   <script>
 /* ============================================================
    EMPLOYEE EMAIL EDITABLE PATCH + ISHIKA SAXENA EMAIL FIX
-   Paste this just before </body>
+   Paste this just before 
+<script>
+(function(){
+  var STORE_KEY = 'upgro_emp_dyn';
+  var RESET_KEY = 'upgro_emp_seed_reset_v20260506';
+  var ACTIVE_FILE_VERSION = 'EMP_IMG_SEED_V1';
+  var SEED = [
+    {empId:'1001', name:'Ritu Tyagi', desig:'EA', dept:'Admin', email:'ritutyagiea@upgromedia.com', role:'Admin', status:'Active'},
+    {empId:'1002', name:'Vishal Srivastava', desig:'Video Editor', dept:'Production', email:'vishal.editor@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1003', name:'Ankit Prajapati', desig:'SEO Executive', dept:'Marketing', email:'ankit.seo@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1004', name:'Harsh Kumar', desig:'Graphic Designer', dept:'Design', email:'harsh.graphic@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1005', name:'Vikas Pandey', desig:'Video Editor', dept:'Production', email:'vikasvideoedit@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1006', name:'Abhishek Kasaudhan', desig:'Meta Media Buyer', dept:'Marketing', email:'abhishek.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1007', name:'Harsh Verma', desig:'Video Editor', dept:'Production', email:'harsh.editor@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1008', name:'Dharmendra Sharma', desig:'Web Developer', dept:'Tech', email:'dharmendra.web@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1009', name:'Shubhi Singh', desig:'Meta Media Buyer', dept:'Manager', email:'shubhi.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1010', name:'Adarsh Srivastava', desig:'Web Developer', dept:'Tech', email:'adarsh.web@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1011', name:'Arpit Yadav', desig:'Accountant', dept:'Finance', email:'arpit@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1012', name:'Adarsh Singh', desig:'MIS', dept:'Admin', email:'adarsh.mis@upgromedia.com', role:'Admin', status:'Active'},
+    {empId:'1013', name:'Dheeraj Sir', desig:'CEO', dept:'Admin', email:'dhiraj.jaiswal@upgromedia.com', role:'Admin', status:'Active'},
+    {empId:'1014', name:'Surya Singh', desig:'Meta Media Buyer', dept:'Marketing', email:'surya.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1015', name:'Neeraj Kumar Yadav', desig:'Meta Media Buyer', dept:'Marketing', email:'neeraj.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1016', name:'Chandrakala Waldia', desig:'Meta Media Buyer', dept:'Marketing', email:'chandrakala.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1017', name:'Tarun Verma', desig:'Tech', dept:'Admin', email:'vraj9424@gmail.com', role:'Admin', status:'Active'},
+    {empId:'1018', name:'Ravi Singh', desig:'Graphic Designer', dept:'Marketing', email:'ravi.graphics@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1019', name:'Ishika Saxena', desig:'Client Relationship Manager', dept:'Marketing', email:'ishika.crm@upgromedia.com', role:'Manager', status:'Active'}
+  ];
+
+  function $(id){ return document.getElementById(id); }
+  function safeToast(msg){ try{ if(typeof toast==='function') toast(msg); }catch(e){} }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; }); }
+  function em(v){ return String(v||'').trim().toLowerCase(); }
+  function cap(v){ return String(v||'').trim(); }
+  function boolRole(role, type){ role = String(role||'').toLowerCase(); return role===type; }
+  function defaultPass(name, empId){ var first = String(name||'User').trim().split(/\s+/)[0] || 'User'; return first.replace(/[^A-Za-z]/g,'') + '@' + (empId || '1000'); }
+  function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
+  function nextEmpId(list){
+    var max = 1019;
+    (list||[]).forEach(function(e){ var n = parseInt(e.empId,10); if(!isNaN(n) && n>max) max=n; });
+    return String(max+1);
+  }
+  function badgeColor(i){
+    try{ if(Array.isArray(CLRS) && CLRS.length) return CLRS[i % CLRS.length]; }catch(e){}
+    var cols=['#0B84FF','#7C3AED','#00B67A','#F59E0B','#E53935','#0E9F8E'];
+    return cols[i % cols.length];
+  }
+  function normalizeEmp(raw, idx, existing){
+    existing = existing || {};
+    var role = cap(raw.role || existing.role || 'User');
+    var emp = {
+      empId: cap(raw.empId || existing.empId || ''),
+      name: cap(raw.name || existing.name || ''),
+      desig: cap(raw.desig || existing.desig || 'Team'),
+      dept: cap(raw.dept || existing.dept || 'General'),
+      email: em(raw.email || existing.email || ''),
+      role: role,
+      status: cap(raw.status || existing.status || 'Active'),
+      pass: cap(raw.pass || existing.pass || defaultPass(raw.name || existing.name, raw.empId || existing.empId)),
+      active: String(raw.status || existing.status || 'Active').toLowerCase() !== 'inactive',
+      isAdmin: role.toLowerCase() === 'admin',
+      isManager: role.toLowerCase() === 'manager',
+      bg: raw.bg || existing.bg || badgeColor(idx),
+      joinDate: raw.joinDate || existing.joinDate || (typeof TODAY!=='undefined' ? TODAY : new Date().toISOString().slice(0,10))
+    };
+    if(emp.isAdmin) emp.isManager = false;
+    return emp;
+  }
+  function combineExisting(){
+    var map = new Map();
+    function add(arr){ (arr||[]).forEach(function(e){ if(!e) return; var email = em(e.email); if(!email) return; map.set(email, Object.assign({}, map.get(email)||{}, e)); }); }
+    try{ add(JSON.parse(localStorage.getItem(STORE_KEY)||'[]')); }catch(e){}
+    try{ add(window.empReg||[]); }catch(e){}
+    try{ add(typeof empReg!=='undefined' ? empReg : []); }catch(e){}
+    try{ if(typeof USERS!=='undefined'){ Object.keys(USERS).forEach(function(k){ add([Object.assign({email:k}, USERS[k])]); }); } }catch(e){}
+    return map;
+  }
+  function seedRegistry(force){
+    var already = localStorage.getItem(RESET_KEY) === ACTIVE_FILE_VERSION;
+    if(already && !force){ return loadRegistry(); }
+    var existingMap = combineExisting();
+    var seeded = SEED.map(function(row, idx){ var ex = existingMap.get(em(row.email)) || {}; return normalizeEmp(row, idx, ex); });
+    saveRegistry(seeded, true);
+    localStorage.setItem(RESET_KEY, ACTIVE_FILE_VERSION);
+    return seeded;
+  }
+  function dedupe(list){
+    var emailMap = new Map();
+    (list||[]).forEach(function(e, idx){
+      var emp = normalizeEmp(e, idx, emailMap.get(em(e.email)) || {});
+      if(!emp.email) return;
+      emailMap.set(emp.email, emp);
+    });
+    var usedIds = new Set();
+    var out = Array.from(emailMap.values()).sort(function(a,b){ return (parseInt(a.empId,10)||0) - (parseInt(b.empId,10)||0) || a.name.localeCompare(b.name); });
+    out.forEach(function(e){
+      if(!e.empId || usedIds.has(e.empId)){
+        e.empId = nextEmpId(Array.from(usedIds).map(function(id){ return {empId:id}; }).concat(out));
+      }
+      usedIds.add(e.empId);
+    });
+    return out;
+  }
+  function loadRegistry(){
+    var list = [];
+    try{ list = JSON.parse(localStorage.getItem(STORE_KEY)||'[]'); }catch(e){ list=[]; }
+    if(!Array.isArray(list) || !list.length){ list = seedRegistry(true); }
+    list = dedupe(list);
+    syncGlobals(list);
+    return list;
+  }
+  function saveRegistry(list, skipToast){
+    list = dedupe(list);
+    localStorage.setItem(STORE_KEY, JSON.stringify(list));
+    syncGlobals(list);
+    if(!skipToast) safeToast('✅ Employees saved successfully');
+    return list;
+  }
+  function syncGlobals(list){
+    try{ window.empReg = list; }catch(e){}
+    try{ empReg = list; }catch(e){}
+    try{
+      if(typeof USERS!=='undefined'){
+        Object.keys(USERS).forEach(function(k){ if(!list.some(function(e){ return e.email===em(k); })) USERS[k].active = false; });
+        list.forEach(function(e){
+          USERS[e.email] = Object.assign({}, USERS[e.email]||{}, {
+            name:e.name,
+            pass:e.pass,
+            role:e.role,
+            desig:e.desig,
+            dept:e.dept,
+            empId:e.empId,
+            isAdmin:e.isAdmin,
+            isManager:e.isManager,
+            active:e.active
+          });
+        });
+      }
+    }catch(e){}
+  }
+  function activeEmployees(){ return loadRegistry().filter(function(e){ return e.active!==false; }); }
+  function renderCounters(list){
+    var cont = $('emp-counters'); if(!cont) return;
+    var active = list.filter(function(e){ return e.active!==false; });
+    var inactive = list.filter(function(e){ return e.active===false; });
+    var admins = active.filter(function(e){ return e.role==='Admin'; });
+    var managers = active.filter(function(e){ return e.role==='Manager'; });
+    var users = active.filter(function(e){ return e.role==='User'; });
+    cont.innerHTML = [
+      ['Total Active', active.length, 'tctr-blue'],
+      ['Admins', admins.length, 'tctr-purple'],
+      ['Managers', managers.length, 'tctr-orange'],
+      ['Users', users.length, 'tctr-green'],
+      ['Inactive', inactive.length, 'tctr-red']
+    ].map(function(x){ return '<div class="tctr '+x[2]+'"><div class="tctr-v">'+x[1]+'</div><div class="tctr-l">'+x[0]+'</div></div>'; }).join('');
+  }
+  function renderEmployeeForm(mode, rec){
+    var fp = $('emp-fp'); if(!fp) return;
+    rec = rec || {empId:'',name:'',desig:'',dept:'',email:'',role:'User',status:'Active',pass:''};
+    var roleOpts = ['Admin','Manager','User'];
+    var desigOpts = ['EA','Video Editor','SEO Executive','Graphic Designer','Meta Media Buyer','Web Developer','Accountant','MIS','CEO','Tech','Client Relationship Manager'];
+    var deptOpts = ['Admin','Production','Marketing','Design','Tech','Finance','Manager','General'];
+    function opts(arr, val){ return arr.map(function(o){ return '<option value="'+esc(o)+'"'+(o===val?' selected':'')+'>'+esc(o)+'</option>'; }).join(''); }
+    fp.innerHTML = ''+
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px">'+
+        '<div><div style="font-weight:800;font-size:18px">'+(mode==='new'?'Add New Employee':'Edit Employee')+'</div><div style="font-size:12px;color:var(--muted)">Employee master registry</div></div>'+
+        '<div class="role-badge '+(rec.role==='Admin'?'rb-admin':rec.role==='Manager'?'rb-manager':'rb-user')+'">'+esc(rec.role||'User')+'</div>'+
+      '</div>'+
+      '<div class="fr">'+
+        '<div class="fg"><label class="fl2">Emp ID *</label><input id="ef-id" class="fc" value="'+esc(rec.empId||'')+'" '+(mode==='edit'?'readonly style="background:#f9f9f9;color:var(--muted)"':'placeholder="Auto if blank"')+'></div>'+
+        '<div class="fg"><label class="fl2">Full Name *</label><input id="ef-n" class="fc" value="'+esc(rec.name||'')+'" placeholder="Employee full name"></div>'+
+        '<div class="fg"><label class="fl2">Designation *</label><select id="ef-d" class="fc">'+opts(desigOpts, rec.desig||desigOpts[0])+'</select></div>'+
+        '<div class="fg"><label class="fl2">Department *</label><select id="ef-dept" class="fc">'+opts(deptOpts, rec.dept||deptOpts[0])+'</select></div>'+
+        '<div class="fg"><label class="fl2">Email *</label><input id="ef-e" type="email" class="fc" value="'+esc(rec.email||'')+'" '+(mode==='edit'?'readonly style="background:#f9f9f9;color:var(--muted)"':'placeholder="employee@upgromedia.com"')+'></div>'+
+        '<div class="fg"><label class="fl2">Password '+(mode==='edit'?'':'*')+'</label><input id="ef-p" type="text" class="fc" value="'+esc(rec.pass||'')+'" placeholder="Auto if blank"></div>'+
+        '<div class="fg"><label class="fl2">Portal Role *</label><select id="ef-r" class="fc">'+opts(roleOpts, rec.role||'User')+'</select></div>'+
+        '<div class="fg"><label class="fl2">Status *</label><select id="ef-status" class="fc"><option value="Active"'+((rec.status||'Active')==='Active'?' selected':'')+'>Active</option><option value="Inactive"'+((rec.status||'Active')==='Inactive'?' selected':'')+'>Inactive</option></select></div>'+
+      '</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">'+
+        '<button class="btn bp bsm" onclick="'+(mode==='new'?'saveNewEmp()':'saveEmp(\''+esc(rec.email)+'\')')+'">💾 Save</button>'+
+        (mode==='edit' ? '<button class="btn bd bsm" onclick="delEmp(\''+esc(rec.email)+'\')">🗑 Remove</button>' : '')+
+        '<button class="btn bo bsm" onclick="selectNewEmp()">➕ New</button>'+
+      '</div>';
+  }
+  window.selectNewEmp = function(){ renderEmployeeForm('new'); };
+  window.editEmp = function(email){ var rec = loadRegistry().find(function(e){ return e.email===em(email); }); if(rec) renderEmployeeForm('edit', rec); };
+  window.saveNewEmp = function(){
+    var list = loadRegistry();
+    var email = em(($('ef-e')||{}).value);
+    var empId = cap(($('ef-id')||{}).value) || nextEmpId(list);
+    var name = cap(($('ef-n')||{}).value);
+    var desig = cap(($('ef-d')||{}).value);
+    var dept = cap(($('ef-dept')||{}).value);
+    var role = cap(($('ef-r')||{}).value || 'User');
+    var status = cap(($('ef-status')||{}).value || 'Active');
+    var pass = cap(($('ef-p')||{}).value) || defaultPass(name, empId);
+    if(!name || !email || !desig || !dept){ return safeToast('⚠ Please fill all required employee fields'); }
+    if(list.some(function(e){ return e.email===email; })) return safeToast('⚠ This email already exists');
+    if(list.some(function(e){ return e.empId===empId; })) return safeToast('⚠ This Emp ID already exists');
+    list.push(normalizeEmp({empId:empId,name:name,desig:desig,dept:dept,email:email,role:role,status:status,pass:pass}, list.length));
+    saveRegistry(list);
+    renderEmpList();
+    renderEmployeeForm('edit', loadRegistry().find(function(e){ return e.email===email; }));
+    try{ if(typeof refillEmpDropdown==='function') refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+  };
+  window.saveEmp = function(oldEmail){
+    var email = em(oldEmail);
+    var list = loadRegistry();
+    var idx = list.findIndex(function(e){ return e.email===email; });
+    if(idx<0) return safeToast('⚠ Employee not found');
+    var empId = cap(($('ef-id')||{}).value) || list[idx].empId;
+    var name = cap(($('ef-n')||{}).value);
+    var desig = cap(($('ef-d')||{}).value);
+    var dept = cap(($('ef-dept')||{}).value);
+    var role = cap(($('ef-r')||{}).value || 'User');
+    var status = cap(($('ef-status')||{}).value || 'Active');
+    var pass = cap(($('ef-p')||{}).value) || list[idx].pass || defaultPass(name, empId);
+    if(!name || !desig || !dept) return safeToast('⚠ Please fill all required employee fields');
+    if(list.some(function(e, i){ return i!==idx && e.empId===empId; })) return safeToast('⚠ This Emp ID already exists');
+    list[idx] = normalizeEmp({empId:empId,name:name,desig:desig,dept:dept,email:email,role:role,status:status,pass:pass}, idx, list[idx]);
+    saveRegistry(list);
+    renderEmpList();
+    renderEmployeeForm('edit', list[idx]);
+    try{ if(typeof refillEmpDropdown==='function') refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+  };
+  window.delEmp = function(email){
+    email = em(email);
+    var list = loadRegistry();
+    var idx = list.findIndex(function(e){ return e.email===email; });
+    if(idx<0) return;
+    if(!confirm('Remove '+list[idx].name+' from active employee list?')) return;
+    list[idx].status = 'Inactive';
+    list[idx].active = false;
+    saveRegistry(list);
+    renderEmpList();
+    $('emp-fp').innerHTML = '<div style="text-align:center;padding:50px 20px;color:var(--muted)"><div style="font-size:40px;margin-bottom:10px">🗑</div><div style="font-weight:700;margin-bottom:4px">Employee removed from active portal list</div><div style="font-size:12px">Record saved as inactive</div></div>';
+    try{ if(typeof refillEmpDropdown==='function') refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+  };
+  window.renderEmpList = function(){
+    var q = String((($('emp-q')||{}).value)||'').trim().toLowerCase();
+    var list = loadRegistry();
+    renderCounters(list);
+    var filtered = list.filter(function(e){
+      var blob = [e.empId,e.name,e.desig,e.dept,e.email,e.role,e.status].join(' ').toLowerCase();
+      return blob.indexOf(q)>-1;
+    });
+    var cont = $('emp-items'); if(!cont) return;
+    if(!filtered.length){ cont.innerHTML = '<div style="padding:16px;color:var(--muted)">No employees matched your search.</div>'; return; }
+    cont.innerHTML = filtered.map(function(e, i){
+      var active = e.active!==false && e.status!=='Inactive';
+      return ''+
+        '<div class="ei" onclick="editEmp(\''+esc(e.email)+'\')">'+
+          '<div class="ei-av" style="background:'+esc(e.bg||badgeColor(i))+'">'+esc(String(e.name||'?').trim().charAt(0).toUpperCase())+'</div>'+
+          '<div class="ei-info">'+
+            '<div class="ei-name">'+esc(e.empId)+' · '+esc(e.name)+'</div>'+
+            '<div class="ei-role">'+esc(e.desig)+' · '+esc(e.dept)+' · '+esc(e.role)+'</div>'+
+            '<div class="ei-role">'+esc(e.email)+'</div>'+
+          '</div>'+
+          '<div class="ei-dot" style="background:'+(active?'#00B67A':'#E53935')+'"></div>'+
+        '</div>';
+    }).join('');
+  };
+  window.initEmpReg = function(force){
+    if(force) seedRegistry(true);
+    return loadRegistry();
+  };
+  var oldRefill = window.refillEmpDropdown;
+  window.refillEmpDropdown = function(){
+    var list = activeEmployees();
+    var candidates = [];
+    ['task-emp','assignEmployee','assign-to','assignee','emp-select','taskAssignee','task-assignee','meeting-attendees'].forEach(function(id){ var el=$(id); if(el) candidates.push(el); });
+    document.querySelectorAll('select').forEach(function(sel){
+      var label = ((sel.id||'')+' '+(sel.name||'')+' '+(sel.getAttribute('aria-label')||'')+' '+(sel.closest('.fg')?sel.closest('.fg').innerText:'')).toLowerCase();
+      if(/assign|employee|attendee|assignee|member/.test(label)) candidates.push(sel);
+    });
+    var seen = new Set();
+    candidates.forEach(function(sel){
+      if(!sel || seen.has(sel)) return;
+      seen.add(sel);
+      var keep = em(sel.value);
+      var first = sel.querySelector('option[value=""]') || sel.querySelector('option');
+      var ph = (first && !String(first.value||'').includes('@')) ? (first.textContent||'— Select Employee —') : '— Select Employee —';
+      sel.innerHTML = '<option value="">'+esc(ph)+'</option>';
+      list.forEach(function(e){
+        var opt = document.createElement('option');
+        opt.value = e.email;
+        opt.textContent = e.empId + ' — ' + e.name + ' — ' + e.desig;
+        sel.appendChild(opt);
+      });
+      if(keep && Array.from(sel.options).some(function(o){ return em(o.value)===keep; })) sel.value = keep;
+    });
+    if(typeof oldRefill==='function'){ try{ oldRefill(); }catch(e){} }
+  };
+  window.fixDuplicateEmployeesNow = function(){
+    saveRegistry(loadRegistry(), true);
+    renderEmpList();
+    try{ window.refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+    safeToast('✅ Employees cleared and rebuilt from master list');
+  };
+  window.resetEmployeesFromMasterImage = function(){
+    seedRegistry(true);
+    renderEmpList();
+    try{ window.refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+    safeToast('✅ Employee master list reset successfully');
+  };
+  // initialize once for this file version
+  seedRegistry(false);
+  try{ window.refillEmpDropdown(); }catch(e){}
+})();
+</script>
+
+</body>
    Do not change any existing code above.
    ============================================================ */
 (function(){
@@ -5696,7 +6956,322 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
 /* ============================================================
    ONLY ISHIKA SAXENA EMAIL FIX
    Correct email: ishika.crm@upgromedia.com
-   Paste just before </body>
+   Paste just before 
+<script>
+(function(){
+  var STORE_KEY = 'upgro_emp_dyn';
+  var RESET_KEY = 'upgro_emp_seed_reset_v20260506';
+  var ACTIVE_FILE_VERSION = 'EMP_IMG_SEED_V1';
+  var SEED = [
+    {empId:'1001', name:'Ritu Tyagi', desig:'EA', dept:'Admin', email:'ritutyagiea@upgromedia.com', role:'Admin', status:'Active'},
+    {empId:'1002', name:'Vishal Srivastava', desig:'Video Editor', dept:'Production', email:'vishal.editor@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1003', name:'Ankit Prajapati', desig:'SEO Executive', dept:'Marketing', email:'ankit.seo@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1004', name:'Harsh Kumar', desig:'Graphic Designer', dept:'Design', email:'harsh.graphic@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1005', name:'Vikas Pandey', desig:'Video Editor', dept:'Production', email:'vikasvideoedit@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1006', name:'Abhishek Kasaudhan', desig:'Meta Media Buyer', dept:'Marketing', email:'abhishek.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1007', name:'Harsh Verma', desig:'Video Editor', dept:'Production', email:'harsh.editor@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1008', name:'Dharmendra Sharma', desig:'Web Developer', dept:'Tech', email:'dharmendra.web@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1009', name:'Shubhi Singh', desig:'Meta Media Buyer', dept:'Manager', email:'shubhi.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1010', name:'Adarsh Srivastava', desig:'Web Developer', dept:'Tech', email:'adarsh.web@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1011', name:'Arpit Yadav', desig:'Accountant', dept:'Finance', email:'arpit@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1012', name:'Adarsh Singh', desig:'MIS', dept:'Admin', email:'adarsh.mis@upgromedia.com', role:'Admin', status:'Active'},
+    {empId:'1013', name:'Dheeraj Sir', desig:'CEO', dept:'Admin', email:'dhiraj.jaiswal@upgromedia.com', role:'Admin', status:'Active'},
+    {empId:'1014', name:'Surya Singh', desig:'Meta Media Buyer', dept:'Marketing', email:'surya.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1015', name:'Neeraj Kumar Yadav', desig:'Meta Media Buyer', dept:'Marketing', email:'neeraj.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1016', name:'Chandrakala Waldia', desig:'Meta Media Buyer', dept:'Marketing', email:'chandrakala.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1017', name:'Tarun Verma', desig:'Tech', dept:'Admin', email:'vraj9424@gmail.com', role:'Admin', status:'Active'},
+    {empId:'1018', name:'Ravi Singh', desig:'Graphic Designer', dept:'Marketing', email:'ravi.graphics@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1019', name:'Ishika Saxena', desig:'Client Relationship Manager', dept:'Marketing', email:'ishika.crm@upgromedia.com', role:'Manager', status:'Active'}
+  ];
+
+  function $(id){ return document.getElementById(id); }
+  function safeToast(msg){ try{ if(typeof toast==='function') toast(msg); }catch(e){} }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; }); }
+  function em(v){ return String(v||'').trim().toLowerCase(); }
+  function cap(v){ return String(v||'').trim(); }
+  function boolRole(role, type){ role = String(role||'').toLowerCase(); return role===type; }
+  function defaultPass(name, empId){ var first = String(name||'User').trim().split(/\s+/)[0] || 'User'; return first.replace(/[^A-Za-z]/g,'') + '@' + (empId || '1000'); }
+  function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
+  function nextEmpId(list){
+    var max = 1019;
+    (list||[]).forEach(function(e){ var n = parseInt(e.empId,10); if(!isNaN(n) && n>max) max=n; });
+    return String(max+1);
+  }
+  function badgeColor(i){
+    try{ if(Array.isArray(CLRS) && CLRS.length) return CLRS[i % CLRS.length]; }catch(e){}
+    var cols=['#0B84FF','#7C3AED','#00B67A','#F59E0B','#E53935','#0E9F8E'];
+    return cols[i % cols.length];
+  }
+  function normalizeEmp(raw, idx, existing){
+    existing = existing || {};
+    var role = cap(raw.role || existing.role || 'User');
+    var emp = {
+      empId: cap(raw.empId || existing.empId || ''),
+      name: cap(raw.name || existing.name || ''),
+      desig: cap(raw.desig || existing.desig || 'Team'),
+      dept: cap(raw.dept || existing.dept || 'General'),
+      email: em(raw.email || existing.email || ''),
+      role: role,
+      status: cap(raw.status || existing.status || 'Active'),
+      pass: cap(raw.pass || existing.pass || defaultPass(raw.name || existing.name, raw.empId || existing.empId)),
+      active: String(raw.status || existing.status || 'Active').toLowerCase() !== 'inactive',
+      isAdmin: role.toLowerCase() === 'admin',
+      isManager: role.toLowerCase() === 'manager',
+      bg: raw.bg || existing.bg || badgeColor(idx),
+      joinDate: raw.joinDate || existing.joinDate || (typeof TODAY!=='undefined' ? TODAY : new Date().toISOString().slice(0,10))
+    };
+    if(emp.isAdmin) emp.isManager = false;
+    return emp;
+  }
+  function combineExisting(){
+    var map = new Map();
+    function add(arr){ (arr||[]).forEach(function(e){ if(!e) return; var email = em(e.email); if(!email) return; map.set(email, Object.assign({}, map.get(email)||{}, e)); }); }
+    try{ add(JSON.parse(localStorage.getItem(STORE_KEY)||'[]')); }catch(e){}
+    try{ add(window.empReg||[]); }catch(e){}
+    try{ add(typeof empReg!=='undefined' ? empReg : []); }catch(e){}
+    try{ if(typeof USERS!=='undefined'){ Object.keys(USERS).forEach(function(k){ add([Object.assign({email:k}, USERS[k])]); }); } }catch(e){}
+    return map;
+  }
+  function seedRegistry(force){
+    var already = localStorage.getItem(RESET_KEY) === ACTIVE_FILE_VERSION;
+    if(already && !force){ return loadRegistry(); }
+    var existingMap = combineExisting();
+    var seeded = SEED.map(function(row, idx){ var ex = existingMap.get(em(row.email)) || {}; return normalizeEmp(row, idx, ex); });
+    saveRegistry(seeded, true);
+    localStorage.setItem(RESET_KEY, ACTIVE_FILE_VERSION);
+    return seeded;
+  }
+  function dedupe(list){
+    var emailMap = new Map();
+    (list||[]).forEach(function(e, idx){
+      var emp = normalizeEmp(e, idx, emailMap.get(em(e.email)) || {});
+      if(!emp.email) return;
+      emailMap.set(emp.email, emp);
+    });
+    var usedIds = new Set();
+    var out = Array.from(emailMap.values()).sort(function(a,b){ return (parseInt(a.empId,10)||0) - (parseInt(b.empId,10)||0) || a.name.localeCompare(b.name); });
+    out.forEach(function(e){
+      if(!e.empId || usedIds.has(e.empId)){
+        e.empId = nextEmpId(Array.from(usedIds).map(function(id){ return {empId:id}; }).concat(out));
+      }
+      usedIds.add(e.empId);
+    });
+    return out;
+  }
+  function loadRegistry(){
+    var list = [];
+    try{ list = JSON.parse(localStorage.getItem(STORE_KEY)||'[]'); }catch(e){ list=[]; }
+    if(!Array.isArray(list) || !list.length){ list = seedRegistry(true); }
+    list = dedupe(list);
+    syncGlobals(list);
+    return list;
+  }
+  function saveRegistry(list, skipToast){
+    list = dedupe(list);
+    localStorage.setItem(STORE_KEY, JSON.stringify(list));
+    syncGlobals(list);
+    if(!skipToast) safeToast('✅ Employees saved successfully');
+    return list;
+  }
+  function syncGlobals(list){
+    try{ window.empReg = list; }catch(e){}
+    try{ empReg = list; }catch(e){}
+    try{
+      if(typeof USERS!=='undefined'){
+        Object.keys(USERS).forEach(function(k){ if(!list.some(function(e){ return e.email===em(k); })) USERS[k].active = false; });
+        list.forEach(function(e){
+          USERS[e.email] = Object.assign({}, USERS[e.email]||{}, {
+            name:e.name,
+            pass:e.pass,
+            role:e.role,
+            desig:e.desig,
+            dept:e.dept,
+            empId:e.empId,
+            isAdmin:e.isAdmin,
+            isManager:e.isManager,
+            active:e.active
+          });
+        });
+      }
+    }catch(e){}
+  }
+  function activeEmployees(){ return loadRegistry().filter(function(e){ return e.active!==false; }); }
+  function renderCounters(list){
+    var cont = $('emp-counters'); if(!cont) return;
+    var active = list.filter(function(e){ return e.active!==false; });
+    var inactive = list.filter(function(e){ return e.active===false; });
+    var admins = active.filter(function(e){ return e.role==='Admin'; });
+    var managers = active.filter(function(e){ return e.role==='Manager'; });
+    var users = active.filter(function(e){ return e.role==='User'; });
+    cont.innerHTML = [
+      ['Total Active', active.length, 'tctr-blue'],
+      ['Admins', admins.length, 'tctr-purple'],
+      ['Managers', managers.length, 'tctr-orange'],
+      ['Users', users.length, 'tctr-green'],
+      ['Inactive', inactive.length, 'tctr-red']
+    ].map(function(x){ return '<div class="tctr '+x[2]+'"><div class="tctr-v">'+x[1]+'</div><div class="tctr-l">'+x[0]+'</div></div>'; }).join('');
+  }
+  function renderEmployeeForm(mode, rec){
+    var fp = $('emp-fp'); if(!fp) return;
+    rec = rec || {empId:'',name:'',desig:'',dept:'',email:'',role:'User',status:'Active',pass:''};
+    var roleOpts = ['Admin','Manager','User'];
+    var desigOpts = ['EA','Video Editor','SEO Executive','Graphic Designer','Meta Media Buyer','Web Developer','Accountant','MIS','CEO','Tech','Client Relationship Manager'];
+    var deptOpts = ['Admin','Production','Marketing','Design','Tech','Finance','Manager','General'];
+    function opts(arr, val){ return arr.map(function(o){ return '<option value="'+esc(o)+'"'+(o===val?' selected':'')+'>'+esc(o)+'</option>'; }).join(''); }
+    fp.innerHTML = ''+
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px">'+
+        '<div><div style="font-weight:800;font-size:18px">'+(mode==='new'?'Add New Employee':'Edit Employee')+'</div><div style="font-size:12px;color:var(--muted)">Employee master registry</div></div>'+
+        '<div class="role-badge '+(rec.role==='Admin'?'rb-admin':rec.role==='Manager'?'rb-manager':'rb-user')+'">'+esc(rec.role||'User')+'</div>'+
+      '</div>'+
+      '<div class="fr">'+
+        '<div class="fg"><label class="fl2">Emp ID *</label><input id="ef-id" class="fc" value="'+esc(rec.empId||'')+'" '+(mode==='edit'?'readonly style="background:#f9f9f9;color:var(--muted)"':'placeholder="Auto if blank"')+'></div>'+
+        '<div class="fg"><label class="fl2">Full Name *</label><input id="ef-n" class="fc" value="'+esc(rec.name||'')+'" placeholder="Employee full name"></div>'+
+        '<div class="fg"><label class="fl2">Designation *</label><select id="ef-d" class="fc">'+opts(desigOpts, rec.desig||desigOpts[0])+'</select></div>'+
+        '<div class="fg"><label class="fl2">Department *</label><select id="ef-dept" class="fc">'+opts(deptOpts, rec.dept||deptOpts[0])+'</select></div>'+
+        '<div class="fg"><label class="fl2">Email *</label><input id="ef-e" type="email" class="fc" value="'+esc(rec.email||'')+'" '+(mode==='edit'?'readonly style="background:#f9f9f9;color:var(--muted)"':'placeholder="employee@upgromedia.com"')+'></div>'+
+        '<div class="fg"><label class="fl2">Password '+(mode==='edit'?'':'*')+'</label><input id="ef-p" type="text" class="fc" value="'+esc(rec.pass||'')+'" placeholder="Auto if blank"></div>'+
+        '<div class="fg"><label class="fl2">Portal Role *</label><select id="ef-r" class="fc">'+opts(roleOpts, rec.role||'User')+'</select></div>'+
+        '<div class="fg"><label class="fl2">Status *</label><select id="ef-status" class="fc"><option value="Active"'+((rec.status||'Active')==='Active'?' selected':'')+'>Active</option><option value="Inactive"'+((rec.status||'Active')==='Inactive'?' selected':'')+'>Inactive</option></select></div>'+
+      '</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">'+
+        '<button class="btn bp bsm" onclick="'+(mode==='new'?'saveNewEmp()':'saveEmp(\''+esc(rec.email)+'\')')+'">💾 Save</button>'+
+        (mode==='edit' ? '<button class="btn bd bsm" onclick="delEmp(\''+esc(rec.email)+'\')">🗑 Remove</button>' : '')+
+        '<button class="btn bo bsm" onclick="selectNewEmp()">➕ New</button>'+
+      '</div>';
+  }
+  window.selectNewEmp = function(){ renderEmployeeForm('new'); };
+  window.editEmp = function(email){ var rec = loadRegistry().find(function(e){ return e.email===em(email); }); if(rec) renderEmployeeForm('edit', rec); };
+  window.saveNewEmp = function(){
+    var list = loadRegistry();
+    var email = em(($('ef-e')||{}).value);
+    var empId = cap(($('ef-id')||{}).value) || nextEmpId(list);
+    var name = cap(($('ef-n')||{}).value);
+    var desig = cap(($('ef-d')||{}).value);
+    var dept = cap(($('ef-dept')||{}).value);
+    var role = cap(($('ef-r')||{}).value || 'User');
+    var status = cap(($('ef-status')||{}).value || 'Active');
+    var pass = cap(($('ef-p')||{}).value) || defaultPass(name, empId);
+    if(!name || !email || !desig || !dept){ return safeToast('⚠ Please fill all required employee fields'); }
+    if(list.some(function(e){ return e.email===email; })) return safeToast('⚠ This email already exists');
+    if(list.some(function(e){ return e.empId===empId; })) return safeToast('⚠ This Emp ID already exists');
+    list.push(normalizeEmp({empId:empId,name:name,desig:desig,dept:dept,email:email,role:role,status:status,pass:pass}, list.length));
+    saveRegistry(list);
+    renderEmpList();
+    renderEmployeeForm('edit', loadRegistry().find(function(e){ return e.email===email; }));
+    try{ if(typeof refillEmpDropdown==='function') refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+  };
+  window.saveEmp = function(oldEmail){
+    var email = em(oldEmail);
+    var list = loadRegistry();
+    var idx = list.findIndex(function(e){ return e.email===email; });
+    if(idx<0) return safeToast('⚠ Employee not found');
+    var empId = cap(($('ef-id')||{}).value) || list[idx].empId;
+    var name = cap(($('ef-n')||{}).value);
+    var desig = cap(($('ef-d')||{}).value);
+    var dept = cap(($('ef-dept')||{}).value);
+    var role = cap(($('ef-r')||{}).value || 'User');
+    var status = cap(($('ef-status')||{}).value || 'Active');
+    var pass = cap(($('ef-p')||{}).value) || list[idx].pass || defaultPass(name, empId);
+    if(!name || !desig || !dept) return safeToast('⚠ Please fill all required employee fields');
+    if(list.some(function(e, i){ return i!==idx && e.empId===empId; })) return safeToast('⚠ This Emp ID already exists');
+    list[idx] = normalizeEmp({empId:empId,name:name,desig:desig,dept:dept,email:email,role:role,status:status,pass:pass}, idx, list[idx]);
+    saveRegistry(list);
+    renderEmpList();
+    renderEmployeeForm('edit', list[idx]);
+    try{ if(typeof refillEmpDropdown==='function') refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+  };
+  window.delEmp = function(email){
+    email = em(email);
+    var list = loadRegistry();
+    var idx = list.findIndex(function(e){ return e.email===email; });
+    if(idx<0) return;
+    if(!confirm('Remove '+list[idx].name+' from active employee list?')) return;
+    list[idx].status = 'Inactive';
+    list[idx].active = false;
+    saveRegistry(list);
+    renderEmpList();
+    $('emp-fp').innerHTML = '<div style="text-align:center;padding:50px 20px;color:var(--muted)"><div style="font-size:40px;margin-bottom:10px">🗑</div><div style="font-weight:700;margin-bottom:4px">Employee removed from active portal list</div><div style="font-size:12px">Record saved as inactive</div></div>';
+    try{ if(typeof refillEmpDropdown==='function') refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+  };
+  window.renderEmpList = function(){
+    var q = String((($('emp-q')||{}).value)||'').trim().toLowerCase();
+    var list = loadRegistry();
+    renderCounters(list);
+    var filtered = list.filter(function(e){
+      var blob = [e.empId,e.name,e.desig,e.dept,e.email,e.role,e.status].join(' ').toLowerCase();
+      return blob.indexOf(q)>-1;
+    });
+    var cont = $('emp-items'); if(!cont) return;
+    if(!filtered.length){ cont.innerHTML = '<div style="padding:16px;color:var(--muted)">No employees matched your search.</div>'; return; }
+    cont.innerHTML = filtered.map(function(e, i){
+      var active = e.active!==false && e.status!=='Inactive';
+      return ''+
+        '<div class="ei" onclick="editEmp(\''+esc(e.email)+'\')">'+
+          '<div class="ei-av" style="background:'+esc(e.bg||badgeColor(i))+'">'+esc(String(e.name||'?').trim().charAt(0).toUpperCase())+'</div>'+
+          '<div class="ei-info">'+
+            '<div class="ei-name">'+esc(e.empId)+' · '+esc(e.name)+'</div>'+
+            '<div class="ei-role">'+esc(e.desig)+' · '+esc(e.dept)+' · '+esc(e.role)+'</div>'+
+            '<div class="ei-role">'+esc(e.email)+'</div>'+
+          '</div>'+
+          '<div class="ei-dot" style="background:'+(active?'#00B67A':'#E53935')+'"></div>'+
+        '</div>';
+    }).join('');
+  };
+  window.initEmpReg = function(force){
+    if(force) seedRegistry(true);
+    return loadRegistry();
+  };
+  var oldRefill = window.refillEmpDropdown;
+  window.refillEmpDropdown = function(){
+    var list = activeEmployees();
+    var candidates = [];
+    ['task-emp','assignEmployee','assign-to','assignee','emp-select','taskAssignee','task-assignee','meeting-attendees'].forEach(function(id){ var el=$(id); if(el) candidates.push(el); });
+    document.querySelectorAll('select').forEach(function(sel){
+      var label = ((sel.id||'')+' '+(sel.name||'')+' '+(sel.getAttribute('aria-label')||'')+' '+(sel.closest('.fg')?sel.closest('.fg').innerText:'')).toLowerCase();
+      if(/assign|employee|attendee|assignee|member/.test(label)) candidates.push(sel);
+    });
+    var seen = new Set();
+    candidates.forEach(function(sel){
+      if(!sel || seen.has(sel)) return;
+      seen.add(sel);
+      var keep = em(sel.value);
+      var first = sel.querySelector('option[value=""]') || sel.querySelector('option');
+      var ph = (first && !String(first.value||'').includes('@')) ? (first.textContent||'— Select Employee —') : '— Select Employee —';
+      sel.innerHTML = '<option value="">'+esc(ph)+'</option>';
+      list.forEach(function(e){
+        var opt = document.createElement('option');
+        opt.value = e.email;
+        opt.textContent = e.empId + ' — ' + e.name + ' — ' + e.desig;
+        sel.appendChild(opt);
+      });
+      if(keep && Array.from(sel.options).some(function(o){ return em(o.value)===keep; })) sel.value = keep;
+    });
+    if(typeof oldRefill==='function'){ try{ oldRefill(); }catch(e){} }
+  };
+  window.fixDuplicateEmployeesNow = function(){
+    saveRegistry(loadRegistry(), true);
+    renderEmpList();
+    try{ window.refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+    safeToast('✅ Employees cleared and rebuilt from master list');
+  };
+  window.resetEmployeesFromMasterImage = function(){
+    seedRegistry(true);
+    renderEmpList();
+    try{ window.refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+    safeToast('✅ Employee master list reset successfully');
+  };
+  // initialize once for this file version
+  seedRegistry(false);
+  try{ window.refillEmpDropdown(); }catch(e){}
+})();
+</script>
+
+</body>
    ============================================================ */
 (function(){
   'use strict';
@@ -6628,6 +8203,321 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
       bindSidebarOnlyIfNeeded();
     }, 1000);
   });
+})();
+</script>
+
+
+<script>
+(function(){
+  var STORE_KEY = 'upgro_emp_dyn';
+  var RESET_KEY = 'upgro_emp_seed_reset_v20260506';
+  var ACTIVE_FILE_VERSION = 'EMP_IMG_SEED_V1';
+  var SEED = [
+    {empId:'1001', name:'Ritu Tyagi', desig:'EA', dept:'Admin', email:'ritutyagiea@upgromedia.com', role:'Admin', status:'Active'},
+    {empId:'1002', name:'Vishal Srivastava', desig:'Video Editor', dept:'Production', email:'vishal.editor@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1003', name:'Ankit Prajapati', desig:'SEO Executive', dept:'Marketing', email:'ankit.seo@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1004', name:'Harsh Kumar', desig:'Graphic Designer', dept:'Design', email:'harsh.graphic@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1005', name:'Vikas Pandey', desig:'Video Editor', dept:'Production', email:'vikasvideoedit@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1006', name:'Abhishek Kasaudhan', desig:'Meta Media Buyer', dept:'Marketing', email:'abhishek.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1007', name:'Harsh Verma', desig:'Video Editor', dept:'Production', email:'harsh.editor@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1008', name:'Dharmendra Sharma', desig:'Web Developer', dept:'Tech', email:'dharmendra.web@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1009', name:'Shubhi Singh', desig:'Meta Media Buyer', dept:'Manager', email:'shubhi.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1010', name:'Adarsh Srivastava', desig:'Web Developer', dept:'Tech', email:'adarsh.web@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1011', name:'Arpit Yadav', desig:'Accountant', dept:'Finance', email:'arpit@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1012', name:'Adarsh Singh', desig:'MIS', dept:'Admin', email:'adarsh.mis@upgromedia.com', role:'Admin', status:'Active'},
+    {empId:'1013', name:'Dheeraj Sir', desig:'CEO', dept:'Admin', email:'dhiraj.jaiswal@upgromedia.com', role:'Admin', status:'Active'},
+    {empId:'1014', name:'Surya Singh', desig:'Meta Media Buyer', dept:'Marketing', email:'surya.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1015', name:'Neeraj Kumar Yadav', desig:'Meta Media Buyer', dept:'Marketing', email:'neeraj.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1016', name:'Chandrakala Waldia', desig:'Meta Media Buyer', dept:'Marketing', email:'chandrakala.meta@upgromedia.com', role:'Manager', status:'Active'},
+    {empId:'1017', name:'Tarun Verma', desig:'Tech', dept:'Admin', email:'vraj9424@gmail.com', role:'Admin', status:'Active'},
+    {empId:'1018', name:'Ravi Singh', desig:'Graphic Designer', dept:'Marketing', email:'ravi.graphics@upgromedia.com', role:'User', status:'Active'},
+    {empId:'1019', name:'Ishika Saxena', desig:'Client Relationship Manager', dept:'Marketing', email:'ishika.crm@upgromedia.com', role:'Manager', status:'Active'}
+  ];
+
+  function $(id){ return document.getElementById(id); }
+  function safeToast(msg){ try{ if(typeof toast==='function') toast(msg); }catch(e){} }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; }); }
+  function em(v){ return String(v||'').trim().toLowerCase(); }
+  function cap(v){ return String(v||'').trim(); }
+  function boolRole(role, type){ role = String(role||'').toLowerCase(); return role===type; }
+  function defaultPass(name, empId){ var first = String(name||'User').trim().split(/\s+/)[0] || 'User'; return first.replace(/[^A-Za-z]/g,'') + '@' + (empId || '1000'); }
+  function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
+  function nextEmpId(list){
+    var max = 1019;
+    (list||[]).forEach(function(e){ var n = parseInt(e.empId,10); if(!isNaN(n) && n>max) max=n; });
+    return String(max+1);
+  }
+  function badgeColor(i){
+    try{ if(Array.isArray(CLRS) && CLRS.length) return CLRS[i % CLRS.length]; }catch(e){}
+    var cols=['#0B84FF','#7C3AED','#00B67A','#F59E0B','#E53935','#0E9F8E'];
+    return cols[i % cols.length];
+  }
+  function normalizeEmp(raw, idx, existing){
+    existing = existing || {};
+    var role = cap(raw.role || existing.role || 'User');
+    var emp = {
+      empId: cap(raw.empId || existing.empId || ''),
+      name: cap(raw.name || existing.name || ''),
+      desig: cap(raw.desig || existing.desig || 'Team'),
+      dept: cap(raw.dept || existing.dept || 'General'),
+      email: em(raw.email || existing.email || ''),
+      role: role,
+      status: cap(raw.status || existing.status || 'Active'),
+      pass: cap(raw.pass || existing.pass || defaultPass(raw.name || existing.name, raw.empId || existing.empId)),
+      active: String(raw.status || existing.status || 'Active').toLowerCase() !== 'inactive',
+      isAdmin: role.toLowerCase() === 'admin',
+      isManager: role.toLowerCase() === 'manager',
+      bg: raw.bg || existing.bg || badgeColor(idx),
+      joinDate: raw.joinDate || existing.joinDate || (typeof TODAY!=='undefined' ? TODAY : new Date().toISOString().slice(0,10))
+    };
+    if(emp.isAdmin) emp.isManager = false;
+    return emp;
+  }
+  function combineExisting(){
+    var map = new Map();
+    function add(arr){ (arr||[]).forEach(function(e){ if(!e) return; var email = em(e.email); if(!email) return; map.set(email, Object.assign({}, map.get(email)||{}, e)); }); }
+    try{ add(JSON.parse(localStorage.getItem(STORE_KEY)||'[]')); }catch(e){}
+    try{ add(window.empReg||[]); }catch(e){}
+    try{ add(typeof empReg!=='undefined' ? empReg : []); }catch(e){}
+    try{ if(typeof USERS!=='undefined'){ Object.keys(USERS).forEach(function(k){ add([Object.assign({email:k}, USERS[k])]); }); } }catch(e){}
+    return map;
+  }
+  function seedRegistry(force){
+    var already = localStorage.getItem(RESET_KEY) === ACTIVE_FILE_VERSION;
+    if(already && !force){ return loadRegistry(); }
+    var existingMap = combineExisting();
+    var seeded = SEED.map(function(row, idx){ var ex = existingMap.get(em(row.email)) || {}; return normalizeEmp(row, idx, ex); });
+    saveRegistry(seeded, true);
+    localStorage.setItem(RESET_KEY, ACTIVE_FILE_VERSION);
+    return seeded;
+  }
+  function dedupe(list){
+    var emailMap = new Map();
+    (list||[]).forEach(function(e, idx){
+      var emp = normalizeEmp(e, idx, emailMap.get(em(e.email)) || {});
+      if(!emp.email) return;
+      emailMap.set(emp.email, emp);
+    });
+    var usedIds = new Set();
+    var out = Array.from(emailMap.values()).sort(function(a,b){ return (parseInt(a.empId,10)||0) - (parseInt(b.empId,10)||0) || a.name.localeCompare(b.name); });
+    out.forEach(function(e){
+      if(!e.empId || usedIds.has(e.empId)){
+        e.empId = nextEmpId(Array.from(usedIds).map(function(id){ return {empId:id}; }).concat(out));
+      }
+      usedIds.add(e.empId);
+    });
+    return out;
+  }
+  function loadRegistry(){
+    var list = [];
+    try{ list = JSON.parse(localStorage.getItem(STORE_KEY)||'[]'); }catch(e){ list=[]; }
+    if(!Array.isArray(list) || !list.length){ list = seedRegistry(true); }
+    list = dedupe(list);
+    syncGlobals(list);
+    return list;
+  }
+  function saveRegistry(list, skipToast){
+    list = dedupe(list);
+    localStorage.setItem(STORE_KEY, JSON.stringify(list));
+    syncGlobals(list);
+    if(!skipToast) safeToast('✅ Employees saved successfully');
+    return list;
+  }
+  function syncGlobals(list){
+    try{ window.empReg = list; }catch(e){}
+    try{ empReg = list; }catch(e){}
+    try{
+      if(typeof USERS!=='undefined'){
+        Object.keys(USERS).forEach(function(k){ if(!list.some(function(e){ return e.email===em(k); })) USERS[k].active = false; });
+        list.forEach(function(e){
+          USERS[e.email] = Object.assign({}, USERS[e.email]||{}, {
+            name:e.name,
+            pass:e.pass,
+            role:e.role,
+            desig:e.desig,
+            dept:e.dept,
+            empId:e.empId,
+            isAdmin:e.isAdmin,
+            isManager:e.isManager,
+            active:e.active
+          });
+        });
+      }
+    }catch(e){}
+  }
+  function activeEmployees(){ return loadRegistry().filter(function(e){ return e.active!==false; }); }
+  function renderCounters(list){
+    var cont = $('emp-counters'); if(!cont) return;
+    var active = list.filter(function(e){ return e.active!==false; });
+    var inactive = list.filter(function(e){ return e.active===false; });
+    var admins = active.filter(function(e){ return e.role==='Admin'; });
+    var managers = active.filter(function(e){ return e.role==='Manager'; });
+    var users = active.filter(function(e){ return e.role==='User'; });
+    cont.innerHTML = [
+      ['Total Active', active.length, 'tctr-blue'],
+      ['Admins', admins.length, 'tctr-purple'],
+      ['Managers', managers.length, 'tctr-orange'],
+      ['Users', users.length, 'tctr-green'],
+      ['Inactive', inactive.length, 'tctr-red']
+    ].map(function(x){ return '<div class="tctr '+x[2]+'"><div class="tctr-v">'+x[1]+'</div><div class="tctr-l">'+x[0]+'</div></div>'; }).join('');
+  }
+  function renderEmployeeForm(mode, rec){
+    var fp = $('emp-fp'); if(!fp) return;
+    rec = rec || {empId:'',name:'',desig:'',dept:'',email:'',role:'User',status:'Active',pass:''};
+    var roleOpts = ['Admin','Manager','User'];
+    var desigOpts = ['EA','Video Editor','SEO Executive','Graphic Designer','Meta Media Buyer','Web Developer','Accountant','MIS','CEO','Tech','Client Relationship Manager'];
+    var deptOpts = ['Admin','Production','Marketing','Design','Tech','Finance','Manager','General'];
+    function opts(arr, val){ return arr.map(function(o){ return '<option value="'+esc(o)+'"'+(o===val?' selected':'')+'>'+esc(o)+'</option>'; }).join(''); }
+    fp.innerHTML = ''+
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px">'+
+        '<div><div style="font-weight:800;font-size:18px">'+(mode==='new'?'Add New Employee':'Edit Employee')+'</div><div style="font-size:12px;color:var(--muted)">Employee master registry</div></div>'+
+        '<div class="role-badge '+(rec.role==='Admin'?'rb-admin':rec.role==='Manager'?'rb-manager':'rb-user')+'">'+esc(rec.role||'User')+'</div>'+
+      '</div>'+
+      '<div class="fr">'+
+        '<div class="fg"><label class="fl2">Emp ID *</label><input id="ef-id" class="fc" value="'+esc(rec.empId||'')+'" '+(mode==='edit'?'readonly style="background:#f9f9f9;color:var(--muted)"':'placeholder="Auto if blank"')+'></div>'+
+        '<div class="fg"><label class="fl2">Full Name *</label><input id="ef-n" class="fc" value="'+esc(rec.name||'')+'" placeholder="Employee full name"></div>'+
+        '<div class="fg"><label class="fl2">Designation *</label><select id="ef-d" class="fc">'+opts(desigOpts, rec.desig||desigOpts[0])+'</select></div>'+
+        '<div class="fg"><label class="fl2">Department *</label><select id="ef-dept" class="fc">'+opts(deptOpts, rec.dept||deptOpts[0])+'</select></div>'+
+        '<div class="fg"><label class="fl2">Email *</label><input id="ef-e" type="email" class="fc" value="'+esc(rec.email||'')+'" '+(mode==='edit'?'readonly style="background:#f9f9f9;color:var(--muted)"':'placeholder="employee@upgromedia.com"')+'></div>'+
+        '<div class="fg"><label class="fl2">Password '+(mode==='edit'?'':'*')+'</label><input id="ef-p" type="text" class="fc" value="'+esc(rec.pass||'')+'" placeholder="Auto if blank"></div>'+
+        '<div class="fg"><label class="fl2">Portal Role *</label><select id="ef-r" class="fc">'+opts(roleOpts, rec.role||'User')+'</select></div>'+
+        '<div class="fg"><label class="fl2">Status *</label><select id="ef-status" class="fc"><option value="Active"'+((rec.status||'Active')==='Active'?' selected':'')+'>Active</option><option value="Inactive"'+((rec.status||'Active')==='Inactive'?' selected':'')+'>Inactive</option></select></div>'+
+      '</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">'+
+        '<button class="btn bp bsm" onclick="'+(mode==='new'?'saveNewEmp()':'saveEmp(\''+esc(rec.email)+'\')')+'">💾 Save</button>'+
+        (mode==='edit' ? '<button class="btn bd bsm" onclick="delEmp(\''+esc(rec.email)+'\')">🗑 Remove</button>' : '')+
+        '<button class="btn bo bsm" onclick="selectNewEmp()">➕ New</button>'+
+      '</div>';
+  }
+  window.selectNewEmp = function(){ renderEmployeeForm('new'); };
+  window.editEmp = function(email){ var rec = loadRegistry().find(function(e){ return e.email===em(email); }); if(rec) renderEmployeeForm('edit', rec); };
+  window.saveNewEmp = function(){
+    var list = loadRegistry();
+    var email = em(($('ef-e')||{}).value);
+    var empId = cap(($('ef-id')||{}).value) || nextEmpId(list);
+    var name = cap(($('ef-n')||{}).value);
+    var desig = cap(($('ef-d')||{}).value);
+    var dept = cap(($('ef-dept')||{}).value);
+    var role = cap(($('ef-r')||{}).value || 'User');
+    var status = cap(($('ef-status')||{}).value || 'Active');
+    var pass = cap(($('ef-p')||{}).value) || defaultPass(name, empId);
+    if(!name || !email || !desig || !dept){ return safeToast('⚠ Please fill all required employee fields'); }
+    if(list.some(function(e){ return e.email===email; })) return safeToast('⚠ This email already exists');
+    if(list.some(function(e){ return e.empId===empId; })) return safeToast('⚠ This Emp ID already exists');
+    list.push(normalizeEmp({empId:empId,name:name,desig:desig,dept:dept,email:email,role:role,status:status,pass:pass}, list.length));
+    saveRegistry(list);
+    renderEmpList();
+    renderEmployeeForm('edit', loadRegistry().find(function(e){ return e.email===email; }));
+    try{ if(typeof refillEmpDropdown==='function') refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+  };
+  window.saveEmp = function(oldEmail){
+    var email = em(oldEmail);
+    var list = loadRegistry();
+    var idx = list.findIndex(function(e){ return e.email===email; });
+    if(idx<0) return safeToast('⚠ Employee not found');
+    var empId = cap(($('ef-id')||{}).value) || list[idx].empId;
+    var name = cap(($('ef-n')||{}).value);
+    var desig = cap(($('ef-d')||{}).value);
+    var dept = cap(($('ef-dept')||{}).value);
+    var role = cap(($('ef-r')||{}).value || 'User');
+    var status = cap(($('ef-status')||{}).value || 'Active');
+    var pass = cap(($('ef-p')||{}).value) || list[idx].pass || defaultPass(name, empId);
+    if(!name || !desig || !dept) return safeToast('⚠ Please fill all required employee fields');
+    if(list.some(function(e, i){ return i!==idx && e.empId===empId; })) return safeToast('⚠ This Emp ID already exists');
+    list[idx] = normalizeEmp({empId:empId,name:name,desig:desig,dept:dept,email:email,role:role,status:status,pass:pass}, idx, list[idx]);
+    saveRegistry(list);
+    renderEmpList();
+    renderEmployeeForm('edit', list[idx]);
+    try{ if(typeof refillEmpDropdown==='function') refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+  };
+  window.delEmp = function(email){
+    email = em(email);
+    var list = loadRegistry();
+    var idx = list.findIndex(function(e){ return e.email===email; });
+    if(idx<0) return;
+    if(!confirm('Remove '+list[idx].name+' from active employee list?')) return;
+    list[idx].status = 'Inactive';
+    list[idx].active = false;
+    saveRegistry(list);
+    renderEmpList();
+    $('emp-fp').innerHTML = '<div style="text-align:center;padding:50px 20px;color:var(--muted)"><div style="font-size:40px;margin-bottom:10px">🗑</div><div style="font-weight:700;margin-bottom:4px">Employee removed from active portal list</div><div style="font-size:12px">Record saved as inactive</div></div>';
+    try{ if(typeof refillEmpDropdown==='function') refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+  };
+  window.renderEmpList = function(){
+    var q = String((($('emp-q')||{}).value)||'').trim().toLowerCase();
+    var list = loadRegistry();
+    renderCounters(list);
+    var filtered = list.filter(function(e){
+      var blob = [e.empId,e.name,e.desig,e.dept,e.email,e.role,e.status].join(' ').toLowerCase();
+      return blob.indexOf(q)>-1;
+    });
+    var cont = $('emp-items'); if(!cont) return;
+    if(!filtered.length){ cont.innerHTML = '<div style="padding:16px;color:var(--muted)">No employees matched your search.</div>'; return; }
+    cont.innerHTML = filtered.map(function(e, i){
+      var active = e.active!==false && e.status!=='Inactive';
+      return ''+
+        '<div class="ei" onclick="editEmp(\''+esc(e.email)+'\')">'+
+          '<div class="ei-av" style="background:'+esc(e.bg||badgeColor(i))+'">'+esc(String(e.name||'?').trim().charAt(0).toUpperCase())+'</div>'+
+          '<div class="ei-info">'+
+            '<div class="ei-name">'+esc(e.empId)+' · '+esc(e.name)+'</div>'+
+            '<div class="ei-role">'+esc(e.desig)+' · '+esc(e.dept)+' · '+esc(e.role)+'</div>'+
+            '<div class="ei-role">'+esc(e.email)+'</div>'+
+          '</div>'+
+          '<div class="ei-dot" style="background:'+(active?'#00B67A':'#E53935')+'"></div>'+
+        '</div>';
+    }).join('');
+  };
+  window.initEmpReg = function(force){
+    if(force) seedRegistry(true);
+    return loadRegistry();
+  };
+  var oldRefill = window.refillEmpDropdown;
+  window.refillEmpDropdown = function(){
+    var list = activeEmployees();
+    var candidates = [];
+    ['task-emp','assignEmployee','assign-to','assignee','emp-select','taskAssignee','task-assignee','meeting-attendees'].forEach(function(id){ var el=$(id); if(el) candidates.push(el); });
+    document.querySelectorAll('select').forEach(function(sel){
+      var label = ((sel.id||'')+' '+(sel.name||'')+' '+(sel.getAttribute('aria-label')||'')+' '+(sel.closest('.fg')?sel.closest('.fg').innerText:'')).toLowerCase();
+      if(/assign|employee|attendee|assignee|member/.test(label)) candidates.push(sel);
+    });
+    var seen = new Set();
+    candidates.forEach(function(sel){
+      if(!sel || seen.has(sel)) return;
+      seen.add(sel);
+      var keep = em(sel.value);
+      var first = sel.querySelector('option[value=""]') || sel.querySelector('option');
+      var ph = (first && !String(first.value||'').includes('@')) ? (first.textContent||'— Select Employee —') : '— Select Employee —';
+      sel.innerHTML = '<option value="">'+esc(ph)+'</option>';
+      list.forEach(function(e){
+        var opt = document.createElement('option');
+        opt.value = e.email;
+        opt.textContent = e.empId + ' — ' + e.name + ' — ' + e.desig;
+        sel.appendChild(opt);
+      });
+      if(keep && Array.from(sel.options).some(function(o){ return em(o.value)===keep; })) sel.value = keep;
+    });
+    if(typeof oldRefill==='function'){ try{ oldRefill(); }catch(e){} }
+  };
+  window.fixDuplicateEmployeesNow = function(){
+    saveRegistry(loadRegistry(), true);
+    renderEmpList();
+    try{ window.refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+    safeToast('✅ Employees cleared and rebuilt from master list');
+  };
+  window.resetEmployeesFromMasterImage = function(){
+    seedRegistry(true);
+    renderEmpList();
+    try{ window.refillEmpDropdown(); }catch(e){}
+    try{ if(typeof buildUI==='function') buildUI(); }catch(e){}
+    safeToast('✅ Employee master list reset successfully');
+  };
+  // initialize once for this file version
+  seedRegistry(false);
+  try{ window.refillEmpDropdown(); }catch(e){}
 })();
 </script>
 
