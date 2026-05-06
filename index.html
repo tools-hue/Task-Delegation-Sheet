@@ -952,7 +952,6 @@ const USERS = {
   'surya.meta@upgromedia.com':       {pass:'Surya@123',        name:'Surya Pratap Singh',    role:'Meta Media Buyer',   desig:'Meta Media Buyer', isAdmin:false, isManager:true},
   'shubhi.meta@upgromedia.com':      {pass:'Shubhi@123',       name:'Shubhi Singh',          role:'Meta Media Buyer',   desig:'Meta Media Buyer', isAdmin:false, isManager:true},
   'ranveer.copywriter@upgromedia.com':{pass:'Ranveer@123',     name:'Ranveer Singh',          role:'Copywriter',   desig:'Copywriter', isAdmin:false, isManager:true},
-  'ishika.crm@upgromedia.com':        {pass:'Ishika@123',     name:'Ishika Saxena',          role:'CRM',   desig:'CRM', isAdmin:false, isManager:true},
 
   // USERS
   'vishal.editor@upgromedia.com':    {pass:'Vishal@1002',     name:'Vishal Srivastava',     role:'Video Editor',       desig:'Video Editor',     isAdmin:false, isManager:false},
@@ -1807,134 +1806,7 @@ function buildMeetingMailHtml(data){
   +(data.notes?'<tr><td style="padding:18px 28px 0"><div style="background:linear-gradient(180deg,#ffffff,#f5f3ff);border:1px solid #ddd6fe;border-radius:24px;padding:18px 20px;box-shadow:0 12px 30px rgba(124,58,237,.08)"><div style="font-size:11px;font-weight:900;letter-spacing:2px;color:#7c3aed;text-transform:uppercase;margin-bottom:10px">Notes</div><div style="font-size:13px;color:#334155;line-height:1.75">'+escapeHtml(data.notes)+'</div></div></td></tr>':'')
 
   +'<tr><td style="padding:24px 28px 30px"><div style="background:linear-gradient(180deg,#f8fafc,#e2e8f0);border:1px solid #cbd5e1;border-radius:24px;padding:20px;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.9)"><div style="display:inline-flex;align-items:center;gap:10px;background:#ffffff;border:1px solid #ccfbf1;border-radius:999px;padding:8px 14px;box-shadow:0 8px 20px rgba(15,23,42,.08)"><img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wgARCADIAMgDASIAAhEBAxEB/8QAHAABAQADAQEBAQAAAAAAAAAAAAcFBggEAQID/8QAGwEBAQADAQEBAAAAAAAAAAAAAAUDBAYHAgH/2gAMAwEAAhADEAAAAeqQAAAAAAAAAAAAAAAAAAADG/n3kvBzFqcj0TpjfuUur9mGG/ygAAAAAAAAGMjVa5S383vwW703j/ZMLb9S22v5gG1EAAAAAAAA8fmgOibe7tWt7f4tfpaNYJBX6fnASaoAAAAAAA1XLi2rF6FF9Pp/HlPFt1PJdOduiudej8to1fkFfj1gkVgAAAAAAEa3/mHB03gtcs6f+9uGfPvz0rwy6869Fc6yK1Gr8gr8esEisAAAAABqsVrPMua57Ns3T2fmzN+ieduieq8thnz78ryrrzr0VzrIrUavyCvx6wSKwAAAAAE+hnQMN6OZVvD7vDnlTfonnbonLihnz78ryrrzr0VzrIrUavyCvx6wSKwAAAAAGmQ28x3seR3/AMOZ8ersyromG3bLihHzK/Ksuw869HQiVV2+vy6oyKgSqoAAAAAGs67nNZ0eqwNciWO1L3Qkfxf6+sf8rjMsI+bf5Z5qGeZ0P+pBX9qCGacAAAAABhYb0Z59S/Etd6W5e1rmx/M3Ysmlzfkrzof5lz0Uq+5ZZ0wq/wA+55gZdAAAAAAABw33JJDnal7/AJknsM7FmJidr2f9ku6Rm1JAAAAAAAAAAAAAAAAAP//EACsQAAEEAQIEBQQDAAAAAAAAAAUCAwQGAQA1BzA0QBESExQVFiEyNjFQYP/aAAgBAQABBQL/AAcmfGh4lXgWxlOfFPaEcSswyNgLOu5zlWavC9+c7Qm+qMPzbCGMFyiy0nXDmF9+0OrwgPJk5ezVgGDcyz09uXHqsDI4H2SpkdOXysOMzZLK6ceixfV1SceEvtDS8NkX5GX1Cqs5IHapXWdmSJMCopKdkjMBQcPEDWPARqldZ2Jg8gQ47fGGUmTUg3KjwspyK3M3tOqV1nY3x5LMh11TyqfU0+Qtugrcze06pXWdgdPMA4xIk+WlRYnk0D2gtugrcze06pXWc6yyHIouRZJzCX5EgnJkAFh06B7QW3QVuZvadUrrOddXfRBZyp1dBGNJVduq0D2gtugrcze06pXWc68pyoBGjYZxSPwu3VaB7QW3QVuZvadUrrOdbdn1SPwu3VaB7QW3QVuZvadUrrOdbdn1SPwu3VaB7QW3QVuZvadUrrOdZmHJAr4idqoRHoqLdCflSfiJ2g7amhZMXMcIjRcxsgXQp0Z8RO1UYUiLK51leWwCost6YKAkZT1wyUh4zFnR5yTxmeUOS3DFQlKJxW2Wpsd958vBjOpVhaeda/17h5s9d/dx4tovbArXwt2r/wB7wUu3tpV7exJiRRH0wEr9aZMiOHc1bsXnGoaiAqv2XNZapMN6YYiFMB7TXvUO24w1IrFmsR/6oVdmlRx8yFkjXhNjVXx/D8Y7Eh89yO09n+NVU0h/iKUv7IW1KxjKWmWmtXqwOVoEVMEYwhbDS1Yz447FvPsLSvPv7TxOlLlWbh5ggJiOh25NC4nfam8TVxFReFS1xzHYp4dxvTVw8jeS009myrr1fWFjucI2VMWOnNWITa6i3aNVimYrRD+h/8QAOREAAAQDAwgGCQUAAAAAAAAAAQIDBQAEERIhQQYTMDFRYXHBFTM0gbHwFCIjQESRoeHxJDI1QmL/2gAIAQMBAT8B90IW2YC1pEtkccwAZdYO6/6/aH9vlWxRNBCojSo1+mjk2OdepwpEDCVMP3G86xhN2bmo6bYQ1QLdWtacR80h6mvTJ9VQNVaB3XaLJ6Qmn2YELFlIo3m5Bv8ACMqMpSMqINTTcOJtnD/W0cOOpsERlgEd+hUUIiW2cboyfaRehzoD7INY7dweboyhyqRkQBnZfVALhMH1Au/aP5h460vCGvswaFrybF5C1MXI+NMA5jDnlOgIi0tNyZAoIh4F3b8fH4jv5w8daXhDX2YNAzZNGdpj0yZPZQJv1jyDaPy3ZVZSFXkjSrYNEtVQxwoG7x4Qz9abhHxHfzh460vCGvswaB0eppOV6LSGhBvHfu4XQb+LDzjDP1puEfEd/OHjrS8Ia+zBoHUhzL1AMIMQ3RoFpf8AeGkhiqmtBhGaPn62cecO5DGULZDCG0BLLAA6BEheglT0vth4BE+2y8yuJlBslImUbg4xLNqLeorMF9cATtlqG3b8oUkVXNSWJNpZsTV9YLN91QuCE2mSEFFzLDmiiBa0vEce6HGTFvmjyxhrT86CQck5dA8pMp2yGGuul8IvaC55hWZLQDEAoFvwwrzgX/8AU2817KxYs1/rxgj+kgohmEaESrdW+8Bx74knRNBM6EwlbIYbWul8T84afmTzJ9Zvf//EADMRAAECBAEICAcBAAAAAAAAAAIBAwAEBREhEhQwMTNBcYETIjI0RFFhwRU1QJHR4fCh/9oACAECAQE/AfpFWyXg6gidkYlXTeRSLRhOyslLETwoRbk/t0OMPTF3yS18fL7RLB0bSJoqiDEg0iqdzXUkUSlZ8azU1iibvP8AUVTCaXloWmjeLIBLrE8ZSPUNOtFNo5vos7PY+Sfn2SKLsi4xVe9Ly0K1FZE7tdqPhboAk5N9ol1fmPD8vaKLsi4xVe9Ly0DlTCUl+hbG7i+mqKPT1bnUWZTra/8AL/eK1sh4x4fl7RRdkXGKr3peWgpEgyRZ4eJak9IH5qv9uitbIeMeH5e0UXZFxiq96XloKS4Ay9iXfAmPxRSvh+orBiTQ5K746VvN7ZSavaKOYi0WUu+KmqFMqqaAlXOUT0hp4gGyY3WDeJ1BDVjZYR0WUNW1vbdCvuYDk4w050oIegdZUiQwWywUsQoCB5xmvUtfG97wsqpIWUWKw4wpKhCtlhptGgQE+v8A/8QAQBAAAQMCAgUJBAgEBwAAAAAAAQIDBAAREiEFMXJzsRATIjJAQVFhwTBScZEUFSMzNEKS0URQoeFgY4Gis/Dx/9oACAEBAAY/Av8AAd3322ttVqsha5CvBtP70CRY+HZXPoZQJH5cYypbUiS62oGxQnoW+VXJuait26IVjV/pn2WQ6g2WhBIq5eT+gVzrmHEBbEE2vySpZHg2nifTsssqNhzZqwyRX2qsLCBiVbWryoPQWw2+2m3Np1LH71HbUnC4oY1fE9jIL7YI7ioUpxclsJTmelWEXbipPRb8fM1iV1eNP7Hr2WWVaucVxrwT4U9PkXbZSgqbT3r/ALckjY9eyKfkKwoHzPkKeethC1FQT4VF51N0FxPRPfnUrdnkkbHr2JtCmi5jF8jVzGX+qudeNkjqNjUmruix901F3qeNS92eSRsevYo5PuHKrmm58sBRObTfh5mpe9VxqLvU8al7s8kjY9ew43Ok6rqNDWqlPvqxLOodw8hWJfW8KibAqXvVcai71PGpe7PJI2PX26ltLLa8QzFfi3CrwvWJxS33lZDvNMGR984nFh93kibAqXvVcai71PGpe7PJI2PX261a+kmvFRqQ+4kKfRYJPu66jbB5ImwKl71XGou9TxqXuzySNj19usDM401c5rqX8U+tRtg8kTYFS96rjUXep41L3Z5JGx6+3VtDkl/FPrUbYPJE2BUveq41F3qeNS92eSRsevt1bQ5JfxT61G2DyRNgVL3quNRd6njUvdnkkbHr7dSGkKcViGSRX4R79BqVzzS2rlNsQt40wWWVuAJzwi9fhHv0GoyFpKVBGYNSVJjOqSXCQQmoylRnUpDiSSU+dSUIBUooNgK/CPfoNPl5lbYKPzC3t5bjayhYTkpJsRnTq33VvK50i6zfuFPsrkOrZCnOgVZUsGUzdvrDGOjRVHeQ8BrwKvX1Xo9wtAHCSk2ue/OmFuyzJaX3YioHxGdNOOPtspdTiTzirXpbTbyFuI6yUnMVzTstltz3VLFApNwe8e3m7HrT2+PAVI23amMP4ubxuK6Jt30YbSiWiSjPww3FSNt2nGXdFc4G1lIUtev/AG1oh0JwBbalYfDq1LntvqckOMd+oGpct5a+euQg377XqTGUbpaIUjyvf9vbyo6OutGXxp+JJirKseK2og0/pNaCho4rHxJqbJU0p1AW4CEd2dL0gGylpJKj5ZWAr6xS1zkdairyz1iorMaK4FIJy1k3rQraxhWhopI87JpUdPWWwAPjapkB6OvniTh7rG1s6fkOpKOfIwg+A/8AewdNtK7e8L8k2GtrDdb6QSddj/amNBNQAvGptKnEuYcJV5W8xRxWw+dfZoSi/ui1KmsNNPOpcSnC7qzqDJgaO+sHnijG2lVsII10FLbSojvIrLsWk9MD+A0qnGf8talg8P61orS5/j9KqwbtCkBPE/KtEaLdakyYJRzq40XrunP9q0427ElxoTX2sNEtNiB0sv6Cn9OuuuuaQdl4FqK8iPOtB71r/jNaPjSnpX2z3RhxBnI1ZH/vfWn4IQ7HjNLBRGdViLWZy7Fp5CpK1jSysSuj92cRIt860ClMlaBok4k9H7w3BN/lUZ8SHYM2N91IZ1in0v6QkaTcfN1rkHgKfjI0tLbgrXziI35UH1qFBXJUymMpKgtKb3sLVEX9Jchyoi8bT7edtX7Cpsv6c7MXKAx88M7+N/5F/8QAKRABAAEDAgUEAwADAAAAAAAAAREAITFR8BBBcYGhMEBhkbHB0VBg4f/aAAgBAQABPyH/AEOJNzYp8q+f5hTTxEq5e1gDZN0vik1izxpEKdqTKsrUqS7a/sB39rJCBpMNJgA5v8KPmrTl1xwlx4V7UF8O41hQctadiRRqMP7Q09QIDy2vSiEDSHJfoQdvZq26EJKMdUgV+jNd3Jr9j8UqLFRFCANvalugfmVeljFCV5iE1+PyoIILFeJ9o5GUnN0ObT1u0ZuaXiORYQz8UAwgIg6cPE+yOxlnBF66B4jfxTrACLP9+anNLBQ963TRW06cPE+yZF7Gq9SH6GlBvZ7c/Y+K3DVW6aK2nTh4n2KT2Iy5+j5rDzoYeQaVaF8NHDW4aq3TRW06cPE+uOtBnhzWUJik69ya5oFLMLkcX4nm8dbhqrdNFbTpw8T66BiUR91IGWVMVCeRuj5tmto1463DVW6aK2nTh4n1xIyRnesqDnpw62jXjrcNVbporadOHifXbfrx62jXjrcNVbporadOHifXbfrx62jXjrcNVbporadOHifXMpK3jnhAWIXjlRZGRPC/CAtDgcI048UKJNOXECAQoTLwpV4QCFwC8mfXm1fwAYaKSSPYYL0A8MemFi1D9ErTQYZva9Nx6EUOtZB30kSnIC+NKacLfE4k5G+SgXAhIoHn1KNd8ivVrVaACdaCIaRJE9fw34cJW66tJ1dxMYqjTSFlXXS1Xtz+9oC6E9IsSTQXpSWSYooAaCoJGE7tIYExYC46ytPrnpyXD78vXjYlE+4/FWzHJWiER6VLrAmF4NYvWfFMgc6chnK+rtf40ocGuFG+8m7HapICLpsMB0q7OGsAWkjCccWE81NRDLKkg9JqFaEsN6/f8PYEF/BGFAAAgORUxjMjNGIjRVDedQtNeYEzzooChcwoVjtHL6qGJh1B0I8qx52ZnH7W+KxJLOp3oAUI8z2TWrCLYoKJddzdmBRAC+fAQHOPrLSDGm0Am/ux+6m77BdYHO96TBYoHVyABYyFICfsVLPd6IWWuJ6eyIfJMbS2qHwpy8gBvNaJfKlmkvNfJOf2Ue4s2MRFyCPmo54wDrW/Jbl3o20wFPvO9HG2Cybda3/ChpOyMizYzKv+C//aAAwDAQACAAMAAAAQ8888888888888888888841G8888888888dE/888888888L2+888888884pxq8888888885ZCq88888888xKDCq888888885qDCq88888888uqLPs38888888Q+MzAV8888888e9voG988888888sMAE888888888888888888//EACURAQABBAEDBAMBAAAAAAAAAAERACExQWEwUbFxgaHwEECRwf/aAAgBAwEBPxD9SdRJCWwTtb270KAN4N3oo8qdNKVC3YEABh126YZG2QXwd0waywU10E3AzTOVmYtjAWJlSPYWI9Yn36RSsabtw3X8F3QlARoGuEW1/goRCVfJ6LiEN1IwPECS5S73ceq1REL0pe42md8zCsj7XLXy3z0bzyRXDNKmjWjBfAUmMMYYtf1uxa/4L7XLXy3z0EKsoIJXSzYEwKW2aQdaHYiMuxbHD+vtcn4X2uWvlvnoG5GXMzgk9mm3NiK+R/uvtcn4X2uWvlvnoC1pDAu2riLsRfPVPinITZW2RxaLyPAXdGLDLn16CUCBTF4wTmKca2xM3la14KhMPjsyhGJPLTQ8IddRFemECJe76EHCAXkMHAXlT5uwEviRAMask89CCjkBMG5BzBa1FaEJuJYSzm4CWpERINq49Gbt4xbmjSXMTUkbi0KYh9qjeKCSByDI2EoMYTBoAA9gL7z+/wD/xAAnEQEAAQMDAwQDAQEAAAAAAAABEQAhQTFRYTCBoXGRsfBAwfHR4f/aAAgBAgEBPxD8SQhMUojd7eP+1H+EwR5/XTYIW8Cts7DL7XqC1WALh2bRpvrfMr6xL3v0m+BGEzlvY8uhlAvBW3Nb8MGfTUgTSPgdEDKMf2mrBkhIwbsNuN6lLSKmbWeB/pa1fe4K8P4HRiEMUNiSJd+D3tQqVtlrpM8tjBrewVvtcFeH8DoRHvYUMGAbl1Zg7uzN+vg3hYF7p4edPrcNFb7XBXh/A6CoIG5pDJzfXGK8f9a+tw0VvtcFeH8DoMgjLVDBViFms205o9F4I4aMgcyh6JyQwU9skGnodC41pfLR0ZKXfSkZc2jtt71Exwum14btHTExYmwY70RhE/zoQdUjSbUmUolbZzH6o8TGfTarv0N4tZMdqi7hGk2pAJD8/wD/xAAqEAEAAQMEAQMDBAMAAAAAAAABEQAhMUFRYfBAIDCBEHHBkaGx0VBg4f/aAAgBAQABPxD/AENHA2TJwLL8VfScEMuhYPxNLhLSlaXJ48XWBS3Mu5ClhZByVDC0YAwoJfM08z5WRytT9YokCy4fFAXYwQASMNmjwdKCBQ4LEBjDETGBbx8RWFBn3f6f1vilvzXglID7qh805nRbVzf6of1rANgmgudmL4gQUMVgBgAWfsdEgNCOFgDRsXhkZAUgZEWzSDvwDGgip0AlpXfZNc48rQxgSyopptjD/wAc0Q42AgCHik9vLV0DmphJGfHLzTVigQAYew/Oi10CAAgDBXSbPEEzaHfR6g/bLALTl8fxZhbS3zSEkkoaSH8NaBcZBAGg+nSbPCFlgGQQi40wMMDKtik5fMsbobqCVd4ACaebkDwcfb0NHOk2eE4koiy6uZTgcDYoNKFqemk6jRlvY9ABo50mzwWZgMADq7Oq+JUKasiLiXwA/VbsqtCDnJ8c3n+K6Lb0wGjnSbPfHeFjA3E1IEBn35eKnziV0Ivmwb1Cko5GwWG4ljBOWui29MBo50mz30DRIcS6qfLCt1disgVCxeFKA5RIWWfoL0W3pgNHOk2e+gUMGWpmMF9A2P7rpNvrF6Lb0wGjnSbPB+6Tb6xei29MBo50mzwfuk2+sXotvTAaOdJs98+hRzhcwV278UsMU2iSiS8SfrRbX7ivhgtXbvxSEi4DaI4aRjWeTRELjQ6aiyRVSwFLhD0sWAMtdu/FCwc+QWBT3wcbXIhkLllqYlJEvBSxK25o8Q7+ORsEQRa1EIwRAEOggvqhRj7SRuCDbDmp3NMYUVYwRlLMgNAETk4ATEI/AlSnzNnsJEwSRuUDFAtHEBtUIOYVbYLb5owvDiWESyeFTY+xj7hhSBYbSz8VOgG0uBCyov4d6eUhBczD/FXLTShIkCQGy5zUI94QOLBITGDGKCAWNDupYHKzFWxdqxqccQy4N2j3xjnBWxAxuvfSMSfgRZXQUE80hEIhgoZi1E5s1BcTCT9VwDJOKhaI5MTO0DBdM5p5qfYCkYLkYoNlh5kgAN5Jcr3KYWtRADAcGqddKmTIYYgSWYRxSEBFRACuhAo0p4ZDgvIICJnjNSMgMUcbgSjclhPAyLqs+xRijbGgCAKPkIyXaUZblxSReFc8I7BObLZpuSQUWazNop2h5UDlZeiUu0toqEOi9D7wE68ssEAtpS2KvJqjhvZElBkaRJE8JQE2aQtvHcalam9UhHH7BSmRRZJpBYLwUvT8TJbCmxghKJVpOGoZHTqWq4tFinNFpMUJk8/uN4ETKygUIlbpmdwFLAIWYrPhF79S5ZGLbxjvTYvlcjjNtpz2pWd32ELIICSQgreFGBPFGi+GVASUwYiiuIniSSYMMVEWVRSFOcmIIgSSttRnMErEFsrsIiPJG/Ot7BtJVjjU2v8A4H//2Q==" alt="UpGro Media" style="width:28px;height:28px;border-radius:8px;object-fit:contain"><span style="font-size:13px;font-weight:900;color:#0f172a">UpGro Media Mission Control</span></div><div style="margin-top:12px;font-size:12px;color:#475569;line-height:1.7">Organized by '+escapeHtml(data.organizer||cu?.name||'UpGro Media')+'</div><div style="margin-top:6px;font-size:11px;color:#94a3b8">Official premium meeting invite · UpGro Media</div></div></td></tr>'
-  +'</table></td></tr></table>
-
-<!-- =========================================================
-     FINAL PATCH V4: ALL TASKS FREEZE HEADER + SCROLL TASK LIST ONLY
-     Paste-safe override. Keeps existing logic unchanged.
-========================================================= -->
-<style id="ug-v4-alltasks-freeze-scroll">
-  /* All Tasks page: only the task table/list scrolls. Upper controls stay fixed. */
-  #pg-alltasks.act{
-    display:flex !important;
-    flex-direction:column !important;
-    height:calc(100vh - var(--th) - 44px) !important;
-    max-height:calc(100vh - var(--th) - 44px) !important;
-    overflow:hidden !important;
-    padding-bottom:14px !important;
-  }
-
-  #pg-alltasks .ph,
-  #pg-alltasks #at-counters,
-  #pg-alltasks .efbar,
-  #pg-alltasks .fb{
-    flex:0 0 auto !important;
-    position:relative;
-    z-index:5;
-  }
-
-  #pg-alltasks > .card{
-    flex:1 1 auto !important;
-    min-height:0 !important;
-    display:flex !important;
-    flex-direction:column !important;
-    overflow:hidden !important;
-    margin-bottom:0 !important;
-  }
-
-  #pg-alltasks > .card > .ch{
-    flex:0 0 auto !important;
-    background:var(--surface) !important;
-    z-index:4;
-  }
-
-  #pg-alltasks > .card > .tw{
-    flex:1 1 auto !important;
-    min-height:0 !important;
-    overflow:auto !important;
-    border-top:0 !important;
-  }
-
-  #pg-alltasks .tbl{
-    min-width:1180px;
-  }
-
-  #pg-alltasks .tbl thead th{
-    position:sticky !important;
-    top:0 !important;
-    z-index:3 !important;
-    background:#FAFBFD !important;
-    box-shadow:0 1px 0 var(--border);
-  }
-
-  #pg-alltasks #at-nil{
-    flex:1 1 auto !important;
-    overflow:auto !important;
-  }
-
-  /* Keep the drawer above the fixed/scrolling table if V2/V3 assignment drawer is open. */
-  .ug-task-report-drawer,
-  #ug-task-report-drawer,
-  .ug-side-drawer,
-  #ug-side-drawer{
-    z-index:99999 !important;
-  }
-
-  @media(max-width:768px){
-    #pg-alltasks.act{
-      height:calc(100vh - var(--th) - 20px) !important;
-      max-height:calc(100vh - var(--th) - 20px) !important;
-      padding-bottom:10px !important;
-    }
-    #pg-alltasks .ph,
-    #pg-alltasks #at-counters,
-    #pg-alltasks .efbar,
-    #pg-alltasks .fb{
-      gap:8px;
-    }
-    #pg-alltasks > .card > .tw{
-      -webkit-overflow-scrolling:touch;
-    }
-  }
-</style>
-<script id="ug-v4-alltasks-freeze-scroll-js">
-(function(){
-  'use strict';
-  function ensureAllTasksScrollMode(){
-    var pg=document.getElementById('pg-alltasks');
-    if(!pg) return;
-    var card=pg.querySelector(':scope > .card');
-    var tw=card ? card.querySelector('.tw') : null;
-    if(tw){
-      tw.setAttribute('data-scroll-only-task-list','true');
-      tw.style.overflow='auto';
-      tw.style.minHeight='0';
-    }
-  }
-  var oldNav=window.nav;
-  if(typeof oldNav==='function' && !oldNav.__ugV4ScrollFreeze){
-    window.nav=function(page){
-      var out=oldNav.apply(this,arguments);
-      if(page==='alltasks') setTimeout(ensureAllTasksScrollMode,0);
-      return out;
-    };
-    window.nav.__ugV4ScrollFreeze=true;
-  }
-  var oldRenderAllTasks=window.renderAllTasks;
-  if(typeof oldRenderAllTasks==='function' && !oldRenderAllTasks.__ugV4ScrollFreeze){
-    window.renderAllTasks=function(){
-      var out=oldRenderAllTasks.apply(this,arguments);
-      setTimeout(ensureAllTasksScrollMode,0);
-      return out;
-    };
-    window.renderAllTasks.__ugV4ScrollFreeze=true;
-  }
-  document.addEventListener('DOMContentLoaded', ensureAllTasksScrollMode);
-  setTimeout(ensureAllTasksScrollMode,300);
-})();
-</script>
-
-</body></html>';
+  +'</table></td></tr></table></body></html>';
 }
 function getTestMailTarget(){
   const el=$('test-mail-email');
@@ -3791,134 +3663,7 @@ if(data.action === 'sendMeetingInvite'){
         +'</td></tr>'
 
         +'</table></td></tr></table>'
-        +'
-
-<!-- =========================================================
-     FINAL PATCH V4: ALL TASKS FREEZE HEADER + SCROLL TASK LIST ONLY
-     Paste-safe override. Keeps existing logic unchanged.
-========================================================= -->
-<style id="ug-v4-alltasks-freeze-scroll">
-  /* All Tasks page: only the task table/list scrolls. Upper controls stay fixed. */
-  #pg-alltasks.act{
-    display:flex !important;
-    flex-direction:column !important;
-    height:calc(100vh - var(--th) - 44px) !important;
-    max-height:calc(100vh - var(--th) - 44px) !important;
-    overflow:hidden !important;
-    padding-bottom:14px !important;
-  }
-
-  #pg-alltasks .ph,
-  #pg-alltasks #at-counters,
-  #pg-alltasks .efbar,
-  #pg-alltasks .fb{
-    flex:0 0 auto !important;
-    position:relative;
-    z-index:5;
-  }
-
-  #pg-alltasks > .card{
-    flex:1 1 auto !important;
-    min-height:0 !important;
-    display:flex !important;
-    flex-direction:column !important;
-    overflow:hidden !important;
-    margin-bottom:0 !important;
-  }
-
-  #pg-alltasks > .card > .ch{
-    flex:0 0 auto !important;
-    background:var(--surface) !important;
-    z-index:4;
-  }
-
-  #pg-alltasks > .card > .tw{
-    flex:1 1 auto !important;
-    min-height:0 !important;
-    overflow:auto !important;
-    border-top:0 !important;
-  }
-
-  #pg-alltasks .tbl{
-    min-width:1180px;
-  }
-
-  #pg-alltasks .tbl thead th{
-    position:sticky !important;
-    top:0 !important;
-    z-index:3 !important;
-    background:#FAFBFD !important;
-    box-shadow:0 1px 0 var(--border);
-  }
-
-  #pg-alltasks #at-nil{
-    flex:1 1 auto !important;
-    overflow:auto !important;
-  }
-
-  /* Keep the drawer above the fixed/scrolling table if V2/V3 assignment drawer is open. */
-  .ug-task-report-drawer,
-  #ug-task-report-drawer,
-  .ug-side-drawer,
-  #ug-side-drawer{
-    z-index:99999 !important;
-  }
-
-  @media(max-width:768px){
-    #pg-alltasks.act{
-      height:calc(100vh - var(--th) - 20px) !important;
-      max-height:calc(100vh - var(--th) - 20px) !important;
-      padding-bottom:10px !important;
-    }
-    #pg-alltasks .ph,
-    #pg-alltasks #at-counters,
-    #pg-alltasks .efbar,
-    #pg-alltasks .fb{
-      gap:8px;
-    }
-    #pg-alltasks > .card > .tw{
-      -webkit-overflow-scrolling:touch;
-    }
-  }
-</style>
-<script id="ug-v4-alltasks-freeze-scroll-js">
-(function(){
-  'use strict';
-  function ensureAllTasksScrollMode(){
-    var pg=document.getElementById('pg-alltasks');
-    if(!pg) return;
-    var card=pg.querySelector(':scope > .card');
-    var tw=card ? card.querySelector('.tw') : null;
-    if(tw){
-      tw.setAttribute('data-scroll-only-task-list','true');
-      tw.style.overflow='auto';
-      tw.style.minHeight='0';
-    }
-  }
-  var oldNav=window.nav;
-  if(typeof oldNav==='function' && !oldNav.__ugV4ScrollFreeze){
-    window.nav=function(page){
-      var out=oldNav.apply(this,arguments);
-      if(page==='alltasks') setTimeout(ensureAllTasksScrollMode,0);
-      return out;
-    };
-    window.nav.__ugV4ScrollFreeze=true;
-  }
-  var oldRenderAllTasks=window.renderAllTasks;
-  if(typeof oldRenderAllTasks==='function' && !oldRenderAllTasks.__ugV4ScrollFreeze){
-    window.renderAllTasks=function(){
-      var out=oldRenderAllTasks.apply(this,arguments);
-      setTimeout(ensureAllTasksScrollMode,0);
-      return out;
-    };
-    window.renderAllTasks.__ugV4ScrollFreeze=true;
-  }
-  document.addEventListener('DOMContentLoaded', ensureAllTasksScrollMode);
-  setTimeout(ensureAllTasksScrollMode,300);
-})();
-</script>
-
-</body></html>';
+        +'</body></html>';
 
       GmailApp.sendEmail(att.email, data.subject || subject, 'Please enable HTML to view this email.', {
         htmlBody: htmlBody,
@@ -4962,134 +4707,7 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
   <script>
 /* =========================================================
    MULTI TASK ASSIGN PATCH
-   Paste this just before 
-
-<!-- =========================================================
-     FINAL PATCH V4: ALL TASKS FREEZE HEADER + SCROLL TASK LIST ONLY
-     Paste-safe override. Keeps existing logic unchanged.
-========================================================= -->
-<style id="ug-v4-alltasks-freeze-scroll">
-  /* All Tasks page: only the task table/list scrolls. Upper controls stay fixed. */
-  #pg-alltasks.act{
-    display:flex !important;
-    flex-direction:column !important;
-    height:calc(100vh - var(--th) - 44px) !important;
-    max-height:calc(100vh - var(--th) - 44px) !important;
-    overflow:hidden !important;
-    padding-bottom:14px !important;
-  }
-
-  #pg-alltasks .ph,
-  #pg-alltasks #at-counters,
-  #pg-alltasks .efbar,
-  #pg-alltasks .fb{
-    flex:0 0 auto !important;
-    position:relative;
-    z-index:5;
-  }
-
-  #pg-alltasks > .card{
-    flex:1 1 auto !important;
-    min-height:0 !important;
-    display:flex !important;
-    flex-direction:column !important;
-    overflow:hidden !important;
-    margin-bottom:0 !important;
-  }
-
-  #pg-alltasks > .card > .ch{
-    flex:0 0 auto !important;
-    background:var(--surface) !important;
-    z-index:4;
-  }
-
-  #pg-alltasks > .card > .tw{
-    flex:1 1 auto !important;
-    min-height:0 !important;
-    overflow:auto !important;
-    border-top:0 !important;
-  }
-
-  #pg-alltasks .tbl{
-    min-width:1180px;
-  }
-
-  #pg-alltasks .tbl thead th{
-    position:sticky !important;
-    top:0 !important;
-    z-index:3 !important;
-    background:#FAFBFD !important;
-    box-shadow:0 1px 0 var(--border);
-  }
-
-  #pg-alltasks #at-nil{
-    flex:1 1 auto !important;
-    overflow:auto !important;
-  }
-
-  /* Keep the drawer above the fixed/scrolling table if V2/V3 assignment drawer is open. */
-  .ug-task-report-drawer,
-  #ug-task-report-drawer,
-  .ug-side-drawer,
-  #ug-side-drawer{
-    z-index:99999 !important;
-  }
-
-  @media(max-width:768px){
-    #pg-alltasks.act{
-      height:calc(100vh - var(--th) - 20px) !important;
-      max-height:calc(100vh - var(--th) - 20px) !important;
-      padding-bottom:10px !important;
-    }
-    #pg-alltasks .ph,
-    #pg-alltasks #at-counters,
-    #pg-alltasks .efbar,
-    #pg-alltasks .fb{
-      gap:8px;
-    }
-    #pg-alltasks > .card > .tw{
-      -webkit-overflow-scrolling:touch;
-    }
-  }
-</style>
-<script id="ug-v4-alltasks-freeze-scroll-js">
-(function(){
-  'use strict';
-  function ensureAllTasksScrollMode(){
-    var pg=document.getElementById('pg-alltasks');
-    if(!pg) return;
-    var card=pg.querySelector(':scope > .card');
-    var tw=card ? card.querySelector('.tw') : null;
-    if(tw){
-      tw.setAttribute('data-scroll-only-task-list','true');
-      tw.style.overflow='auto';
-      tw.style.minHeight='0';
-    }
-  }
-  var oldNav=window.nav;
-  if(typeof oldNav==='function' && !oldNav.__ugV4ScrollFreeze){
-    window.nav=function(page){
-      var out=oldNav.apply(this,arguments);
-      if(page==='alltasks') setTimeout(ensureAllTasksScrollMode,0);
-      return out;
-    };
-    window.nav.__ugV4ScrollFreeze=true;
-  }
-  var oldRenderAllTasks=window.renderAllTasks;
-  if(typeof oldRenderAllTasks==='function' && !oldRenderAllTasks.__ugV4ScrollFreeze){
-    window.renderAllTasks=function(){
-      var out=oldRenderAllTasks.apply(this,arguments);
-      setTimeout(ensureAllTasksScrollMode,0);
-      return out;
-    };
-    window.renderAllTasks.__ugV4ScrollFreeze=true;
-  }
-  document.addEventListener('DOMContentLoaded', ensureAllTasksScrollMode);
-  setTimeout(ensureAllTasksScrollMode,300);
-})();
-</script>
-
-</body>
+   Paste this just before </body>
    No existing code change required.
    ========================================================= */
 (function(){
@@ -5521,1440 +5139,1270 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
 
 })();
 </script>
-
-
-<!-- ============================================================
-     FINAL INLINE FIX: Employee counts + Employee CRUD + Reports + Meetings
-     Generated by ChatGPT from uploaded portal code on 2026-05-06
-     ============================================================ -->
-<script>
+  <script>
 /* ============================================================
-   UPGRO FINAL OVERRIDE PATCH — Employees + Reports + Meet Links
-   Paste as LAST script before 
-
-<!-- =========================================================
-     FINAL PATCH V4: ALL TASKS FREEZE HEADER + SCROLL TASK LIST ONLY
-     Paste-safe override. Keeps existing logic unchanged.
-========================================================= -->
-<style id="ug-v4-alltasks-freeze-scroll">
-  /* All Tasks page: only the task table/list scrolls. Upper controls stay fixed. */
-  #pg-alltasks.act{
-    display:flex !important;
-    flex-direction:column !important;
-    height:calc(100vh - var(--th) - 44px) !important;
-    max-height:calc(100vh - var(--th) - 44px) !important;
-    overflow:hidden !important;
-    padding-bottom:14px !important;
-  }
-
-  #pg-alltasks .ph,
-  #pg-alltasks #at-counters,
-  #pg-alltasks .efbar,
-  #pg-alltasks .fb{
-    flex:0 0 auto !important;
-    position:relative;
-    z-index:5;
-  }
-
-  #pg-alltasks > .card{
-    flex:1 1 auto !important;
-    min-height:0 !important;
-    display:flex !important;
-    flex-direction:column !important;
-    overflow:hidden !important;
-    margin-bottom:0 !important;
-  }
-
-  #pg-alltasks > .card > .ch{
-    flex:0 0 auto !important;
-    background:var(--surface) !important;
-    z-index:4;
-  }
-
-  #pg-alltasks > .card > .tw{
-    flex:1 1 auto !important;
-    min-height:0 !important;
-    overflow:auto !important;
-    border-top:0 !important;
-  }
-
-  #pg-alltasks .tbl{
-    min-width:1180px;
-  }
-
-  #pg-alltasks .tbl thead th{
-    position:sticky !important;
-    top:0 !important;
-    z-index:3 !important;
-    background:#FAFBFD !important;
-    box-shadow:0 1px 0 var(--border);
-  }
-
-  #pg-alltasks #at-nil{
-    flex:1 1 auto !important;
-    overflow:auto !important;
-  }
-
-  /* Keep the drawer above the fixed/scrolling table if V2/V3 assignment drawer is open. */
-  .ug-task-report-drawer,
-  #ug-task-report-drawer,
-  .ug-side-drawer,
-  #ug-side-drawer{
-    z-index:99999 !important;
-  }
-
-  @media(max-width:768px){
-    #pg-alltasks.act{
-      height:calc(100vh - var(--th) - 20px) !important;
-      max-height:calc(100vh - var(--th) - 20px) !important;
-      padding-bottom:10px !important;
-    }
-    #pg-alltasks .ph,
-    #pg-alltasks #at-counters,
-    #pg-alltasks .efbar,
-    #pg-alltasks .fb{
-      gap:8px;
-    }
-    #pg-alltasks > .card > .tw{
-      -webkit-overflow-scrolling:touch;
-    }
-  }
-</style>
-<script id="ug-v4-alltasks-freeze-scroll-js">
-(function(){
-  'use strict';
-  function ensureAllTasksScrollMode(){
-    var pg=document.getElementById('pg-alltasks');
-    if(!pg) return;
-    var card=pg.querySelector(':scope > .card');
-    var tw=card ? card.querySelector('.tw') : null;
-    if(tw){
-      tw.setAttribute('data-scroll-only-task-list','true');
-      tw.style.overflow='auto';
-      tw.style.minHeight='0';
-    }
-  }
-  var oldNav=window.nav;
-  if(typeof oldNav==='function' && !oldNav.__ugV4ScrollFreeze){
-    window.nav=function(page){
-      var out=oldNav.apply(this,arguments);
-      if(page==='alltasks') setTimeout(ensureAllTasksScrollMode,0);
-      return out;
-    };
-    window.nav.__ugV4ScrollFreeze=true;
-  }
-  var oldRenderAllTasks=window.renderAllTasks;
-  if(typeof oldRenderAllTasks==='function' && !oldRenderAllTasks.__ugV4ScrollFreeze){
-    window.renderAllTasks=function(){
-      var out=oldRenderAllTasks.apply(this,arguments);
-      setTimeout(ensureAllTasksScrollMode,0);
-      return out;
-    };
-    window.renderAllTasks.__ugV4ScrollFreeze=true;
-  }
-  document.addEventListener('DOMContentLoaded', ensureAllTasksScrollMode);
-  setTimeout(ensureAllTasksScrollMode,300);
-})();
-</script>
-
-</body>. Existing code untouched.
+   EMPLOYEE EMAIL EDITABLE PATCH + ISHIKA SAXENA EMAIL FIX
+   Paste this just before </body>
+   Do not change any existing code above.
    ============================================================ */
 (function(){
   'use strict';
 
-  const PATCH_TAG = 'UG_FINAL_2026_05_06';
-  const $id = id => document.getElementById(id);
-  const E = v => String(v || '').trim().toLowerCase();
-  const N = v => String(v || '').trim().replace(/\s+/g, ' ');
-  const K = v => N(v).toLowerCase();
-  const isMail = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(E(v));
-  const safe = v => String(v == null ? '' : v)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;').replace(/"/g,'&quot;')
-    .replace(/'/g,'&#039;');
+  const ISHIKA_NAME_KEY = 'ishika saxena';
 
-  const EMP_LS = 'upgro_emp_dyn';
-  const ROLES_LS = 'upgro_roles_v3';
-  const SYNC_LS = 'upgro_emp_sync_ping_v1';
-  const MEET_LS = 'upgro_meetings_v2';
+  /*
+    Default corrected email.
+    Agar actual email alag ho, Employee section me Ishika Saxena select karke
+    email field se directly change kar sakte ho.
+  */
+  const ISHIKA_CORRECT_EMAIL = 'ishika.crm@upgromedia.com';
 
-  const EMAIL_ALIAS = {
-    'ritutyagi@upgromedia.com':'ritutyagiea@upgromedia.com',
-    'ritu.tyagi@upgromedia.com':'ritutyagiea@upgromedia.com',
-    'chnadrakala.meta@upgromedia.com':'chandrakala.meta@upgromedia.com',
-    'chandrakala.waldia@upgromedia.com':'chandrakala.meta@upgromedia.com',
-    'subhi.meta@upgromedia.com':'shubhi.meta@upgromedia.com'
+  function $(id){
+    return document.getElementById(id);
+  }
+
+  function cleanEmail(v){
+    return String(v || '')
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '');
+  }
+
+  function cleanName(v){
+    return String(v || '')
+      .trim()
+      .replace(/\s+/g, ' ')
+      .toLowerCase();
+  }
+
+  function isEmail(v){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail(v));
+  }
+
+  function showToast(msg){
+    if(typeof toast === 'function') toast(msg);
+    else alert(msg);
+  }
+
+  function ensureEmpGlobals(){
+    if(typeof window.empReg === 'undefined') window.empReg = [];
+    try{
+      if(typeof empReg === 'undefined') empReg = window.empReg;
+    }catch(e){}
+    if(typeof window.USERS === 'undefined' && typeof USERS !== 'undefined'){
+      window.USERS = USERS;
+    }
+  }
+
+  function getEmpArray(){
+    ensureEmpGlobals();
+
+    try{
+      if(typeof initEmpReg === 'function') initEmpReg(true);
+    }catch(e){}
+
+    if(Array.isArray(window.empReg)) return window.empReg;
+
+    try{
+      if(Array.isArray(empReg)){
+        window.empReg = empReg;
+        return empReg;
+      }
+    }catch(e){}
+
+    window.empReg = [];
+    return window.empReg;
+  }
+
+  function setEmpArray(arr){
+    window.empReg = arr;
+
+    try{
+      empReg = arr;
+    }catch(e){}
+  }
+
+  function syncUsersAfterEmailChange(oldEmail, newEmp){
+    oldEmail = cleanEmail(oldEmail);
+    const newEmail = cleanEmail(newEmp.email);
+
+    try{
+      if(typeof USERS !== 'undefined'){
+        if(oldEmail && oldEmail !== newEmail && USERS[oldEmail]){
+          delete USERS[oldEmail];
+        }
+
+        USERS[newEmail] = {
+          ...(USERS[newEmail] || {}),
+          ...newEmp,
+          email: newEmail,
+          name: newEmp.name,
+          pass: newEmp.pass,
+          role: newEmp.role || newEmp.desig || 'Team',
+          desig: newEmp.desig || newEmp.role || 'Team',
+          isAdmin: !!newEmp.isAdmin,
+          isManager: !!newEmp.isManager,
+          active: newEmp.active !== false
+        };
+      }
+    }catch(e){}
+  }
+
+  function syncTasksAfterEmailChange(oldEmail, newEmail, empName, empDesig){
+    oldEmail = cleanEmail(oldEmail);
+    newEmail = cleanEmail(newEmail);
+
+    if(!oldEmail || !newEmail || oldEmail === newEmail) return;
+
+    const keys = [
+      'email',
+      'assignedToEmail',
+      'empEmail',
+      'AssignedTo_Email',
+      'AssignedToEmail',
+      'EmployeeEmail',
+      'Assigned Email',
+      'Assigned To Email',
+      'Assigned To (Email)'
+    ];
+
+    const nameKeys = [
+      'empName',
+      'assignedTo',
+      'AssignedTo_Name',
+      'AssignedToName',
+      'EmployeeName',
+      'Assigned To',
+      'Assigned To Name',
+      'Assigned To (Name)'
+    ];
+
+    function patchTask(t){
+      if(!t || typeof t !== 'object') return t;
+
+      let matched = false;
+
+      keys.forEach(function(k){
+        if(cleanEmail(t[k]) === oldEmail){
+          t[k] = newEmail;
+          matched = true;
+        }
+      });
+
+      if(matched){
+        nameKeys.forEach(function(k){
+          t[k] = empName;
+        });
+
+        t.email = newEmail;
+        t.assignedToEmail = newEmail;
+        t.empEmail = newEmail;
+        t.AssignedTo_Email = newEmail;
+        t['Assigned To (Email)'] = newEmail;
+
+        t.empName = empName;
+        t.assignedTo = empName;
+        t.AssignedTo_Name = empName;
+        t['Assigned To (Name)'] = empName;
+
+        if(empDesig){
+          t.desig = empDesig;
+          t.Designation = empDesig;
+        }
+      }
+
+      return t;
+    }
+
+    try{
+      if(Array.isArray(window.allTasks)){
+        window.allTasks = window.allTasks.map(patchTask);
+      }
+    }catch(e){}
+
+    try{
+      if(Array.isArray(allTasks)){
+        allTasks = allTasks.map(patchTask);
+        window.allTasks = allTasks;
+      }
+    }catch(e){}
+  }
+
+  function persistEverything(){
+    try{
+      if(typeof persistEmpRegistry === 'function') persistEmpRegistry();
+    }catch(e){}
+
+    try{
+      if(typeof syncUserDirectoryFromRegistry === 'function') syncUserDirectoryFromRegistry();
+    }catch(e){}
+
+    try{
+      if(typeof emitEmpSync === 'function') emitEmpSync();
+    }catch(e){}
+
+    try{
+      if(typeof refillEmpDropdown === 'function') refillEmpDropdown();
+    }catch(e){}
+
+    try{
+      if(typeof populateTaskFilterOptions === 'function') populateTaskFilterOptions();
+    }catch(e){}
+
+    try{
+      if(typeof renderEmpList === 'function') renderEmpList();
+    }catch(e){}
+
+    try{
+      if(typeof buildUI === 'function') buildUI();
+    }catch(e){}
+  }
+
+  function autoFixIshikaEmail(){
+    const arr = getEmpArray();
+    let changed = false;
+
+    arr.forEach(function(emp){
+      if(!emp) return;
+
+      const nm = cleanName(emp.name || emp.Name || emp.EmployeeName || '');
+      const currentEmail = cleanEmail(emp.email || emp.Email || emp.EmployeeEmail || '');
+
+      if(nm === ISHIKA_NAME_KEY && currentEmail !== ISHIKA_CORRECT_EMAIL){
+        const oldEmail = currentEmail;
+
+        emp.email = ISHIKA_CORRECT_EMAIL;
+        emp.Email = ISHIKA_CORRECT_EMAIL;
+        emp.EmployeeEmail = ISHIKA_CORRECT_EMAIL;
+        emp.name = emp.name || 'Ishika Saxena';
+        emp.Name = emp.name;
+        emp.active = emp.active !== false;
+
+        syncUsersAfterEmailChange(oldEmail, emp);
+        syncTasksAfterEmailChange(
+          oldEmail,
+          ISHIKA_CORRECT_EMAIL,
+          emp.name || 'Ishika Saxena',
+          emp.desig || emp.role || 'Team'
+        );
+
+        changed = true;
+      }
+    });
+
+    if(changed){
+      setEmpArray(arr);
+      persistEverything();
+    }
+  }
+
+  function makeEmailFieldEditable(){
+    const fp = $('emp-fp');
+    if(!fp) return;
+
+    const nameInput = $('ef-n');
+    let emailInput = $('ef-e');
+
+    if(!nameInput) return;
+
+    const selectedName = cleanName(nameInput.value);
+
+    /*
+      Agar edit form me email input already hai but readonly/disabled hai,
+      usko editable kar do.
+    */
+    if(emailInput){
+      emailInput.removeAttribute('readonly');
+      emailInput.removeAttribute('disabled');
+      emailInput.type = 'email';
+      emailInput.classList.add('fc');
+      emailInput.placeholder = 'employee@upgromedia.com';
+
+      const wrap = emailInput.closest('.fg');
+      if(wrap){
+        const label = wrap.querySelector('label');
+        if(label) label.textContent = 'Email *';
+      }
+
+      if(selectedName === ISHIKA_NAME_KEY && cleanEmail(emailInput.value) !== ISHIKA_CORRECT_EMAIL){
+        emailInput.value = ISHIKA_CORRECT_EMAIL;
+      }
+
+      return;
+    }
+
+    /*
+      Agar edit form me email field missing hai,
+      name field ke neeche new editable email field inject kar do.
+    */
+    const empList = getEmpArray();
+    const emp = empList.find(function(e){
+      return cleanName(e.name || e.Name || '') === selectedName;
+    });
+
+    const currentEmail = selectedName === ISHIKA_NAME_KEY
+      ? ISHIKA_CORRECT_EMAIL
+      : cleanEmail(emp && emp.email);
+
+    const nameWrap = nameInput.closest('.fg') || nameInput.parentElement;
+
+    const div = document.createElement('div');
+    div.className = 'fg';
+    div.innerHTML =
+      '<label class="fl2">Email *</label>' +
+      '<input id="ef-e" type="email" class="fc" placeholder="employee@upgromedia.com" value="' + currentEmail + '">';
+
+    if(nameWrap && nameWrap.parentNode){
+      nameWrap.parentNode.insertBefore(div, nameWrap.nextSibling);
+    }
+  }
+
+  const oldSelectEmp = window.selectEmp;
+  window.selectEmp = function(email){
+    const result = oldSelectEmp ? oldSelectEmp.apply(this, arguments) : undefined;
+
+    setTimeout(function(){
+      autoFixIshikaEmail();
+      makeEmailFieldEditable();
+    }, 80);
+
+    return result;
   };
-  function CE(email){ email = E(email).replace(/\s+/g,''); return EMAIL_ALIAS[email] || email; }
 
-  function initials(name){
-    return N(name || '?').split(/\s+/).map(x => x[0] || '').join('').toUpperCase().slice(0,2) || '?';
-  }
-  function todayISO(){
-    const d = new Date();
-    return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10);
-  }
-  function dateVal(v){
-    if(!v) return null;
-    if(v instanceof Date && !isNaN(v)) return v;
-    const s = String(v).trim();
-    let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-    if(m){ const d = new Date(+m[1], +m[2]-1, +m[3]); return isNaN(d) ? null : d; }
-    m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/);
-    if(m){ const d = new Date(+m[3], +m[2]-1, +m[1]); return isNaN(d) ? null : d; }
-    const d = new Date(s);
-    return isNaN(d) ? null : d;
-  }
-  function dateISO(v){
-    const d = dateVal(v);
-    if(!d) return '';
-    return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10);
-  }
-  function taskDate(t){
-    try{ if(typeof taskDateValue === 'function') return taskDateValue(t); }catch(e){}
-    return dateVal(t && (t.adate || t.AssignDate || t['Assign Date'] || t.ts || t.Timestamp || t.ddate || t.DueDate));
-  }
-  function fmtDate(v){
-    try{ if(typeof fd === 'function') return fd(v); }catch(e){}
-    return dateISO(v) || '—';
-  }
-  function taskTitle(t){
-    try{ if(typeof getTaskDisplayName === 'function') return getTaskDisplayName(t); }catch(e){}
-    return N(t && (t.task || t.Task || t.TaskName || t['Task Name'] || t.workName || t.WorkName || 'Untitled Task'));
-  }
-  function statusOf(t){
-    try{ if(typeof normStatus === 'function') return normStatus(t.status || t.Status); }catch(e){}
-    const s = E(t && (t.status || t.Status || 'assigned')).replace(/[-_]/g,' ');
-    if(['done','completed','finish','finished'].includes(s)) return 'completed';
-    if(['inprogress','in progress','started','working'].includes(s)) return 'in progress';
-    if(['reject','rejected'].includes(s)) return 'rejected';
-    if(['overdue','late'].includes(s)) return 'overdue';
-    return 'assigned';
-  }
-  function taskId(t){
-    try{ if(typeof taskUiId === 'function') return taskUiId(t); }catch(e){}
-    return t && (t.taskCode || t.taskId || t.TaskID || t.id || '—');
-  }
-  function overDue(t){
-    try{ if(typeof isOD === 'function') return isOD(t); }catch(e){}
-    if(statusOf(t)==='completed') return false;
-    const d = dateVal(t && (t.ddate || t.DueDate || t['Due Date']));
-    if(!d) return false;
-    const n = new Date(); n.setHours(0,0,0,0); d.setHours(0,0,0,0);
-    return d < n;
-  }
+  const oldSelectNewEmp = window.selectNewEmp;
+  window.selectNewEmp = function(){
+    const result = oldSelectNewEmp ? oldSelectNewEmp.apply(this, arguments) : undefined;
 
-  function parseBool(v, fallback){
-    if(v === true || v === false) return v;
-    const s = E(v);
-    if(['true','yes','y','1','active'].includes(s)) return true;
-    if(['false','no','n','0','inactive'].includes(s)) return false;
-    return !!fallback;
-  }
-  function employeeFromRow(row, i){
-    row = row || {};
-    const email = CE(row.email || row.Email || row.EmployeeEmail || row['Employee Email'] || row['Email Address'] || row.LoginEmail || '');
-    const name = N(row.name || row.Name || row.EmployeeName || row['Employee Name'] || row['Full Name'] || (email ? email.split('@')[0] : ''));
-    if(!email && !name) return null;
-    const desig = N(row.desig || row.Designation || row.designation || row.department || row.Department || row.role || row.Role || 'Team') || 'Team';
-    const role = N(row.role || row.Role || row.RoleName || desig) || desig;
-    const active = !['false','no','0','inactive','removed','delete','deleted'].includes(E(row.active !== undefined ? row.active : row.Active !== undefined ? row.Active : row.Status || 'true'));
-    const admin = parseBool(row.isAdmin !== undefined ? row.isAdmin : row.IsAdmin !== undefined ? row.IsAdmin : row['Is Admin'], false);
-    const manager = !admin && (parseBool(row.isManager !== undefined ? row.isManager : row.IsManager !== undefined ? row.IsManager : row['Is Manager'], false) || /manager|assigner|team lead/i.test(role + ' ' + desig));
-    return {
-      email, name: name || email, pass: String(row.pass || row.Password || row.password || '').trim(),
-      role, desig, isAdmin: admin, isManager: manager, active,
-      bg: row.bg || (typeof CLRS !== 'undefined' ? CLRS[i % CLRS.length] : '#0B84FF'),
-      joinDate: row.joinDate || row.JoinDate || row['Join Date'] || ''
+    setTimeout(function(){
+      const emailInput = $('ef-e');
+      if(emailInput){
+        emailInput.removeAttribute('readonly');
+        emailInput.removeAttribute('disabled');
+        emailInput.type = 'email';
+      }
+    }, 80);
+
+    return result;
+  };
+
+  /*
+    Complete safe save override:
+    - Name editable
+    - Email editable
+    - Password editable
+    - Designation editable
+    - Role editable
+    - Admin / Manager / Active checkbox working
+    - Old email se new email migration
+  */
+  window.saveEmp = async function(oldEmail){
+    const arr = getEmpArray();
+
+    const name = (($('ef-n') || {}).value || '').trim();
+    const newEmail = cleanEmail(($('ef-e') || {}).value || oldEmail || '');
+    const pass = (($('ef-p') || {}).value || '').trim();
+
+    const desig = (($('ef-d') || {}).value || 'Team').trim();
+    const roleVal = ((($('ef-r') || {}).value || desig) || 'Team').trim();
+
+    const isAdminCk = !!(($('ef-admin') || {}).checked);
+    const isMgrCk = !!(($('ef-mgr') || {}).checked);
+    const active = $('ef-ac') ? !!$('ef-ac').checked : true;
+
+    const oldClean = cleanEmail(oldEmail);
+
+    if(!name){
+      showToast('⚠ Name required');
+      return;
+    }
+
+    if(!newEmail || !isEmail(newEmail)){
+      showToast('⚠ Valid email required');
+      return;
+    }
+
+    const oldIndex = arr.findIndex(function(e){
+      return cleanEmail(e.email) === oldClean;
+    });
+
+    let index = oldIndex;
+
+    /*
+      Fallback: if old email mismatch ho gaya ho, name se record find karo.
+    */
+    if(index < 0){
+      index = arr.findIndex(function(e){
+        return cleanName(e.name) === cleanName(name);
+      });
+    }
+
+    if(index < 0){
+      showToast('⚠ Employee not found');
+      return;
+    }
+
+    const duplicate = arr.find(function(e, i){
+      return i !== index && cleanEmail(e.email) === newEmail;
+    });
+
+    if(duplicate){
+      showToast('⚠ This email already exists for another employee');
+      return;
+    }
+
+    const previousEmail = cleanEmail(arr[index].email || oldEmail);
+
+    const oldEmp = arr[index] || {};
+
+    const managerFlag = !!(
+      isMgrCk ||
+      (
+        typeof isForcedAssigner === 'function' &&
+        isForcedAssigner({
+          email: newEmail,
+          name: name,
+          desig: desig,
+          role: roleVal
+        })
+      )
+    );
+
+    const updatedEmp = {
+      ...oldEmp,
+      email: newEmail,
+      Email: newEmail,
+      EmployeeEmail: newEmail,
+      name: name,
+      Name: name,
+      pass: pass || oldEmp.pass || oldEmp.password || '',
+      password: pass || oldEmp.pass || oldEmp.password || '',
+      role: roleVal,
+      Role: roleVal,
+      desig: desig,
+      Designation: desig,
+      isAdmin: isAdminCk,
+      isManager: managerFlag,
+      active: active,
+      Active: active ? 'Yes' : 'No',
+      bg: oldEmp.bg || (typeof CLRS !== 'undefined' ? CLRS[index % CLRS.length] : '#0B84FF'),
+      joinDate: oldEmp.joinDate || oldEmp.JoinDate || (typeof TODAY !== 'undefined' ? TODAY : '')
     };
+
+    arr[index] = updatedEmp;
+    setEmpArray(arr);
+
+    syncUsersAfterEmailChange(previousEmail, updatedEmp);
+    syncTasksAfterEmailChange(previousEmail, newEmail, name, desig);
+
+    /*
+      Current logged-in user ka email bhi update karo agar wahi employee edit hua hai.
+    */
+    try{
+      if(typeof cu !== 'undefined' && cu && cleanEmail(cu.email) === previousEmail){
+        cu = {
+          ...cu,
+          ...updatedEmp,
+          email: newEmail,
+          role: roleVal,
+          desig: desig
+        };
+        window.cu = cu;
+
+        if(typeof saveCurrentSession === 'function'){
+          saveCurrentSession();
+        }else{
+          localStorage.setItem('upgro_current_session_v1', JSON.stringify(cu));
+        }
+      }
+    }catch(e){}
+
+    try{
+      if(typeof persistEmpRegistry === 'function') persistEmpRegistry();
+    }catch(e){}
+
+    try{
+      if(typeof syncUserDirectoryFromRegistry === 'function') syncUserDirectoryFromRegistry();
+    }catch(e){}
+
+    try{
+      if(typeof emitEmpSync === 'function') emitEmpSync();
+    }catch(e){}
+
+    /*
+      Google Sheet sync available ho to update bhej do.
+    */
+    try{
+      if(typeof syncEmployeeToServer === 'function'){
+        await syncEmployeeToServer(updatedEmp, 'upsertEmployee');
+      }else if(typeof SURL !== 'undefined' && SURL){
+        await fetch(SURL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'upsertEmployee',
+            ...updatedEmp,
+            oldEmail: previousEmail,
+            email: newEmail
+          })
+        });
+      }
+    }catch(e){
+      console.warn('Employee sheet sync failed, local portal updated:', e);
+    }
+
+    try{
+      if(typeof initEmpReg === 'function') initEmpReg(true);
+    }catch(e){}
+
+    try{
+      if(typeof renderEmpList === 'function') renderEmpList();
+    }catch(e){}
+
+    try{
+      if(typeof selectEmp === 'function') selectEmp(newEmail);
+    }catch(e){}
+
+    try{
+      if(typeof refillEmpDropdown === 'function') refillEmpDropdown();
+    }catch(e){}
+
+    try{
+      if(typeof populateTaskFilterOptions === 'function') populateTaskFilterOptions();
+    }catch(e){}
+
+    try{
+      if(typeof buildUI === 'function') buildUI();
+    }catch(e){}
+
+    showToast('✅ Employee updated successfully');
+  };
+
+  /*
+    Page load pe bhi Ishika email auto-fix.
+  */
+  window.addEventListener('DOMContentLoaded', function(){
+    setTimeout(function(){
+      autoFixIshikaEmail();
+      makeEmailFieldEditable();
+    }, 900);
+  });
+
+  setTimeout(function(){
+    autoFixIshikaEmail();
+  }, 1200);
+
+})();
+</script>
+  <script>
+/* ============================================================
+   ONLY ISHIKA SAXENA EMAIL FIX
+   Correct email: ishika.crm@upgromedia.com
+   Paste just before </body>
+   ============================================================ */
+(function(){
+  'use strict';
+
+  const OLD_EMAILS = [
+    'ishika.crm@upgromedia.com',
+    'ishika.crm@upgromedia.com',
+    'ishika.crm@upgromedia.com'
+  ];
+
+  const CORRECT_EMAIL = 'ishika.crm@upgromedia.com';
+
+  function clean(v){
+    return String(v || '').trim().toLowerCase().replace(/\s+/g, '');
   }
-  function localDyn(){
-    try{ if(typeof loadDynEmployees === 'function') return loadDynEmployees() || []; }catch(e){}
-    try{ return JSON.parse(localStorage.getItem(EMP_LS) || '[]') || []; }catch(e){ return []; }
+
+  function cleanName(v){
+    return String(v || '').trim().replace(/\s+/g, ' ').toLowerCase();
   }
-  function saveDyn(list){
-    try{ if(typeof saveDynEmployees === 'function') saveDynEmployees(list); else localStorage.setItem(EMP_LS, JSON.stringify(list)); }catch(e){}
+
+  function isIshika(emp){
+    if(!emp) return false;
+
+    const name = cleanName(emp.name || emp.Name || emp.EmployeeName || emp.empName || '');
+    const email = clean(emp.email || emp.Email || emp.EmployeeEmail || emp.empEmail || '');
+
+    return (
+      name === 'ishika saxena' ||
+      OLD_EMAILS.includes(email) ||
+      email === CORRECT_EMAIL
+    );
   }
-  function baseRows(){
-    const rows = [];
-    try{ if(typeof USERS !== 'undefined') Object.keys(USERS).forEach(email => rows.push(Object.assign({}, USERS[email], {email}))); }catch(e){}
-    try{ if(Array.isArray(sheetEmpReg)) rows.push.apply(rows, sheetEmpReg); }catch(e){}
-    try{ if(Array.isArray(window.sheetEmpReg)) rows.push.apply(rows, window.sheetEmpReg); }catch(e){}
-    try{ if(Array.isArray(empReg)) rows.push.apply(rows, empReg); }catch(e){}
-    try{ if(Array.isArray(window.empReg)) rows.push.apply(rows, window.empReg); }catch(e){}
-    rows.push.apply(rows, localDyn());
-    return rows;
+
+  function patchEmployeeObject(emp){
+    if(!emp || !isIshika(emp)) return emp;
+
+    emp.name = 'Ishika Saxena';
+    emp.Name = 'Ishika Saxena';
+    emp.EmployeeName = 'Ishika Saxena';
+
+    emp.email = CORRECT_EMAIL;
+    emp.Email = CORRECT_EMAIL;
+    emp.EmployeeEmail = CORRECT_EMAIL;
+    emp.empEmail = CORRECT_EMAIL;
+
+    emp.role = emp.role || emp.Role || 'CRM';
+    emp.Role = emp.role;
+
+    emp.desig = emp.desig || emp.Designation || 'CRM';
+    emp.Designation = emp.desig;
+
+    emp.active = true;
+    emp.Active = 'Yes';
+
+    return emp;
   }
-  function allEmployees(includeInactive){
-    const map = new Map();
-    baseRows().forEach((r,i) => {
-      const e = employeeFromRow(r,i);
-      if(!e || !isMail(e.email)) return;
-      const old = map.get(e.email) || {};
-      const merged = Object.assign({}, old, e);
-      if(old.active === false || e.active === false) merged.active = false;
-      if(!merged.pass && old.pass) merged.pass = old.pass;
+
+  function fixUsers(){
+    try{
+      if(typeof USERS === 'undefined') return;
+
+      OLD_EMAILS.forEach(function(oldEmail){
+        oldEmail = clean(oldEmail);
+
+        if(USERS[oldEmail]){
+          USERS[CORRECT_EMAIL] = Object.assign({}, USERS[oldEmail], {
+            email: CORRECT_EMAIL,
+            name: 'Ishika Saxena',
+            role: USERS[oldEmail].role || USERS[oldEmail].desig || 'CRM',
+            desig: USERS[oldEmail].desig || USERS[oldEmail].role || 'CRM',
+            active: true
+          });
+
+          delete USERS[oldEmail];
+        }
+      });
+
+      if(!USERS[CORRECT_EMAIL]){
+        USERS[CORRECT_EMAIL] = {
+          name: 'Ishika Saxena',
+          email: CORRECT_EMAIL,
+          pass: 'Ishika@123',
+          role: 'CRM',
+          desig: 'CRM',
+          active: true,
+          isAdmin: false,
+          isManager: true
+        };
+      }else{
+        USERS[CORRECT_EMAIL] = patchEmployeeObject(USERS[CORRECT_EMAIL]);
+      }
+    }catch(e){
+      console.warn('USERS Ishika email fix failed:', e);
+    }
+  }
+
+  function fixEmpRegistry(){
+    let arr = [];
+
+    try{
+      if(Array.isArray(window.empReg)) arr = window.empReg;
+    }catch(e){}
+
+    try{
+      if((!arr || !arr.length) && typeof empReg !== 'undefined' && Array.isArray(empReg)){
+        arr = empReg;
+      }
+    }catch(e){}
+
+    if(!Array.isArray(arr)) arr = [];
+
+    let found = false;
+
+    arr.forEach(function(emp){
+      if(isIshika(emp)){
+        patchEmployeeObject(emp);
+        found = true;
+      }
+    });
+
+    if(!found){
+      arr.push({
+        name: 'Ishika Saxena',
+        email: CORRECT_EMAIL,
+        pass: 'Ishika@123',
+        role: 'CRM',
+        desig: 'CRM',
+        active: true,
+        isAdmin: false,
+        isManager: true
+      });
+    }
+
+    try{ window.empReg = arr; }catch(e){}
+    try{ empReg = arr; }catch(e){}
+  }
+
+  function fixTasks(){
+    function patchTask(t){
+      if(!t || typeof t !== 'object') return t;
+
+      const possibleEmailKeys = [
+        'email',
+        'empEmail',
+        'assignedToEmail',
+        'AssignedTo_Email',
+        'AssignedToEmail',
+        'EmployeeEmail',
+        'Assigned Email',
+        'Assigned To Email',
+        'Assigned To (Email)'
+      ];
+
+      let matched = false;
+
+      possibleEmailKeys.forEach(function(k){
+        if(OLD_EMAILS.includes(clean(t[k])) || clean(t[k]) === CORRECT_EMAIL){
+          t[k] = CORRECT_EMAIL;
+          matched = true;
+        }
+      });
+
+      const possibleNameKeys = [
+        'empName',
+        'assignedTo',
+        'AssignedTo_Name',
+        'AssignedToName',
+        'EmployeeName',
+        'Assigned To',
+        'Assigned To Name',
+        'Assigned To (Name)'
+      ];
+
+      possibleNameKeys.forEach(function(k){
+        if(cleanName(t[k]) === 'ishika saxena'){
+          matched = true;
+        }
+      });
+
+      if(matched){
+        t.email = CORRECT_EMAIL;
+        t.empEmail = CORRECT_EMAIL;
+        t.assignedToEmail = CORRECT_EMAIL;
+        t.AssignedTo_Email = CORRECT_EMAIL;
+        t['Assigned To (Email)'] = CORRECT_EMAIL;
+
+        t.empName = 'Ishika Saxena';
+        t.assignedTo = 'Ishika Saxena';
+        t.AssignedTo_Name = 'Ishika Saxena';
+        t['Assigned To (Name)'] = 'Ishika Saxena';
+
+        t.desig = t.desig || 'CRM';
+        t.Designation = t.Designation || 'CRM';
+      }
+
+      return t;
+    }
+
+    try{
+      if(Array.isArray(window.allTasks)){
+        window.allTasks = window.allTasks.map(patchTask);
+      }
+    }catch(e){}
+
+    try{
+      if(typeof allTasks !== 'undefined' && Array.isArray(allTasks)){
+        allTasks = allTasks.map(patchTask);
+        window.allTasks = allTasks;
+      }
+    }catch(e){}
+  }
+
+  function refreshUI(){
+    try{ if(typeof persistEmpRegistry === 'function') persistEmpRegistry(); }catch(e){}
+    try{ if(typeof syncUserDirectoryFromRegistry === 'function') syncUserDirectoryFromRegistry(); }catch(e){}
+    try{ if(typeof emitEmpSync === 'function') emitEmpSync(); }catch(e){}
+
+    try{ if(typeof initEmpReg === 'function') initEmpReg(true); }catch(e){}
+    try{ if(typeof renderEmpList === 'function') renderEmpList(); }catch(e){}
+    try{ if(typeof refillEmpDropdown === 'function') refillEmpDropdown(); }catch(e){}
+    try{ if(typeof populateTaskFilterOptions === 'function') populateTaskFilterOptions(); }catch(e){}
+    try{ if(typeof buildUI === 'function') buildUI(); }catch(e){}
+
+    const emailInput = document.getElementById('ef-e');
+    if(emailInput){
+      emailInput.value = CORRECT_EMAIL;
+      emailInput.removeAttribute('readonly');
+      emailInput.removeAttribute('disabled');
+    }
+
+    try{
+      if(typeof selectEmp === 'function'){
+        setTimeout(function(){
+          try{ selectEmp(CORRECT_EMAIL); }catch(e){}
+        }, 150);
+      }
+    }catch(e){}
+  }
+
+  function runFix(){
+    fixUsers();
+    fixEmpRegistry();
+    fixTasks();
+    refreshUI();
+
+    if(typeof toast === 'function'){
+      toast('✅ Ishika Saxena email fixed: ' + CORRECT_EMAIL);
+    }
+  }
+
+  window.fixIshikaEmailNow = runFix;
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){
+      setTimeout(runFix, 500);
+    });
+  }else{
+    setTimeout(runFix, 500);
+  }
+
+})();
+</script>
+<script>
+/* =========================================================
+   UPGRO FINAL RECOVERY PATCH — APPEND ONLY
+   Keeps old sidebar/nav intact. Fixes only requested issues:
+   employee dedupe/remove visibility, assigned-work drawer,
+   All Tasks scroll, sidebar user repair, and Auto Google Meet.
+   ========================================================= */
+(function(){
+  'use strict';
+  if(window.__UG_FINAL_RECOVERY_PATCH_V12) return;
+  window.__UG_FINAL_RECOVERY_PATCH_V12 = true;
+
+  var REMOVED_KEY = 'ug_removed_employee_emails_final_v12';
+
+  function $(id){ return document.getElementById(id); }
+  function E(v){ return String(v||'').trim().toLowerCase().replace(/\s+/g,''); }
+  function N(v){ return String(v||'').trim().replace(/\s+/g,' '); }
+  function isMail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(E(v)); }
+  function toastSafe(msg){ try{ if(typeof toast==='function') toast(msg); else console.log(msg); }catch(e){ console.log(msg); } }
+  function esc(v){ return String(v==null?'':v).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];}); }
+  function normActive(v, def){
+    if(v === undefined || v === null || v === '') return def !== false;
+    if(v === false) return false;
+    var s=String(v).trim().toLowerCase();
+    return !(s==='false'||s==='no'||s==='0'||s==='inactive'||s==='removed'||s==='delete'||s==='deleted');
+  }
+  function loadRemoved(){
+    try{ var arr=JSON.parse(localStorage.getItem(REMOVED_KEY)||'[]'); return new Set(Array.isArray(arr)?arr.map(E).filter(isMail):[]); }catch(e){ return new Set(); }
+  }
+  function saveRemoved(set){ try{ localStorage.setItem(REMOVED_KEY, JSON.stringify(Array.from(set||[]))); }catch(e){} }
+  function currentUser(){ try{ return window.cu || (typeof cu!=='undefined'?cu:null); }catch(e){ return window.cu || null; } }
+  function setCurrentUser(u){ if(!u) return; try{ window.cu=u; }catch(e){} try{ cu=u; }catch(e){} }
+  function bg(i){ try{ return CLRS[i % CLRS.length]; }catch(e){ return '#0B84FF'; } }
+  function iniSafe(name){ try{ return typeof ini==='function'?ini(name):N(name).split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase(); }catch(e){ return '?'; } }
+  function managerFlag(emp){ try{ return typeof computeManagerFlag==='function' ? computeManagerFlag(emp) : !!emp.isManager; }catch(e){ return !!emp.isManager; } }
+
+  function rawEmployees(){
+    var arr=[];
+    try{ if(Array.isArray(window.empReg)) arr=arr.concat(window.empReg); }catch(e){}
+    try{ if(typeof empReg!=='undefined' && Array.isArray(empReg)) arr=arr.concat(empReg); }catch(e){}
+    try{ if(typeof sheetEmpReg!=='undefined' && Array.isArray(sheetEmpReg)) arr=arr.concat(sheetEmpReg); }catch(e){}
+    try{ if(typeof loadDynEmployees==='function'){ var dyn=loadDynEmployees(); if(Array.isArray(dyn)) arr=arr.concat(dyn); } }catch(e){}
+    try{ if(typeof USERS!=='undefined') Object.keys(USERS).forEach(function(email){ arr.push(Object.assign({},USERS[email],{email:email})); }); }catch(e){}
+    return arr;
+  }
+
+  function canonEmp(r,i){
+    r = r || {};
+    var email = E(r.email||r.Email||r.EmployeeEmail||r.empEmail||r['Email Address']||r.LoginEmail||r.UserEmail||'');
+    if(!isMail(email)) return null;
+    var name = N(r.name||r.Name||r.EmployeeName||r.empName||r.FullName||r['Full Name']||email.split('@')[0]);
+    var desig = N(r.desig||r.Designation||r.designation||r.role||r.Role||'Team') || 'Team';
+    var role = N(r.role||r.Role||desig) || desig;
+    var active = normActive(r.active!==undefined?r.active:(r.Active!==undefined?r.Active:(r.Status!==undefined?r.Status:undefined)), true);
+    var isAdmin = !!r.isAdmin || String(r.IsAdmin||r['Is Admin']||'').toLowerCase()==='true' || String(r.IsAdmin||r['Is Admin']||'').toLowerCase()==='yes';
+    var isManager = !!r.isManager || String(r.IsManager||r['Is Manager']||'').toLowerCase()==='true' || String(r.IsManager||r['Is Manager']||'').toLowerCase()==='yes';
+    var emp = Object.assign({}, r, {email:email,name:name,pass:String(r.pass||r.password||r.Password||'').trim(),role:role,desig:desig,isAdmin:isAdmin,isManager:isManager,active:active,bg:r.bg||bg(i||0),joinDate:r.joinDate||r.JoinDate||''});
+    emp.isManager = managerFlag(emp);
+    if(emp.isAdmin) emp.isManager = false;
+    return emp;
+  }
+
+  function normalizeEmployees(){
+    var removed=loadRemoved(), map=new Map();
+    rawEmployees().forEach(function(r,i){
+      var e=canonEmp(r,i); if(!e) return;
+      var old=map.get(e.email)||{};
+      var merged=Object.assign({},old,e);
+      merged.active = (old.active===false || e.active===false || removed.has(e.email)) ? false : true;
+      merged.isManager = managerFlag(merged);
+      if(merged.isAdmin) merged.isManager=false;
       map.set(e.email, merged);
     });
-    const out = Array.from(map.values()).filter(e => includeInactive || e.active !== false);
-    out.sort((a,b) => String(a.name).localeCompare(String(b.name)));
+    var out=Array.from(map.values()).sort(function(a,b){ return String(a.name||'').localeCompare(String(b.name||'')); });
+    try{ window.empReg=out; }catch(e){}
+    try{ empReg=out; }catch(e){}
     try{
-      empReg = Array.from(map.values());
-      window.empReg = empReg;
-      if(typeof USERS !== 'undefined'){
-        empReg.forEach(e => { USERS[e.email] = Object.assign({}, USERS[e.email] || {}, e); });
+      if(typeof USERS!=='undefined'){
+        out.forEach(function(e){ USERS[e.email]=Object.assign({},USERS[e.email]||{},e,{active:e.active!==false,isAdmin:!!e.isAdmin,isManager:!!e.isManager}); });
       }
     }catch(e){}
     return out;
   }
-  function activeEmployees(){ return allEmployees(false); }
-  function persistEmployees(){
-    const list = allEmployees(true).map(e => ({
-      email:e.email, name:e.name, pass:e.pass, role:e.role, desig:e.desig,
-      isAdmin:!!e.isAdmin, isManager:!!e.isManager, active:e.active !== false,
-      bg:e.bg, joinDate:e.joinDate || ''
-    }));
-    saveDyn(list);
-    try{
-      const roles = {};
-      list.forEach(e => roles[e.email] = {isAdmin:!!e.isAdmin, isManager:!!e.isManager});
-      localStorage.setItem(ROLES_LS, JSON.stringify(roles));
-      localStorage.setItem(SYNC_LS, String(Date.now()));
-    }catch(e){}
-    try{ if(typeof syncUserDirectoryFromRegistry === 'function') syncUserDirectoryFromRegistry(); }catch(e){}
-    return list;
-  }
-  async function postBackend(payload){
-    try{
-      if(typeof SURL === 'undefined' || !SURL) return null;
-      const res = await fetch(SURL, {method:'POST', body:JSON.stringify(payload), signal:AbortSignal.timeout(30000)});
-      const txt = await res.text();
-      try{ return JSON.parse(txt); }catch(e){ return {success:false, message:txt.slice(0,200)}; }
-    }catch(err){ return {success:false, message:err.message}; }
-  }
-  async function syncEmployee(emp, action){
-    const payload = Object.assign({
-      action: action || 'upsertEmployee',
-      email: emp.email, Email: emp.email, EmployeeEmail: emp.email, 'Employee Email': emp.email,
-      name: emp.name, Name: emp.name, EmployeeName: emp.name, 'Employee Name': emp.name,
-      pass: emp.pass || '', Password: emp.pass || '',
-      role: emp.role || emp.desig || 'Team', Role: emp.role || emp.desig || 'Team',
-      desig: emp.desig || emp.role || 'Team', Designation: emp.desig || emp.role || 'Team',
-      isAdmin: !!emp.isAdmin, IsAdmin: !!emp.isAdmin,
-      isManager: !!emp.isManager, IsManager: !!emp.isManager,
-      active: emp.active !== false, Active: emp.active !== false,
-      joinDate: emp.joinDate || '', JoinDate: emp.joinDate || ''
-    }, emp || {});
-    return postBackend(payload);
-  }
-
+  function activeEmployees(){ return normalizeEmployees().filter(function(e){ return e.active!==false; }); }
+  function empByEmail(email){ email=E(email); return normalizeEmployees().find(function(e){ return e.email===email; }) || null; }
+  function activeEmailSet(){ var s=new Set(); activeEmployees().forEach(function(e){ s.add(e.email); }); return s; }
   window.getActiveEmployees = activeEmployees;
-  window.getAllEmployeesClean = function(){ return allEmployees(true); };
-  window.initEmpReg = function(){ return allEmployees(true); };
+  window.getAllEmployeesClean = normalizeEmployees;
+  window.isActiveEmployeeEmail = function(email){ var e=empByEmail(email); return !!(e && e.active!==false); };
 
-  window.uname = function(email){
-    const e = allEmployees(true).find(x => x.email === CE(email));
-    return e ? e.name : N(String(email || 'Unknown').split('@')[0].replace(/[._-]+/g,' '));
-  };
-  window.udesig = function(email){
-    const e = allEmployees(true).find(x => x.email === CE(email));
-    return e ? (e.desig || e.role || 'Team') : 'Team';
-  };
-  window.normalizeDisplayName = function(name,email,desig){
-    const e = allEmployees(true).find(x => x.email === CE(email));
-    return e ? e.name : (N(name) || window.uname(email) || 'Unknown');
+  var oldInitEmpReg = window.initEmpReg;
+  window.initEmpReg = function(force){
+    try{ if(typeof oldInitEmpReg==='function') oldInitEmpReg.call(this,force); }catch(e){ console.warn('old initEmpReg skipped',e); }
+    return normalizeEmployees();
   };
 
-  function currentEmp(){
-    if(!window.cu && typeof cu !== 'undefined') window.cu = cu;
-    const mail = CE((window.cu || cu || {}).email || '');
-    return allEmployees(true).find(e => e.email === mail) || (window.cu || cu || null);
-  }
-  window.isAdmin = function(){ const e = currentEmp(); return !!(e && e.active !== false && e.isAdmin); };
-  window.isManager = function(){ const e = currentEmp(); return !!(e && e.active !== false && !e.isAdmin && e.isManager); };
-  window.canAssign = function(){ return window.isAdmin() || window.isManager(); };
-
-  function taskEmail(t){
-    if(!t) return '';
-    let email = CE(t.email || t.assignedToEmail || t.empEmail || t.employeeEmail || t.AssignedTo_Email || t.AssignedToEmail || t.EmployeeEmail || t['Assigned To Email'] || t['Employee Email'] || t.mail || t.Email || '');
-    if(isMail(email)) return email;
-    const nm = K(t.empName || t.assignedTo || t.AssignedTo_Name || t['Assigned To Name'] || t.EmployeeName || t.Name || '');
-    const e = allEmployees(true).find(x => K(x.name) === nm);
-    return e ? e.email : '';
-  }
-  function assignedByText(t){ return N(t && (t.assignedByLabel || t.AssignedBy_Name || t['Assigned By Name'] || t.assignedBy || t.AssignedBy || t.by || '')); }
-  function assignedByKey(t){
-    const byMail = CE(t && (t.assignedByEmail || t.AssignedBy_Email || t['Assigned By Email'] || ''));
-    if(isMail(byMail)) return byMail;
-    const by = K(assignedByText(t));
-    const e = allEmployees(true).find(x => K(x.name) === by || by.includes(K(x.name)) || K(x.name).includes(by));
-    return e ? e.email : by;
-  }
-  function normalizeTask(t){
-    if(!t) return t;
-    const email = taskEmail(t);
-    const emp = allEmployees(true).find(e => e.email === email);
-    if(emp){
-      t.email = email; t.assignedToEmail = email; t.empEmail = email;
-      t.empName = emp.name; t.assignedTo = emp.name; t.AssignedTo_Name = emp.name;
-      t.desig = emp.desig || emp.role || 'Team'; t.assignedToLabel = emp.name;
+  function repairSidebarUser(){
+    var u=currentUser();
+    if(!u || !u.email){
+      try{
+        var raw=localStorage.getItem('upgro_current_user_v1');
+        if(raw){ var sess=JSON.parse(raw)||{}; if(sess.email){ var rec=empByEmail(sess.email); if(rec && rec.active!==false) u=rec; } }
+      }catch(e){}
     }
-    const total = Math.max(1, Number(t.totalUnits || t.TotalUnits || t.Count || t.count || t.WorkCount || 1) || 1);
-    let done = Math.max(0, Number(t.doneUnits || t.DoneUnits || t.DoneQty || t.completedQty || 0) || 0);
-    let st = statusOf(t);
-    if(st === 'completed' && done === 0) done = total;
-    done = Math.min(total, done);
-    t.totalUnits = total;
-    t.doneUnits = done;
-    t.pendingUnits = Math.max(0, Number(t.pendingUnits || t.PendingUnits || t.PendingQty || (total-done)) || 0);
-    t.status = st;
-    return t;
+    if(!u || !u.email) return false;
+    var rec=empByEmail(u.email) || u;
+    u=Object.assign({},u,rec,{email:E(rec.email||u.email),name:N(rec.name||u.name||u.email),role:rec.role||rec.desig||u.role||'Team',desig:rec.desig||rec.role||u.desig||'Team',isAdmin:!!rec.isAdmin,isManager:!!rec.isManager});
+    setCurrentUser(u);
+    var sn=$('sb-name'); if(sn) sn.textContent=u.name || u.email;
+    var sr=$('sb-role'); if(sr) sr.textContent=u.isAdmin?'👑 Admin':u.isManager?'🔀 Manager':(u.role||u.desig||'Team');
+    var av=$('sb-av'); if(av && !av.querySelector('img')) av.textContent=iniSafe(u.name||u.email);
+    var dg=$('dash-greet'); if(dg && u.name){
+      var h=new Date().getHours();
+      dg.textContent=(h<12?'Good Morning ☀️':h<17?'Good Afternoon 🌤':'Good Evening 🌙')+', '+String(u.name).split(' ')[0];
+    }
+    return true;
   }
-  function activeTasks(list){
-    const active = new Set(activeEmployees().map(e => e.email));
-    return (list || []).map(normalizeTask).filter(t => active.has(taskEmail(t)));
-  }
-  function assignedByMe(t){
-    const me = currentEmp(); if(!me) return false;
-    const bk = assignedByKey(t);
-    return bk === me.email || K(assignedByText(t)) === K(me.name) || K(assignedByText(t)).includes(K(me.name));
+  window.ugRepairSidebarUser = repairSidebarUser;
+
+  window.restoreCurrentSession = function(){
+    try{
+      var raw=localStorage.getItem('upgro_current_user_v1');
+      if(!raw) return false;
+      var sess=JSON.parse(raw)||{};
+      if(!sess.email) return false;
+      var rec=empByEmail(sess.email);
+      if(!rec || rec.active===false) return false;
+      setCurrentUser(rec);
+      return true;
+    }catch(e){ return false; }
+  };
+
+  function safeRefreshUI(){
+    normalizeEmployees();
+    try{ if(typeof syncUserDirectoryFromRegistry==='function') syncUserDirectoryFromRegistry(); }catch(e){}
+    try{ if(typeof persistEmpRegistry==='function') persistEmpRegistry(); }catch(e){}
+    try{ refillEmpDropdown(); }catch(e){}
+    try{ populateTaskFilterOptions(); }catch(e){}
+    try{ renderEmpList(); }catch(e){}
+    try{ if(currentUser() && currentUser().email){ repairSidebarUser(); if(typeof buildUI==='function') buildUI(); repairSidebarUser(); } }catch(e){ console.warn('safe build skipped',e); }
   }
 
-  window.taskBelongsToCurrentUser = function(t){
-    const me = currentEmp();
-    return !!(me && taskEmail(normalizeTask(t)) === me.email);
-  };
-  window.applyEmpF = function(tasks){
-    let list = activeTasks(tasks || []);
-    const me = currentEmp();
-    if(window.isAdmin()){
-      if(typeof activeEmpF !== 'undefined' && activeEmpF){
-        list = list.filter(t => taskEmail(t).replace(/[^a-z0-9]/g,'-') === activeEmpF || taskEmail(t).split('@')[0].replace(/[^a-z0-9]/g,'-') === activeEmpF);
-      }
-      return list;
-    }
-    if(window.isManager() && me){
-      list = list.filter(t => taskEmail(t) === me.email || assignedByMe(t));
-      if(typeof activeEmpF !== 'undefined' && activeEmpF){
-        list = list.filter(t => taskEmail(t).replace(/[^a-z0-9]/g,'-') === activeEmpF || taskEmail(t).split('@')[0].replace(/[^a-z0-9]/g,'-') === activeEmpF);
-      }
-      return list;
-    }
-    return me ? list.filter(t => taskEmail(t) === me.email) : [];
-  };
+  function persistEmployeesToLocal(){
+    try{
+      var dyn=normalizeEmployees().map(function(e){ return {email:e.email,name:e.name,pass:e.pass,role:e.role,desig:e.desig,isAdmin:!!e.isAdmin,isManager:!!e.isManager,active:e.active!==false,bg:e.bg,joinDate:e.joinDate||''}; });
+      if(typeof saveDynEmployees==='function') saveDynEmployees(dyn);
+      else localStorage.setItem('upgro_emp_dyn', JSON.stringify(dyn));
+      if(typeof emitEmpSync==='function') emitEmpSync();
+    }catch(e){}
+  }
 
   window.refillEmpDropdown = function(){
-    const list = activeEmployees();
-    const ids = ['add-emp','mtg-attendees','task-emp','assignEmployee','assign-to','assignee','emp-select','taskAssignee','task-assignee'];
-    const sels = [];
-    ids.forEach(id => { const el = $id(id); if(el) sels.push(el); });
-    document.querySelectorAll('select').forEach(sel => {
-      const label = (sel.id+' '+sel.name+' '+(sel.getAttribute('aria-label')||'')+' '+(sel.closest('.fg') ? sel.closest('.fg').innerText : '')).toLowerCase();
-      if(/assign|employee|assignee|attendee|member/.test(label)) sels.push(sel);
+    var list=activeEmployees();
+    var candidates=[];
+    ['add-emp','task-emp','assignEmployee','assign-to','assignee','emp-select','taskAssignee','task-assignee','meeting-attendees'].forEach(function(id){ var el=$(id); if(el) candidates.push(el); });
+    document.querySelectorAll('select').forEach(function(sel){
+      var label=(sel.id+' '+sel.name+' '+(sel.getAttribute('aria-label')||'')+' '+(sel.closest('.fg')?sel.closest('.fg').innerText:'')).toLowerCase();
+      if(/assign|employee|attendee|assignee|member/.test(label)) candidates.push(sel);
     });
-    const used = new Set();
-    sels.forEach(sel => {
-      if(!sel || used.has(sel)) return; used.add(sel);
-      const keep = CE(sel.value);
-      const first = sel.querySelector('option[value=""]') || sel.querySelector('option');
-      const ph = first && !isMail(first.value) && N(first.textContent) ? first.textContent : '— Select Active Employee —';
-      sel.innerHTML = '<option value="">'+safe(ph)+'</option>';
-      list.forEach(e => {
-        const o = document.createElement('option');
-        o.value = e.email;
-        o.textContent = e.name + ' — ' + (e.desig || e.role || 'Team') + (e.isAdmin ? ' [Admin]' : e.isManager ? ' [Manager]' : '');
-        sel.appendChild(o);
-      });
-      if(keep && Array.from(sel.options).some(o => CE(o.value) === keep)) sel.value = keep;
+    var seen=new Set();
+    candidates.forEach(function(sel){
+      if(!sel || seen.has(sel)) return; seen.add(sel);
+      var keep=E(sel.value);
+      var first=sel.querySelector('option[value=""]') || sel.querySelector('option');
+      var ph=(first && !isMail(first.value) && N(first.textContent)) ? first.textContent : '— Select Active Employee —';
+      sel.innerHTML='<option value="">'+esc(ph)+'</option>';
+      list.forEach(function(e){ var o=document.createElement('option'); o.value=e.email; o.textContent=e.name+' — '+(e.desig||e.role||'Team'); sel.appendChild(o); });
+      if(keep && Array.from(sel.options).some(function(o){ return E(o.value)===keep; })) sel.value=keep;
     });
   };
 
   window.populateTaskFilterOptions = function(){
-    const active = activeEmployees();
-    const toSel = $id('at-assigned-to');
-    if(toSel){
-      const keep = CE(toSel.value);
-      toSel.innerHTML = '<option value="">Assigned To — All</option>';
-      active.forEach(e => { const o = document.createElement('option'); o.value = e.email; o.textContent = e.name + ' — ' + (e.desig || e.role || 'Team'); toSel.appendChild(o); });
-      if(keep && Array.from(toSel.options).some(o => CE(o.value) === keep)) toSel.value = keep;
-    }
-    const bySel = $id('at-assigned-by');
-    if(bySel){
-      const keep = CE(bySel.value) || bySel.value;
-      bySel.innerHTML = '<option value="">Assigned By — All</option>';
-      const seen = new Set();
-      (window.allTasks || allTasks || []).forEach(t => {
-        const key = assignedByKey(t); const label = assignedByText(t) || key;
-        if(!key || seen.has(key)) return; seen.add(key);
-        const o = document.createElement('option'); o.value = key; o.textContent = label; bySel.appendChild(o);
-      });
-      if(keep && Array.from(bySel.options).some(o => o.value === keep)) bySel.value = keep;
-    }
-    const anSel = $id('an-emp-filter');
-    if(anSel){
-      const keep = CE(anSel.value);
-      anSel.innerHTML = '<option value="">Employee — All Active</option>';
-      active.forEach(e => { const o = document.createElement('option'); o.value = e.email; o.textContent = e.name + ' — ' + (e.desig || e.role || 'Team'); anSel.appendChild(o); });
-      if(keep && Array.from(anSel.options).some(o => CE(o.value) === keep)) anSel.value = keep;
-    }
+    var list=activeEmployees();
+    [['at-assigned-to','Assigned To — All'],['at-assigned-by','Assigned By — All'],['an-emp-filter','Employee — All Active']].forEach(function(pair){
+      var sel=$(pair[0]); if(!sel) return;
+      var keep=E(sel.value);
+      sel.innerHTML='<option value="">'+pair[1]+'</option>';
+      list.forEach(function(e){ var o=document.createElement('option'); o.value=e.email; o.textContent=e.name+' — '+(e.desig||e.role||'Team'); sel.appendChild(o); });
+      if(keep && Array.from(sel.options).some(function(o){ return E(o.value)===keep; })) sel.value=keep;
+    });
   };
 
   window.renderEmpList = function(){
-    const list = allEmployees(true);
-    const q = K(($id('emp-q') || {value:''}).value);
-    const cont = $id('emp-items'); if(!cont) return;
-    const counters = $id('emp-counters');
+    var cont=$('emp-items'); if(!cont) return;
+    var q=E(($('emp-q')||{value:''}).value);
+    var list=activeEmployees();
+    var counters=$('emp-counters');
     if(counters){
-      const active = list.filter(e => e.active !== false).length;
-      const inactive = list.length - active;
-      const admins = list.filter(e => e.active !== false && e.isAdmin).length;
-      const managers = list.filter(e => e.active !== false && e.isManager).length;
-      counters.innerHTML = '<div class="tctr tctr-blue"><div class="tctr-v">'+list.length+'</div><div class="tctr-l">Total</div></div>'+
-        '<div class="tctr tctr-green"><div class="tctr-v">'+active+'</div><div class="tctr-l">Active</div></div>'+
-        '<div class="tctr tctr-red"><div class="tctr-v">'+inactive+'</div><div class="tctr-l">Inactive</div></div>'+
+      var admins=list.filter(function(e){return e.isAdmin;}).length;
+      var managers=list.filter(function(e){return e.isManager;}).length;
+      counters.innerHTML='<div class="tctr tctr-blue"><div class="tctr-v">'+list.length+'</div><div class="tctr-l">Active Employees</div></div>'+
+        '<div class="tctr tctr-green"><div class="tctr-v">'+list.length+'</div><div class="tctr-l">Visible</div></div>'+
         '<div class="tctr tctr-purple"><div class="tctr-v">'+admins+'</div><div class="tctr-l">Admins</div></div>'+
-        '<div class="tctr tctr-orange"><div class="tctr-v">'+managers+'</div><div class="tctr-l">Assigners</div></div>';
+        '<div class="tctr tctr-orange"><div class="tctr-v">'+managers+'</div><div class="tctr-l">Assigners</div></div>'+
+        '<div class="tctr tctr-red"><div class="tctr-v">'+loadRemoved().size+'</div><div class="tctr-l">Removed</div></div>';
     }
-    const filtered = list.filter(e => !q || K(e.name+' '+e.email+' '+e.role+' '+e.desig).includes(q));
-    cont.innerHTML = filtered.length ? '' : '<div style="padding:16px;color:var(--muted)">No employees found.</div>';
-    filtered.forEach((e,i) => {
-      const div = document.createElement('div');
-      div.className = 'ei' + ((typeof editEmpEmail !== 'undefined' && editEmpEmail === e.email) ? ' act' : '');
-      div.onclick = () => { if(typeof selectEmp === 'function') selectEmp(e.email); };
-      const badge = e.isAdmin ? '<span class="role-badge rb-admin">Admin</span>' : e.isManager ? '<span class="role-badge rb-manager">Manager</span>' : '';
-      div.innerHTML = '<div class="ei-av" style="background:'+(e.bg || (typeof CLRS !== 'undefined' ? CLRS[i%CLRS.length] : '#0B84FF'))+'">'+initials(e.name)+'</div>'+
-        '<div class="ei-info"><div class="ei-name">'+safe(e.name)+' '+badge+'</div><div class="ei-role">'+safe(e.desig || e.role || 'Team')+'</div></div>'+
-        '<div class="ei-dot" title="'+(e.active !== false ? 'Active' : 'Inactive')+'" style="background:'+(e.active !== false ? '#00B67A' : '#E53935')+'"></div>';
+    var filtered=list.filter(function(e){ var hay=E((e.name||'')+' '+(e.email||'')+' '+(e.role||'')+' '+(e.desig||'')); return !q || hay.indexOf(q)>=0; });
+    if(!filtered.length){ cont.innerHTML='<div style="padding:16px;color:var(--muted)">No active employees found.</div>'; return; }
+    cont.innerHTML='';
+    filtered.forEach(function(e,i){
+      var div=document.createElement('div'); div.className='ei'+(E(window.editEmpEmail||'')===e.email?' act':''); div.onclick=function(){ window.selectEmp(e.email); };
+      var badge=e.isAdmin?'<span class="role-badge rb-admin">Admin</span>':(e.isManager?'<span class="role-badge rb-manager">Manager</span>':'');
+      div.innerHTML='<div class="ei-av" style="background:'+esc(e.bg||bg(i))+'">'+esc(iniSafe(e.name))+'</div><div class="ei-info"><div class="ei-name">'+esc(e.name)+' — '+esc(e.desig||e.role||'Team')+' '+badge+'</div><div class="ei-role">'+esc(e.email)+'</div></div><div class="ei-dot" style="background:#00B67A"></div>';
       cont.appendChild(div);
     });
   };
 
-  window.saveEmp = async function(oldEmail){
-    const email = CE(oldEmail || ($id('ef-e') || {value:''}).value);
-    const old = allEmployees(true).find(e => e.email === email) || {};
-    const name = N(($id('ef-n') || {value:''}).value);
-    const pass = String(($id('ef-p') || {value:''}).value || old.pass || '').trim();
-    const desig = N(($id('ef-d') || {value:'Team'}).value) || 'Team';
-    const role = N(($id('ef-r') || {value:desig}).value) || desig;
-    const isAdmin = !!(($id('ef-admin') || {}).checked);
-    const isManager = !isAdmin && !!(($id('ef-mgr') || {}).checked);
-    const active = ($id('ef-ac') ? $id('ef-ac').checked : true);
-    if(!name){ if(typeof toast === 'function') toast('⚠ Name required'); return; }
-    const rec = Object.assign({}, old, {email,name,pass,desig,role,isAdmin,isManager,active});
-    const map = new Map(allEmployees(true).map(e => [e.email,e])); map.set(email,rec);
-    try{ empReg = Array.from(map.values()); window.empReg = empReg; }catch(e){}
-    persistEmployees();
-    const sync = await syncEmployee(rec, 'upsertEmployee');
-    try{ if(window.cu && CE(window.cu.email) === email) Object.assign(window.cu, rec); if(typeof cu !== 'undefined' && CE(cu.email) === email) Object.assign(cu, rec); }catch(e){}
-    refreshAfterPatch();
-    if(typeof selectEmp === 'function') selectEmp(email);
-    if(typeof toast === 'function') toast(sync && sync.success === false ? '✅ Employee updated locally. Sheet sync issue.' : '✅ Employee updated on portal + backend.');
+  window.selectEmp = function(email){
+    email=E(email); var e=empByEmail(email); if(!e || e.active===false) return;
+    try{ editEmpEmail=email; window.editEmpEmail=email; }catch(x){ window.editEmpEmail=email; }
+    renderEmpList();
+    var fp=$('emp-fp'); if(!fp) return;
+    var opts=''; try{ opts=(DESIG_OPTS||[]).map(function(d){return '<option value="'+esc(d)+'"'+(d===e.desig?' selected':'')+'>'+esc(d)+'</option>';}).join(''); }catch(x){ opts='<option>'+esc(e.desig||'Team')+'</option>'; }
+    fp.innerHTML='<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px"><div style="width:50px;height:50px;border-radius:50%;background:'+esc(e.bg||'#0B84FF')+';display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff">'+esc(iniSafe(e.name))+'</div><div><div style="font-size:16px;font-weight:700">'+esc(e.name)+' — '+esc(e.desig||e.role||'Team')+'</div><div style="font-size:12px;color:var(--muted)">'+esc(e.email)+'</div></div></div>'+
+      '<div class="fg"><label class="fl2">Full Name</label><input id="ef-n" value="'+esc(e.name)+'" class="fc"></div>'+
+      '<div class="fg"><label class="fl2">Email</label><input id="ef-e" value="'+esc(e.email)+'" class="fc" readonly style="background:#f9f9f9;color:var(--muted)"></div>'+
+      '<div class="fg"><label class="fl2">Password</label><input id="ef-p" type="password" value="'+esc(e.pass||'')+'" class="fc"></div>'+
+      '<div class="fg"><label class="fl2">Designation</label><select id="ef-d" class="fc">'+opts+'</select></div>'+
+      '<div class="fg"><label class="fl2">Role</label><input id="ef-r" value="'+esc(e.role||e.desig||'Team')+'" class="fc"></div>'+
+      '<div style="display:flex;gap:20px;margin-bottom:14px;flex-wrap:wrap"><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="ef-admin" '+(e.isAdmin?'checked':'')+' style="width:14px;height:14px;accent-color:var(--blue)"> 👑 Admin</label><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="ef-mgr" '+(e.isManager?'checked':'')+' style="width:14px;height:14px;accent-color:var(--purple)"> 🔀 Manager / Assigner</label><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="ef-ac" checked style="width:14px;height:14px;accent-color:var(--green)"> ✅ Active</label></div>'+
+      '<div style="display:flex;gap:8px"><button class="btn bp" style="flex:1" onclick="saveEmp(\''+esc(e.email)+'\')">💾 Save Changes</button><button class="btn bd bsm" onclick="delEmp(\''+esc(e.email)+'\')">🗑 Remove</button></div>';
   };
 
   window.addNewEmp = async function(){
-    const name = N(($id('ef-n') || {value:''}).value);
-    const email = CE(($id('ef-e') || {value:''}).value);
-    const pass = String(($id('ef-p') || {value:''}).value).trim();
-    const desig = N(($id('ef-d') || {value:'Team'}).value) || 'Team';
-    const role = N(($id('ef-r') || {value:desig}).value) || desig;
-    const isAdmin = !!(($id('ef-admin') || {}).checked);
-    const isManager = !isAdmin && !!(($id('ef-mgr') || {}).checked);
-    if(!name || !email || !pass){ if(typeof toast === 'function') toast('⚠ Name, email and password required'); return; }
-    if(!isMail(email)){ if(typeof toast === 'function') toast('⚠ Valid email required'); return; }
-    if(allEmployees(true).some(e => e.email === email)){ if(typeof toast === 'function') toast('⚠ Email already exists'); return; }
-    const rec = {email,name,pass,desig,role,isAdmin,isManager,active:true,joinDate:todayISO(),bg:(typeof CLRS !== 'undefined' ? CLRS[allEmployees(true).length % CLRS.length] : '#0B84FF')};
-    try{ empReg = allEmployees(true).concat([rec]); window.empReg = empReg; if(typeof USERS !== 'undefined') USERS[email] = rec; }catch(e){}
-    persistEmployees();
-    const sync = await syncEmployee(rec, 'upsertEmployee');
-    refreshAfterPatch();
-    if(typeof selectEmp === 'function') selectEmp(email);
-    if(typeof toast === 'function') toast(sync && sync.success === false ? '✅ Employee added locally. Sheet sync issue.' : '✅ New employee added and visible in portal.');
+    var name=N(($('ef-n')||{value:''}).value), email=E(($('ef-e')||{value:''}).value), pass=N(($('ef-p')||{value:''}).value);
+    var desig=N(($('ef-d')||{value:'Team'}).value)||'Team', role=N(($('ef-r')||{value:''}).value)||desig;
+    if(!name||!email||!pass){ toastSafe('⚠ Name, email and password required'); return; }
+    if(!isMail(email)){ toastSafe('⚠ Valid email required'); return; }
+    var removed=loadRemoved(); removed.delete(email); saveRemoved(removed);
+    var list=normalizeEmployees();
+    var existing=list.find(function(e){return e.email===email;});
+    var emp=existing || {email:email,bg:bg(list.length),joinDate:(typeof TODAY!=='undefined'?TODAY:new Date().toISOString().slice(0,10))};
+    emp.name=name; emp.pass=pass; emp.desig=desig; emp.role=role; emp.isAdmin=!!(($('ef-admin')||{}).checked); emp.isManager=!!(($('ef-mgr')||{}).checked); if(emp.isAdmin) emp.isManager=false; emp.active=true;
+    if(existing){ Object.assign(existing,emp); } else { list.push(emp); }
+    try{ window.empReg=list; empReg=list; }catch(e){}
+    try{ if(typeof USERS!=='undefined') USERS[email]=Object.assign({},USERS[email]||{},emp); }catch(e){}
+    persistEmployeesToLocal();
+    try{ if(typeof syncEmployeeToServer==='function') await syncEmployeeToServer(emp,'upsertEmployee'); }catch(e){}
+    safeRefreshUI();
+    window.selectEmp(email);
+    toastSafe(existing?'✅ Employee restored/updated':'✅ Employee added');
+  };
+
+  window.saveEmp = async function(oldEmail){
+    oldEmail=E(oldEmail); var e=empByEmail(oldEmail); if(!e){toastSafe('⚠ Employee not found');return;}
+    var name=N(($('ef-n')||{value:''}).value), pass=N(($('ef-p')||{value:''}).value), desig=N(($('ef-d')||{value:'Team'}).value)||'Team', role=N(($('ef-r')||{value:''}).value)||desig;
+    if(!name){toastSafe('⚠ Name required');return;}
+    e.name=name; if(pass)e.pass=pass; e.desig=desig; e.role=role; e.isAdmin=!!(($('ef-admin')||{}).checked); e.isManager=!!(($('ef-mgr')||{}).checked); if(e.isAdmin)e.isManager=false; e.active=(($('ef-ac')||{checked:true}).checked)!==false;
+    var removed=loadRemoved(); if(e.active) removed.delete(oldEmail); else removed.add(oldEmail); saveRemoved(removed);
+    try{ if(typeof USERS!=='undefined') USERS[oldEmail]=Object.assign({},USERS[oldEmail]||{},e); }catch(x){}
+    persistEmployeesToLocal();
+    try{ if(typeof syncEmployeeToServer==='function') await syncEmployeeToServer(e,'upsertEmployee'); }catch(x){}
+    if(currentUser() && E(currentUser().email)===oldEmail){ setCurrentUser(Object.assign({},currentUser(),e)); try{ if(typeof saveCurrentSession==='function') saveCurrentSession(); }catch(x){} }
+    safeRefreshUI(); window.selectEmp(oldEmail); toastSafe('✅ Employee updated');
   };
 
   window.delEmp = async function(email){
-    email = CE(email);
-    if(!email) return;
-    if(!confirm('Remove '+email+' from portal? Backup data sheet me safe rahega.')) return;
-    const list = allEmployees(true).map(e => e.email === email ? Object.assign({}, e, {active:false, Active:'No'}) : e);
-    try{ empReg = list; window.empReg = empReg; if(typeof USERS !== 'undefined' && USERS[email]) USERS[email].active = false; }catch(e){}
-    persistEmployees();
-    await syncEmployee({email,active:false,Active:'No'}, 'upsertEmployee');
-    try{ if(typeof activeEmpF !== 'undefined') activeEmpF = null; }catch(e){}
-    const fp = $id('emp-fp');
-    if(fp) fp.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:34px;margin-bottom:8px">✓</div><div style="font-weight:700">Employee removed from portal.</div><div style="font-size:12px;margin-top:4px">Old task history safe hai.</div></div>';
-    refreshAfterPatch();
-    if(typeof toast === 'function') toast('🗑 Employee hidden everywhere in portal.');
+    email=E(email); if(!email) return;
+    if(currentUser() && E(currentUser().email)===email){ toastSafe('⚠ Current logged-in user ko remove nahi kar sakte. Pehle doosre admin se login karo.'); return; }
+    if(!confirm('Remove '+email+' from portal? Old task history safe rahegi.')) return;
+    var removed=loadRemoved(); removed.add(email); saveRemoved(removed);
+    var list=normalizeEmployees(); list.forEach(function(e){ if(e.email===email) e.active=false; });
+    try{ window.empReg=list; empReg=list; }catch(e){}
+    try{ if(typeof USERS!=='undefined' && USERS[email]) USERS[email].active=false; }catch(e){}
+    persistEmployeesToLocal();
+    try{ if(typeof syncEmployeeToServer==='function') await syncEmployeeToServer({email:email,active:false,Active:'No'},'upsertEmployee'); }catch(e){}
+    try{ editEmpEmail=null; }catch(e){}
+    var fp=$('emp-fp'); if(fp) fp.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:32px;margin-bottom:8px">✓</div><div style="font-weight:600">Employee removed from portal everywhere.</div><div style="font-size:12px;margin-top:4px">Old task history safe hai.</div></div>';
+    safeRefreshUI(); toastSafe('🗑 Employee hidden everywhere');
   };
 
-  function filteredByDate(list){
-    try{ if(typeof applyDateF === 'function') return applyDateF([].concat(list)); }catch(e){}
-    return list || [];
-  }
-  window.renderCounters = function(tasks, containerId){
-    const el = $id(containerId); if(!el) return;
-    const list = activeTasks(tasks || []);
-    const totalTasks = list.length;
-    const completed = list.filter(t => statusOf(t) === 'completed').length;
-    const inprog = list.filter(t => statusOf(t) === 'in progress').length;
-    const overdue = list.filter(t => overDue(t)).length;
-    const pending = list.filter(t => statusOf(t) === 'assigned').length;
-    const totalUnits = list.reduce((s,t)=>s+(Number(t.totalUnits)||1),0);
-    const doneUnits = list.reduce((s,t)=>s+(Number(t.doneUnits)||0),0);
-    const pendingUnits = list.reduce((s,t)=>s+(Number(t.pendingUnits)||Math.max(0,(Number(t.totalUnits)||1)-(Number(t.doneUnits)||0))),0);
-    const box = (cls,val,lbl,kind) => '<div class="tctr '+cls+'" style="cursor:pointer" onclick="ugCounterDrill(\''+kind+'\')"><div class="tctr-v">'+val+'</div><div class="tctr-l">'+lbl+'</div></div>';
-    el.innerHTML = box('tctr-blue',totalTasks,'Total Tasks','all') + box('tctr-green',completed,'Completed','completed') + box('tctr-orange',inprog,'In Progress','inprogress') + box('tctr-red',overdue,'Overdue','overdue') + box('tctr-purple',pending,'Pending Accept','pending') +
-      '<div class="tctr"><div class="tctr-v" style="color:var(--blue)">'+totalUnits+'</div><div class="tctr-l">Total Units</div></div>'+
-      '<div class="tctr"><div class="tctr-v" style="color:var(--green)">'+doneUnits+'</div><div class="tctr-l">Units Done</div></div>'+
-      '<div class="tctr"><div class="tctr-v" style="color:var(--orange)">'+pendingUnits+'</div><div class="tctr-l">Units Pending</div></div>';
-  };
-
-  window.ugCounterDrill = function(kind){
-    let list = filteredByDate(window.applyEmpF([].concat(window.allTasks || allTasks || [])));
-    if(kind === 'completed') list = list.filter(t => statusOf(t) === 'completed');
-    if(kind === 'inprogress') list = list.filter(t => statusOf(t) === 'in progress');
-    if(kind === 'overdue') list = list.filter(t => overDue(t));
-    if(kind === 'pending') list = list.filter(t => statusOf(t) === 'assigned');
-    openTaskListModal((kind || 'all').toUpperCase()+' Tasks', list);
-  };
-
-  function ensureReportCard(){
-    const page = $id('pg-alltasks') || $id('pg-dash');
-    if(!page || $id('ug-assignment-report')) return;
-    const card = document.createElement('div');
-    card.id = 'ug-assignment-report';
-    card.className = 'card';
-    card.style.marginBottom = '14px';
-    card.innerHTML = '<div class="ch"><div class="ct">Assignment Report</div><span class="cbdg" id="ug-report-range">Date range synced</span></div><div class="cb" id="ug-report-body"></div>';
-    const target = $id('at-counters') || page.querySelector('.task-counters') || page.firstElementChild;
-    if(target && target.parentNode) target.parentNode.insertBefore(card, target.nextSibling);
-    else page.appendChild(card);
-  }
-  function groupReport(list, mode){
-    const map = new Map();
-    list.forEach(t => {
-      normalizeTask(t);
-      let key, label, email = '';
-      if(mode === 'given'){
-        email = taskEmail(t); key = email; label = window.uname(email);
-      }else{
-        key = assignedByKey(t); label = assignedByText(t) || key || 'Unknown';
-      }
-      if(!key) return;
-      if(!map.has(key)) map.set(key,{key,email,label,total:0,units:0,done:0,pending:0,completed:0,overdue:0,tasks:[]});
-      const r = map.get(key); r.total++; r.units += Number(t.totalUnits)||1; r.done += Number(t.doneUnits)||0; r.pending += Number(t.pendingUnits)||0; if(statusOf(t)==='completed') r.completed++; if(overDue(t)) r.overdue++; r.tasks.push(t);
-    });
-    return Array.from(map.values()).sort((a,b)=>b.total-a.total || String(a.label).localeCompare(String(b.label)));
-  }
-  window.renderAssignmentReport = function(){
-    ensureReportCard();
-    const body = $id('ug-report-body'); if(!body) return;
-    const me = currentEmp();
-    const scoped = filteredByDate(activeTasks(window.allTasks || allTasks || []));
-    const given = me ? scoped.filter(assignedByMe) : [];
-    const received = me ? scoped.filter(t => taskEmail(t) === me.email) : [];
-    const givenRows = groupReport(given, 'given');
-    const recRows = groupReport(received, 'received');
-    const from = ($id('dr-f') || {value:''}).value, to = ($id('dr-t') || {value:''}).value;
-    const rg = $id('ug-report-range'); if(rg) rg.textContent = (from || 'All') + ' → ' + (to || 'Today/All');
-    const renderRows = (rows, mode) => rows.length ? rows.map(r =>
-      '<tr><td><strong>'+safe(r.label)+'</strong>'+(r.email?'<div style="font-size:10px;color:var(--muted)">'+safe(r.email)+'</div>':'')+'</td>'+
-      '<td><button class="btn bo bxs" onclick="ugReportDrill(\''+mode+'\',\''+safe(r.key)+'\',\'all\')">'+r.total+'</button></td>'+
-      '<td>'+r.units+'</td><td>'+r.completed+'</td><td>'+r.pending+'</td><td style="color:var(--red);font-weight:700">'+r.overdue+'</td></tr>'
-    ).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:14px">No data in selected range</td></tr>';
-    body.innerHTML = '<div class="g2" style="margin-bottom:0">'+
-      '<div><div style="font-weight:800;margin-bottom:8px">Work I Assigned</div><div class="tw"><table class="tbl"><thead><tr><th>Employee</th><th>Tasks</th><th>Units</th><th>Done</th><th>Pending</th><th>Overdue</th></tr></thead><tbody>'+renderRows(givenRows,'given')+'</tbody></table></div></div>'+
-      '<div><div style="font-weight:800;margin-bottom:8px">Work Assigned To Me</div><div class="tw"><table class="tbl"><thead><tr><th>Assigned By</th><th>Tasks</th><th>Units</th><th>Done</th><th>Pending</th><th>Overdue</th></tr></thead><tbody>'+renderRows(recRows,'received')+'</tbody></table></div></div>'+
-      '</div><div style="font-size:11px;color:var(--muted);margin-top:8px">Click any task count to open the exact work list for that employee/status/date range.</div>';
-  };
-
-  window.ugReportDrill = function(mode,key,status){
-    const scoped = filteredByDate(activeTasks(window.allTasks || allTasks || []));
-    let list;
-    if(mode === 'given') list = scoped.filter(t => assignedByMe(t) && taskEmail(t) === key);
-    else list = scoped.filter(t => taskEmail(t) === (currentEmp()||{}).email && assignedByKey(t) === key);
-    if(status && status !== 'all') list = list.filter(t => statusOf(t) === status);
-    openTaskListModal((mode === 'given' ? 'Work I Assigned' : 'Work Assigned To Me'), list);
-  };
-
-  function openTaskListModal(title, list){
-    list = activeTasks(list || []);
-    const modal = $id('m-drill'), head = $id('m-drill-t'), body = $id('m-drill-b');
-    if(!modal || !body) return;
-    if(head) head.textContent = title + ' ('+list.length+')';
-    body.innerHTML = list.length ? list.map(t => {
-      const st = overDue(t) ? 'Overdue' : statusOf(t).replace(/\b\w/g,c=>c.toUpperCase());
-      return '<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:8px">'+
-        '<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div style="font-weight:700">'+safe(taskTitle(t))+'</div><div style="font-family:JetBrains Mono,monospace;font-size:10px;color:var(--blue);margin-top:2px">'+safe(taskId(t))+'</div></div><span class="pill '+(overDue(t)?'po':statusOf(t)==='completed'?'pc':statusOf(t)==='in progress'?'pp':'pa')+'">'+safe(st)+'</span></div>'+
-        '<div style="font-size:11px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap;margin-top:7px"><span>Assigned To: <b>'+safe(window.uname(taskEmail(t)))+'</b></span><span>By: <b>'+safe(assignedByText(t)||'—')+'</b></span><span>Assign: '+safe(fmtDate(t.adate||t.AssignDate))+'</span><span>Due: '+safe(fmtDate(t.ddate||t.DueDate))+'</span><span>Count: '+(Number(t.pendingUnits)||0)+' Pending / '+(Number(t.doneUnits)||0)+' Submit / '+(Number(t.totalUnits)||1)+' Total</span></div>'+
-      '</div>';
-    }).join('') : '<div style="text-align:center;padding:28px;color:var(--muted)">No work found for this count.</div>';
-    modal.classList.remove('hidden');
-  }
-
-  window.buildEmpPills = function(tasks){
-    const cont = $id('emp-pills'); if(!cont) return;
-    const list = activeTasks(tasks || window.allTasks || allTasks || []);
-    const counts = new Map();
-    list.forEach(t => { const e = taskEmail(t); counts.set(e,(counts.get(e)||0)+1); });
-    cont.innerHTML = '';
-    const all = document.createElement('span'); all.className = 'efp' + ((typeof activeEmpF === 'undefined' || !activeEmpF) ? ' act' : ''); all.textContent = '🌐 All'; all.onclick = () => { try{ activeEmpF = null; window.activeEmpF = null; }catch(e){} refreshAfterPatch(); }; cont.appendChild(all);
-    activeEmployees().filter(e => counts.has(e.email)).forEach((e,i) => {
-      const key = e.email.replace(/[^a-z0-9]/g,'-');
-      const sp = document.createElement('span');
-      sp.className = 'efp' + ((typeof activeEmpF !== 'undefined' && activeEmpF === key) ? ' act' : '');
-      sp.title = e.email;
-      sp.innerHTML = '<span class="efav" style="background:'+(e.bg || (typeof CLRS !== 'undefined' ? CLRS[i%CLRS.length] : '#0B84FF'))+'">'+initials(e.name)+'</span>'+safe(e.name)+' <b style="font-size:10px;color:var(--blue)">'+counts.get(e.email)+'</b>';
-      sp.onclick = () => { try{ activeEmpF = key; window.activeEmpF = key; }catch(err){} refreshAfterPatch(); };
-      cont.appendChild(sp);
-    });
-  };
-
-  const oldRenderAllTasks = window.renderAllTasks;
-  window.renderAllTasks = function(){
-    if(typeof oldRenderAllTasks === 'function') oldRenderAllTasks.apply(this, arguments);
-    try{ window.renderAssignmentReport(); }catch(e){ console.warn('assignment report failed', e); }
-  };
-
-  const oldSetRange = window.setRange;
-  window.setRange = function(){
-    const r = oldSetRange && oldSetRange.apply(this, arguments);
-    setTimeout(() => { try{ window.renderAssignmentReport(); }catch(e){} }, 50);
-    return r;
-  };
-
-  function durationMinutes(v){
-    const n = parseInt(String(v || '30').match(/\d+/)?.[0] || '30', 10);
-    return Number.isFinite(n) ? n : 30;
-  }
-  function selectedAttendeeEmails(){
-    try{ return Array.from(selectedAttendees || []).map(CE).filter(isMail); }catch(e){ return []; }
-  }
-  function attendeeObjects(){
-    const emps = activeEmployees();
-    return selectedAttendeeEmails().map(email => {
-      const e = emps.find(x => x.email === email);
-      return {email, name:e ? e.name : email, desig:e ? (e.desig || e.role || 'Team') : 'Team'};
-    });
-  }
-  async function createCalendarMeeting(m){
-    const res = await postBackend({
-      action:'createCalendarMeeting',
-      meetingId:m.id,
-      title:m.title,
-      datetime:m.datetime,
-      durationMinutes:durationMinutes(m.duration),
-      duration:m.duration,
-      location:m.location || '',
-      agenda:m.agenda || '',
-      notes:m.notes || '',
-      attendees:m.attendees || [],
-      organizer:m.createdBy || ((currentEmp()||{}).name || 'UpGro Media'),
-      organizerEmail:(currentEmp()||{}).email || '',
-      sendUpdates:'all'
-    });
-    return res || {success:false};
-  }
-  window.saveMeeting = async function(){
-    const id = ($id('mtg-id') || {value:''}).value;
-    const title = N(($id('mtg-title') || {value:''}).value);
-    const date = ($id('mtg-date') || {value:''}).value;
-    const time = ($id('mtg-time') || {value:''}).value;
-    const dur = ($id('mtg-dur') || {value:'30 minutes'}).value;
-    const loc = N(($id('mtg-loc') || {value:''}).value);
-    const agenda = N(($id('mtg-agenda') || {value:''}).value);
-    const notes = N(($id('mtg-notes') || {value:''}).value);
-    if(!title){ if(typeof toast === 'function') toast('⚠ Meeting title required'); return; }
-    if(!date || !time){ if(typeof toast === 'function') toast('⚠ Date and time required'); return; }
-    if(!selectedAttendeeEmails().length){ if(typeof toast === 'function') toast('⚠ Select at least one attendee'); return; }
-    const mtg = {id:id || ('MTG_' + Date.now()), title, datetime:date+'T'+time, duration:dur, location:loc, agenda, notes, attendees:attendeeObjects(), createdBy:(currentEmp()||{}).name || 'Admin', createdAt:new Date().toLocaleString('en-IN')};
-    if(typeof toast === 'function') toast('🔗 Generating Google Meet link...');
-    const cal = await createCalendarMeeting(mtg);
-    if(cal && cal.success){
-      mtg.meetLink = cal.meetLink || cal.hangoutLink || '';
-      mtg.calendarEventId = cal.eventId || '';
-      mtg.location = mtg.meetLink || mtg.location;
-    }else{
-      if(typeof toast === 'function') toast('⚠ Meet link backend missing. Sending normal invite.');
-      try{ if(typeof sendMeetingEmails === 'function') await sendMeetingEmails(mtg, id ? 'updated' : 'new'); }catch(e){}
-    }
-    try{ if(typeof loadMeetings === 'function') loadMeetings(); }catch(e){}
-    try{
-      const old = Array.isArray(meetings) ? meetings : [];
-      const idx = old.findIndex(x => x.id === mtg.id);
-      if(idx >= 0) old[idx] = Object.assign({}, old[idx], mtg); else old.unshift(mtg);
-      meetings = old;
-      localStorage.setItem(MEET_LS, JSON.stringify(meetings));
-      localStorage.setItem('upgro_meetings_v1', JSON.stringify(meetings));
-    }catch(e){}
-    await postBackend(Object.assign({action:'saveMeeting'}, mtg));
-    try{ if(typeof CM === 'function') CM('m-mtg'); }catch(e){}
-    try{ if(typeof renderMeetings === 'function') renderMeetings(); }catch(e){}
-    if(typeof toast === 'function') toast((mtg.meetLink ? '✅ Google Meet created & sent to ' : '✅ Meeting saved for ') + mtg.attendees.length + ' attendee(s)');
-  };
-
-  window.loadMeetings = function(){
-    try{
-      const v = localStorage.getItem(MEET_LS) || localStorage.getItem('upgro_meetings_v1');
-      meetings = v ? JSON.parse(v) : [];
-    }catch(e){ meetings = []; }
-    return meetings;
-  };
-  window.syncMeetingsFromServer = async function(){
-    try{
-      if(typeof SURL === 'undefined' || !SURL) return;
-      const res = await fetch(SURL+'?action=getMeetings',{signal:AbortSignal.timeout(15000)});
-      const j = await res.json();
-      const rows = Array.isArray(j.meetings) ? j.meetings : Array.isArray(j.data) ? j.data : [];
-      if(rows.length){
-        meetings = rows.map(m => {
-          if(typeof m.attendees === 'string'){ try{ m.attendees = JSON.parse(m.attendees); }catch(e){ m.attendees = []; } }
-          return m;
-        });
-        localStorage.setItem(MEET_LS, JSON.stringify(meetings));
-        if(typeof renderMeetings === 'function') renderMeetings();
-      }
-    }catch(e){}
-  };
-  const oldRenderMeetings = window.renderMeetings;
-  window.renderMeetings = function(){
-    try{ window.loadMeetings(); }catch(e){}
-    if(typeof oldRenderMeetings === 'function') oldRenderMeetings.apply(this, arguments);
-    setTimeout(() => {
-      try{
-        document.querySelectorAll('#mtg-list .mtg-card').forEach((card, idx) => {
-          const m = (meetings || [])[idx];
-          if(m && m.meetLink && !card.querySelector('.ug-meet-link')){
-            const bar = document.createElement('div');
-            bar.className = 'ug-meet-link';
-            bar.style.cssText = 'margin-top:8px;padding:8px 10px;background:var(--green3);border:1px solid rgba(0,182,122,.25);border-radius:8px;font-size:12px;font-weight:700';
-            bar.innerHTML = '🔗 Google Meet: <a href="'+safe(m.meetLink)+'" target="_blank" rel="noopener noreferrer">Join Meeting</a>';
-            card.appendChild(bar);
-          }
-        });
-      }catch(e){}
-    }, 30);
-  };
-  const oldNav = window.nav;
-  window.nav = function(page){
-    const r = oldNav && oldNav.apply(this, arguments);
-    if(page === 'meetings') setTimeout(window.syncMeetingsFromServer, 200);
-    if(page === 'employees') setTimeout(window.renderEmpList, 50);
-    if(page === 'alltasks') setTimeout(window.renderAssignmentReport, 80);
-    return r;
-  };
-
-  function refreshAfterPatch(){
-    try{ window.initEmpReg(true); }catch(e){}
-    try{ window.refillEmpDropdown(); }catch(e){}
-    try{ window.populateTaskFilterOptions(); }catch(e){}
-    try{ if(typeof renderEmpList === 'function') renderEmpList(); }catch(e){}
-    try{ if(typeof buildUI === 'function') buildUI(); }catch(e){}
-    try{ window.renderAssignmentReport(); }catch(e){}
-  }
-  const oldBuildUI = window.buildUI;
-  window.buildUI = function(){
-    try{ window.initEmpReg(true); }catch(e){}
-    try{ if(typeof allTasks !== 'undefined') allTasks = activeTasks(allTasks); window.allTasks = allTasks; }catch(e){}
-    const r = oldBuildUI && oldBuildUI.apply(this, arguments);
-    refreshAfterPatchLite();
-    return r;
-  };
-  function refreshAfterPatchLite(){
-    try{ window.refillEmpDropdown(); }catch(e){}
-    try{ window.populateTaskFilterOptions(); }catch(e){}
-    try{ window.renderAssignmentReport(); }catch(e){}
-  }
-
-  window.ugFinalFixNow = function(){
-    refreshAfterPatch();
-    try{ window.syncMeetingsFromServer(); }catch(e){}
-    if(typeof toast === 'function') toast('✅ Final patch active: employees, counts, reports, meetings fixed.');
-  };
-
-  document.addEventListener('DOMContentLoaded', function(){ setTimeout(window.ugFinalFixNow, 1000); });
-  setTimeout(window.ugFinalFixNow, 1200);
-  console.log(PATCH_TAG, 'loaded');
-})();
-</script>
-<style id="ug-final-v2-style">
-  .ug-report-launch{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:10px 0 14px;padding:12px 14px;border:1px solid var(--border);border-radius:14px;background:#fff;box-shadow:var(--sh0)}
-  .ug-report-launch-title{font-weight:800;color:var(--text);font-size:13px;display:flex;align-items:center;gap:8px}
-  .ug-report-launch-sub{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.35}
-  .ug-report-mini{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
-  .ug-report-mini span{font-size:10px;font-weight:800;border-radius:20px;padding:5px 9px;background:var(--bg);border:1px solid var(--border);color:var(--muted)}
-  .ug-side-mask{position:fixed;inset:0;background:rgba(15,23,42,.42);z-index:780;display:none;backdrop-filter:blur(2px)}
-  .ug-side-mask.open{display:block}
-  .ug-side-drawer{position:fixed;top:0;right:0;width:520px;max-width:96vw;height:100vh;background:var(--surface);z-index:790;box-shadow:-18px 0 60px rgba(15,23,42,.25);transform:translateX(104%);transition:transform .22s ease;display:flex;flex-direction:column;border-left:1px solid var(--border)}
-  .ug-side-drawer.open{transform:translateX(0)}
-  .ug-side-head{height:58px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 18px;border-bottom:1px solid var(--border);flex-shrink:0;background:#fff}
-  .ug-side-title{font-size:15px;font-weight:900;color:var(--text)}
-  .ug-side-sub{font-size:11px;color:var(--muted);margin-top:2px}
-  .ug-side-close{width:32px;height:32px;border-radius:9px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:18px;color:var(--muted)}
-  .ug-side-close:hover{background:var(--red3);color:var(--red);border-color:rgba(229,57,53,.22)}
-  .ug-side-body{padding:14px 16px 20px;overflow:auto;flex:1;background:#F8FAFC}
-  .ug-side-section{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:var(--sh0);margin-bottom:12px;overflow:hidden}
-  .ug-side-section-head{padding:11px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px}
-  .ug-side-section-head b{font-size:12px;color:var(--text)}
-  .ug-side-section-head span{font-size:10px;color:var(--muted);font-weight:700;background:var(--bg);padding:3px 8px;border-radius:12px;border:1px solid var(--border)}
-  .ug-side-table{width:100%;border-collapse:collapse;font-size:11px}
-  .ug-side-table th{padding:8px 9px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);background:#FAFBFD;border-bottom:1px solid var(--border);white-space:nowrap}
-  .ug-side-table td{padding:8px 9px;border-bottom:1px solid #F1F5F9;vertical-align:middle}
-  .ug-side-table tr:last-child td{border-bottom:none}
-  .ug-side-name{font-weight:800;color:var(--text);line-height:1.2}
-  .ug-side-role{font-size:9px;color:var(--muted);margin-top:2px}
-  .ug-count-link{cursor:pointer;color:var(--blue);font-weight:900;text-decoration:underline;text-underline-offset:2px}
-  .ug-count-link:hover{color:var(--blue2)}
-  .ug-empty{padding:20px;text-align:center;color:var(--muted);font-size:12px}
-  .ug-emp-form-note{background:var(--blue3);border:1px solid rgba(11,132,255,.18);border-radius:10px;padding:9px 11px;font-size:11px;color:var(--blue);line-height:1.4;margin-bottom:12px}
-  @media(max-width:768px){.ug-report-launch{align-items:flex-start;flex-direction:column}.ug-report-mini{justify-content:flex-start}.ug-side-drawer{width:100vw;max-width:100vw}.ug-side-table{font-size:10px}.ug-side-table th,.ug-side-table td{padding:7px 6px}}
-</style>
-<script id="ug-final-v2-script">
-(function(){
-  'use strict';
-  const TAG='UG_FINAL_V2_EMPLOYEE_SIDEBAR_FIX';
-  const EMP_BACKUP_KEY='upgro_emp_dyn_v2_safe';
-  const EMP_MAIN_KEY=(typeof EMP_STORE_KEY!=='undefined' ? EMP_STORE_KEY : 'upgro_emp_dyn');
-  const ROLE_KEY=(typeof ROLE_STORE_KEY!=='undefined' ? ROLE_STORE_KEY : 'upgro_roles_v3');
-  const $id=(id)=>document.getElementById(id);
-  const esc=(v)=>String(v==null?'':v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-  const txt=(v)=>String(v==null?'':v).replace(/\s+/g,' ').trim();
-  const low=(v)=>txt(v).toLowerCase();
-  const email=(v)=>txt(v).toLowerCase();
-  const isEmail=(v)=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email(v));
-  const initials=(n)=>txt(n||'?').split(/\s+/).map(x=>x[0]||'').join('').toUpperCase().slice(0,2)||'?';
-  const today=()=>new Date().toISOString().slice(0,10);
-  const colorAt=(i)=>((typeof CLRS!=='undefined' && CLRS[i%CLRS.length]) || '#0B84FF');
-  const desigOptions=()=>((typeof DESIG_OPTS!=='undefined' && Array.isArray(DESIG_OPTS)) ? DESIG_OPTS : ['MIS','Executive Assistant','Web Developer','Graphic Designer','Video Editor','CRM','Meta Media Buyer','Google Ads','SEO Executive','SEO','Founder','CEO','HR','Accountant','Intern','Content Writer','Social Media Manager','Performance Marketer','Team Lead','Other']);
-  function notify(msg){ try{ if(typeof toast==='function') toast(msg); else console.log(msg); }catch(e){ console.log(msg); } }
-  function parseJSON(k, fallback){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):fallback; }catch(e){ return fallback; } }
-  function writeJSON(k, val){ try{ localStorage.setItem(k, JSON.stringify(val)); }catch(e){} }
-  function parseBool(v, fallback){
-    if(v===true || v===false) return v;
-    const s=low(v);
-    if(['true','yes','y','1','active'].includes(s)) return true;
-    if(['false','no','n','0','inactive','removed','deleted'].includes(s)) return false;
-    return !!fallback;
-  }
-  function canonEmp(row, i){
-    row=row||{};
-    const em=email(row.email||row.Email||row.EmployeeEmail||row['Employee Email']||row['Email Address']||row.LoginEmail||row.mail||'');
-    const nm=txt(row.name||row.Name||row.EmployeeName||row['Employee Name']||row['Full Name']||row.FullName||(em?em.split('@')[0]:''));
-    if(!em && !nm) return null;
-    const desig=txt(row.desig||row.Designation||row.designation||row.Department||row.department||row.role||row.Role||'Team')||'Team';
-    const role=txt(row.role||row.Role||row.RoleName||row.designation||row.Designation||desig)||desig;
-    const activeVal=(row.active!==undefined?row.active:(row.Active!==undefined?row.Active:(row.Status!==undefined?row.Status:true)));
-    const isAdmin=parseBool(row.isAdmin!==undefined?row.isAdmin:(row.IsAdmin!==undefined?row.IsAdmin:row['Is Admin']), false);
-    const isManager=parseBool(row.isManager!==undefined?row.isManager:(row.IsManager!==undefined?row.IsManager:row['Is Manager']), false) || (!isAdmin && /manager|assigner|team lead|lead/i.test(role+' '+desig));
-    return {email:em,name:nm||em,pass:txt(row.pass||row.Password||row.password||row['Password']||''),role,desig,isAdmin,isManager,active:parseBool(activeVal,true),bg:row.bg||row.Bg||colorAt(i||0),joinDate:txt(row.joinDate||row.JoinDate||row['Join Date']||'')};
-  }
-  function rawEmployeeRows(){
-    const rows=[];
-    try{ if(typeof USERS!=='undefined') Object.keys(USERS).forEach((em)=>rows.push(Object.assign({},USERS[em],{email:em}))); }catch(e){}
-    try{ if(Array.isArray(sheetEmpReg)) rows.push(...sheetEmpReg); }catch(e){}
-    try{ if(Array.isArray(window.sheetEmpReg)) rows.push(...window.sheetEmpReg); }catch(e){}
-    try{ if(Array.isArray(empReg)) rows.push(...empReg); }catch(e){}
-    try{ if(Array.isArray(window.empReg)) rows.push(...window.empReg); }catch(e){}
-    const main=parseJSON(EMP_MAIN_KEY,[]); if(Array.isArray(main)) rows.push(...main);
-    const backup=parseJSON(EMP_BACKUP_KEY,[]); if(Array.isArray(backup)) rows.push(...backup);
-    return rows;
-  }
-  function mergedEmployees(includeInactive=true){
-    const map=new Map();
-    rawEmployeeRows().forEach((r,i)=>{
-      const e=canonEmp(r,i); if(!e || !isEmail(e.email)) return;
-      const old=map.get(e.email)||{};
-      const merged=Object.assign({}, old, e);
-      if(old.active===false || e.active===false) merged.active=false;
-      if(!merged.pass && old.pass) merged.pass=old.pass;
-      if(!merged.bg) merged.bg=old.bg||colorAt(map.size);
-      map.set(e.email, merged);
-    });
-    const arr=Array.from(map.values()).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
-    try{ empReg=arr.slice(); window.empReg=empReg; }catch(e){ window.empReg=arr.slice(); }
-    try{ if(typeof USERS!=='undefined') arr.forEach(e=>{ USERS[e.email]=Object.assign({}, USERS[e.email]||{}, e); }); }catch(e){}
-    return includeInactive ? arr : arr.filter(e=>e.active!==false);
-  }
-  function activeEmployees(){ return mergedEmployees(false); }
-  function findEmp(em){ em=email(em); return mergedEmployees(true).find(e=>e.email===em)||null; }
-  function persistEmployees(){
-    const arr=mergedEmployees(true).map(e=>({email:e.email,name:e.name,pass:e.pass,role:e.role,desig:e.desig,isAdmin:!!e.isAdmin,isManager:!!e.isManager,active:e.active!==false,bg:e.bg,joinDate:e.joinDate||''}));
-    writeJSON(EMP_MAIN_KEY, arr); writeJSON(EMP_BACKUP_KEY, arr);
-    const roles={}; arr.forEach(e=>roles[e.email]={isAdmin:!!e.isAdmin,isManager:!!e.isManager,active:e.active!==false}); writeJSON(ROLE_KEY, roles);
-    try{ localStorage.setItem('upgro_emp_sync_ping_v1', String(Date.now())); }catch(e){}
-    try{ if(typeof syncUserDirectoryFromRegistry==='function') syncUserDirectoryFromRegistry(); }catch(e){}
-    return arr;
-  }
-  async function backend(payload){
-    try{ if(typeof SURL==='undefined' || !SURL) return {success:false,message:'No backend URL'}; const res=await fetch(SURL,{method:'POST',body:JSON.stringify(payload),signal:AbortSignal.timeout(30000)}); const t=await res.text(); try{return JSON.parse(t);}catch(e){return {success:res.ok,message:t};} }catch(e){ return {success:false,message:e.message}; }
-  }
-  async function syncEmp(emp){
-    const payload=Object.assign({action:'upsertEmployee',email:emp.email,Email:emp.email,'Email Address':emp.email,EmployeeEmail:emp.email,name:emp.name,Name:emp.name,EmployeeName:emp.name,'Employee Name':emp.name,pass:emp.pass||'',Password:emp.pass||'',role:emp.role||emp.desig||'Team',Role:emp.role||emp.desig||'Team',desig:emp.desig||emp.role||'Team',Designation:emp.desig||emp.role||'Team',isAdmin:!!emp.isAdmin,IsAdmin:!!emp.isAdmin,isManager:!!emp.isManager,IsManager:!!emp.isManager,active:emp.active!==false,Active:emp.active!==false,joinDate:emp.joinDate||'',JoinDate:emp.joinDate||''}, emp);
-    return backend(payload);
-  }
-  window.getActiveEmployees=activeEmployees;
-  window.getAllEmployeesClean=function(){return mergedEmployees(true);};
-  window.initEmpReg=function(){ mergedEmployees(true); return window.empReg; };
-  window.uname=function(em){ const e=findEmp(em); return e?e.name:txt(String(em||'').split('@')[0].replace(/[._-]+/g,' '))||'Unknown'; };
-  window.udesig=function(em){ const e=findEmp(em); return e?(e.desig||e.role||'Team'):'Team'; };
-  window.normalizeDisplayName=function(name,em,desig){ const e=findEmp(em); return e?e.name:(txt(name)||window.uname(em)||'Unknown'); };
-  function current(){ try{ if(typeof cu!=='undefined' && cu) return findEmp(cu.email)||cu; }catch(e){} return window.cu ? (findEmp(window.cu.email)||window.cu) : null; }
-  window.isAdmin=function(){ const c=current(); return !!(c && c.active!==false && c.isAdmin); };
-  window.isManager=function(){ const c=current(); return !!(c && c.active!==false && !c.isAdmin && c.isManager); };
-  window.canAssign=function(){ return window.isAdmin() || window.isManager(); };
-  window.refillEmpDropdown=function(){
-    const list=activeEmployees();
-    const selectors=['add-emp','task-emp','assignEmployee','assign-to','assignee','emp-select','taskAssignee','task-assignee'];
-    selectors.forEach(id=>{ const sel=$id(id); if(!sel || sel.tagName!=='SELECT') return; const keep=email(sel.value); const ph=(sel.options[0] && !isEmail(sel.options[0].value)) ? sel.options[0].textContent : '— Select Active Employee —'; sel.innerHTML='<option value="">'+esc(ph||'— Select Active Employee —')+'</option>'+list.map(e=>'<option value="'+esc(e.email)+'">'+esc(e.name)+' — '+esc(e.desig||e.role||'Team')+'</option>').join(''); if(keep && list.some(e=>e.email===keep)) sel.value=keep; });
-    document.querySelectorAll('select').forEach(sel=>{ const label=low(sel.id+' '+sel.name+' '+(sel.getAttribute('aria-label')||'')); if(!/(employee|assignee|assigned|attendee|member)/.test(label)) return; if(selectors.includes(sel.id)) return; const keep=email(sel.value); const first=(sel.options[0] && !isEmail(sel.options[0].value)) ? sel.options[0].textContent : '— Select Active Employee —'; sel.innerHTML='<option value="">'+esc(first||'— Select Active Employee —')+'</option>'+list.map(e=>'<option value="'+esc(e.email)+'">'+esc(e.name)+' — '+esc(e.desig||e.role||'Team')+'</option>').join(''); if(keep && list.some(e=>e.email===keep)) sel.value=keep; });
-  };
-  function empCountersHTML(arr){
-    const total=arr.length, active=arr.filter(e=>e.active!==false).length, inactive=arr.filter(e=>e.active===false).length, admins=arr.filter(e=>e.isAdmin).length, managers=arr.filter(e=>!e.isAdmin && e.isManager).length;
-    return '<div class="tctr tctr-blue"><div class="tctr-v">'+total+'</div><div class="tctr-l">Total</div></div><div class="tctr tctr-green"><div class="tctr-v">'+active+'</div><div class="tctr-l">Active</div></div><div class="tctr tctr-red"><div class="tctr-v">'+inactive+'</div><div class="tctr-l">Inactive</div></div><div class="tctr tctr-purple"><div class="tctr-v">'+admins+'</div><div class="tctr-l">Admins</div></div><div class="tctr tctr-orange"><div class="tctr-v">'+managers+'</div><div class="tctr-l">Assigners</div></div>';
-  }
-  window.renderEmpList=function(){
-    const arr=mergedEmployees(true); const q=low(($id('emp-q')||{value:''}).value); const cont=$id('emp-items'); const counters=$id('emp-counters'); if(counters)counters.innerHTML=empCountersHTML(arr); if(!cont)return;
-    const filtered=arr.filter(e=>!q || low(e.name+' '+e.email+' '+e.role+' '+e.desig).includes(q));
-    cont.innerHTML=filtered.length?'':'<div style="padding:16px;color:var(--muted)">No employees found.</div>';
-    filtered.forEach(e=>{ const div=document.createElement('div'); div.className='ei'+(window.ugEditEmpEmail===e.email?' act':''); div.onclick=function(){ window.selectEmp(e.email); }; const badge=e.isAdmin?'<span class="role-badge rb-admin">Admin</span>':(e.isManager?'<span class="role-badge rb-manager">Assigner</span>':''); div.innerHTML='<div class="ei-av" style="background:'+esc(e.bg||'#0B84FF')+'">'+esc(initials(e.name))+'</div><div class="ei-info"><div class="ei-name">'+esc(e.name)+' '+badge+'</div><div class="ei-role">'+esc(e.desig||e.role||'Team')+'</div></div><div class="ei-dot" title="'+(e.active!==false?'Active':'Inactive')+'" style="background:'+(e.active!==false?'#00B67A':'#E53935')+'"></div>'; cont.appendChild(div); });
-  };
-  function employeeForm(e, isNew){
-    const opts=desigOptions().map(d=>'<option value="'+esc(d)+'"'+(!isNew && d===(e.desig||'')?' selected':'')+'>'+esc(d)+'</option>').join('');
-    const emailField=isNew?'<input id="ef-e" class="fc" placeholder="employee@upgromedia.com">':'<input id="ef-e" value="'+esc(e.email)+'" class="fc" readonly style="background:#f8fafc;color:var(--muted)">';
-    return '<div class="ug-emp-form-note">Employee update ab portal, dropdowns, roles, task filters aur local backup sab jagah live sync hoga.</div><div style="font-size:15px;font-weight:900;margin-bottom:14px">'+(isNew?'➕ Add New Employee':'👤 Edit Employee')+'</div><div class="fg"><label class="fl2">Full Name *</label><input id="ef-n" value="'+esc(e.name||'')+'" class="fc"></div><div class="fg"><label class="fl2">Email *</label>'+emailField+'</div><div class="fg"><label class="fl2">Password '+(isNew?'*':'')+'</label><input id="ef-p" type="password" value="'+esc(e.pass||'')+'" class="fc"></div><div class="fg"><label class="fl2">Designation *</label><select id="ef-d" class="fc">'+opts+'</select></div><div class="fg"><label class="fl2">Role *</label><input id="ef-r" value="'+esc(e.role||e.desig||'')+'" class="fc" placeholder="e.g. SEO Executive"></div><div style="display:flex;gap:18px;margin-bottom:14px;flex-wrap:wrap"><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="ef-admin" '+(e.isAdmin?'checked':'')+' style="width:14px;height:14px;accent-color:var(--blue)"> 👑 Admin</label><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="ef-mgr" '+(e.isManager?'checked':'')+' style="width:14px;height:14px;accent-color:var(--purple)"> 🔀 Work Assigner</label>'+(!isNew?'<label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="ef-ac" '+(e.active!==false?'checked':'')+' style="width:14px;height:14px;accent-color:var(--green)"> ✅ Active</label>':'')+'</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn '+(isNew?'bs':'bp')+'" style="flex:1" onclick="'+(isNew?'addNewEmp()':'saveEmp(\''+esc(e.email)+'\')')+'">'+(isNew?'✅ Add Employee':'💾 Save Changes')+'</button>'+(!isNew?'<button class="btn bd bsm" onclick="delEmp(\''+esc(e.email)+'\')">🗑 Remove</button>':'')+'</div>';
-  }
-  window.selectNewEmp=function(){ window.ugEditEmpEmail=null; window.renderEmpList(); const fp=$id('emp-fp'); if(fp) fp.innerHTML=employeeForm({name:'',email:'',pass:'',role:'',desig:desigOptions()[0],isAdmin:false,isManager:false,active:true}, true); };
-  window.selectEmp=function(em){ const e=findEmp(em); if(!e){ notify('⚠ Employee not found'); return; } window.ugEditEmpEmail=e.email; window.renderEmpList(); const fp=$id('emp-fp'); if(fp) fp.innerHTML=employeeForm(e, false); };
-  function formEmp(oldEmail){
-    const nm=txt(($id('ef-n')||{}).value); const em=email(($id('ef-e')||{}).value||oldEmail); const pass=txt(($id('ef-p')||{}).value); const desig=txt(($id('ef-d')||{}).value)||'Team'; const role=txt(($id('ef-r')||{}).value)||desig; const isAdmin=!!(($id('ef-admin')||{}).checked); const isManager=!isAdmin && !!(($id('ef-mgr')||{}).checked || /manager|assigner|team lead|lead/i.test(role+' '+desig)); const active=($id('ef-ac')?!!$id('ef-ac').checked:true);
-    return {email:em,name:nm,pass,desig,role,isAdmin,isManager,active,bg:(findEmp(em)||{}).bg||colorAt(mergedEmployees(true).length),joinDate:(findEmp(em)||{}).joinDate||today()};
-  }
-  window.saveEmp=async function(oldEmail){
-    const rec=formEmp(oldEmail); if(!rec.name){notify('⚠ Name required');return;} if(!isEmail(rec.email)){notify('⚠ Valid email required');return;}
-    const arr=mergedEmployees(true); const idx=arr.findIndex(e=>e.email===email(oldEmail)); if(idx<0){notify('⚠ Employee not found. Use Add New Employee.');return;}
-    if(!rec.pass) rec.pass=arr[idx].pass||''; arr[idx]=Object.assign({}, arr[idx], rec); writeJSON(EMP_MAIN_KEY, arr); writeJSON(EMP_BACKUP_KEY, arr); try{ empReg=arr; window.empReg=arr; if(typeof USERS!=='undefined') USERS[rec.email]=Object.assign({},USERS[rec.email]||{},rec); }catch(e){} persistEmployees(); const synced=await syncEmp(rec); window.renderEmpList(); window.selectEmp(rec.email); window.refillEmpDropdown(); try{ if(typeof populateTaskFilterOptions==='function') populateTaskFilterOptions(); }catch(e){} try{ if(typeof buildUI==='function') buildUI(); }catch(e){} notify(synced && synced.success===false?'✅ Employee updated locally. Sheet backend missing/action not added.':'✅ Employee updated everywhere.');
-  };
-  window.addNewEmp=async function(){
-    const rec=formEmp(''); if(!rec.name || !rec.email || !rec.pass){notify('⚠ Name, email and password required');return;} if(!isEmail(rec.email)){notify('⚠ Valid email required');return;} const arr=mergedEmployees(true); if(arr.some(e=>e.email===rec.email)){notify('⚠ Email already exists. Select employee and update.');return;} arr.push(rec); writeJSON(EMP_MAIN_KEY, arr); writeJSON(EMP_BACKUP_KEY, arr); try{ empReg=arr; window.empReg=arr; if(typeof USERS!=='undefined') USERS[rec.email]=Object.assign({},USERS[rec.email]||{},rec); }catch(e){} persistEmployees(); const synced=await syncEmp(rec); window.renderEmpList(); window.selectEmp(rec.email); window.refillEmpDropdown(); try{ if(typeof populateTaskFilterOptions==='function') populateTaskFilterOptions(); }catch(e){} try{ if(typeof buildUI==='function') buildUI(); }catch(e){} notify(synced && synced.success===false?'✅ Employee added locally. Sheet backend missing/action not added.':'✅ New employee added everywhere.');
-  };
-  window.delEmp=async function(em){
-    em=email(em); if(!em)return; if(!confirm('Remove '+em+' from active portal list? Task history safe rahegi.')) return; const arr=mergedEmployees(true).map(e=>e.email===em?Object.assign({},e,{active:false,Active:'No'}):e); writeJSON(EMP_MAIN_KEY, arr); writeJSON(EMP_BACKUP_KEY, arr); try{ empReg=arr; window.empReg=arr; if(typeof USERS!=='undefined' && USERS[em]) USERS[em].active=false; }catch(e){} persistEmployees(); await syncEmp(Object.assign({email:em}, findEmp(em)||{}, {active:false,Active:'No'})); const fp=$id('emp-fp'); if(fp)fp.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:34px;margin-bottom:8px">✓</div><div style="font-weight:800">Employee hidden from active portal.</div><div style="font-size:12px;margin-top:4px">Old task history safe hai.</div></div>'; window.ugEditEmpEmail=null; window.renderEmpList(); window.refillEmpDropdown(); try{ if(typeof buildUI==='function') buildUI(); }catch(e){} notify('🗑 Employee hidden everywhere in portal.');
-  };
-  window.syncEmps=async function(){ const arr=persistEmployees(); const res=await backend({action:'syncEmployees',employees:arr}); notify(res && res.success===false?'⚠ Local employee sync saved. Backend action missing.':'✅ Employees synced to backend.'); };
-
-  function normStatus(t){ try{ if(typeof window.normStatus==='function') return window.normStatus(t.status||t.Status||'assigned'); }catch(e){} const s=low(t.status||t.Status||'assigned').replace(/[-_]/g,' '); if(['done','completed','finish','finished'].includes(s)) return 'completed'; if(['inprogress','in progress','started','working'].includes(s)) return 'in progress'; if(['reject','rejected'].includes(s)) return 'rejected'; if(['overdue','late'].includes(s)) return 'overdue'; return 'assigned'; }
   function taskEmail(t){
-    if(!t)return''; let em=email(t.email||t.assignedToEmail||t.empEmail||t.employeeEmail||t.AssignedTo_Email||t.AssignedToEmail||t.EmployeeEmail||t['Assigned To Email']||t['Employee Email']||t.mail||t.Email||''); if(isEmail(em))return em;
-    const nm=low(t.empName||t.assignedTo||t.AssignedTo_Name||t['Assigned To Name']||t.EmployeeName||t.Name||''); const e=mergedEmployees(true).find(x=>low(x.name)===nm); return e?e.email:'';
+    t=t||{};
+    var email=E(t.email||t.assignedToEmail||t.empEmail||t.employeeEmail||t.AssignedTo_Email||t.AssignedToEmail||t['Assigned To Email']||t['Assigned To (Email)']||t.EmployeeEmail||t.Email||'');
+    if(isMail(email)) return email;
+    var name=N(t.empName||t.assignedTo||t.AssignedTo_Name||t['Assigned To Name']||t.Name||'').toLowerCase();
+    var emp=normalizeEmployees().find(function(e){ return N(e.name).toLowerCase()===name; });
+    return emp?emp.email:'';
   }
-  function taskByText(t){ return txt(t && (t.assignedByLabel||t.AssignedBy_Name||t['Assigned By Name']||t.assignedBy||t.AssignedBy||t.by||t.createdBy||t.CreatedBy||'')); }
-  function taskByKey(t){ const em=email(t && (t.assignedByEmail||t.AssignedBy_Email||t['Assigned By Email']||t.createdByEmail||'')); if(isEmail(em))return em; const by=low(taskByText(t)); if(!by)return''; const e=mergedEmployees(true).find(x=>low(x.name)===by || by.includes(low(x.name)) || low(x.name).includes(by)); return e?e.email:by; }
-  function taskDateVal(t){
-    const raw=t && (t.adate||t.AssignDate||t['Assign Date']||t.assignDate||t.ts||t.Timestamp||t.createdAt||t.ddate||t.DueDate||t['Due Date']);
-    if(!raw)return null; const s=String(raw).trim(); let d=null; if(/^\d{4}-\d{2}-\d{2}/.test(s)) d=new Date(s.slice(0,10)+'T00:00:00'); else if(/^\d{2}[-/]\d{2}[-/]\d{4}/.test(s)){ const p=s.split(/[/-]/); d=new Date(p[2],Number(p[1])-1,p[0]); } else d=new Date(s); return isNaN(d)?null:d;
+  function taskTitle(t){ return t.task||t.Task||t.workName||t.WorkName||t.title||t.Title||'Untitled Task'; }
+  function taskDate(t){ return t.adate||t.assignDate||t.assignedAt||t.AssignDate||t['Assign Date']||t.createdAt||t.date||''; }
+  function taskDue(t){ return t.ddate||t.dueDate||t.DueDate||t['Due Date']||''; }
+  function parseD(v){ try{ if(typeof flexDate==='function') return flexDate(v); }catch(e){} var d=new Date(v); return isNaN(d)?null:d; }
+  function rangeOK(t){
+    var f=$('ug-work-from'), to=$('ug-work-to');
+    var d=parseD(taskDate(t)||taskDue(t)); if(!d) return true;
+    if(f && f.value){ var fd=new Date(f.value+'T00:00:00'); if(d<fd) return false; }
+    if(to && to.value){ var td=new Date(to.value+'T23:59:59'); if(d>td) return false; }
+    return true;
   }
-  function inDateRange(t){
-    const f=($id('dr-f')||{}).value, to=($id('dr-t')||{}).value; const d=taskDateVal(t); if(f||to){ if(!d)return false; const ds=new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime(); if(f && ds<new Date(f+'T00:00:00').getTime())return false; if(to && ds>new Date(to+'T23:59:59').getTime())return false; return true; }
-    const range=(typeof dateRange!=='undefined'?dateRange:'all'); if(!d||range==='all')return true; const now=new Date(); const start=new Date(now); start.setHours(0,0,0,0); const end=new Date(now); end.setHours(23,59,59,999); if(range==='today'){} else if(range==='week'){ const day=start.getDay(); start.setDate(start.getDate()-day); } else if(range==='month'){ start.setDate(1); } else if(range==='year'){ start.setMonth(0,1); } else return true; return d>=start && d<=end;
+  function byCurrentUser(t){ var u=currentUser(); if(!u) return false; var by=N(t.by||t.assignedBy||t.AssignedBy||t.createdBy||'').toLowerCase(); return by && (by===N(u.name).toLowerCase() || by===E(u.email)); }
+  function toCurrentUser(t){ var u=currentUser(); return !!(u && taskEmail(t)===E(u.email)); }
+  function visibleTasks(){
+    var active=activeEmailSet();
+    var arr=[]; try{ arr=Array.isArray(window.allTasks)?window.allTasks:(typeof allTasks!=='undefined'?allTasks:[]); }catch(e){}
+    return (arr||[]).filter(function(t){ var e=taskEmail(t); return e && active.has(e); });
   }
-  function isOverdue(t){ if(normStatus(t)==='completed')return false; const raw=t&&(t.ddate||t.DueDate||t['Due Date']); if(!raw)return normStatus(t)==='overdue'; const d=taskDateVal({adate:raw}); if(!d)return normStatus(t)==='overdue'; const n=new Date(); n.setHours(0,0,0,0); d.setHours(0,0,0,0); return d<n; }
-  function units(t,k){ const n=Number(t&&t[k]); return Number.isFinite(n)?Math.max(0,n):0; }
-  function taskTitle(t){ try{ if(typeof getTaskDisplayName==='function') return getTaskDisplayName(t); }catch(e){} return txt(t.task||t.Task||t.TaskName||t['Task Name']||t.workName||t.WorkName||'Untitled Task'); }
-  function taskId(t){ return txt(t.taskCode||t.taskId||t.TaskID||t.id||'—'); }
-  function normalizeTask(t){ const em=taskEmail(t); const e=findEmp(em); if(e){ t.email=em; t.assignedToEmail=em; t.empEmail=em; t.AssignedTo_Email=em; t.empName=e.name; t.assignedTo=e.name; t.AssignedTo_Name=e.name; t.desig=e.desig||e.role||t.desig; } return t; }
-  function scopedTasks(){ const active=new Set(activeEmployees().map(e=>e.email)); const list=[].concat((typeof allTasks!=='undefined'?allTasks:[]),(Array.isArray(window.allTasks)&&window.allTasks!==allTasks?window.allTasks:[])); const seen=new Set(); return list.map(normalizeTask).filter(t=>{ const id=taskId(t)+'|'+taskTitle(t)+'|'+taskEmail(t); if(seen.has(id))return false; seen.add(id); const em=taskEmail(t); return active.has(em) && inDateRange(t); }); }
-  function aggregate(list, mode){
-    const map=new Map();
-    list.forEach(t=>{ const key=mode==='given'?taskEmail(t):taskByKey(t); if(!key)return; const emp=mode==='given'?findEmp(key):findEmp(key); const label=mode==='given'?(emp?emp.name:window.uname(key)):(emp?emp.name:(taskByText(t)||key||'Unknown')); const role=mode==='given'?(emp?(emp.desig||emp.role||'Team'):'Team'):(emp?(emp.desig||emp.role||'Team'):'Assigner'); if(!map.has(key))map.set(key,{key,label,role,tasks:0,units:0,done:0,pending:0,overdue:0}); const r=map.get(key); r.tasks++; r.units+=Math.max(1,units(t,'totalUnits')||1); r.done+=units(t,'doneUnits'); r.pending+=(Number.isFinite(Number(t.pendingUnits))?units(t,'pendingUnits'):Math.max(0,(units(t,'totalUnits')||1)-units(t,'doneUnits'))); if(isOverdue(t))r.overdue++; });
-    return Array.from(map.values()).sort((a,b)=>b.tasks-a.tasks || a.label.localeCompare(b.label));
-  }
-  function ensureDrawer(){
-    let mask=$id('ug-report-mask'), drawer=$id('ug-report-drawer');
-    if(mask&&drawer)return {mask,drawer};
-    mask=document.createElement('div'); mask.id='ug-report-mask'; mask.className='ug-side-mask'; mask.onclick=window.closeAssignmentSidebar;
-    drawer=document.createElement('aside'); drawer.id='ug-report-drawer'; drawer.className='ug-side-drawer'; drawer.innerHTML='<div class="ug-side-head"><div><div class="ug-side-title">Assignment Report</div><div class="ug-side-sub" id="ug-side-sub">Date range synced with All Tasks</div></div><button class="ug-side-close" onclick="closeAssignmentSidebar()">×</button></div><div class="ug-side-body" id="ug-side-body"></div>';
-    document.body.appendChild(mask); document.body.appendChild(drawer); return {mask,drawer};
-  }
-  window.openAssignmentSidebar=function(){ ensureDrawer(); window.renderAssignmentReport(true); $id('ug-report-mask').classList.add('open'); $id('ug-report-drawer').classList.add('open'); };
-  window.closeAssignmentSidebar=function(){ const m=$id('ug-report-mask'), d=$id('ug-report-drawer'); if(m)m.classList.remove('open'); if(d)d.classList.remove('open'); };
-  function removeOldInlineReport(){ document.querySelectorAll('#pg-alltasks .card').forEach(card=>{ const title=card.querySelector('.ct'); if(title && /assignment report/i.test(title.textContent||'')) card.remove(); }); }
-  function countLink(n,mode,key,status){ return '<span class="ug-count-link" onclick="openAssignmentTaskList(\''+esc(mode)+'\',\''+esc(String(key).replace(/'/g,'\\\''))+'\',\''+esc(status||'all')+'\')">'+n+'</span>'; }
-  function rowsHTML(rows,mode){ if(!rows.length)return '<tr><td colspan="6"><div class="ug-empty">No work found in selected date range.</div></td></tr>'; return rows.map(r=>'<tr><td><div class="ug-side-name">'+esc(r.label)+'</div><div class="ug-side-role">'+esc(r.role)+'</div></td><td>'+countLink(r.tasks,mode,r.key,'all')+'</td><td>'+r.units+'</td><td>'+countLink(r.done,mode,r.key,'completed')+'</td><td>'+countLink(r.pending,mode,r.key,'pending')+'</td><td>'+countLink(r.overdue,mode,r.key,'overdue')+'</td></tr>').join(''); }
-  function sectionHTML(title,rows,mode){ return '<div class="ug-side-section"><div class="ug-side-section-head"><b>'+esc(title)+'</b><span>'+rows.length+' rows</span></div><table class="ug-side-table"><thead><tr><th>'+(mode==='given'?'Employee':'Assigned By')+'</th><th>Tasks</th><th>Units</th><th>Done</th><th>Pending</th><th>Overdue</th></tr></thead><tbody>'+rowsHTML(rows,mode)+'</tbody></table></div>'; }
-  window.renderAssignmentReport=function(forceDrawer){
-    removeOldInlineReport(); ensureDrawer(); const me=current(); const tasks=scopedTasks(); const myEmail=email(me&&me.email); const myName=low(me&&me.name);
-    const given=tasks.filter(t=>{ const k=taskByKey(t); const by=low(taskByText(t)); return (myEmail && k===myEmail) || (myName && by && (by===myName || by.includes(myName) || myName.includes(by))); });
-    const received=tasks.filter(t=>myEmail && taskEmail(t)===myEmail);
-    const givenRows=aggregate(given,'given'); const receivedRows=aggregate(received,'received');
-    const body=$id('ug-side-body'); if(body) body.innerHTML=sectionHTML('Work I Assigned To Employees',givenRows,'given')+sectionHTML('Work Assigned To Me',receivedRows,'received')+'<div style="font-size:11px;color:var(--muted);line-height:1.45;margin-top:8px">Count par click karne se exact work list open hogi. Date range All Tasks wale filters se synced hai.</div>';
-    const sub=$id('ug-side-sub'); if(sub) sub.textContent='Given: '+given.length+' tasks · Received: '+received.length+' tasks';
-    let launch=$id('ug-report-launch'); const target=$id('at-counters') || document.querySelector('#pg-alltasks .task-counters'); if(target && !launch){ launch=document.createElement('div'); launch.id='ug-report-launch'; launch.className='ug-report-launch'; target.insertAdjacentElement('afterend', launch); }
-    if(launch){ launch.innerHTML='<div><div class="ug-report-launch-title">📌 Work Assigned By Me / To Me</div><div class="ug-report-launch-sub">Report ab side drawer me open hoga, table congested nahi hoga.</div></div><div class="ug-report-mini"><span>Given '+given.length+'</span><span>Received '+received.length+'</span><button class="btn bp bsm" onclick="openAssignmentSidebar()">Open Side Report →</button></div>'; }
-    if(forceDrawer){ const d=$id('ug-report-drawer'); if(d)d.classList.add('open'); const m=$id('ug-report-mask'); if(m)m.classList.add('open'); }
-  };
-  window.openAssignmentTaskList=function(mode,key,status){
-    key=String(key||''); status=status||'all'; const me=current(); const myEmail=email(me&&me.email); const myName=low(me&&me.name); let list=scopedTasks();
-    if(mode==='given') list=list.filter(t=>{ const k=taskByKey(t); const by=low(taskByText(t)); const mine=(myEmail&&k===myEmail)||(myName&&by&&(by===myName||by.includes(myName)||myName.includes(by))); return mine && taskEmail(t)===email(key); });
-    else list=list.filter(t=>myEmail && taskEmail(t)===myEmail && taskByKey(t)===key);
-    if(status==='completed') list=list.filter(t=>normStatus(t)==='completed');
-    if(status==='pending') list=list.filter(t=>normStatus(t)!=='completed' && !isOverdue(t));
-    if(status==='overdue') list=list.filter(t=>isOverdue(t));
-    openTaskModal((mode==='given'?'Work I Assigned':'Work Assigned To Me')+' · '+status, list);
-  };
-  function openTaskModal(title,list){
-    let modal=$id('ug-task-modal'); if(!modal){ modal=document.createElement('div'); modal.id='ug-task-modal'; modal.className='mov hidden'; modal.innerHTML='<div class="mo mo-lg"><div class="moh"><div class="mot" id="ug-task-modal-title"></div><button class="mox" onclick="document.getElementById(\'ug-task-modal\').classList.add(\'hidden\')">×</button></div><div class="mob2" id="ug-task-modal-body"></div><div class="mof"><button class="btn bo" onclick="document.getElementById(\'ug-task-modal\').classList.add(\'hidden\')">Close</button></div></div>'; document.body.appendChild(modal); }
-    $id('ug-task-modal-title').textContent=title+' — '+list.length+' work';
-    $id('ug-task-modal-body').innerHTML=list.length?list.map(t=>'<div class="tc"><div class="tc-top"><div><div class="tc-task">'+esc(taskTitle(t))+'</div><div style="font-size:10px;color:var(--blue);margin-top:2px">'+esc(taskId(t))+'</div></div><span class="pill '+(isOverdue(t)?'po':normStatus(t)==='completed'?'pc':normStatus(t)==='in progress'?'pp':'pa')+'">'+esc(normStatus(t))+'</span></div><div style="font-size:11px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap;margin-top:7px"><span>To: <b>'+esc(window.uname(taskEmail(t)))+'</b></span><span>By: <b>'+esc(taskByText(t)||'—')+'</b></span><span>Assign: '+esc((t.adate||t.AssignDate||'—'))+'</span><span>Due: '+esc((t.ddate||t.DueDate||'—'))+'</span><span>Count: '+esc((t.pendingUnits||0)+' Pending / '+(t.doneUnits||0)+' Submit / Total '+(t.totalUnits||1))+'</span></div></div>').join(''):'<div class="ug-empty">No exact work found for this count.</div>';
-    modal.classList.remove('hidden');
-  }
-  const oldRenderAll=window.renderAllTasks; window.renderAllTasks=function(){ const r=(typeof oldRenderAll==='function'?oldRenderAll.apply(this,arguments):undefined); setTimeout(()=>window.renderAssignmentReport(false),40); return r; };
-  const oldBuild=window.buildUI; window.buildUI=function(){ try{ mergedEmployees(true); }catch(e){} const r=(typeof oldBuild==='function'?oldBuild.apply(this,arguments):undefined); setTimeout(()=>{try{window.refillEmpDropdown();window.renderAssignmentReport(false);}catch(e){}},60); return r; };
-  const oldNav=window.nav; window.nav=function(page){ const r=(typeof oldNav==='function'?oldNav.apply(this,arguments):undefined); if(page==='employees')setTimeout(window.renderEmpList,80); if(page==='alltasks')setTimeout(()=>window.renderAssignmentReport(false),120); return r; };
-  window.ugFinalV2FixNow=function(){ mergedEmployees(true); window.refillEmpDropdown(); window.renderEmpList(); window.renderAssignmentReport(false); notify('✅ V2 fixed: employee section + side report active.'); };
-  document.addEventListener('DOMContentLoaded',()=>setTimeout(window.ugFinalV2FixNow,1100));
-  setTimeout(window.ugFinalV2FixNow,1400);
-  console.log(TAG,'loaded');
-})();
-</script>
 
-
-
-<!-- ============================================================
-     UPGRO V3 EMPLOYEE DEDUPE LOCK — final override
-     Fixes repeated employee duplicates by canonical email key.
-     ============================================================ -->
-<style id="ug-employee-dedupe-v3-style">
-  .ug-dedupe-note{background:linear-gradient(135deg,#EFF6FF,#F8FAFC);border:1px solid rgba(11,132,255,.18);border-radius:12px;padding:10px 12px;font-size:11px;color:#1565C0;line-height:1.45;margin:0 0 12px}
-  .ug-emp-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 12px}
-  .ug-emp-actions .btn{white-space:nowrap}
-</style>
-<script id="ug-employee-dedupe-v3-script">
-(function(){
-  'use strict';
-  const TAG='UG_EMPLOYEE_DEDUPE_LOCK_V3';
-  const STORE_KEYS=['upgro_emp_dyn','upgro_emp_dyn_v2_safe'];
-  const ROLE_KEY='upgro_roles_v3';
-  const SYNC_KEY='upgro_emp_sync_ping_v1';
-  const $id=id=>document.getElementById(id);
-  const txt=v=>String(v==null?'':v).replace(/\s+/g,' ').trim();
-  const low=v=>txt(v).toLowerCase();
-  const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const alias={
-    'ritutyagi@upgromedia.com':'ritutyagiea@upgromedia.com',
-    'ritu.tyagi@upgromedia.com':'ritutyagiea@upgromedia.com',
-    'chnadrakala.meta@upgromedia.com':'chandrakala.meta@upgromedia.com',
-    'chandrakala.waldia@upgromedia.com':'chandrakala.meta@upgromedia.com',
-    'subhi.meta@upgromedia.com':'shubhi.meta@upgromedia.com'
+  function ensureWorkDrawer(){
+    if($('ug-work-drawer')) return;
+    var style=document.createElement('style');
+    style.textContent='.ug-work-btn{position:fixed;right:18px;bottom:86px;z-index:350;border:none;border-radius:999px;background:var(--navy);color:#fff;padding:11px 16px;font-size:12px;font-weight:800;box-shadow:var(--sh2);cursor:pointer}.ug-work-drawer{position:fixed;right:-430px;top:0;width:420px;max-width:94vw;height:100vh;background:#fff;border-left:1px solid var(--border);box-shadow:-16px 0 44px rgba(15,23,42,.18);z-index:700;transition:right .22s ease;display:flex;flex-direction:column}.ug-work-drawer.open{right:0}.ug-work-head{padding:15px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}.ug-work-body{padding:14px 16px;overflow:auto;flex:1}.ug-tab{padding:7px 10px;border:1px solid var(--border);background:#fff;border-radius:999px;font-size:11px;font-weight:800;cursor:pointer}.ug-tab.act{background:var(--blue);border-color:var(--blue);color:#fff}.ug-emp-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;background:#fff}.ug-emp-row:hover{background:var(--blue3);border-color:rgba(11,132,255,.25)}.ug-task-mini{border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:#fff}.ug-date-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 12px}.ug-date-row input{padding:8px 9px;border:1px solid var(--border);border-radius:8px;font-size:12px}.ug-close{border:none;background:var(--bg);border-radius:8px;padding:5px 9px;cursor:pointer}';
+    document.head.appendChild(style);
+    var btn=document.createElement('button'); btn.id='ug-work-btn'; btn.className='ug-work-btn'; btn.textContent='📌 Assigned Work'; btn.onclick=function(){ openWorkDrawer('by'); }; document.body.appendChild(btn);
+    var drawer=document.createElement('div'); drawer.id='ug-work-drawer'; drawer.className='ug-work-drawer';
+    drawer.innerHTML='<div class="ug-work-head"><div><div style="font-weight:900;font-size:15px">Assignment Report</div><div style="font-size:11px;color:var(--muted)">Date range + employee wise task list</div></div><button class="ug-close" onclick="document.getElementById(\'ug-work-drawer\').classList.remove(\'open\')">✕</button></div><div class="ug-work-body"><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="ug-tab act" id="ug-tab-by" onclick="ugRenderWorkDrawer(\'by\')">Work Assigned By Me</button><button class="ug-tab" id="ug-tab-to" onclick="ugRenderWorkDrawer(\'to\')">Assigned To Me</button></div><div class="ug-date-row"><input type="date" id="ug-work-from" onchange="ugRenderWorkDrawer(window.ugWorkMode||\'by\')"><input type="date" id="ug-work-to" onchange="ugRenderWorkDrawer(window.ugWorkMode||\'by\')"></div><div id="ug-work-summary"></div><div id="ug-work-detail"></div></div>';
+    document.body.appendChild(drawer);
+  }
+  function openWorkDrawer(mode){ ensureWorkDrawer(); var d=$('ug-work-drawer'); if(d)d.classList.add('open'); window.ugRenderWorkDrawer(mode||'by'); }
+  window.openWorkDrawer=openWorkDrawer;
+  window.ugRenderWorkDrawer=function(mode,email){
+    ensureWorkDrawer(); mode=mode||window.ugWorkMode||'by'; window.ugWorkMode=mode;
+    var tb=$('ug-tab-by'), tt=$('ug-tab-to'); if(tb)tb.classList.toggle('act',mode==='by'); if(tt)tt.classList.toggle('act',mode==='to');
+    var tasks=visibleTasks().filter(rangeOK).filter(mode==='by'?byCurrentUser:toCurrentUser);
+    var map=new Map();
+    tasks.forEach(function(t){ var em=taskEmail(t)||'unknown'; var emp=empByEmail(em)||{name:t.empName||t.assignedTo||em,email:em,desig:t.desig||'Team'}; if(!map.has(em)) map.set(em,{emp:emp,tasks:[]}); map.get(em).tasks.push(t); });
+    var rows=Array.from(map.values()).sort(function(a,b){return String(a.emp.name||'').localeCompare(String(b.emp.name||''));});
+    var sum=$('ug-work-summary');
+    if(sum){ sum.innerHTML='<div style="font-size:12px;color:var(--muted);margin-bottom:10px"><b>'+tasks.length+'</b> task(s) found</div>'+(rows.length?rows.map(function(r){return '<div class="ug-emp-row" onclick="ugRenderWorkDrawer(\''+mode+'\',\''+esc(r.emp.email)+'\')"><div><div style="font-weight:800;font-size:13px">'+esc(r.emp.name||r.emp.email)+'</div><div style="font-size:11px;color:var(--muted)">'+esc(r.emp.desig||r.emp.role||'Team')+'</div></div><div style="font-size:20px;font-weight:900;color:var(--blue)">'+r.tasks.length+'</div></div>';}).join(''):'<div style="padding:20px;text-align:center;color:var(--muted)">No work found in selected range.</div>'); }
+    var detail=$('ug-work-detail'); if(!detail) return; if(!email){ detail.innerHTML=''; return; }
+    var selected=tasks.filter(function(t){ return taskEmail(t)===email; });
+    detail.innerHTML='<div style="font-size:12px;font-weight:800;margin:14px 0 8px;color:var(--text)">Exact work list · '+selected.length+'</div>'+selected.map(function(t){return '<div class="ug-task-mini"><div style="font-weight:800;font-size:12px">'+esc(taskTitle(t))+'</div><div style="font-size:11px;color:var(--muted);margin-top:4px">ID: '+esc(t.id||t.taskId||t.TaskID||'—')+' · Status: '+esc(t.status||'assigned')+' · Due: '+esc(taskDue(t)||'—')+'</div><div style="font-size:11px;color:var(--muted);margin-top:3px">Assigned to: '+esc(t.empName||t.assignedTo||email)+' · By: '+esc(t.by||t.assignedBy||'—')+'</div></div>';}).join('');
   };
-  function email(v){ const e=low(v).replace(/\s+/g,''); return alias[e]||e; }
-  function isEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email(v)); }
-  function initials(n){ return txt(n||'?').split(/\s+/).map(x=>x[0]||'').join('').toUpperCase().slice(0,2)||'?'; }
-  function colorAt(i){ try{ if(typeof CLRS!=='undefined' && CLRS.length) return CLRS[i%CLRS.length]; }catch(e){} return '#0B84FF'; }
-  function today(){ try{ if(typeof TODAY!=='undefined' && TODAY) return TODAY; }catch(e){} return new Date().toISOString().slice(0,10); }
-  function notify(m){ try{ if(typeof toast==='function') toast(m); else console.log(m); }catch(e){ console.log(m); } }
-  function readJSON(k,f){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):f; }catch(e){ return f; } }
-  function writeJSON(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
-  function b(v,fb){ if(v===true||v===false)return v; const s=low(v); if(['true','yes','y','1','active'].includes(s))return true; if(['false','no','n','0','inactive','removed','delete','deleted'].includes(s))return false; return !!fb; }
-  function desigOptions(){ try{ if(typeof DESIG_OPTS!=='undefined' && Array.isArray(DESIG_OPTS) && DESIG_OPTS.length) return DESIG_OPTS; }catch(e){} return ['MIS','Executive Assistant','Web Developer','Graphic Designer','Video Editor','CRM','Meta Media Buyer','Google Ads','SEO Executive','SEO','Founder','CEO','HR','Accountant','Intern','Content Writer','Social Media Manager','Performance Marketer','Team Lead','Other']; }
-  function parseRow(r,i){
-    r=r||{};
-    const em=email(r.email||r.Email||r.EmployeeEmail||r['Employee Email']||r['Email Address']||r.LoginEmail||r.UserEmail||r.mail||'');
-    const nm=txt(r.name||r.Name||r.EmployeeName||r['Employee Name']||r['Full Name']||r.FullName||(em?em.split('@')[0]:''));
-    if(!em && !nm) return null;
-    if(em && !isEmail(em)) return null;
-    const desig=txt(r.desig||r.Designation||r.designation||r.Department||r.department||r.role||r.Role||'Team')||'Team';
-    const role=txt(r.role||r.Role||r.RoleName||r.designation||r.Designation||desig)||desig;
-    const activeRaw=(r.active!==undefined?r.active:(r.Active!==undefined?r.Active:(r.Status!==undefined?r.Status:true)));
-    const isAdmin=b(r.isAdmin!==undefined?r.isAdmin:(r.IsAdmin!==undefined?r.IsAdmin:r['Is Admin']),false);
-    const isManager=!isAdmin && (b(r.isManager!==undefined?r.isManager:(r.IsManager!==undefined?r.IsManager:r['Is Manager']),false)||/manager|assigner|team lead|lead/i.test(role+' '+desig));
-    return {
-      email:em,
-      name:nm||em,
-      pass:txt(r.pass||r.Password||r.password||r['Password']||''),
-      role,desig,
-      isAdmin:!!isAdmin,
-      isManager:!!isManager,
-      active:b(activeRaw,true),
-      bg:r.bg||r.Bg||colorAt(i||0),
-      joinDate:txt(r.joinDate||r.JoinDate||r['Join Date']||'')
-    };
+
+  function applyAllTasksScrollFix(){
+    if($('ug-alltasks-scroll-style')) return;
+    var st=document.createElement('style'); st.id='ug-alltasks-scroll-style';
+    st.textContent='#pg-alltasks.act{height:calc(100vh - var(--th));display:flex!important;flex-direction:column;overflow:hidden}#pg-alltasks .ph,#pg-alltasks .task-counters,#pg-alltasks .efbar,#pg-alltasks .fb{flex-shrink:0}#pg-alltasks>.card{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}#pg-alltasks>.card>.tw{flex:1;min-height:0;overflow:auto;max-height:none}#pg-alltasks .tbl thead th{position:sticky;top:0;z-index:3;background:#FAFBFD}';
+    document.head.appendChild(st);
   }
-  function sourceRows(){
-    const rows=[];
-    try{ if(typeof USERS!=='undefined') Object.keys(USERS).forEach(em=>rows.push(Object.assign({},USERS[em],{email:em}))); }catch(e){}
-    try{ if(Array.isArray(sheetEmpReg)) rows.push(...sheetEmpReg); }catch(e){}
-    try{ if(Array.isArray(window.sheetEmpReg)) rows.push(...window.sheetEmpReg); }catch(e){}
-    try{ if(Array.isArray(empReg)) rows.push(...empReg); }catch(e){}
-    try{ if(Array.isArray(window.empReg)) rows.push(...window.empReg); }catch(e){}
-    STORE_KEYS.forEach(k=>{ const arr=readJSON(k,[]); if(Array.isArray(arr)) rows.push(...arr); });
-    return rows;
+
+  function ensureMeetOptionUI(){
+    var loc=$('mtg-loc'); if(!loc) return;
+    if($('ug-meet-auto-box')) return;
+    var box=document.createElement('div'); box.id='ug-meet-auto-box';
+    box.style.cssText='margin-top:8px;background:var(--blue3);border:1px solid rgba(11,132,255,.22);border-radius:10px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap';
+    box.innerHTML='<label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--text);cursor:pointer;user-select:none"><input type="checkbox" id="mtg-auto-meet" checked style="width:16px;height:16px;accent-color:#0B84FF"> Auto-generate Google Meet link</label><button type="button" class="btn bo bxs" id="ug-meet-generate-now">🔗 Generate Now</button><div id="ug-meet-auto-status" style="width:100%;font-size:11px;color:var(--muted);line-height:1.45">Google Meet link will be generated automatically while saving.</div>';
+    loc.parentNode.insertBefore(box, loc.nextSibling);
+    var b=$('ug-meet-generate-now'); if(b) b.onclick=function(e){ if(e)e.preventDefault(); window.ugGenerateMeetLinkFromModal(); };
+    var chk=$('mtg-auto-meet'); if(chk) chk.onchange=updateMeetStatus;
+    updateMeetStatus();
   }
-  function mergeInto(old,e,idx){
-    const out=Object.assign({},old||{});
-    ['email','name','pass','role','desig','joinDate'].forEach(k=>{ if(e[k]) out[k]=e[k]; });
-    out.isAdmin=!!e.isAdmin;
-    out.isManager=!!e.isManager && !out.isAdmin;
-    out.active=e.active!==false; // latest canonical row wins; prevents old inactive duplicate locking the record forever
-    out.bg=e.bg||out.bg||colorAt(idx||0);
-    return out;
+  function updateMeetStatus(){
+    var st=$('ug-meet-auto-status'), chk=$('mtg-auto-meet'), loc=$('mtg-loc'); if(!st||!chk) return;
+    if(chk.checked) st.textContent=(loc && /meet\.google\.com/i.test(loc.value))?'✅ Google Meet link already added.':'Google Meet link will be generated automatically while saving, then sent in invite emails.';
+    else st.textContent='Auto Meet OFF. Use this if you are entering a physical location or existing link manually.';
   }
-  function canonicalEmployees(includeInactive=true){
-    const byEmail=new Map();
-    sourceRows().forEach((r,i)=>{
-      const e=parseRow(r,i); if(!e||!e.email) return;
-      byEmail.set(e.email, mergeInto(byEmail.get(e.email), e, byEmail.size));
+  async function generateMeetLinkFromModal(){
+    var loc=$('mtg-loc'), st=$('ug-meet-auto-status');
+    var title=N(($('mtg-title')||{value:''}).value), date=($('mtg-date')||{value:''}).value, time=($('mtg-time')||{value:''}).value;
+    if(!SURL){ toastSafe('⚠ Settings mein Apps Script URL save karo pehle'); return ''; }
+    if(!title){ toastSafe('⚠ Meeting title required'); return ''; }
+    if(!date||!time){ toastSafe('⚠ Date and time required'); return ''; }
+    try{ if(st) st.textContent='Generating Google Meet link...'; }catch(e){}
+    var attendees=[];
+    try{ attendees=Array.from(selectedAttendees||[]).map(function(email){var e=empByEmail(email)||{};return {email:email,name:e.name||email,desig:e.desig||e.role||'Team'};}); }catch(e){}
+    var dur=($('mtg-dur')||{value:'30 minutes'}).value;
+    var mins=parseInt(String(dur||'30').match(/\d+/)?.[0]||'30',10)||30;
+    var payload={action:'createCalendarMeeting',title:title,datetime:date+'T'+time,durationMinutes:mins,attendeeList:attendees,agenda:($('mtg-agenda')||{value:''}).value||'',notes:($('mtg-notes')||{value:''}).value||'',organizer:(currentUser()&&currentUser().name)||'UpGro Media'};
+    try{
+      var res=await fetch(SURL,{method:'POST',body:JSON.stringify(payload),signal:AbortSignal.timeout(25000)});
+      var txt=await res.text(), d={}; try{ d=JSON.parse(txt); }catch(e){}
+      var link=d.meetLink||d.hangoutLink||d.conferenceLink||d.link||'';
+      if(link){ if(loc) loc.value=link; if(st) st.textContent='✅ Google Meet link generated and added.'; toastSafe('✅ Google Meet link generated'); return link; }
+      if(st) st.textContent='❌ Meet link not returned. Apps Script me createCalendarMeeting action add karo.';
+      toastSafe('❌ Backend did not return Meet link');
+    }catch(e){ if(st) st.textContent='❌ Meet generation failed: '+(e.message||e); toastSafe('❌ Meet generation failed'); }
+    return '';
+  }
+  window.ugGenerateMeetLinkFromModal=generateMeetLinkFromModal;
+
+  var oldOpenMeeting=window.openAddMeeting;
+  window.openAddMeeting=function(){
+    try{ if(typeof oldOpenMeeting==='function') oldOpenMeeting.apply(this,arguments); }catch(e){ console.warn('old openAddMeeting failed',e); }
+    var modal=$('m-mtg');
+    if(modal) modal.classList.remove('hidden');
+    try{ ensureMeetOptionUI(); }catch(e){}
+    try{ if(typeof buildAttendeeList==='function') buildAttendeeList(($('mtg-att-q')||{value:''}).value||''); }catch(e){}
+    setTimeout(ensureMeetOptionUI,50);
+    return false;
+  };
+  var oldEditMeeting=window.openEditMeeting;
+  window.openEditMeeting=function(id){ var r; try{ if(typeof oldEditMeeting==='function') r=oldEditMeeting.apply(this,arguments); }catch(e){console.warn(e);} ensureMeetOptionUI(); return r; };
+  var oldSaveMeeting=window.saveMeeting;
+  window.saveMeeting=async function(){
+    try{
+      ensureMeetOptionUI();
+      var chk=$('mtg-auto-meet'), loc=$('mtg-loc');
+      if(chk && chk.checked && loc && !/meet\.google\.com/i.test(loc.value||'')) await generateMeetLinkFromModal();
+    }catch(e){ console.warn('auto meet skipped',e); }
+    return oldSaveMeeting ? oldSaveMeeting.apply(this,arguments) : undefined;
+  };
+  function bindScheduleButton(){
+    var box=$('mtg-ph-r'); if(!box) return;
+    Array.from(box.querySelectorAll('button')).forEach(function(btn){ if((btn.textContent||'').toLowerCase().indexOf('schedule')>-1){ btn.onclick=function(e){ if(e)e.preventDefault(); return window.openAddMeeting(); }; } });
+  }
+
+  function bindNavRepair(){
+    document.querySelectorAll('.ni[id^="ni-"]').forEach(function(el){
+      var id=String(el.id||'').replace(/^ni-/,'');
+      var pageMap={dash:'dash',dashboard:'dash',mytasks:'mytasks',alltasks:'alltasks',analytics:'analytics',employees:'employees',meetings:'meetings',forms:'forms',settings:'settings'};
+      var pg=pageMap[id]||id;
+      el.onclick=function(e){ if(e)e.preventDefault(); try{ if(typeof nav==='function') nav(pg); }catch(x){ console.warn(x); } setTimeout(function(){ repairSidebarUser(); bindScheduleButton(); ensureWorkDrawer(); applyAllTasksScrollFix(); },50); return false; };
     });
-    let arr=Array.from(byEmail.values());
-    // second pass: remove same-name/same-designation duplicates caused by wrong old email rows
-    const byNameRole=new Map();
-    arr.forEach((e,i)=>{
-      const key=low(e.name)+'|'+low(e.desig||e.role||'');
-      const old=byNameRole.get(key);
-      if(!old){ byNameRole.set(key,e); return; }
-      const preferNew=(/@upgromedia\.com$/.test(e.email)&&!/@upgromedia\.com$/.test(old.email)) || (e.active!==false && old.active===false);
-      byNameRole.set(key, preferNew?mergeInto(old,e,i):mergeInto(e,old,i));
-    });
-    arr=Array.from(byNameRole.values()).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
-    arr.forEach((e,i)=>{ if(!e.bg)e.bg=colorAt(i); e.isManager=!!e.isManager && !e.isAdmin; });
-    try{ empReg=arr.slice(); window.empReg=arr.slice(); }catch(e){ window.empReg=arr.slice(); }
-    try{ sheetEmpReg=arr.slice(); window.sheetEmpReg=arr.slice(); }catch(e){}
-    try{ if(typeof USERS!=='undefined') arr.forEach(e=>{ USERS[e.email]=Object.assign({},USERS[e.email]||{},e,{active:e.active!==false}); }); }catch(e){}
-    return includeInactive?arr:arr.filter(e=>e.active!==false);
   }
-  function activeEmployees(){ return canonicalEmployees(false); }
-  function findEmp(em){ em=email(em); return canonicalEmployees(true).find(e=>e.email===em)||null; }
-  function saveCanonical(){
-    const arr=canonicalEmployees(true).map(e=>({email:e.email,name:e.name,pass:e.pass,role:e.role,desig:e.desig,isAdmin:!!e.isAdmin,isManager:!!e.isManager,active:e.active!==false,bg:e.bg,joinDate:e.joinDate||''}));
-    STORE_KEYS.forEach(k=>writeJSON(k,arr));
-    const roles={}; arr.forEach(e=>roles[e.email]={isAdmin:!!e.isAdmin,isManager:!!e.isManager,active:e.active!==false}); writeJSON(ROLE_KEY,roles);
-    try{ localStorage.setItem(SYNC_KEY,String(Date.now())); }catch(e){}
-    return arr;
-  }
-  function v3MergeRegistry(base,dyn,roles){
-    const rows=[];
-    if(Array.isArray(base))rows.push(...base);
-    try{ if(Array.isArray(sheetEmpReg))rows.push(...sheetEmpReg); }catch(e){}
-    if(Array.isArray(dyn))rows.push(...dyn);
-    if(roles && typeof roles==='object') rows.forEach(r=>{ const em=email(r&&r.email); if(em&&roles[em]) Object.assign(r,roles[em]); });
-    const oldSource=sourceRows;
-    rows.forEach(()=>{});
-    const map=new Map();
-    rows.forEach((r,i)=>{ const e=parseRow(r,i); if(e&&e.email)map.set(e.email,mergeInto(map.get(e.email),e,map.size)); });
-    return Array.from(map.values()).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
-  }
-  function v3LoadDynEmployees(){ return canonicalEmployees(true); }
-  function v3SaveDynEmployees(arr){ if(Array.isArray(arr)){ const map=new Map(); arr.forEach((r,i)=>{ const e=parseRow(r,i); if(e&&e.email)map.set(e.email,mergeInto(map.get(e.email),e,map.size)); }); STORE_KEYS.forEach(k=>writeJSON(k,Array.from(map.values()))); } }
-  function v3PersistEmpRegistry(){ return saveCanonical(); }
-  function v3SyncUserDirectory(){ canonicalEmployees(true); }
-  function v3GetStoredEmployee(em){ return findEmp(em); }
-  function v3InitEmpReg(){ saveCanonical(); return window.empReg; }
-  try{ mergeRegistry=v3MergeRegistry; }catch(e){ window.mergeRegistry=v3MergeRegistry; }
-  try{ loadDynEmployees=v3LoadDynEmployees; }catch(e){ window.loadDynEmployees=v3LoadDynEmployees; }
-  try{ saveDynEmployees=v3SaveDynEmployees; }catch(e){ window.saveDynEmployees=v3SaveDynEmployees; }
-  try{ persistEmpRegistry=v3PersistEmpRegistry; }catch(e){ window.persistEmpRegistry=v3PersistEmpRegistry; }
-  try{ syncUserDirectoryFromRegistry=v3SyncUserDirectory; }catch(e){ window.syncUserDirectoryFromRegistry=v3SyncUserDirectory; }
-  try{ getStoredEmployee=v3GetStoredEmployee; }catch(e){ window.getStoredEmployee=v3GetStoredEmployee; }
-  try{ initEmpReg=v3InitEmpReg; }catch(e){ window.initEmpReg=v3InitEmpReg; }
-  window.getActiveEmployees=activeEmployees;
-  window.getAllEmployeesClean=function(){return canonicalEmployees(true)};
-  window.ugCanonicalEmployees=canonicalEmployees;
-  window.uname=function(em){ const f=findEmp(em); if(f)return f.name; const s=email(em); return s?s.split('@')[0].replace(/[._-]+/g,' ').replace(/\b\w/g,m=>m.toUpperCase()):'—'; };
-  window.udesig=function(em){ const f=findEmp(em); return f?(f.desig||f.role||'Team'):'Team'; };
-  window.refillEmpDropdown=function(){
-    const selectors=[];
-    ['task-emp','assignEmployee','assign-to','assignee','emp-select','taskAssignee','task-assignee','meeting-attendees','at-assigned-to','an-emp-filter'].forEach(id=>{ const el=$id(id); if(el)selectors.push(el); });
-    document.querySelectorAll('select').forEach(s=>{ const label=low((s.id||'')+' '+(s.name||'')+' '+(s.getAttribute('aria-label')||'')+' '+(s.closest('.fg')?s.closest('.fg').innerText:'')); if(/assign|assignee|employee|attendee|member/.test(label))selectors.push(s); });
-    const seen=new Set(); const list=activeEmployees();
-    selectors.forEach(sel=>{
-      if(!sel||seen.has(sel))return; seen.add(sel); const keep=email(sel.value); const first=sel.querySelector('option[value=""]')||sel.querySelector('option'); const ph=(first&&!isEmail(first.value))?txt(first.textContent):'— Select Active Employee —';
-      sel.innerHTML='<option value="">'+esc(ph||'— Select Active Employee —')+'</option>'+list.map(e=>'<option value="'+esc(e.email)+'">'+esc(e.name+' — '+(e.desig||e.role||'Team'))+'</option>').join('');
-      if(keep && list.some(e=>e.email===keep))sel.value=keep;
-    });
+
+  var oldDoLogin=window.doLogin;
+  window.doLogin=async function(){
+    var r;
+    try{ r=oldDoLogin ? await oldDoLogin.apply(this,arguments) : undefined; }catch(e){ console.error('login failed',e); toastSafe('❌ Login error: '+(e.message||e)); }
+    setTimeout(function(){ repairSidebarUser(); bindNavRepair(); bindScheduleButton(); ensureWorkDrawer(); applyAllTasksScrollFix(); },250);
+    setTimeout(repairSidebarUser,900);
+    return r;
   };
-  window.populateTaskFilterOptions=function(){
-    const list=activeEmployees();
-    [['at-assigned-to','Assigned To — All'],['at-assigned-by','Assigned By — All'],['an-emp-filter','Employee — All Active']].forEach(([id,ph])=>{
-      const sel=$id(id); if(!sel)return; const keep=email(sel.value); sel.innerHTML='<option value="">'+esc(ph)+'</option>'+list.map(e=>'<option value="'+esc(e.email)+'">'+esc(e.name+' — '+(e.desig||e.role||'Team'))+'</option>').join(''); if(keep&&list.some(e=>e.email===keep))sel.value=keep;
-    });
+  var oldInitApp=window.initApp;
+  window.initApp=function(){ var r; try{ r=oldInitApp?oldInitApp.apply(this,arguments):undefined; }catch(e){ console.error('initApp failed',e); } setTimeout(function(){ repairSidebarUser(); bindNavRepair(); bindScheduleButton(); ensureWorkDrawer(); applyAllTasksScrollFix(); },100); return r; };
+  var oldBuildUI=window.buildUI;
+  window.buildUI=function(){ var r; try{ r=oldBuildUI?oldBuildUI.apply(this,arguments):undefined; }catch(e){ console.warn('buildUI skipped',e); } setTimeout(function(){ repairSidebarUser(); bindScheduleButton(); ensureWorkDrawer(); },40); return r; };
+
+  window.fixDuplicateEmployeesNow=function(){ normalizeEmployees(); safeRefreshUI(); toastSafe('✅ Employees deduped and active list refreshed'); };
+  window.ugFinalRecoveryNow=function(){
+    normalizeEmployees(); repairSidebarUser(); bindNavRepair(); bindScheduleButton(); ensureWorkDrawer(); applyAllTasksScrollFix();
+    try{ refillEmpDropdown(); populateTaskFilterOptions(); renderEmpList(); }catch(e){}
+    toastSafe('✅ Portal recovered without touching old layout');
   };
-  function countersHTML(arr){
-    const total=arr.length, active=arr.filter(e=>e.active!==false).length, inactive=arr.filter(e=>e.active===false).length, admins=arr.filter(e=>e.isAdmin).length, managers=arr.filter(e=>!e.isAdmin&&e.isManager).length;
-    return '<div class="tctr tctr-blue"><div class="tctr-v">'+total+'</div><div class="tctr-l">Total</div></div><div class="tctr tctr-green"><div class="tctr-v">'+active+'</div><div class="tctr-l">Active</div></div><div class="tctr tctr-red"><div class="tctr-v">'+inactive+'</div><div class="tctr-l">Inactive</div></div><div class="tctr tctr-purple"><div class="tctr-v">'+admins+'</div><div class="tctr-l">Admins</div></div><div class="tctr tctr-orange"><div class="tctr-v">'+managers+'</div><div class="tctr-l">Assigners</div></div>';
-  }
-  function ensureEmpToolbar(){
-    const cont=$id('emp-items'); if(!cont)return;
-    const parent=cont.parentElement; if(!parent||$id('ug-emp-dedupe-tools'))return;
-    const bar=document.createElement('div'); bar.id='ug-emp-dedupe-tools'; bar.className='ug-emp-actions';
-    bar.innerHTML='<button class="btn bo bsm" onclick="ugHardDedupeEmployees()">🧹 Remove Duplicates</button><button class="btn bo bsm" onclick="syncEmps()">↻ Sync Clean List</button>';
-    cont.insertAdjacentElement('beforebegin',bar);
-  }
-  window.renderEmpList=function(){
-    const arr=canonicalEmployees(true); saveCanonical(); ensureEmpToolbar();
-    const q=low(($id('emp-q')||{value:''}).value); const cont=$id('emp-items'); const counters=$id('emp-counters'); if(counters)counters.innerHTML=countersHTML(arr); if(!cont)return;
-    const filtered=arr.filter(e=>!q||low(e.name+' '+e.email+' '+e.role+' '+e.desig).includes(q));
-    cont.innerHTML='';
-    if(!filtered.length){ cont.innerHTML='<div style="padding:16px;color:var(--muted)">No employees found.</div>'; return; }
-    filtered.forEach(e=>{ const div=document.createElement('div'); div.className='ei'+(window.ugEditEmpEmail===e.email?' act':''); div.onclick=function(){ window.selectEmp(e.email); }; const badge=e.isAdmin?'<span class="role-badge rb-admin">Admin</span>':(e.isManager?'<span class="role-badge rb-manager">Assigner</span>':''); div.innerHTML='<div class="ei-av" style="background:'+esc(e.bg||'#0B84FF')+'">'+esc(initials(e.name))+'</div><div class="ei-info"><div class="ei-name">'+esc(e.name)+' '+badge+'</div><div class="ei-role">'+esc(e.desig||e.role||'Team')+'</div></div><div class="ei-dot" title="'+(e.active!==false?'Active':'Inactive')+'" style="background:'+(e.active!==false?'#00B67A':'#E53935')+'"></div>'; cont.appendChild(div); });
-  };
-  function empForm(e,isNew){
-    const opts=desigOptions().map(d=>'<option value="'+esc(d)+'"'+(d===(e.desig||'')?' selected':'')+'>'+esc(d)+'</option>').join('');
-    const emailField=isNew?'<input id="ef-e" class="fc" placeholder="employee@upgromedia.com">':'<input id="ef-e" value="'+esc(e.email)+'" class="fc" readonly style="background:#f8fafc;color:var(--muted)">';
-    return '<div class="ug-dedupe-note"><b>Duplicate lock active:</b> same email dobara add nahi hoga. Existing inactive employee ko add karne par wahi employee reactivate/update hoga.</div><div style="font-size:15px;font-weight:900;margin-bottom:14px">'+(isNew?'➕ Add New Employee':'👤 Edit Employee')+'</div><div class="fg"><label class="fl2">Full Name *</label><input id="ef-n" value="'+esc(e.name||'')+'" class="fc"></div><div class="fg"><label class="fl2">Email *</label>'+emailField+'</div><div class="fg"><label class="fl2">Password '+(isNew?'*':'')+'</label><input id="ef-p" type="password" value="'+esc(e.pass||'')+'" class="fc"></div><div class="fg"><label class="fl2">Designation *</label><select id="ef-d" class="fc">'+opts+'</select></div><div class="fg"><label class="fl2">Role *</label><input id="ef-r" value="'+esc(e.role||e.desig||'')+'" class="fc" placeholder="e.g. SEO Executive"></div><div style="display:flex;gap:18px;margin-bottom:14px;flex-wrap:wrap"><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="ef-admin" '+(e.isAdmin?'checked':'')+' style="width:14px;height:14px;accent-color:var(--blue)"> 👑 Admin</label><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="ef-mgr" '+(e.isManager?'checked':'')+' style="width:14px;height:14px;accent-color:var(--purple)"> 🔀 Work Assigner</label>'+(!isNew?'<label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="ef-ac" '+(e.active!==false?'checked':'')+' style="width:14px;height:14px;accent-color:var(--green)"> ✅ Active</label>':'')+'</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn '+(isNew?'bs':'bp')+'" style="flex:1" onclick="'+(isNew?'addNewEmp()':'saveEmp(\''+esc(e.email)+'\')')+'">'+(isNew?'✅ Add / Reactivate Employee':'💾 Save Changes')+'</button>'+(!isNew?'<button class="btn bd bsm" onclick="delEmp(\''+esc(e.email)+'\')">🗑 Remove</button>':'')+'</div>';
-  }
-  window.selectNewEmp=function(){ window.ugEditEmpEmail=null; window.renderEmpList(); const fp=$id('emp-fp'); if(fp)fp.innerHTML=empForm({name:'',email:'',pass:'',desig:desigOptions()[0],role:'',isAdmin:false,isManager:false,active:true},true); };
-  window.selectEmp=function(em){ const e=findEmp(em); if(!e){ notify('⚠ Employee not found'); return; } window.ugEditEmpEmail=e.email; window.renderEmpList(); const fp=$id('emp-fp'); if(fp)fp.innerHTML=empForm(e,false); };
-  function formEmp(oldEmail){
-    const nm=txt(($id('ef-n')||{}).value), em=email(($id('ef-e')||{}).value||oldEmail), pass=txt(($id('ef-p')||{}).value), desig=txt(($id('ef-d')||{}).value)||'Team', role=txt(($id('ef-r')||{}).value)||desig, isAdmin=!!(($id('ef-admin')||{}).checked), isManager=!isAdmin&&!!(($id('ef-mgr')||{}).checked||/manager|assigner|team lead|lead/i.test(role+' '+desig)), active=$id('ef-ac')?!!$id('ef-ac').checked:true;
-    const old=findEmp(em)||findEmp(oldEmail)||{};
-    return {email:em,name:nm,pass:pass||old.pass||'',desig,role,isAdmin,isManager,active,bg:old.bg||colorAt(canonicalEmployees(true).length),joinDate:old.joinDate||today()};
-  }
-  async function postEmp(emp,action){
-    try{ if(typeof SURL==='undefined'||!SURL)return {success:false,message:'No backend'}; const payload=Object.assign({action:action||'upsertEmployee',mode:'upsertByEmail',dedupeBy:'email',rowKey:emp.email,upsertKey:'email'},emp,{Email:emp.email,EmployeeEmail:emp.email,'Email Address':emp.email,Name:emp.name,EmployeeName:emp.name,Designation:emp.desig,Role:emp.role,Password:emp.pass,Active:emp.active!==false,IsAdmin:!!emp.isAdmin,IsManager:!!emp.isManager}); const res=await fetch(SURL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload),signal:AbortSignal.timeout(30000)}); const t=await res.text(); try{return JSON.parse(t);}catch(e){return {success:res.ok,message:t};} }catch(e){return {success:false,message:e.message};}
-  }
-  async function saveEmpInternal(oldEmail,isAdd){
-    const rec=formEmp(oldEmail); if(!rec.name||!rec.email||(!rec.pass&&isAdd)){ notify('⚠ Name, email and password required'); return; } if(!isEmail(rec.email)){ notify('⚠ Valid email required'); return; }
-    let arr=canonicalEmployees(true); const idx=arr.findIndex(e=>e.email===email(oldEmail||rec.email)); const existingByEmail=arr.findIndex(e=>e.email===rec.email);
-    if(isAdd && existingByEmail>=0){ arr[existingByEmail]=Object.assign({},arr[existingByEmail],rec,{active:true}); }
-    else if(idx>=0){ arr[idx]=Object.assign({},arr[idx],rec); }
-    else { arr.push(rec); }
-    STORE_KEYS.forEach(k=>writeJSON(k,arr)); try{ empReg=arr.slice(); window.empReg=arr.slice(); if(typeof USERS!=='undefined') arr.forEach(e=>USERS[e.email]=Object.assign({},USERS[e.email]||{},e)); }catch(e){}
-    saveCanonical(); await postEmp(rec,'upsertEmployee'); window.renderEmpList(); window.selectEmp(rec.email); window.refillEmpDropdown(); try{ window.populateTaskFilterOptions(); }catch(e){} try{ if(typeof buildUI==='function')buildUI(); }catch(e){} notify(isAdd && existingByEmail>=0?'✅ Existing employee reactivated/updated. Duplicate nahi bana.':(isAdd?'✅ Employee added without duplicate.':'✅ Employee updated without duplicate.'));
-  }
-  window.saveEmp=function(oldEmail){ return saveEmpInternal(oldEmail,false); };
-  window.addNewEmp=function(){ return saveEmpInternal('',true); };
-  window.delEmp=async function(em){ em=email(em); if(!em)return; if(!confirm('Remove '+em+' from active portal list? Task history safe rahegi.'))return; const arr=canonicalEmployees(true).map(e=>e.email===em?Object.assign({},e,{active:false}):e); STORE_KEYS.forEach(k=>writeJSON(k,arr)); try{ empReg=arr.slice(); window.empReg=arr.slice(); if(typeof USERS!=='undefined'&&USERS[em])USERS[em].active=false; }catch(e){} saveCanonical(); await postEmp(Object.assign({},findEmp(em)||{email:em},{active:false,Active:'No'}),'upsertEmployee'); const fp=$id('emp-fp'); if(fp)fp.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:34px;margin-bottom:8px">✓</div><div style="font-weight:800">Employee hidden from active portal.</div><div style="font-size:12px;margin-top:4px">Old task history safe hai.</div></div>'; window.ugEditEmpEmail=null; window.renderEmpList(); window.refillEmpDropdown(); try{if(typeof buildUI==='function')buildUI();}catch(e){} notify('🗑 Employee hidden. Duplicate nahi banega.'); };
-  window.syncEmps=async function(){ const arr=saveCanonical(); const res=await (async()=>{ try{ if(typeof SURL==='undefined'||!SURL)return {success:false}; const r=await fetch(SURL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'syncEmployeesReplace',mode:'replaceByEmail',dedupeBy:'email',employees:arr}),signal:AbortSignal.timeout(30000)}); const t=await r.text(); try{return JSON.parse(t);}catch(e){return {success:r.ok,message:t};} }catch(e){return {success:false,message:e.message};} })(); notify(res&&res.success?'✅ Clean employee list synced.':'✅ Portal duplicates cleaned locally. Backend replace action missing ho sakta hai.'); };
-  window.ugHardDedupeEmployees=function(){ const before=sourceRows().map((r,i)=>parseRow(r,i)).filter(e=>e&&e.email).length; const arr=saveCanonical(); window.refillEmpDropdown(); try{window.populateTaskFilterOptions();}catch(e){} window.renderEmpList(); try{ if(typeof renderAssignmentReport==='function')renderAssignmentReport(false); }catch(e){} notify('✅ Duplicate cleanup done: '+before+' raw rows → '+arr.length+' unique employees.'); };
-  const oldBuild=window.buildUI; window.buildUI=function(){ window.ugHardDedupeEmployeesSilent&&window.ugHardDedupeEmployeesSilent(); const r=(typeof oldBuild==='function'?oldBuild.apply(this,arguments):undefined); setTimeout(()=>{try{saveCanonical();window.refillEmpDropdown();window.renderEmpList();}catch(e){}},80); return r; };
-  window.ugHardDedupeEmployeesSilent=function(){ try{ saveCanonical(); }catch(e){} };
-  document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{ try{ window.ugHardDedupeEmployeesSilent(); window.refillEmpDropdown(); window.renderEmpList(); }catch(e){ console.warn(TAG,e); } },1500));
-  setTimeout(()=>{ try{ window.ugHardDedupeEmployeesSilent(); }catch(e){} },700);
-  console.log(TAG,'loaded');
-})();
-</script>
 
+  document.addEventListener('click',function(e){
+    var btn=e.target && e.target.closest ? e.target.closest('button') : null;
+    if(btn && btn.closest && btn.closest('#mtg-ph-r') && (btn.textContent||'').toLowerCase().indexOf('schedule')>-1){ e.preventDefault(); e.stopPropagation(); window.openAddMeeting(); }
+  },true);
 
-<!-- =========================================================
-     FINAL PATCH V4: ALL TASKS FREEZE HEADER + SCROLL TASK LIST ONLY
-     Paste-safe override. Keeps existing logic unchanged.
-========================================================= -->
-<style id="ug-v4-alltasks-freeze-scroll">
-  /* All Tasks page: only the task table/list scrolls. Upper controls stay fixed. */
-  #pg-alltasks.act{
-    display:flex !important;
-    flex-direction:column !important;
-    height:calc(100vh - var(--th) - 44px) !important;
-    max-height:calc(100vh - var(--th) - 44px) !important;
-    overflow:hidden !important;
-    padding-bottom:14px !important;
-  }
-
-  #pg-alltasks .ph,
-  #pg-alltasks #at-counters,
-  #pg-alltasks .efbar,
-  #pg-alltasks .fb{
-    flex:0 0 auto !important;
-    position:relative;
-    z-index:5;
-  }
-
-  #pg-alltasks > .card{
-    flex:1 1 auto !important;
-    min-height:0 !important;
-    display:flex !important;
-    flex-direction:column !important;
-    overflow:hidden !important;
-    margin-bottom:0 !important;
-  }
-
-  #pg-alltasks > .card > .ch{
-    flex:0 0 auto !important;
-    background:var(--surface) !important;
-    z-index:4;
-  }
-
-  #pg-alltasks > .card > .tw{
-    flex:1 1 auto !important;
-    min-height:0 !important;
-    overflow:auto !important;
-    border-top:0 !important;
-  }
-
-  #pg-alltasks .tbl{
-    min-width:1180px;
-  }
-
-  #pg-alltasks .tbl thead th{
-    position:sticky !important;
-    top:0 !important;
-    z-index:3 !important;
-    background:#FAFBFD !important;
-    box-shadow:0 1px 0 var(--border);
-  }
-
-  #pg-alltasks #at-nil{
-    flex:1 1 auto !important;
-    overflow:auto !important;
-  }
-
-  /* Keep the drawer above the fixed/scrolling table if V2/V3 assignment drawer is open. */
-  .ug-task-report-drawer,
-  #ug-task-report-drawer,
-  .ug-side-drawer,
-  #ug-side-drawer{
-    z-index:99999 !important;
-  }
-
-  @media(max-width:768px){
-    #pg-alltasks.act{
-      height:calc(100vh - var(--th) - 20px) !important;
-      max-height:calc(100vh - var(--th) - 20px) !important;
-      padding-bottom:10px !important;
-    }
-    #pg-alltasks .ph,
-    #pg-alltasks #at-counters,
-    #pg-alltasks .efbar,
-    #pg-alltasks .fb{
-      gap:8px;
-    }
-    #pg-alltasks > .card > .tw{
-      -webkit-overflow-scrolling:touch;
-    }
-  }
-</style>
-<script id="ug-v4-alltasks-freeze-scroll-js">
-(function(){
-  'use strict';
-  function ensureAllTasksScrollMode(){
-    var pg=document.getElementById('pg-alltasks');
-    if(!pg) return;
-    var card=pg.querySelector(':scope > .card');
-    var tw=card ? card.querySelector('.tw') : null;
-    if(tw){
-      tw.setAttribute('data-scroll-only-task-list','true');
-      tw.style.overflow='auto';
-      tw.style.minHeight='0';
-    }
-  }
-  var oldNav=window.nav;
-  if(typeof oldNav==='function' && !oldNav.__ugV4ScrollFreeze){
-    window.nav=function(page){
-      var out=oldNav.apply(this,arguments);
-      if(page==='alltasks') setTimeout(ensureAllTasksScrollMode,0);
-      return out;
-    };
-    window.nav.__ugV4ScrollFreeze=true;
-  }
-  var oldRenderAllTasks=window.renderAllTasks;
-  if(typeof oldRenderAllTasks==='function' && !oldRenderAllTasks.__ugV4ScrollFreeze){
-    window.renderAllTasks=function(){
-      var out=oldRenderAllTasks.apply(this,arguments);
-      setTimeout(ensureAllTasksScrollMode,0);
-      return out;
-    };
-    window.renderAllTasks.__ugV4ScrollFreeze=true;
-  }
-  document.addEventListener('DOMContentLoaded', ensureAllTasksScrollMode);
-  setTimeout(ensureAllTasksScrollMode,300);
+  document.addEventListener('DOMContentLoaded',function(){
+    setTimeout(function(){
+      normalizeEmployees(); bindNavRepair(); bindScheduleButton(); ensureWorkDrawer(); applyAllTasksScrollFix();
+      var lp=$('lp'), app=$('app');
+      if((!currentUser() || !currentUser().email) && window.restoreCurrentSession()){
+        if(lp) lp.classList.add('hidden');
+        if(app) app.classList.remove('hidden');
+        try{ if(typeof initApp==='function') initApp(); }catch(e){ console.warn(e); }
+      }
+      repairSidebarUser();
+    },900);
+    setTimeout(function(){ repairSidebarUser(); bindScheduleButton(); },1800);
+  });
 })();
 </script>
 
