@@ -1806,192 +1806,7 @@ function buildMeetingMailHtml(data){
   +(data.notes?'<tr><td style="padding:18px 28px 0"><div style="background:linear-gradient(180deg,#ffffff,#f5f3ff);border:1px solid #ddd6fe;border-radius:24px;padding:18px 20px;box-shadow:0 12px 30px rgba(124,58,237,.08)"><div style="font-size:11px;font-weight:900;letter-spacing:2px;color:#7c3aed;text-transform:uppercase;margin-bottom:10px">Notes</div><div style="font-size:13px;color:#334155;line-height:1.75">'+escapeHtml(data.notes)+'</div></div></td></tr>':'')
 
   +'<tr><td style="padding:24px 28px 30px"><div style="background:linear-gradient(180deg,#f8fafc,#e2e8f0);border:1px solid #cbd5e1;border-radius:24px;padding:20px;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.9)"><div style="display:inline-flex;align-items:center;gap:10px;background:#ffffff;border:1px solid #ccfbf1;border-radius:999px;padding:8px 14px;box-shadow:0 8px 20px rgba(15,23,42,.08)"><img src="data:image/jpeg;base64,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8888888888888888888841G8888888888dE/888888888L2+888888884pxq8888888885ZCq88888888xKDCq888888885qDCq88888888uqLPs38888888Q+MzAV8888888e9voG988888888sMAE888888888888888888//EACURAQABBAEDBAMBAAAAAAAAAAERACExQWEwUbFxgaHwEECRwf/aAAgBAwEBPxD9SdRJCWwTtb270KAN4N3oo8qdNKVC3YEABh126YZG2QXwd0waywU10E3AzTOVmYtjAWJlSPYWI9Yn36RSsabtw3X8F3QlARoGuEW1/goRCVfJ6LiEN1IwPECS5S73ceq1REL0pe42md8zCsj7XLXy3z0bzyRXDNKmjWjBfAUmMMYYtf1uxa/4L7XLXy3z0EKsoIJXSzYEwKW2aQdaHYiMuxbHD+vtcn4X2uWvlvnoG5GXMzgk9mm3NiK+R/uvtcn4X2uWvlvnoC1pDAu2riLsRfPVPinITZW2RxaLyPAXdGLDLn16CUCBTF4wTmKca2xM3la14KhMPjsyhGJPLTQ8IddRFemECJe76EHCAXkMHAXlT5uwEviRAMask89CCjkBMG5BzBa1FaEJuJYSzm4CWpERINq49Gbt4xbmjSXMTUkbi0KYh9qjeKCSByDI2EoMYTBoAA9gL7z+/wD/xAAnEQEAAQMDAwQDAQEAAAAAAAABEQAhQTFRYTCBoXGRsfBAwfHR4f/aAAgBAgEBPxD8SQhMUojd7eP+1H+EwR5/XTYIW8Cts7DL7XqC1WALh2bRpvrfMr6xL3v0m+BGEzlvY8uhlAvBW3Nb8MGfTUgTSPgdEDKMf2mrBkhIwbsNuN6lLSKmbWeB/pa1fe4K8P4HRiEMUNiSJd+D3tQqVtlrpM8tjBrewVvtcFeH8DoRHvYUMGAbl1Zg7uzN+vg3hYF7p4edPrcNFb7XBXh/A6CoIG5pDJzfXGK8f9a+tw0VvtcFeH8DoMgjLVDBViFms205o9F4I4aMgcyh6JyQwU9skGnodC41pfLR0ZKXfSkZc2jtt71Exwum14btHTExYmwY70RhE/zoQdUjSbUmUolbZzH6o8TGfTarv0N4tZMdqi7hGk2pAJD8/wD/xAAqEAEAAQMEAQMDBAMAAAAAAAABEQAhMUFRYfBAIDCBEHHBkaGx0VBg4f/aAAgBAQABPxD/AENHA2TJwLL8VfScEMuhYPxNLhLSlaXJ48XWBS3Mu5ClhZByVDC0YAwoJfM08z5WRytT9YokCy4fFAXYwQASMNmjwdKCBQ4LEBjDETGBbx8RWFBn3f6f1vilvzXglID7qh805nRbVzf6of1rANgmgudmL4gQUMVgBgAWfsdEgNCOFgDRsXhkZAUgZEWzSDvwDGgip0AlpXfZNc48rQxgSyopptjD/wAc0Q42AgCHik9vLV0DmphJGfHLzTVigQAYew/Oi10CAAgDBXSbPEEzaHfR6g/bLALTl8fxZhbS3zSEkkoaSH8NaBcZBAGg+nSbPCFlgGQQi40wMMDKtik5fMsbobqCVd4ACaebkDwcfb0NHOk2eE4koiy6uZTgcDYoNKFqemk6jRlvY9ABo50mzwWZgMADq7Oq+JUKasiLiXwA/VbsqtCDnJ8c3n+K6Lb0wGjnSbPfHeFjA3E1IEBn35eKnziV0Ivmwb1Cko5GwWG4ljBOWui29MBo50mz30DRIcS6qfLCt1disgVCxeFKA5RIWWfoL0W3pgNHOk2e+gUMGWpmMF9A2P7rpNvrF6Lb0wGjnSbPB+6Tb6xei29MBo50mzwfuk2+sXotvTAaOdJs98+hRzhcwV278UsMU2iSiS8SfrRbX7ivhgtXbvxSEi4DaI4aRjWeTRELjQ6aiyRVSwFLhD0sWAMtdu/FCwc+QWBT3wcbXIhkLllqYlJEvBSxK25o8Q7+ORsEQRa1EIwRAEOggvqhRj7SRuCDbDmp3NMYUVYwRlLMgNAETk4ATEI/AlSnzNnsJEwSRuUDFAtHEBtUIOYVbYLb5owvDiWESyeFTY+xj7hhSBYbSz8VOgG0uBCyov4d6eUhBczD/FXLTShIkCQGy5zUI94QOLBITGDGKCAWNDupYHKzFWxdqxqccQy4N2j3xjnBWxAxuvfSMSfgRZXQUE80hEIhgoZi1E5s1BcTCT9VwDJOKhaI5MTO0DBdM5p5qfYCkYLkYoNlh5kgAN5Jcr3KYWtRADAcGqddKmTIYYgSWYRxSEBFRACuhAo0p4ZDgvIICJnjNSMgMUcbgSjclhPAyLqs+xRijbGgCAKPkIyXaUZblxSReFc8I7BObLZpuSQUWazNop2h5UDlZeiUu0toqEOi9D7wE68ssEAtpS2KvJqjhvZElBkaRJE8JQE2aQtvHcalam9UhHH7BSmRRZJpBYLwUvT8TJbCmxghKJVpOGoZHTqWq4tFinNFpMUJk8/uN4ETKygUIlbpmdwFLAIWYrPhF79S5ZGLbxjvTYvlcjjNtpz2pWd32ELIICSQgreFGBPFGi+GVASUwYiiuIniSSYMMVEWVRSFOcmIIgSSttRnMErEFsrsIiPJG/Ot7BtJVjjU2v8A4H//2Q==" alt="UpGro Media" style="width:28px;height:28px;border-radius:8px;object-fit:contain"><span style="font-size:13px;font-weight:900;color:#0f172a">UpGro Media Mission Control</span></div><div style="margin-top:12px;font-size:12px;color:#475569;line-height:1.7">Organized by '+escapeHtml(data.organizer||cu?.name||'UpGro Media')+'</div><div style="margin-top:6px;font-size:11px;color:#94a3b8">Official premium meeting invite · UpGro Media</div></div></td></tr>'
-  +'</table></td></tr></table><script>
-/* =========================================================
-   UPGRO MEET LINK HARD FIX — APPEND ONLY
-   Purpose: Do not touch old code. Only replace Generate Now logic.
-   ========================================================= */
-(function(){
-  'use strict';
-  function $(id){return document.getElementById(id);}
-  function txt(v){return String(v == null ? '' : v).trim();}
-  function toastMsg(m){try{ if(typeof toast==='function') toast(m); else console.log(m); }catch(e){console.log(m);} }
-  function setMeetStatus(m, color){
-    var st=$('ug-meet-auto-status');
-    if(st){ st.textContent=m; if(color) st.style.color=color; }
-  }
-  function getSURL(){
-    try{ if(typeof SURL !== 'undefined' && SURL) return SURL; }catch(e){}
-    try{ return localStorage.getItem('ugv4_url') || localStorage.getItem('upgro_url') || ''; }catch(e){ return ''; }
-  }
-  function isMeetUrl(v){return /^https:\/\/meet\.google\.com\/[a-z0-9-]+/i.test(String(v||''));}
-  function findMeetInText(s){
-    s=String(s||'');
-    var m=s.match(/https:\/\/meet\.google\.com\/[a-zA-Z0-9-]+/);
-    return m ? m[0] : '';
-  }
-  function findMeetDeep(obj, depth){
-    depth = depth || 0;
-    if(depth > 6 || obj == null) return '';
-    if(typeof obj === 'string') return findMeetInText(obj);
-    if(Array.isArray(obj)){
-      for(var i=0;i<obj.length;i++){ var r=findMeetDeep(obj[i], depth+1); if(r) return r; }
-      return '';
-    }
-    if(typeof obj === 'object'){
-      var directKeys=['meetLink','meetUrl','meetingLink','googleMeetLink','conferenceLink','hangoutLink','link','url','location','uri'];
-      for(var k=0;k<directKeys.length;k++){
-        var val=obj[directKeys[k]];
-        var found=findMeetDeep(val, depth+1);
-        if(found) return found;
-      }
-      for(var key in obj){ if(Object.prototype.hasOwnProperty.call(obj,key)){ var r2=findMeetDeep(obj[key], depth+1); if(r2) return r2; } }
-    }
-    return '';
-  }
-  function selectedAttendeePayload(){
-    var arr=[];
-    try{
-      var set = window.selectedAttendees || selectedAttendees || new Set();
-      Array.from(set).forEach(function(email){
-        email=String(email||'').trim().toLowerCase();
-        if(!email || email.indexOf('@')<0) return;
-        var e={};
-        try{ if(typeof empByEmail==='function') e=empByEmail(email)||{}; }catch(x){}
-        try{ if(!e.email && window.empReg){ e=(empReg||[]).find(function(x){return String(x.email||'').toLowerCase()===email;})||{}; } }catch(x){}
-        arr.push({email:email,name:e.name||email,desig:e.desig||e.role||'Team'});
-      });
-    }catch(e){}
-    return arr;
-  }
-  function buildMeetPayload(actionName){
-    var date=txt(($('mtg-date')||{}).value);
-    var time=txt(($('mtg-time')||{}).value);
-    var dur=txt(($('mtg-dur')||{}).value) || '30 minutes';
-    var n=parseInt((dur.match(/\d+/)||['30'])[0],10)||30;
-    if(/hour|hr/i.test(dur)) n=n*60;
-    var attendees=selectedAttendeePayload();
-    return {
-      action: actionName || 'createCalendarMeeting',
-      title: txt(($('mtg-title')||{}).value) || 'UpGro Media Meeting',
-      meetingTitle: txt(($('mtg-title')||{}).value) || 'UpGro Media Meeting',
-      date: date,
-      time: time,
-      datetime: date && time ? (date+'T'+time+':00') : '',
-      startTime: date && time ? (date+'T'+time+':00') : '',
-      duration: dur,
-      durationMinutes: n,
-      attendees: attendees,
-      attendeeList: attendees,
-      attendeeEmails: attendees.map(function(a){return a.email;}).join(','),
-      agenda: txt(($('mtg-agenda')||{}).value),
-      notes: txt(($('mtg-notes')||{}).value),
-      organizer: (function(){ try{return (typeof cu!=='undefined'&&cu&&cu.name)||'';}catch(e){return '';} })() || 'UpGro Media'
-    };
-  }
-  async function callMeetBackend(payload){
-    var url=getSURL();
-    if(!url) throw new Error('Apps Script URL missing. Settings me Google Sheet / Apps Script URL save karo.');
-    var res=await fetch(url,{method:'POST',body:JSON.stringify(payload),redirect:'follow',signal:AbortSignal.timeout(30000)});
-    var body=await res.text();
-    var json=null;
-    try{ json=JSON.parse(body); }catch(e){}
-    var link=findMeetInText(body) || findMeetDeep(json);
-    return {ok:res.ok,status:res.status,body:body,json:json,link:link};
-  }
-  async function callMeetBackendGET(payload){
-    var url=getSURL();
-    if(!url) throw new Error('Apps Script URL missing.');
-    var q=new URLSearchParams();
-    ['action','title','meetingTitle','date','time','datetime','duration','durationMinutes','attendeeEmails','agenda','notes','organizer'].forEach(function(k){ if(payload[k] != null && typeof payload[k] !== 'object') q.set(k, String(payload[k])); });
-    var sep=url.indexOf('?')>-1 ? '&' : '?';
-    var res=await fetch(url+sep+q.toString(),{method:'GET',redirect:'follow',signal:AbortSignal.timeout(30000)});
-    var body=await res.text();
-    var json=null;
-    try{ json=JSON.parse(body); }catch(e){}
-    var link=findMeetInText(body) || findMeetDeep(json);
-    return {ok:res.ok,status:res.status,body:body,json:json,link:link};
-  }
-  async function hardGenerateMeetLink(){
-    var loc=$('mtg-loc');
-    var title=txt(($('mtg-title')||{}).value), date=txt(($('mtg-date')||{}).value), time=txt(($('mtg-time')||{}).value);
-    if(!title){ toastMsg('⚠ Meeting title required'); return ''; }
-    if(!date || !time){ toastMsg('⚠ Date and time required'); return ''; }
-    if(loc && isMeetUrl(loc.value)){ setMeetStatus('✅ Google Meet link already added.','var(--green)'); return loc.value; }
-    setMeetStatus('⏳ Generating Google Meet link from Apps Script...','var(--blue)');
-
-    var attempts=[
-      buildMeetPayload('createCalendarMeeting'),
-      buildMeetPayload('generateGoogleMeetLink'),
-      buildMeetPayload('createGoogleMeet')
-    ];
-    var last='';
-    for(var i=0;i<attempts.length;i++){
-      try{
-        var out=await callMeetBackend(attempts[i]);
-        if(out.link){ if(loc) loc.value=out.link; setMeetStatus('✅ Google Meet link generated and added.','var(--green)'); toastMsg('✅ Google Meet link generated'); return out.link; }
-        var j=out.json || {};
-        last = j.error || j.message || j.status || out.body || ('HTTP '+out.status);
-      }catch(e){ last=e.message||String(e); }
-    }
-    try{
-      var outGet=await callMeetBackendGET(buildMeetPayload('createCalendarMeeting'));
-      if(outGet.link){ if(loc) loc.value=outGet.link; setMeetStatus('✅ Google Meet link generated and added.','var(--green)'); toastMsg('✅ Google Meet link generated'); return outGet.link; }
-      var jg=outGet.json||{}; last = jg.error || jg.message || outGet.body || last;
-    }catch(e2){ last=e2.message||String(e2); }
-
-    last=String(last||'No response from backend').replace(/\s+/g,' ').slice(0,240);
-    setMeetStatus('❌ Meet link not returned. Backend response: '+last,'var(--red)');
-    toastMsg('❌ Meet link not returned — backend response dekho');
-    return '';
-  }
-
-  window.ugGenerateMeetLinkFromModal = hardGenerateMeetLink;
-
-  function ensureButtonRebind(){
-    var b=$('ug-meet-generate-now');
-    if(b && b.getAttribute('data-hard-fixed')!=='1'){
-      b.setAttribute('data-hard-fixed','1');
-      b.onclick=function(e){ if(e)e.preventDefault(); return hardGenerateMeetLink(); };
-    }
-  }
-
-  var oldOpen=window.openAddMeeting;
-  window.openAddMeeting=function(){
-    var r;
-    try{ if(typeof oldOpen==='function') r=oldOpen.apply(this,arguments); }catch(e){ console.warn(e); }
-    setTimeout(ensureButtonRebind,80);
-    setTimeout(ensureButtonRebind,400);
-    return r;
-  };
-
-  var oldSave=window.saveMeeting;
-  window.saveMeeting=async function(){
-    try{
-      ensureButtonRebind();
-      var chk=$('mtg-auto-meet'), loc=$('mtg-loc');
-      if(chk && chk.checked && loc && !isMeetUrl(loc.value)){
-        var link=await hardGenerateMeetLink();
-        if(!link){
-          // Do not block manual saving forever. User can uncheck auto meet or paste link manually.
-          var ok=confirm('Google Meet link generate nahi hua. Phir bhi meeting save/send karni hai?');
-          if(!ok) return false;
-        }
-      }
-    }catch(e){ console.warn('hard meet generation skipped',e); }
-    return oldSave ? oldSave.apply(this,arguments) : undefined;
-  };
-
-  document.addEventListener('click',function(e){
-    var b=e.target && e.target.closest ? e.target.closest('#ug-meet-generate-now') : null;
-    if(b){ e.preventDefault(); e.stopPropagation(); hardGenerateMeetLink(); }
-  },true);
-
-  document.addEventListener('DOMContentLoaded',function(){setTimeout(ensureButtonRebind,1200);});
-})();
-</script>
-
-</body></html>';
+  +'</table></td></tr></table></body></html>';
 }
 function getTestMailTarget(){
   const el=$('test-mail-email');
@@ -3848,192 +3663,7 @@ if(data.action === 'sendMeetingInvite'){
         +'</td></tr>'
 
         +'</table></td></tr></table>'
-        +'<script>
-/* =========================================================
-   UPGRO MEET LINK HARD FIX — APPEND ONLY
-   Purpose: Do not touch old code. Only replace Generate Now logic.
-   ========================================================= */
-(function(){
-  'use strict';
-  function $(id){return document.getElementById(id);}
-  function txt(v){return String(v == null ? '' : v).trim();}
-  function toastMsg(m){try{ if(typeof toast==='function') toast(m); else console.log(m); }catch(e){console.log(m);} }
-  function setMeetStatus(m, color){
-    var st=$('ug-meet-auto-status');
-    if(st){ st.textContent=m; if(color) st.style.color=color; }
-  }
-  function getSURL(){
-    try{ if(typeof SURL !== 'undefined' && SURL) return SURL; }catch(e){}
-    try{ return localStorage.getItem('ugv4_url') || localStorage.getItem('upgro_url') || ''; }catch(e){ return ''; }
-  }
-  function isMeetUrl(v){return /^https:\/\/meet\.google\.com\/[a-z0-9-]+/i.test(String(v||''));}
-  function findMeetInText(s){
-    s=String(s||'');
-    var m=s.match(/https:\/\/meet\.google\.com\/[a-zA-Z0-9-]+/);
-    return m ? m[0] : '';
-  }
-  function findMeetDeep(obj, depth){
-    depth = depth || 0;
-    if(depth > 6 || obj == null) return '';
-    if(typeof obj === 'string') return findMeetInText(obj);
-    if(Array.isArray(obj)){
-      for(var i=0;i<obj.length;i++){ var r=findMeetDeep(obj[i], depth+1); if(r) return r; }
-      return '';
-    }
-    if(typeof obj === 'object'){
-      var directKeys=['meetLink','meetUrl','meetingLink','googleMeetLink','conferenceLink','hangoutLink','link','url','location','uri'];
-      for(var k=0;k<directKeys.length;k++){
-        var val=obj[directKeys[k]];
-        var found=findMeetDeep(val, depth+1);
-        if(found) return found;
-      }
-      for(var key in obj){ if(Object.prototype.hasOwnProperty.call(obj,key)){ var r2=findMeetDeep(obj[key], depth+1); if(r2) return r2; } }
-    }
-    return '';
-  }
-  function selectedAttendeePayload(){
-    var arr=[];
-    try{
-      var set = window.selectedAttendees || selectedAttendees || new Set();
-      Array.from(set).forEach(function(email){
-        email=String(email||'').trim().toLowerCase();
-        if(!email || email.indexOf('@')<0) return;
-        var e={};
-        try{ if(typeof empByEmail==='function') e=empByEmail(email)||{}; }catch(x){}
-        try{ if(!e.email && window.empReg){ e=(empReg||[]).find(function(x){return String(x.email||'').toLowerCase()===email;})||{}; } }catch(x){}
-        arr.push({email:email,name:e.name||email,desig:e.desig||e.role||'Team'});
-      });
-    }catch(e){}
-    return arr;
-  }
-  function buildMeetPayload(actionName){
-    var date=txt(($('mtg-date')||{}).value);
-    var time=txt(($('mtg-time')||{}).value);
-    var dur=txt(($('mtg-dur')||{}).value) || '30 minutes';
-    var n=parseInt((dur.match(/\d+/)||['30'])[0],10)||30;
-    if(/hour|hr/i.test(dur)) n=n*60;
-    var attendees=selectedAttendeePayload();
-    return {
-      action: actionName || 'createCalendarMeeting',
-      title: txt(($('mtg-title')||{}).value) || 'UpGro Media Meeting',
-      meetingTitle: txt(($('mtg-title')||{}).value) || 'UpGro Media Meeting',
-      date: date,
-      time: time,
-      datetime: date && time ? (date+'T'+time+':00') : '',
-      startTime: date && time ? (date+'T'+time+':00') : '',
-      duration: dur,
-      durationMinutes: n,
-      attendees: attendees,
-      attendeeList: attendees,
-      attendeeEmails: attendees.map(function(a){return a.email;}).join(','),
-      agenda: txt(($('mtg-agenda')||{}).value),
-      notes: txt(($('mtg-notes')||{}).value),
-      organizer: (function(){ try{return (typeof cu!=='undefined'&&cu&&cu.name)||'';}catch(e){return '';} })() || 'UpGro Media'
-    };
-  }
-  async function callMeetBackend(payload){
-    var url=getSURL();
-    if(!url) throw new Error('Apps Script URL missing. Settings me Google Sheet / Apps Script URL save karo.');
-    var res=await fetch(url,{method:'POST',body:JSON.stringify(payload),redirect:'follow',signal:AbortSignal.timeout(30000)});
-    var body=await res.text();
-    var json=null;
-    try{ json=JSON.parse(body); }catch(e){}
-    var link=findMeetInText(body) || findMeetDeep(json);
-    return {ok:res.ok,status:res.status,body:body,json:json,link:link};
-  }
-  async function callMeetBackendGET(payload){
-    var url=getSURL();
-    if(!url) throw new Error('Apps Script URL missing.');
-    var q=new URLSearchParams();
-    ['action','title','meetingTitle','date','time','datetime','duration','durationMinutes','attendeeEmails','agenda','notes','organizer'].forEach(function(k){ if(payload[k] != null && typeof payload[k] !== 'object') q.set(k, String(payload[k])); });
-    var sep=url.indexOf('?')>-1 ? '&' : '?';
-    var res=await fetch(url+sep+q.toString(),{method:'GET',redirect:'follow',signal:AbortSignal.timeout(30000)});
-    var body=await res.text();
-    var json=null;
-    try{ json=JSON.parse(body); }catch(e){}
-    var link=findMeetInText(body) || findMeetDeep(json);
-    return {ok:res.ok,status:res.status,body:body,json:json,link:link};
-  }
-  async function hardGenerateMeetLink(){
-    var loc=$('mtg-loc');
-    var title=txt(($('mtg-title')||{}).value), date=txt(($('mtg-date')||{}).value), time=txt(($('mtg-time')||{}).value);
-    if(!title){ toastMsg('⚠ Meeting title required'); return ''; }
-    if(!date || !time){ toastMsg('⚠ Date and time required'); return ''; }
-    if(loc && isMeetUrl(loc.value)){ setMeetStatus('✅ Google Meet link already added.','var(--green)'); return loc.value; }
-    setMeetStatus('⏳ Generating Google Meet link from Apps Script...','var(--blue)');
-
-    var attempts=[
-      buildMeetPayload('createCalendarMeeting'),
-      buildMeetPayload('generateGoogleMeetLink'),
-      buildMeetPayload('createGoogleMeet')
-    ];
-    var last='';
-    for(var i=0;i<attempts.length;i++){
-      try{
-        var out=await callMeetBackend(attempts[i]);
-        if(out.link){ if(loc) loc.value=out.link; setMeetStatus('✅ Google Meet link generated and added.','var(--green)'); toastMsg('✅ Google Meet link generated'); return out.link; }
-        var j=out.json || {};
-        last = j.error || j.message || j.status || out.body || ('HTTP '+out.status);
-      }catch(e){ last=e.message||String(e); }
-    }
-    try{
-      var outGet=await callMeetBackendGET(buildMeetPayload('createCalendarMeeting'));
-      if(outGet.link){ if(loc) loc.value=outGet.link; setMeetStatus('✅ Google Meet link generated and added.','var(--green)'); toastMsg('✅ Google Meet link generated'); return outGet.link; }
-      var jg=outGet.json||{}; last = jg.error || jg.message || outGet.body || last;
-    }catch(e2){ last=e2.message||String(e2); }
-
-    last=String(last||'No response from backend').replace(/\s+/g,' ').slice(0,240);
-    setMeetStatus('❌ Meet link not returned. Backend response: '+last,'var(--red)');
-    toastMsg('❌ Meet link not returned — backend response dekho');
-    return '';
-  }
-
-  window.ugGenerateMeetLinkFromModal = hardGenerateMeetLink;
-
-  function ensureButtonRebind(){
-    var b=$('ug-meet-generate-now');
-    if(b && b.getAttribute('data-hard-fixed')!=='1'){
-      b.setAttribute('data-hard-fixed','1');
-      b.onclick=function(e){ if(e)e.preventDefault(); return hardGenerateMeetLink(); };
-    }
-  }
-
-  var oldOpen=window.openAddMeeting;
-  window.openAddMeeting=function(){
-    var r;
-    try{ if(typeof oldOpen==='function') r=oldOpen.apply(this,arguments); }catch(e){ console.warn(e); }
-    setTimeout(ensureButtonRebind,80);
-    setTimeout(ensureButtonRebind,400);
-    return r;
-  };
-
-  var oldSave=window.saveMeeting;
-  window.saveMeeting=async function(){
-    try{
-      ensureButtonRebind();
-      var chk=$('mtg-auto-meet'), loc=$('mtg-loc');
-      if(chk && chk.checked && loc && !isMeetUrl(loc.value)){
-        var link=await hardGenerateMeetLink();
-        if(!link){
-          // Do not block manual saving forever. User can uncheck auto meet or paste link manually.
-          var ok=confirm('Google Meet link generate nahi hua. Phir bhi meeting save/send karni hai?');
-          if(!ok) return false;
-        }
-      }
-    }catch(e){ console.warn('hard meet generation skipped',e); }
-    return oldSave ? oldSave.apply(this,arguments) : undefined;
-  };
-
-  document.addEventListener('click',function(e){
-    var b=e.target && e.target.closest ? e.target.closest('#ug-meet-generate-now') : null;
-    if(b){ e.preventDefault(); e.stopPropagation(); hardGenerateMeetLink(); }
-  },true);
-
-  document.addEventListener('DOMContentLoaded',function(){setTimeout(ensureButtonRebind,1200);});
-})();
-</script>
-
-</body></html>';
+        +'</body></html>';
 
       GmailApp.sendEmail(att.email, data.subject || subject, 'Please enable HTML to view this email.', {
         htmlBody: htmlBody,
@@ -5077,192 +4707,7 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
   <script>
 /* =========================================================
    MULTI TASK ASSIGN PATCH
-   Paste this just before <script>
-/* =========================================================
-   UPGRO MEET LINK HARD FIX — APPEND ONLY
-   Purpose: Do not touch old code. Only replace Generate Now logic.
-   ========================================================= */
-(function(){
-  'use strict';
-  function $(id){return document.getElementById(id);}
-  function txt(v){return String(v == null ? '' : v).trim();}
-  function toastMsg(m){try{ if(typeof toast==='function') toast(m); else console.log(m); }catch(e){console.log(m);} }
-  function setMeetStatus(m, color){
-    var st=$('ug-meet-auto-status');
-    if(st){ st.textContent=m; if(color) st.style.color=color; }
-  }
-  function getSURL(){
-    try{ if(typeof SURL !== 'undefined' && SURL) return SURL; }catch(e){}
-    try{ return localStorage.getItem('ugv4_url') || localStorage.getItem('upgro_url') || ''; }catch(e){ return ''; }
-  }
-  function isMeetUrl(v){return /^https:\/\/meet\.google\.com\/[a-z0-9-]+/i.test(String(v||''));}
-  function findMeetInText(s){
-    s=String(s||'');
-    var m=s.match(/https:\/\/meet\.google\.com\/[a-zA-Z0-9-]+/);
-    return m ? m[0] : '';
-  }
-  function findMeetDeep(obj, depth){
-    depth = depth || 0;
-    if(depth > 6 || obj == null) return '';
-    if(typeof obj === 'string') return findMeetInText(obj);
-    if(Array.isArray(obj)){
-      for(var i=0;i<obj.length;i++){ var r=findMeetDeep(obj[i], depth+1); if(r) return r; }
-      return '';
-    }
-    if(typeof obj === 'object'){
-      var directKeys=['meetLink','meetUrl','meetingLink','googleMeetLink','conferenceLink','hangoutLink','link','url','location','uri'];
-      for(var k=0;k<directKeys.length;k++){
-        var val=obj[directKeys[k]];
-        var found=findMeetDeep(val, depth+1);
-        if(found) return found;
-      }
-      for(var key in obj){ if(Object.prototype.hasOwnProperty.call(obj,key)){ var r2=findMeetDeep(obj[key], depth+1); if(r2) return r2; } }
-    }
-    return '';
-  }
-  function selectedAttendeePayload(){
-    var arr=[];
-    try{
-      var set = window.selectedAttendees || selectedAttendees || new Set();
-      Array.from(set).forEach(function(email){
-        email=String(email||'').trim().toLowerCase();
-        if(!email || email.indexOf('@')<0) return;
-        var e={};
-        try{ if(typeof empByEmail==='function') e=empByEmail(email)||{}; }catch(x){}
-        try{ if(!e.email && window.empReg){ e=(empReg||[]).find(function(x){return String(x.email||'').toLowerCase()===email;})||{}; } }catch(x){}
-        arr.push({email:email,name:e.name||email,desig:e.desig||e.role||'Team'});
-      });
-    }catch(e){}
-    return arr;
-  }
-  function buildMeetPayload(actionName){
-    var date=txt(($('mtg-date')||{}).value);
-    var time=txt(($('mtg-time')||{}).value);
-    var dur=txt(($('mtg-dur')||{}).value) || '30 minutes';
-    var n=parseInt((dur.match(/\d+/)||['30'])[0],10)||30;
-    if(/hour|hr/i.test(dur)) n=n*60;
-    var attendees=selectedAttendeePayload();
-    return {
-      action: actionName || 'createCalendarMeeting',
-      title: txt(($('mtg-title')||{}).value) || 'UpGro Media Meeting',
-      meetingTitle: txt(($('mtg-title')||{}).value) || 'UpGro Media Meeting',
-      date: date,
-      time: time,
-      datetime: date && time ? (date+'T'+time+':00') : '',
-      startTime: date && time ? (date+'T'+time+':00') : '',
-      duration: dur,
-      durationMinutes: n,
-      attendees: attendees,
-      attendeeList: attendees,
-      attendeeEmails: attendees.map(function(a){return a.email;}).join(','),
-      agenda: txt(($('mtg-agenda')||{}).value),
-      notes: txt(($('mtg-notes')||{}).value),
-      organizer: (function(){ try{return (typeof cu!=='undefined'&&cu&&cu.name)||'';}catch(e){return '';} })() || 'UpGro Media'
-    };
-  }
-  async function callMeetBackend(payload){
-    var url=getSURL();
-    if(!url) throw new Error('Apps Script URL missing. Settings me Google Sheet / Apps Script URL save karo.');
-    var res=await fetch(url,{method:'POST',body:JSON.stringify(payload),redirect:'follow',signal:AbortSignal.timeout(30000)});
-    var body=await res.text();
-    var json=null;
-    try{ json=JSON.parse(body); }catch(e){}
-    var link=findMeetInText(body) || findMeetDeep(json);
-    return {ok:res.ok,status:res.status,body:body,json:json,link:link};
-  }
-  async function callMeetBackendGET(payload){
-    var url=getSURL();
-    if(!url) throw new Error('Apps Script URL missing.');
-    var q=new URLSearchParams();
-    ['action','title','meetingTitle','date','time','datetime','duration','durationMinutes','attendeeEmails','agenda','notes','organizer'].forEach(function(k){ if(payload[k] != null && typeof payload[k] !== 'object') q.set(k, String(payload[k])); });
-    var sep=url.indexOf('?')>-1 ? '&' : '?';
-    var res=await fetch(url+sep+q.toString(),{method:'GET',redirect:'follow',signal:AbortSignal.timeout(30000)});
-    var body=await res.text();
-    var json=null;
-    try{ json=JSON.parse(body); }catch(e){}
-    var link=findMeetInText(body) || findMeetDeep(json);
-    return {ok:res.ok,status:res.status,body:body,json:json,link:link};
-  }
-  async function hardGenerateMeetLink(){
-    var loc=$('mtg-loc');
-    var title=txt(($('mtg-title')||{}).value), date=txt(($('mtg-date')||{}).value), time=txt(($('mtg-time')||{}).value);
-    if(!title){ toastMsg('⚠ Meeting title required'); return ''; }
-    if(!date || !time){ toastMsg('⚠ Date and time required'); return ''; }
-    if(loc && isMeetUrl(loc.value)){ setMeetStatus('✅ Google Meet link already added.','var(--green)'); return loc.value; }
-    setMeetStatus('⏳ Generating Google Meet link from Apps Script...','var(--blue)');
-
-    var attempts=[
-      buildMeetPayload('createCalendarMeeting'),
-      buildMeetPayload('generateGoogleMeetLink'),
-      buildMeetPayload('createGoogleMeet')
-    ];
-    var last='';
-    for(var i=0;i<attempts.length;i++){
-      try{
-        var out=await callMeetBackend(attempts[i]);
-        if(out.link){ if(loc) loc.value=out.link; setMeetStatus('✅ Google Meet link generated and added.','var(--green)'); toastMsg('✅ Google Meet link generated'); return out.link; }
-        var j=out.json || {};
-        last = j.error || j.message || j.status || out.body || ('HTTP '+out.status);
-      }catch(e){ last=e.message||String(e); }
-    }
-    try{
-      var outGet=await callMeetBackendGET(buildMeetPayload('createCalendarMeeting'));
-      if(outGet.link){ if(loc) loc.value=outGet.link; setMeetStatus('✅ Google Meet link generated and added.','var(--green)'); toastMsg('✅ Google Meet link generated'); return outGet.link; }
-      var jg=outGet.json||{}; last = jg.error || jg.message || outGet.body || last;
-    }catch(e2){ last=e2.message||String(e2); }
-
-    last=String(last||'No response from backend').replace(/\s+/g,' ').slice(0,240);
-    setMeetStatus('❌ Meet link not returned. Backend response: '+last,'var(--red)');
-    toastMsg('❌ Meet link not returned — backend response dekho');
-    return '';
-  }
-
-  window.ugGenerateMeetLinkFromModal = hardGenerateMeetLink;
-
-  function ensureButtonRebind(){
-    var b=$('ug-meet-generate-now');
-    if(b && b.getAttribute('data-hard-fixed')!=='1'){
-      b.setAttribute('data-hard-fixed','1');
-      b.onclick=function(e){ if(e)e.preventDefault(); return hardGenerateMeetLink(); };
-    }
-  }
-
-  var oldOpen=window.openAddMeeting;
-  window.openAddMeeting=function(){
-    var r;
-    try{ if(typeof oldOpen==='function') r=oldOpen.apply(this,arguments); }catch(e){ console.warn(e); }
-    setTimeout(ensureButtonRebind,80);
-    setTimeout(ensureButtonRebind,400);
-    return r;
-  };
-
-  var oldSave=window.saveMeeting;
-  window.saveMeeting=async function(){
-    try{
-      ensureButtonRebind();
-      var chk=$('mtg-auto-meet'), loc=$('mtg-loc');
-      if(chk && chk.checked && loc && !isMeetUrl(loc.value)){
-        var link=await hardGenerateMeetLink();
-        if(!link){
-          // Do not block manual saving forever. User can uncheck auto meet or paste link manually.
-          var ok=confirm('Google Meet link generate nahi hua. Phir bhi meeting save/send karni hai?');
-          if(!ok) return false;
-        }
-      }
-    }catch(e){ console.warn('hard meet generation skipped',e); }
-    return oldSave ? oldSave.apply(this,arguments) : undefined;
-  };
-
-  document.addEventListener('click',function(e){
-    var b=e.target && e.target.closest ? e.target.closest('#ug-meet-generate-now') : null;
-    if(b){ e.preventDefault(); e.stopPropagation(); hardGenerateMeetLink(); }
-  },true);
-
-  document.addEventListener('DOMContentLoaded',function(){setTimeout(ensureButtonRebind,1200);});
-})();
-</script>
-
-</body>
+   Paste this just before </body>
    No existing code change required.
    ========================================================= */
 (function(){
@@ -5697,192 +5142,7 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
   <script>
 /* ============================================================
    EMPLOYEE EMAIL EDITABLE PATCH + ISHIKA SAXENA EMAIL FIX
-   Paste this just before <script>
-/* =========================================================
-   UPGRO MEET LINK HARD FIX — APPEND ONLY
-   Purpose: Do not touch old code. Only replace Generate Now logic.
-   ========================================================= */
-(function(){
-  'use strict';
-  function $(id){return document.getElementById(id);}
-  function txt(v){return String(v == null ? '' : v).trim();}
-  function toastMsg(m){try{ if(typeof toast==='function') toast(m); else console.log(m); }catch(e){console.log(m);} }
-  function setMeetStatus(m, color){
-    var st=$('ug-meet-auto-status');
-    if(st){ st.textContent=m; if(color) st.style.color=color; }
-  }
-  function getSURL(){
-    try{ if(typeof SURL !== 'undefined' && SURL) return SURL; }catch(e){}
-    try{ return localStorage.getItem('ugv4_url') || localStorage.getItem('upgro_url') || ''; }catch(e){ return ''; }
-  }
-  function isMeetUrl(v){return /^https:\/\/meet\.google\.com\/[a-z0-9-]+/i.test(String(v||''));}
-  function findMeetInText(s){
-    s=String(s||'');
-    var m=s.match(/https:\/\/meet\.google\.com\/[a-zA-Z0-9-]+/);
-    return m ? m[0] : '';
-  }
-  function findMeetDeep(obj, depth){
-    depth = depth || 0;
-    if(depth > 6 || obj == null) return '';
-    if(typeof obj === 'string') return findMeetInText(obj);
-    if(Array.isArray(obj)){
-      for(var i=0;i<obj.length;i++){ var r=findMeetDeep(obj[i], depth+1); if(r) return r; }
-      return '';
-    }
-    if(typeof obj === 'object'){
-      var directKeys=['meetLink','meetUrl','meetingLink','googleMeetLink','conferenceLink','hangoutLink','link','url','location','uri'];
-      for(var k=0;k<directKeys.length;k++){
-        var val=obj[directKeys[k]];
-        var found=findMeetDeep(val, depth+1);
-        if(found) return found;
-      }
-      for(var key in obj){ if(Object.prototype.hasOwnProperty.call(obj,key)){ var r2=findMeetDeep(obj[key], depth+1); if(r2) return r2; } }
-    }
-    return '';
-  }
-  function selectedAttendeePayload(){
-    var arr=[];
-    try{
-      var set = window.selectedAttendees || selectedAttendees || new Set();
-      Array.from(set).forEach(function(email){
-        email=String(email||'').trim().toLowerCase();
-        if(!email || email.indexOf('@')<0) return;
-        var e={};
-        try{ if(typeof empByEmail==='function') e=empByEmail(email)||{}; }catch(x){}
-        try{ if(!e.email && window.empReg){ e=(empReg||[]).find(function(x){return String(x.email||'').toLowerCase()===email;})||{}; } }catch(x){}
-        arr.push({email:email,name:e.name||email,desig:e.desig||e.role||'Team'});
-      });
-    }catch(e){}
-    return arr;
-  }
-  function buildMeetPayload(actionName){
-    var date=txt(($('mtg-date')||{}).value);
-    var time=txt(($('mtg-time')||{}).value);
-    var dur=txt(($('mtg-dur')||{}).value) || '30 minutes';
-    var n=parseInt((dur.match(/\d+/)||['30'])[0],10)||30;
-    if(/hour|hr/i.test(dur)) n=n*60;
-    var attendees=selectedAttendeePayload();
-    return {
-      action: actionName || 'createCalendarMeeting',
-      title: txt(($('mtg-title')||{}).value) || 'UpGro Media Meeting',
-      meetingTitle: txt(($('mtg-title')||{}).value) || 'UpGro Media Meeting',
-      date: date,
-      time: time,
-      datetime: date && time ? (date+'T'+time+':00') : '',
-      startTime: date && time ? (date+'T'+time+':00') : '',
-      duration: dur,
-      durationMinutes: n,
-      attendees: attendees,
-      attendeeList: attendees,
-      attendeeEmails: attendees.map(function(a){return a.email;}).join(','),
-      agenda: txt(($('mtg-agenda')||{}).value),
-      notes: txt(($('mtg-notes')||{}).value),
-      organizer: (function(){ try{return (typeof cu!=='undefined'&&cu&&cu.name)||'';}catch(e){return '';} })() || 'UpGro Media'
-    };
-  }
-  async function callMeetBackend(payload){
-    var url=getSURL();
-    if(!url) throw new Error('Apps Script URL missing. Settings me Google Sheet / Apps Script URL save karo.');
-    var res=await fetch(url,{method:'POST',body:JSON.stringify(payload),redirect:'follow',signal:AbortSignal.timeout(30000)});
-    var body=await res.text();
-    var json=null;
-    try{ json=JSON.parse(body); }catch(e){}
-    var link=findMeetInText(body) || findMeetDeep(json);
-    return {ok:res.ok,status:res.status,body:body,json:json,link:link};
-  }
-  async function callMeetBackendGET(payload){
-    var url=getSURL();
-    if(!url) throw new Error('Apps Script URL missing.');
-    var q=new URLSearchParams();
-    ['action','title','meetingTitle','date','time','datetime','duration','durationMinutes','attendeeEmails','agenda','notes','organizer'].forEach(function(k){ if(payload[k] != null && typeof payload[k] !== 'object') q.set(k, String(payload[k])); });
-    var sep=url.indexOf('?')>-1 ? '&' : '?';
-    var res=await fetch(url+sep+q.toString(),{method:'GET',redirect:'follow',signal:AbortSignal.timeout(30000)});
-    var body=await res.text();
-    var json=null;
-    try{ json=JSON.parse(body); }catch(e){}
-    var link=findMeetInText(body) || findMeetDeep(json);
-    return {ok:res.ok,status:res.status,body:body,json:json,link:link};
-  }
-  async function hardGenerateMeetLink(){
-    var loc=$('mtg-loc');
-    var title=txt(($('mtg-title')||{}).value), date=txt(($('mtg-date')||{}).value), time=txt(($('mtg-time')||{}).value);
-    if(!title){ toastMsg('⚠ Meeting title required'); return ''; }
-    if(!date || !time){ toastMsg('⚠ Date and time required'); return ''; }
-    if(loc && isMeetUrl(loc.value)){ setMeetStatus('✅ Google Meet link already added.','var(--green)'); return loc.value; }
-    setMeetStatus('⏳ Generating Google Meet link from Apps Script...','var(--blue)');
-
-    var attempts=[
-      buildMeetPayload('createCalendarMeeting'),
-      buildMeetPayload('generateGoogleMeetLink'),
-      buildMeetPayload('createGoogleMeet')
-    ];
-    var last='';
-    for(var i=0;i<attempts.length;i++){
-      try{
-        var out=await callMeetBackend(attempts[i]);
-        if(out.link){ if(loc) loc.value=out.link; setMeetStatus('✅ Google Meet link generated and added.','var(--green)'); toastMsg('✅ Google Meet link generated'); return out.link; }
-        var j=out.json || {};
-        last = j.error || j.message || j.status || out.body || ('HTTP '+out.status);
-      }catch(e){ last=e.message||String(e); }
-    }
-    try{
-      var outGet=await callMeetBackendGET(buildMeetPayload('createCalendarMeeting'));
-      if(outGet.link){ if(loc) loc.value=outGet.link; setMeetStatus('✅ Google Meet link generated and added.','var(--green)'); toastMsg('✅ Google Meet link generated'); return outGet.link; }
-      var jg=outGet.json||{}; last = jg.error || jg.message || outGet.body || last;
-    }catch(e2){ last=e2.message||String(e2); }
-
-    last=String(last||'No response from backend').replace(/\s+/g,' ').slice(0,240);
-    setMeetStatus('❌ Meet link not returned. Backend response: '+last,'var(--red)');
-    toastMsg('❌ Meet link not returned — backend response dekho');
-    return '';
-  }
-
-  window.ugGenerateMeetLinkFromModal = hardGenerateMeetLink;
-
-  function ensureButtonRebind(){
-    var b=$('ug-meet-generate-now');
-    if(b && b.getAttribute('data-hard-fixed')!=='1'){
-      b.setAttribute('data-hard-fixed','1');
-      b.onclick=function(e){ if(e)e.preventDefault(); return hardGenerateMeetLink(); };
-    }
-  }
-
-  var oldOpen=window.openAddMeeting;
-  window.openAddMeeting=function(){
-    var r;
-    try{ if(typeof oldOpen==='function') r=oldOpen.apply(this,arguments); }catch(e){ console.warn(e); }
-    setTimeout(ensureButtonRebind,80);
-    setTimeout(ensureButtonRebind,400);
-    return r;
-  };
-
-  var oldSave=window.saveMeeting;
-  window.saveMeeting=async function(){
-    try{
-      ensureButtonRebind();
-      var chk=$('mtg-auto-meet'), loc=$('mtg-loc');
-      if(chk && chk.checked && loc && !isMeetUrl(loc.value)){
-        var link=await hardGenerateMeetLink();
-        if(!link){
-          // Do not block manual saving forever. User can uncheck auto meet or paste link manually.
-          var ok=confirm('Google Meet link generate nahi hua. Phir bhi meeting save/send karni hai?');
-          if(!ok) return false;
-        }
-      }
-    }catch(e){ console.warn('hard meet generation skipped',e); }
-    return oldSave ? oldSave.apply(this,arguments) : undefined;
-  };
-
-  document.addEventListener('click',function(e){
-    var b=e.target && e.target.closest ? e.target.closest('#ug-meet-generate-now') : null;
-    if(b){ e.preventDefault(); e.stopPropagation(); hardGenerateMeetLink(); }
-  },true);
-
-  document.addEventListener('DOMContentLoaded',function(){setTimeout(ensureButtonRebind,1200);});
-})();
-</script>
-
-</body>
+   Paste this just before </body>
    Do not change any existing code above.
    ============================================================ */
 (function(){
@@ -6436,192 +5696,7 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
 /* ============================================================
    ONLY ISHIKA SAXENA EMAIL FIX
    Correct email: ishika.crm@upgromedia.com
-   Paste just before <script>
-/* =========================================================
-   UPGRO MEET LINK HARD FIX — APPEND ONLY
-   Purpose: Do not touch old code. Only replace Generate Now logic.
-   ========================================================= */
-(function(){
-  'use strict';
-  function $(id){return document.getElementById(id);}
-  function txt(v){return String(v == null ? '' : v).trim();}
-  function toastMsg(m){try{ if(typeof toast==='function') toast(m); else console.log(m); }catch(e){console.log(m);} }
-  function setMeetStatus(m, color){
-    var st=$('ug-meet-auto-status');
-    if(st){ st.textContent=m; if(color) st.style.color=color; }
-  }
-  function getSURL(){
-    try{ if(typeof SURL !== 'undefined' && SURL) return SURL; }catch(e){}
-    try{ return localStorage.getItem('ugv4_url') || localStorage.getItem('upgro_url') || ''; }catch(e){ return ''; }
-  }
-  function isMeetUrl(v){return /^https:\/\/meet\.google\.com\/[a-z0-9-]+/i.test(String(v||''));}
-  function findMeetInText(s){
-    s=String(s||'');
-    var m=s.match(/https:\/\/meet\.google\.com\/[a-zA-Z0-9-]+/);
-    return m ? m[0] : '';
-  }
-  function findMeetDeep(obj, depth){
-    depth = depth || 0;
-    if(depth > 6 || obj == null) return '';
-    if(typeof obj === 'string') return findMeetInText(obj);
-    if(Array.isArray(obj)){
-      for(var i=0;i<obj.length;i++){ var r=findMeetDeep(obj[i], depth+1); if(r) return r; }
-      return '';
-    }
-    if(typeof obj === 'object'){
-      var directKeys=['meetLink','meetUrl','meetingLink','googleMeetLink','conferenceLink','hangoutLink','link','url','location','uri'];
-      for(var k=0;k<directKeys.length;k++){
-        var val=obj[directKeys[k]];
-        var found=findMeetDeep(val, depth+1);
-        if(found) return found;
-      }
-      for(var key in obj){ if(Object.prototype.hasOwnProperty.call(obj,key)){ var r2=findMeetDeep(obj[key], depth+1); if(r2) return r2; } }
-    }
-    return '';
-  }
-  function selectedAttendeePayload(){
-    var arr=[];
-    try{
-      var set = window.selectedAttendees || selectedAttendees || new Set();
-      Array.from(set).forEach(function(email){
-        email=String(email||'').trim().toLowerCase();
-        if(!email || email.indexOf('@')<0) return;
-        var e={};
-        try{ if(typeof empByEmail==='function') e=empByEmail(email)||{}; }catch(x){}
-        try{ if(!e.email && window.empReg){ e=(empReg||[]).find(function(x){return String(x.email||'').toLowerCase()===email;})||{}; } }catch(x){}
-        arr.push({email:email,name:e.name||email,desig:e.desig||e.role||'Team'});
-      });
-    }catch(e){}
-    return arr;
-  }
-  function buildMeetPayload(actionName){
-    var date=txt(($('mtg-date')||{}).value);
-    var time=txt(($('mtg-time')||{}).value);
-    var dur=txt(($('mtg-dur')||{}).value) || '30 minutes';
-    var n=parseInt((dur.match(/\d+/)||['30'])[0],10)||30;
-    if(/hour|hr/i.test(dur)) n=n*60;
-    var attendees=selectedAttendeePayload();
-    return {
-      action: actionName || 'createCalendarMeeting',
-      title: txt(($('mtg-title')||{}).value) || 'UpGro Media Meeting',
-      meetingTitle: txt(($('mtg-title')||{}).value) || 'UpGro Media Meeting',
-      date: date,
-      time: time,
-      datetime: date && time ? (date+'T'+time+':00') : '',
-      startTime: date && time ? (date+'T'+time+':00') : '',
-      duration: dur,
-      durationMinutes: n,
-      attendees: attendees,
-      attendeeList: attendees,
-      attendeeEmails: attendees.map(function(a){return a.email;}).join(','),
-      agenda: txt(($('mtg-agenda')||{}).value),
-      notes: txt(($('mtg-notes')||{}).value),
-      organizer: (function(){ try{return (typeof cu!=='undefined'&&cu&&cu.name)||'';}catch(e){return '';} })() || 'UpGro Media'
-    };
-  }
-  async function callMeetBackend(payload){
-    var url=getSURL();
-    if(!url) throw new Error('Apps Script URL missing. Settings me Google Sheet / Apps Script URL save karo.');
-    var res=await fetch(url,{method:'POST',body:JSON.stringify(payload),redirect:'follow',signal:AbortSignal.timeout(30000)});
-    var body=await res.text();
-    var json=null;
-    try{ json=JSON.parse(body); }catch(e){}
-    var link=findMeetInText(body) || findMeetDeep(json);
-    return {ok:res.ok,status:res.status,body:body,json:json,link:link};
-  }
-  async function callMeetBackendGET(payload){
-    var url=getSURL();
-    if(!url) throw new Error('Apps Script URL missing.');
-    var q=new URLSearchParams();
-    ['action','title','meetingTitle','date','time','datetime','duration','durationMinutes','attendeeEmails','agenda','notes','organizer'].forEach(function(k){ if(payload[k] != null && typeof payload[k] !== 'object') q.set(k, String(payload[k])); });
-    var sep=url.indexOf('?')>-1 ? '&' : '?';
-    var res=await fetch(url+sep+q.toString(),{method:'GET',redirect:'follow',signal:AbortSignal.timeout(30000)});
-    var body=await res.text();
-    var json=null;
-    try{ json=JSON.parse(body); }catch(e){}
-    var link=findMeetInText(body) || findMeetDeep(json);
-    return {ok:res.ok,status:res.status,body:body,json:json,link:link};
-  }
-  async function hardGenerateMeetLink(){
-    var loc=$('mtg-loc');
-    var title=txt(($('mtg-title')||{}).value), date=txt(($('mtg-date')||{}).value), time=txt(($('mtg-time')||{}).value);
-    if(!title){ toastMsg('⚠ Meeting title required'); return ''; }
-    if(!date || !time){ toastMsg('⚠ Date and time required'); return ''; }
-    if(loc && isMeetUrl(loc.value)){ setMeetStatus('✅ Google Meet link already added.','var(--green)'); return loc.value; }
-    setMeetStatus('⏳ Generating Google Meet link from Apps Script...','var(--blue)');
-
-    var attempts=[
-      buildMeetPayload('createCalendarMeeting'),
-      buildMeetPayload('generateGoogleMeetLink'),
-      buildMeetPayload('createGoogleMeet')
-    ];
-    var last='';
-    for(var i=0;i<attempts.length;i++){
-      try{
-        var out=await callMeetBackend(attempts[i]);
-        if(out.link){ if(loc) loc.value=out.link; setMeetStatus('✅ Google Meet link generated and added.','var(--green)'); toastMsg('✅ Google Meet link generated'); return out.link; }
-        var j=out.json || {};
-        last = j.error || j.message || j.status || out.body || ('HTTP '+out.status);
-      }catch(e){ last=e.message||String(e); }
-    }
-    try{
-      var outGet=await callMeetBackendGET(buildMeetPayload('createCalendarMeeting'));
-      if(outGet.link){ if(loc) loc.value=outGet.link; setMeetStatus('✅ Google Meet link generated and added.','var(--green)'); toastMsg('✅ Google Meet link generated'); return outGet.link; }
-      var jg=outGet.json||{}; last = jg.error || jg.message || outGet.body || last;
-    }catch(e2){ last=e2.message||String(e2); }
-
-    last=String(last||'No response from backend').replace(/\s+/g,' ').slice(0,240);
-    setMeetStatus('❌ Meet link not returned. Backend response: '+last,'var(--red)');
-    toastMsg('❌ Meet link not returned — backend response dekho');
-    return '';
-  }
-
-  window.ugGenerateMeetLinkFromModal = hardGenerateMeetLink;
-
-  function ensureButtonRebind(){
-    var b=$('ug-meet-generate-now');
-    if(b && b.getAttribute('data-hard-fixed')!=='1'){
-      b.setAttribute('data-hard-fixed','1');
-      b.onclick=function(e){ if(e)e.preventDefault(); return hardGenerateMeetLink(); };
-    }
-  }
-
-  var oldOpen=window.openAddMeeting;
-  window.openAddMeeting=function(){
-    var r;
-    try{ if(typeof oldOpen==='function') r=oldOpen.apply(this,arguments); }catch(e){ console.warn(e); }
-    setTimeout(ensureButtonRebind,80);
-    setTimeout(ensureButtonRebind,400);
-    return r;
-  };
-
-  var oldSave=window.saveMeeting;
-  window.saveMeeting=async function(){
-    try{
-      ensureButtonRebind();
-      var chk=$('mtg-auto-meet'), loc=$('mtg-loc');
-      if(chk && chk.checked && loc && !isMeetUrl(loc.value)){
-        var link=await hardGenerateMeetLink();
-        if(!link){
-          // Do not block manual saving forever. User can uncheck auto meet or paste link manually.
-          var ok=confirm('Google Meet link generate nahi hua. Phir bhi meeting save/send karni hai?');
-          if(!ok) return false;
-        }
-      }
-    }catch(e){ console.warn('hard meet generation skipped',e); }
-    return oldSave ? oldSave.apply(this,arguments) : undefined;
-  };
-
-  document.addEventListener('click',function(e){
-    var b=e.target && e.target.closest ? e.target.closest('#ug-meet-generate-now') : null;
-    if(b){ e.preventDefault(); e.stopPropagation(); hardGenerateMeetLink(); }
-  },true);
-
-  document.addEventListener('DOMContentLoaded',function(){setTimeout(ensureButtonRebind,1200);});
-})();
-</script>
-
-</body>
+   Paste just before </body>
    ============================================================ */
 (function(){
   'use strict';
@@ -7331,188 +6406,228 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
 })();
 </script>
 
+
 <script>
 /* =========================================================
-   UPGRO MEET LINK HARD FIX — APPEND ONLY
-   Purpose: Do not touch old code. Only replace Generate Now logic.
+   UPGRO FINAL SAFE PATCH — CLICK RESTORE + EMPLOYEE DEDUPE
+   Append-only. No existing sidebar/nav code is edited.
    ========================================================= */
 (function(){
   'use strict';
-  function $(id){return document.getElementById(id);}
-  function txt(v){return String(v == null ? '' : v).trim();}
-  function toastMsg(m){try{ if(typeof toast==='function') toast(m); else console.log(m); }catch(e){console.log(m);} }
-  function setMeetStatus(m, color){
-    var st=$('ug-meet-auto-status');
-    if(st){ st.textContent=m; if(color) st.style.color=color; }
+
+  var STORE_KEY = 'upgro_emp_dyn';
+  var REMOVED_KEYS = ['ug_removed_employee_emails_final_v12','ug_removed_employee_emails_v7','upgro_removed_employees'];
+
+  function E(v){
+    var x = String(v == null ? '' : v).trim().toLowerCase().replace(/\s+/g,'');
+    var aliases = {
+      'ritutyagi@upgromedia.com':'ritutyagiea@upgromedia.com',
+      'ritu.tyagi@upgromedia.com':'ritutyagiea@upgromedia.com',
+      'chnadrakala.meta@upgromedia.com':'chandrakala.meta@upgromedia.com',
+      'chandrakala.waldia@upgromedia.com':'chandrakala.meta@upgromedia.com',
+      'shubhi.meta@upgromedia.com':'subhi.meta@upgromedia.com'
+    };
+    return aliases[x] || x;
   }
-  function getSURL(){
-    try{ if(typeof SURL !== 'undefined' && SURL) return SURL; }catch(e){}
-    try{ return localStorage.getItem('ugv4_url') || localStorage.getItem('upgro_url') || ''; }catch(e){ return ''; }
+  function N(v){ return String(v == null ? '' : v).trim().replace(/\s+/g,' '); }
+  function isMail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(E(v)); }
+  function truthActive(v){
+    var s = String(v == null ? '' : v).trim().toLowerCase();
+    return !(v === false || s === 'false' || s === 'no' || s === '0' || s === 'inactive' || s === 'removed' || s === 'delete' || s === 'deleted');
   }
-  function isMeetUrl(v){return /^https:\/\/meet\.google\.com\/[a-z0-9-]+/i.test(String(v||''));}
-  function findMeetInText(s){
-    s=String(s||'');
-    var m=s.match(/https:\/\/meet\.google\.com\/[a-zA-Z0-9-]+/);
-    return m ? m[0] : '';
+  function parseJSON(v, fallback){ try{ return JSON.parse(v); }catch(e){ return fallback; } }
+  function toastSafe(msg){ try{ if(typeof toast === 'function') toast(msg); else console.log(msg); }catch(e){ console.log(msg); } }
+  function getRemovedSet(){
+    var set = new Set();
+    REMOVED_KEYS.forEach(function(k){
+      try{
+        var raw = localStorage.getItem(k);
+        var arr = parseJSON(raw, []);
+        if(Array.isArray(arr)) arr.forEach(function(x){ if(isMail(x)) set.add(E(x)); });
+      }catch(e){}
+    });
+    return set;
   }
-  function findMeetDeep(obj, depth){
-    depth = depth || 0;
-    if(depth > 6 || obj == null) return '';
-    if(typeof obj === 'string') return findMeetInText(obj);
-    if(Array.isArray(obj)){
-      for(var i=0;i<obj.length;i++){ var r=findMeetDeep(obj[i], depth+1); if(r) return r; }
-      return '';
-    }
-    if(typeof obj === 'object'){
-      var directKeys=['meetLink','meetUrl','meetingLink','googleMeetLink','conferenceLink','hangoutLink','link','url','location','uri'];
-      for(var k=0;k<directKeys.length;k++){
-        var val=obj[directKeys[k]];
-        var found=findMeetDeep(val, depth+1);
-        if(found) return found;
-      }
-      for(var key in obj){ if(Object.prototype.hasOwnProperty.call(obj,key)){ var r2=findMeetDeep(obj[key], depth+1); if(r2) return r2; } }
-    }
-    return '';
+  function empFromAny(r){
+    if(!r || typeof r !== 'object') return null;
+    var email = E(r.email || r.Email || r.EmployeeEmail || r.empEmail || r.mail || r.Mail || '');
+    if(!isMail(email)) return null;
+    var name = N(r.name || r.Name || r.EmployeeName || r.empName || '');
+    if(!name) name = email.split('@')[0].replace(/[._-]+/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();});
+    var desig = N(r.desig || r.Designation || r.designation || r.role || r.Role || 'Team') || 'Team';
+    var role = N(r.role || r.Role || r.desig || r.Designation || desig) || desig;
+    return Object.assign({}, r, {
+      email: email,
+      Email: email,
+      name: name,
+      Name: name,
+      desig: desig,
+      Designation: desig,
+      role: role,
+      Role: role,
+      active: truthActive(r.active !== undefined ? r.active : (r.Active !== undefined ? r.Active : true)),
+      isAdmin: !!(r.isAdmin || r.admin || r.Admin),
+      isManager: !!(r.isManager || r.manager || r.Manager)
+    });
   }
-  function selectedAttendeePayload(){
-    var arr=[];
+  function mergePriority(old, cur){
+    if(!old) return cur;
+    var merged = Object.assign({}, old, cur);
+    ['name','Name','email','Email','pass','password','role','Role','desig','Designation','joinDate','bg'].forEach(function(k){
+      if((cur[k] === undefined || cur[k] === null || String(cur[k]).trim() === '') && old[k] !== undefined) merged[k] = old[k];
+    });
+    merged.active = (old.active === false || cur.active === false) ? false : true;
+    merged.isAdmin = !!(old.isAdmin || cur.isAdmin);
+    merged.isManager = !!(old.isManager || cur.isManager);
+    if(merged.isAdmin) merged.isManager = false;
+    return merged;
+  }
+  function collectEmployees(){
+    var arr = [];
+    try{ if(Array.isArray(window.empReg)) arr = arr.concat(window.empReg); }catch(e){}
+    try{ if(typeof empReg !== 'undefined' && Array.isArray(empReg)) arr = arr.concat(empReg); }catch(e){}
+    try{ var dyn = parseJSON(localStorage.getItem(STORE_KEY) || '[]', []); if(Array.isArray(dyn)) arr = arr.concat(dyn); }catch(e){}
+    try{ if(Array.isArray(window.sheetEmpReg)) arr = arr.concat(window.sheetEmpReg); }catch(e){}
+    try{ if(typeof sheetEmpReg !== 'undefined' && Array.isArray(sheetEmpReg)) arr = arr.concat(sheetEmpReg); }catch(e){}
     try{
-      var set = window.selectedAttendees || selectedAttendees || new Set();
-      Array.from(set).forEach(function(email){
-        email=String(email||'').trim().toLowerCase();
-        if(!email || email.indexOf('@')<0) return;
-        var e={};
-        try{ if(typeof empByEmail==='function') e=empByEmail(email)||{}; }catch(x){}
-        try{ if(!e.email && window.empReg){ e=(empReg||[]).find(function(x){return String(x.email||'').toLowerCase()===email;})||{}; } }catch(x){}
-        arr.push({email:email,name:e.name||email,desig:e.desig||e.role||'Team'});
+      if(typeof USERS !== 'undefined') Object.keys(USERS || {}).forEach(function(email){
+        if(USERS[email]) arr.push(Object.assign({}, USERS[email], {email: email}));
       });
     }catch(e){}
     return arr;
   }
-  function buildMeetPayload(actionName){
-    var date=txt(($('mtg-date')||{}).value);
-    var time=txt(($('mtg-time')||{}).value);
-    var dur=txt(($('mtg-dur')||{}).value) || '30 minutes';
-    var n=parseInt((dur.match(/\d+/)||['30'])[0],10)||30;
-    if(/hour|hr/i.test(dur)) n=n*60;
-    var attendees=selectedAttendeePayload();
-    return {
-      action: actionName || 'createCalendarMeeting',
-      title: txt(($('mtg-title')||{}).value) || 'UpGro Media Meeting',
-      meetingTitle: txt(($('mtg-title')||{}).value) || 'UpGro Media Meeting',
-      date: date,
-      time: time,
-      datetime: date && time ? (date+'T'+time+':00') : '',
-      startTime: date && time ? (date+'T'+time+':00') : '',
-      duration: dur,
-      durationMinutes: n,
-      attendees: attendees,
-      attendeeList: attendees,
-      attendeeEmails: attendees.map(function(a){return a.email;}).join(','),
-      agenda: txt(($('mtg-agenda')||{}).value),
-      notes: txt(($('mtg-notes')||{}).value),
-      organizer: (function(){ try{return (typeof cu!=='undefined'&&cu&&cu.name)||'';}catch(e){return '';} })() || 'UpGro Media'
-    };
-  }
-  async function callMeetBackend(payload){
-    var url=getSURL();
-    if(!url) throw new Error('Apps Script URL missing. Settings me Google Sheet / Apps Script URL save karo.');
-    var res=await fetch(url,{method:'POST',body:JSON.stringify(payload),redirect:'follow',signal:AbortSignal.timeout(30000)});
-    var body=await res.text();
-    var json=null;
-    try{ json=JSON.parse(body); }catch(e){}
-    var link=findMeetInText(body) || findMeetDeep(json);
-    return {ok:res.ok,status:res.status,body:body,json:json,link:link};
-  }
-  async function callMeetBackendGET(payload){
-    var url=getSURL();
-    if(!url) throw new Error('Apps Script URL missing.');
-    var q=new URLSearchParams();
-    ['action','title','meetingTitle','date','time','datetime','duration','durationMinutes','attendeeEmails','agenda','notes','organizer'].forEach(function(k){ if(payload[k] != null && typeof payload[k] !== 'object') q.set(k, String(payload[k])); });
-    var sep=url.indexOf('?')>-1 ? '&' : '?';
-    var res=await fetch(url+sep+q.toString(),{method:'GET',redirect:'follow',signal:AbortSignal.timeout(30000)});
-    var body=await res.text();
-    var json=null;
-    try{ json=JSON.parse(body); }catch(e){}
-    var link=findMeetInText(body) || findMeetDeep(json);
-    return {ok:res.ok,status:res.status,body:body,json:json,link:link};
-  }
-  async function hardGenerateMeetLink(){
-    var loc=$('mtg-loc');
-    var title=txt(($('mtg-title')||{}).value), date=txt(($('mtg-date')||{}).value), time=txt(($('mtg-time')||{}).value);
-    if(!title){ toastMsg('⚠ Meeting title required'); return ''; }
-    if(!date || !time){ toastMsg('⚠ Date and time required'); return ''; }
-    if(loc && isMeetUrl(loc.value)){ setMeetStatus('✅ Google Meet link already added.','var(--green)'); return loc.value; }
-    setMeetStatus('⏳ Generating Google Meet link from Apps Script...','var(--blue)');
-
-    var attempts=[
-      buildMeetPayload('createCalendarMeeting'),
-      buildMeetPayload('generateGoogleMeetLink'),
-      buildMeetPayload('createGoogleMeet')
-    ];
-    var last='';
-    for(var i=0;i<attempts.length;i++){
-      try{
-        var out=await callMeetBackend(attempts[i]);
-        if(out.link){ if(loc) loc.value=out.link; setMeetStatus('✅ Google Meet link generated and added.','var(--green)'); toastMsg('✅ Google Meet link generated'); return out.link; }
-        var j=out.json || {};
-        last = j.error || j.message || j.status || out.body || ('HTTP '+out.status);
-      }catch(e){ last=e.message||String(e); }
-    }
-    try{
-      var outGet=await callMeetBackendGET(buildMeetPayload('createCalendarMeeting'));
-      if(outGet.link){ if(loc) loc.value=outGet.link; setMeetStatus('✅ Google Meet link generated and added.','var(--green)'); toastMsg('✅ Google Meet link generated'); return outGet.link; }
-      var jg=outGet.json||{}; last = jg.error || jg.message || outGet.body || last;
-    }catch(e2){ last=e2.message||String(e2); }
-
-    last=String(last||'No response from backend').replace(/\s+/g,' ').slice(0,240);
-    setMeetStatus('❌ Meet link not returned. Backend response: '+last,'var(--red)');
-    toastMsg('❌ Meet link not returned — backend response dekho');
-    return '';
-  }
-
-  window.ugGenerateMeetLinkFromModal = hardGenerateMeetLink;
-
-  function ensureButtonRebind(){
-    var b=$('ug-meet-generate-now');
-    if(b && b.getAttribute('data-hard-fixed')!=='1'){
-      b.setAttribute('data-hard-fixed','1');
-      b.onclick=function(e){ if(e)e.preventDefault(); return hardGenerateMeetLink(); };
-    }
-  }
-
-  var oldOpen=window.openAddMeeting;
-  window.openAddMeeting=function(){
-    var r;
-    try{ if(typeof oldOpen==='function') r=oldOpen.apply(this,arguments); }catch(e){ console.warn(e); }
-    setTimeout(ensureButtonRebind,80);
-    setTimeout(ensureButtonRebind,400);
-    return r;
-  };
-
-  var oldSave=window.saveMeeting;
-  window.saveMeeting=async function(){
-    try{
-      ensureButtonRebind();
-      var chk=$('mtg-auto-meet'), loc=$('mtg-loc');
-      if(chk && chk.checked && loc && !isMeetUrl(loc.value)){
-        var link=await hardGenerateMeetLink();
-        if(!link){
-          // Do not block manual saving forever. User can uncheck auto meet or paste link manually.
-          var ok=confirm('Google Meet link generate nahi hua. Phir bhi meeting save/send karni hai?');
-          if(!ok) return false;
-        }
+  function dedupeEmployees(includeInactive){
+    var removed = getRemovedSet();
+    var map = new Map();
+    collectEmployees().forEach(function(r){
+      var e = empFromAny(r);
+      if(!e) return;
+      if(removed.has(e.email)) e.active = false;
+      var old = map.get(e.email);
+      map.set(e.email, mergePriority(old, e));
+    });
+    var out = Array.from(map.values()).map(function(e, i){
+      e.email = E(e.email);
+      e.Email = e.email;
+      e.name = N(e.name || e.Name) || e.email;
+      e.Name = e.name;
+      e.desig = N(e.desig || e.Designation || e.role || 'Team') || 'Team';
+      e.Designation = e.desig;
+      e.role = N(e.role || e.Role || e.desig) || e.desig;
+      e.Role = e.role;
+      if(!e.bg){
+        try{ e.bg = (typeof CLRS !== 'undefined' && CLRS.length) ? CLRS[i % CLRS.length] : '#0B84FF'; }catch(x){ e.bg = '#0B84FF'; }
       }
-    }catch(e){ console.warn('hard meet generation skipped',e); }
-    return oldSave ? oldSave.apply(this,arguments) : undefined;
+      if(e.isAdmin) e.isManager = false;
+      return e;
+    });
+    out.sort(function(a,b){ return String(a.name).localeCompare(String(b.name)); });
+
+    var visible = includeInactive ? out : out.filter(function(e){ return e.active !== false; });
+
+    try{ window.empReg = out; }catch(e){}
+    try{ empReg = out; }catch(e){}
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(out)); }catch(e){}
+    try{
+      if(typeof USERS !== 'undefined'){
+        Object.keys(USERS).forEach(function(k){ if(isMail(k)) delete USERS[k]; });
+        out.forEach(function(e){ USERS[e.email] = Object.assign({}, USERS[e.email] || {}, e); });
+      }
+    }catch(e){}
+    return visible;
+  }
+  function activeEmployees(){ return dedupeEmployees(false); }
+  function refreshEmployeeViews(){
+    try{ if(typeof syncUserDirectoryFromRegistry === 'function') syncUserDirectoryFromRegistry(); }catch(e){}
+    try{ if(typeof refillEmpDropdown === 'function') refillEmpDropdown(); }catch(e){}
+    try{ if(typeof populateTaskFilterOptions === 'function') populateTaskFilterOptions(); }catch(e){}
+    try{ if(typeof renderEmpList === 'function') renderEmpList(); }catch(e){}
+    try{ if(typeof buildAttendeeList === 'function') buildAttendeeList((document.getElementById('mtg-att-q')||{value:''}).value || ''); }catch(e){}
+  }
+
+  var oldInitEmpReg = window.initEmpReg;
+  window.initEmpReg = function(force){
+    try{ if(typeof oldInitEmpReg === 'function') oldInitEmpReg.apply(this, arguments); }catch(e){ console.warn('old initEmpReg skipped:', e); }
+    return dedupeEmployees(true);
   };
 
-  document.addEventListener('click',function(e){
-    var b=e.target && e.target.closest ? e.target.closest('#ug-meet-generate-now') : null;
-    if(b){ e.preventDefault(); e.stopPropagation(); hardGenerateMeetLink(); }
-  },true);
+  var oldLoadDyn = window.loadDynEmployees;
+  window.loadDynEmployees = function(){
+    var arr = [];
+    try{ arr = typeof oldLoadDyn === 'function' ? oldLoadDyn.apply(this, arguments) : parseJSON(localStorage.getItem(STORE_KEY) || '[]', []); }catch(e){ arr = parseJSON(localStorage.getItem(STORE_KEY) || '[]', []); }
+    var map = new Map();
+    (Array.isArray(arr) ? arr : []).forEach(function(r){ var e = empFromAny(r); if(e) map.set(e.email, mergePriority(map.get(e.email), e)); });
+    return Array.from(map.values());
+  };
 
-  document.addEventListener('DOMContentLoaded',function(){setTimeout(ensureButtonRebind,1200);});
+  var oldRenderEmpList = window.renderEmpList;
+  window.renderEmpList = function(){
+    var backup;
+    try{ backup = window.empReg || empReg; }catch(e){ backup = []; }
+    try{
+      var list = activeEmployees();
+      try{ window.empReg = list; empReg = list; }catch(e){}
+      return typeof oldRenderEmpList === 'function' ? oldRenderEmpList.apply(this, arguments) : undefined;
+    }finally{
+      try{ window.empReg = dedupeEmployees(true); empReg = window.empReg; }catch(e){}
+    }
+  };
+
+  var oldDelEmp = window.delEmp;
+  window.delEmp = async function(email){
+    email = E(email);
+    if(!email) return;
+    var before = collectEmployees().length;
+    var result;
+    try{ result = typeof oldDelEmp === 'function' ? await oldDelEmp.apply(this, arguments) : undefined; }catch(e){ console.warn('old delEmp failed:', e); }
+    var removed = getRemovedSet(); removed.add(email);
+    try{ localStorage.setItem(REMOVED_KEYS[0], JSON.stringify(Array.from(removed))); }catch(e){}
+    var list = dedupeEmployees(true);
+    list.forEach(function(e){ if(e.email === email) e.active = false; });
+    try{ window.empReg = list; empReg = list; localStorage.setItem(STORE_KEY, JSON.stringify(list)); }catch(e){}
+    refreshEmployeeViews();
+    try{ if(typeof buildUI === 'function') buildUI(); }catch(e){}
+    return result;
+  };
+
+  window.fixDuplicateEmployeesNow = function(){
+    dedupeEmployees(true);
+    refreshEmployeeViews();
+    try{ if(typeof buildUI === 'function') buildUI(); }catch(e){}
+    toastSafe('✅ Duplicate employees removed. Login/sidebar clicks restored.');
+  };
+
+  function bindSidebarOnlyIfNeeded(){
+    document.querySelectorAll('.ni[id^="ni-"]').forEach(function(el){
+      if(el.getAttribute('data-safe-nav-bound') === '1') return;
+      el.setAttribute('data-safe-nav-bound','1');
+      el.addEventListener('click', function(ev){
+        var id = String(el.id || '').replace(/^ni-/, '');
+        var map = {dashboard:'dash',dash:'dash',mytasks:'mytasks',alltasks:'alltasks',analytics:'analytics',employees:'employees',meetings:'meetings',forms:'forms',settings:'settings'};
+        var pg = map[id] || id;
+        if(typeof nav === 'function'){
+          ev.preventDefault();
+          nav(pg);
+          setTimeout(function(){ dedupeEmployees(true); refreshEmployeeViews(); },80);
+        }
+      }, false);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    setTimeout(function(){
+      try{ dedupeEmployees(true); }catch(e){}
+      bindSidebarOnlyIfNeeded();
+      refreshEmployeeViews();
+    }, 800);
+  });
+
+  window.addEventListener('load', function(){
+    setTimeout(function(){
+      try{ window.fixDuplicateEmployeesNow(); }catch(e){}
+      bindSidebarOnlyIfNeeded();
+    }, 1000);
+  });
 })();
 </script>
 
