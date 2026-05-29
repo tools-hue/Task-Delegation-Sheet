@@ -5958,6 +5958,531 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
   }
 
 })();
+
+/* =========================================================
+   FINAL TASK WORKFLOW PATCH — Mark Done Lock + View Task +
+   Submit Verification + Multi Assign Employee Persistence +
+   Analytics Reports
+   Safe append patch: does not remove/overwrite old modules.
+   ========================================================= */
+(function(){
+  'use strict';
+
+  var DONE_LOCK_KEY = 'upgro_done_task_lock_v4';
+  var lastMultiEmployee = '';
+
+  function $(id){ return document.getElementById(id); }
+  function qsa(sel,root){ return Array.prototype.slice.call((root||document).querySelectorAll(sel)); }
+  function txt(v){ return String(v == null ? '' : v).trim(); }
+  function low(v){ return txt(v).toLowerCase(); }
+  function esc(v){
+    return txt(v).replace(/[&<>"']/g,function(m){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+    });
+  }
+  function normMail(v){
+    try{ if(typeof normEmail === 'function') return normEmail(v); }catch(e){}
+    return low(v);
+  }
+  function nowIN(){
+    try{ if(typeof indianDate === 'function') return indianDate(new Date()); }catch(e){}
+    return new Date().toLocaleString('en-IN');
+  }
+  function statusOf(t){
+    try{ if(typeof normStatus === 'function') return normStatus(t && (t.status || t.Status)); }catch(e){}
+    return low(t && (t.status || t.Status || 'assigned')) || 'assigned';
+  }
+  function displayName(t){
+    try{ if(typeof getTaskDisplayName === 'function') return getTaskDisplayName(t); }catch(e){}
+    return txt(t && (t.task || t.Task || t.workName || t.WorkName || t.TaskName || t['Task Name'] || ''));
+  }
+  function uiId(t){
+    try{ if(typeof taskUiId === 'function') return taskUiId(t); }catch(e){}
+    return txt(t && (t.taskCode || t.taskId || t.TaskID || t.id || t.ID || ''));
+  }
+  function taskEmail(t){
+    try{ if(typeof resolveTaskEmail === 'function') return resolveTaskEmail(t); }catch(e){}
+    return normMail(t && (t.email || t.assignedToEmail || t.empEmail || t.EmployeeEmail || t.AssignedTo_Email || t['Assigned To Email'] || ''));
+  }
+  function taskTotal(t){ return Math.max(1, Number(t && (t.totalUnits || t.TotalUnits || t.Count || t.count || 1)) || 1); }
+  function taskDone(t){ return Math.max(0, Number(t && (t.doneUnits || t.DoneUnits || t.DoneQty || t.doneQty || 0)) || 0); }
+  function taskDue(t){ return txt(t && (t.ddate || t.DueDate || t['Due Date'] || '')); }
+  function taskAssignDate(t){ return txt(t && (t.adate || t.AssignDate || t['Assign Date'] || t.ts || t.Timestamp || '')); }
+  function taskDept(t){
+    var d = txt(t && (t.desig || t.Designation || t.department || t.Department || t.role || t.Role || ''));
+    if(!d){ try{ d = typeof udesig === 'function' ? udesig(taskEmail(t)) : ''; }catch(e){} }
+    return d || 'Team';
+  }
+  function allTaskKeys(t,id){
+    var keys = [];
+    function add(v){ v = low(v); if(v && keys.indexOf(v) < 0) keys.push(v); }
+    add(id);
+    add(t && t.id); add(t && t.ID); add(t && t.taskId); add(t && t.taskCode); add(t && t.TaskID); add(uiId(t));
+    add(displayName(t) + '|' + taskEmail(t) + '|' + taskAssignDate(t) + '|' + taskDue(t));
+    return keys;
+  }
+  function readLocks(){
+    try{ return JSON.parse(localStorage.getItem(DONE_LOCK_KEY) || '{}') || {}; }catch(e){ return {}; }
+  }
+  function writeLocks(map){
+    try{ localStorage.setItem(DONE_LOCK_KEY, JSON.stringify(map || {})); }catch(e){}
+  }
+  function lockDone(t,id,extra){
+    var map = readLocks();
+    var now = (extra && extra.completedAt) || nowIN();
+    var total = taskTotal(t);
+    var rec = {
+      status:'completed',
+      completedAt:now,
+      doneUnits:total,
+      pendingUnits:0,
+      task:displayName(t),
+      email:taskEmail(t),
+      taskCode:uiId(t) || id || '',
+      lockedAt:Date.now()
+    };
+    allTaskKeys(t,id).forEach(function(k){ map[k] = rec; });
+    writeLocks(map);
+    try{
+      allTaskKeys(t,id).forEach(function(k){ statusOverrides.set(k,{status:'completed',completedAt:now,doneUnits:total,pendingUnits:0}); });
+    }catch(e){}
+    return rec;
+  }
+  function hasDoneLock(t,id){
+    var map = readLocks();
+    return allTaskKeys(t,id).some(function(k){ return map[k] && map[k].status === 'completed'; });
+  }
+  function markLocalCompleted(t,id,now){
+    if(!t) return t;
+    now = now || nowIN();
+    var total = taskTotal(t);
+    t.status = 'completed';
+    t.Status = 'Completed';
+    t.doneUnits = total;
+    t.DoneUnits = total;
+    t.DoneQty = total;
+    t.pendingUnits = 0;
+    t.PendingUnits = 0;
+    t.PendingQty = 0;
+    t.completedAt = now;
+    t.CompletedAt = now;
+    t['Completed At'] = now;
+    try{ if(statusOverrides) statusOverrides.set(id || t.id || uiId(t),{status:'completed',completedAt:now,doneUnits:total,pendingUnits:0}); }catch(e){}
+    return t;
+  }
+  function applyDoneLocks(){
+    try{
+      if(!Array.isArray(allTasks)) return;
+      allTasks.forEach(function(t){
+        if(!t) return;
+        if(hasDoneLock(t,t.id) || statusOf(t)==='completed' || taskDone(t) >= taskTotal(t)){
+          if(statusOf(t)!=='completed' || Number(t.pendingUnits || 0)!==0) markLocalCompleted(t,t.id,t.completedAt || t.CompletedAt || nowIN());
+        }
+      });
+      window.allTasks = allTasks;
+    }catch(e){}
+  }
+  function findTask(id){
+    applyDoneLocks();
+    id = low(id);
+    try{
+      return (allTasks || []).find(function(t){
+        return allTaskKeys(t,t && t.id).some(function(k){ return k === id; }) || low(uiId(t)) === id;
+      }) || null;
+    }catch(e){ return null; }
+  }
+
+  // Harden ensureTaskMeta so stale sheet rows cannot re-open a locally completed task.
+  var oldEnsureTaskMeta = window.ensureTaskMeta;
+  window.ensureTaskMeta = function(t){
+    var out = t;
+    try{ out = oldEnsureTaskMeta ? oldEnsureTaskMeta.call(this,t) : t; }catch(e){ out = t; }
+    try{
+      if(out && hasDoneLock(out,out.id)) markLocalCompleted(out,out.id,out.completedAt || out.CompletedAt || nowIN());
+    }catch(e){}
+    return out;
+  };
+
+  // View Task modal.
+  window.openTaskView = function(id){
+    var t = findTask(id);
+    if(!t){ if(typeof toast === 'function') toast('Task not found'); return; }
+    var modal = $('m-view-task');
+    if(!modal){
+      modal = document.createElement('div');
+      modal.id = 'm-view-task';
+      modal.className = 'mov hidden';
+      modal.innerHTML = '<div class="mo mo-lg"><div class="moh"><div class="mot">👁 View Task</div><button class="mox" type="button" onclick="document.getElementById(\'m-view-task\').classList.add(\'hidden\')">×</button></div><div class="mob2" id="m-view-task-body"></div><div class="mof"><button class="btn bo" type="button" onclick="document.getElementById(\'m-view-task\').classList.add(\'hidden\')">Close</button></div></div>';
+      document.body.appendChild(modal);
+    }
+    var s = statusOf(t);
+    var total = taskTotal(t), done = taskDone(t), pending = Math.max(0,total-done);
+    var refs = txt(t.references || t.References || t['References'] || '');
+    var copy = txt(t.adCopy || t.AdCopy || t.AdScript || t['Ad Copy'] || '');
+    var notes = txt(t.notes || t.Notes || t.Description || '');
+    var drive = txt(t.driveLink || t.DriveLink || t['Drive Link'] || '');
+    var body = $('m-view-task-body');
+    if(body){
+      body.innerHTML = ''+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">'+
+          '<div class="card"><div class="cb"><div class="fl2">Task ID</div><div style="font-family:JetBrains Mono,monospace;font-weight:800;color:var(--blue)">'+esc(uiId(t))+'</div></div></div>'+
+          '<div class="card"><div class="cb"><div class="fl2">Status</div><span class="pill '+(s==='completed'?'pc':s==='in progress'?'pp':'pa')+'">'+esc(s==='completed'?'Completed':s==='in progress'?'In Progress':s)+'</span></div></div>'+
+        '</div>'+
+        '<div class="card" style="margin-bottom:12px"><div class="ch"><div class="ct">Work Details</div></div><div class="cb">'+
+          '<div style="font-size:16px;font-weight:800;margin-bottom:10px;line-height:1.35">'+esc(displayName(t))+'</div>'+
+          '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;font-size:12px;color:var(--text2)">'+
+            '<div><b>Assigned To:</b><br>'+esc((t.assignedToLabel || t.empName || t.assignedTo || '') + (taskDept(t)?' · '+taskDept(t):''))+'</div>'+
+            '<div><b>Assigned By:</b><br>'+esc(t.assignedByLabel || t.by || t.assignedBy || '—')+'</div>'+
+            '<div><b>Assign Date:</b><br>'+esc(taskAssignDate(t) || '—')+'</div>'+
+            '<div><b>Due Date:</b><br>'+esc(taskDue(t) || '—')+'</div>'+
+            '<div><b>Count:</b><br>'+pending+' Pending / '+done+' Submit / Total '+total+'</div>'+
+            '<div><b>Priority:</b><br>'+esc(t.priority || t.Priority || 'medium')+'</div>'+
+          '</div>'+
+        '</div></div>'+
+        (refs?'<div class="card" style="margin-bottom:12px"><div class="ch"><div class="ct">References</div></div><div class="cb" style="white-space:pre-wrap;line-height:1.55">'+esc(refs)+'</div></div>':'')+
+        (copy?'<div class="card" style="margin-bottom:12px"><div class="ch"><div class="ct">Ad Copy / Script</div></div><div class="cb" style="white-space:pre-wrap;line-height:1.55">'+esc(copy)+'</div></div>':'')+
+        (notes?'<div class="card" style="margin-bottom:12px"><div class="ch"><div class="ct">Notes</div></div><div class="cb" style="white-space:pre-wrap;line-height:1.55">'+esc(notes)+'</div></div>':'')+
+        (drive?'<div class="card"><div class="ch"><div class="ct">Submitted / Drive Link</div></div><div class="cb"><a href="'+esc(drive.split(',')[0])+'" target="_blank" rel="noopener noreferrer">Open Work Link ↗</a><div style="margin-top:8px;font-size:11px;color:var(--muted);white-space:pre-wrap">'+esc(drive)+'</div></div></div>':'');
+    }
+    modal.classList.remove('hidden');
+  };
+
+  function addViewButtons(){
+    try{
+      qsa('#mt-list .tc-acts').forEach(function(acts){
+        if(acts.querySelector('.task-view-btn')) return;
+        var html = acts.innerHTML || '';
+        var m = html.match(/(?:qDone|openEditTask|qAccept|qReject)\('([^']+)'/);
+        if(!m) return;
+        var b = document.createElement('button');
+        b.className = 'btn bo bsm task-view-btn';
+        b.type = 'button';
+        b.textContent = '👁 View Task';
+        b.onclick = function(){ window.openTaskView(m[1]); };
+        var doneBtn = qsa('button',acts).find(function(x){ return /Mark Done|✓/.test(x.textContent || ''); });
+        if(doneBtn && doneBtn.nextSibling) acts.insertBefore(b, doneBtn.nextSibling); else acts.insertBefore(b, acts.firstChild);
+      });
+      qsa('#at-body tr').forEach(function(tr){
+        var cell = tr.querySelector('.acts-td');
+        if(!cell || cell.querySelector('.task-view-btn')) return;
+        var code = txt(tr.children[1] && tr.children[1].textContent);
+        var t = (allTasks || []).find(function(x){ return low(uiId(x)) === low(code) || low(x.id) === low(code) || low(x.taskCode) === low(code) || low(x.taskId) === low(code); });
+        if(!t) return;
+        var b = document.createElement('button');
+        b.className = 'btn bo bxs task-view-btn';
+        b.type = 'button';
+        b.title = 'View Task';
+        b.textContent = '👁';
+        b.onclick = function(){ window.openTaskView(t.id || uiId(t)); };
+        var wrap = cell.querySelector('div') || cell;
+        wrap.insertBefore(b, wrap.firstChild);
+      });
+    }catch(e){}
+  }
+
+  // Mark Done: complete locally, lock it, and send a full payload to the sheet.
+  window.qDone = async function(id){
+    if(!SURL){ if(typeof toast === 'function') toast('⚠ Connect Google Sheet in Settings'); return; }
+    var t = findTask(id) || {id:id, taskCode:id, taskId:id};
+    var now = nowIN();
+    markLocalCompleted(t,id,now);
+    lockDone(t,id,{completedAt:now});
+    applyDoneLocks();
+    try{ if(typeof buildUI === 'function') buildUI(); }catch(e){}
+    try{ if(typeof populateSubSel === 'function') populateSubSel(); }catch(e){}
+    if(typeof toast === 'function') toast('✅ Task completed. It will not return in active work.');
+    var payload = {
+      action:'updateTask',
+      id:id,
+      taskId:t.taskId || t.taskCode || uiId(t) || id,
+      taskCode:t.taskCode || t.taskId || uiId(t) || id,
+      TaskID:t.taskCode || t.taskId || uiId(t) || id,
+      task:displayName(t), Task:displayName(t), workName:displayName(t), WorkName:displayName(t), TaskName:displayName(t),
+      email:taskEmail(t), AssignedTo_Email:taskEmail(t), assignedToEmail:taskEmail(t), empEmail:taskEmail(t), EmployeeEmail:taskEmail(t), 'Assigned To Email':taskEmail(t),
+      status:'Completed', Status:'Completed',
+      doneUnits:taskTotal(t), DoneUnits:taskTotal(t), DoneQty:taskTotal(t), updatedDoneUnits:taskTotal(t),
+      pendingUnits:0, PendingUnits:0, PendingQty:0,
+      totalUnits:taskTotal(t), TotalUnits:taskTotal(t), Count:taskTotal(t),
+      completedAt:now, CompletedAt:now, 'Completed At':now,
+      deleteEmailOnComplete:false, keepEmail:true, preserveEmail:true
+    };
+    try{
+      await fetch(SURL,{method:'POST',body:JSON.stringify(payload)});
+    }catch(e){
+      if(typeof toast === 'function') toast('⚠ Completed locally, sheet sync failed');
+    }
+  };
+
+  function ensureSubmitVerificationUI(){
+    var subBox = $('sub-box');
+    if(!subBox) return;
+    if(!$('task-workflow-style')){
+      var st = document.createElement('style');
+      st.id = 'task-workflow-style';
+      st.textContent = '.verify-work-box{border:1px solid rgba(11,132,255,.25);background:var(--blue3);border-radius:10px;padding:10px 12px;margin-bottom:10px}.analytics-report-tools{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:end}.analytics-report-tools .fg{margin:0}.analytics-report-tools .btn{white-space:nowrap}@media(max-width:768px){.analytics-report-tools{display:block}.analytics-report-tools .fg,.analytics-report-tools .btn{margin:0 0 8px 0;width:100%}}';
+      document.head.appendChild(st);
+    }
+    // Remove duplicate Status field in submit form if browser has both duplicate IDs.
+    var statusSelects = qsa('[id="sub-stat"]');
+    if(statusSelects.length > 1){
+      statusSelects.slice(1).forEach(function(el){ var fg = el.closest('.fg'); if(fg) fg.remove(); else el.remove(); });
+    }
+    if(!$('sub-content')){
+      var notes = $('sub-notes');
+      var holder = document.createElement('div');
+      holder.className = 'verify-work-box';
+      holder.innerHTML = '<label class="fl2" style="color:var(--blue)">🧾 Submit Task For Verification *</label><textarea id="sub-content" class="fc" rows="5" placeholder="Please paste your content here for work verification...\nExample: final caption, ad copy, design text, completed checklist, published link details, etc."></textarea><div style="font-size:10px;color:var(--muted);margin-top:6px">Drive link optional hai, lekin verification ke liye content/summary yahan paste karna zaroori hai.</div>';
+      if(notes){
+        var fg = notes.closest('.fg') || notes.parentNode;
+        if(fg && fg.parentNode) fg.parentNode.insertBefore(holder, fg);
+      }else{
+        var cb = subBox.querySelector('.cb');
+        if(cb) cb.insertBefore(holder, cb.querySelector('button.btn.bs'));
+      }
+    }
+    var submitBtn = subBox.querySelector('button[onclick="submitWork()"]');
+    if(submitBtn) submitBtn.textContent = '📤 Submit Task For Verification';
+  }
+
+  window.submitWork = async function(){
+    ensureSubmitVerificationUI();
+    var taskId = txt(($('sub-task')||{}).value);
+    var status = txt(($('sub-stat')||{value:'Completed'}).value) || 'Completed';
+    var notes = txt(($('sub-notes')||{}).value);
+    var content = txt(($('sub-content')||{}).value);
+    var driveLink = '';
+    try{ driveLink = typeof getAllDriveLinks === 'function' ? getAllDriveLinks() : txt(($('sub-drive-link')||{}).value); }catch(e){ driveLink = txt(($('sub-drive-link')||{}).value); }
+    var doneUnits = Math.max(1, parseInt(txt(($('sub-done-units')||{value:'1'}).value) || '1',10) || 1);
+    if(!taskId){ if(typeof toast === 'function') toast('⚠ Please select a task first'); return; }
+    if(!content && !driveLink){ if(typeof toast === 'function') toast('⚠ Please paste your content or add a drive link for verification'); return; }
+    if(!SURL){ if(typeof toast === 'function') toast('⚠ Connect Google Sheet in Settings'); return; }
+    var t = findTask(taskId);
+    if(!t){ if(typeof toast === 'function') toast('⚠ Task not found'); return; }
+    var total = taskTotal(t);
+    var currentDone = Math.max(0, Number(t.doneUnits || 0) || 0);
+    var currentPending = Math.max(0, Number(t.pendingUnits || (total-currentDone)) || 0);
+    doneUnits = Math.min(Math.max(1,doneUnits), Math.max(1,currentPending || 1));
+    var updatedDone = Math.min(total,currentDone + doneUnits);
+    var updatedPending = Math.max(0,total - updatedDone);
+    var completed = (status === 'Completed' || updatedPending === 0);
+    var now = nowIN();
+    t.doneUnits = updatedDone; t.DoneUnits = updatedDone; t.pendingUnits = updatedPending; t.PendingUnits = updatedPending; t.driveLink = driveLink || t.driveLink || '';
+    t.submittedContent = content; t.WorkContent = content;
+    if(completed){ markLocalCompleted(t,taskId,now); lockDone(t,taskId,{completedAt:now}); }
+    else { t.status = 'in progress'; t.Status = 'In Progress'; try{ statusOverrides.set(taskId,{status:'in progress',doneUnits:updatedDone,pendingUnits:updatedPending,driveLink:t.driveLink}); }catch(e){} }
+    try{ if(typeof buildUI === 'function') buildUI(); }catch(e){}
+    var payload = {
+      action:'submitWork', id:taskId, taskId:taskId, taskCode:uiId(t) || taskId, TaskID:uiId(t) || taskId,
+      email:(cu && cu.email) || taskEmail(t), empName:(cu && cu.name) || '',
+      task:displayName(t), workName:displayName(t), WorkName:displayName(t), TaskName:displayName(t),
+      status:completed?'Completed':'In Progress', Status:completed?'Completed':'In Progress',
+      notes:notes, Notes:notes,
+      submittedContent:content, WorkContent:content, VerificationContent:content, Content:content, 'Submitted Content':content,
+      driveLink:driveLink, DriveLink:driveLink,
+      doneUnits:doneUnits, submittedUnits:doneUnits, updatedDoneUnits:updatedDone, DoneUnits:updatedDone, DoneQty:updatedDone,
+      pendingUnits:updatedPending, PendingUnits:updatedPending, PendingQty:updatedPending,
+      totalUnits:total, TotalUnits:total, Count:total,
+      completedAt:completed?now:'', CompletedAt:completed?now:'', 'Completed At':completed?now:'',
+      adate:taskAssignDate(t), AssignDate:taskAssignDate(t), ddate:taskDue(t), DueDate:taskDue(t), by:t.by || t.assignedBy || '',
+      countSummary:updatedPending+' Pending / '+updatedDone+' Submit',
+      deleteEmailOnComplete:false, keepEmail:true, preserveEmail:true
+    };
+    try{
+      try{
+        payload.emailHtml = typeof buildTaskMailHtml === 'function' ? buildTaskMailHtml('submission',Object.assign({},t,{status:payload.Status,notes:notes,driveLink:driveLink,doneUnits:updatedDone,pendingUnits:updatedPending,totalUnits:total,countSummary:payload.countSummary,submittedContent:content})) : '';
+      }catch(e){}
+      await fetch(SURL,{method:'POST',body:JSON.stringify(payload)});
+      if(typeof toast === 'function') toast('✅ Task submitted for verification');
+      ['sub-notes','sub-drive-link','sub-content'].forEach(function(id){ var el=$(id); if(el) el.value=''; });
+      var extra=$('sub-extra-drive-links'); if(extra) extra.innerHTML='';
+      var sdu=$('sub-done-units'); if(sdu) sdu.value='1';
+      try{ if(typeof populateSubSel === 'function') populateSubSel(); }catch(e){}
+    }catch(e){
+      if(typeof toast === 'function') toast('⚠ Submitted locally, sheet sync failed');
+    }
+  };
+
+  // Multi-task employee persistence: every new row keeps the last selected employee.
+  function employeeOptionsHtml(selected){
+    var rows = [];
+    rows.push('<option value="">— Select Employee —</option>');
+    try{
+      var list = [];
+      if(typeof getActiveEmployees === 'function') list = getActiveEmployees();
+      else if(Array.isArray(empReg)) list = empReg.filter(function(e){ return e && e.active !== false; });
+      list.forEach(function(e){
+        var val = normMail(e.email);
+        if(!val) return;
+        rows.push('<option value="'+esc(val)+'"'+(normMail(selected)===val?' selected':'')+'>'+esc((e.name||val)+' — '+(e.desig||e.role||'Team'))+'</option>');
+      });
+    }catch(e){
+      var base = $('add-emp');
+      if(base) qsa('option',base).forEach(function(o){ rows.push('<option value="'+esc(o.value)+'"'+(o.value===selected?' selected':'')+'>'+esc(o.textContent)+'</option>'); });
+    }
+    return rows.join('');
+  }
+  function setRowEmployee(row,value){
+    if(!row) return;
+    var sel = row.querySelector('.multi-task-emp');
+    if(!sel) return;
+    var keep = value || sel.value || lastMultiEmployee || '';
+    sel.innerHTML = employeeOptionsHtml(keep);
+    if(keep && qsa('option',sel).some(function(o){ return normMail(o.value) === normMail(keep); })) sel.value = keep;
+    var out = row.querySelector('.multi-task-assignee-name');
+    if(out){
+      var opt = sel.options[sel.selectedIndex];
+      out.textContent = sel.value ? (opt ? opt.textContent : sel.value) : 'Not selected';
+    }
+  }
+  function fixMultiRows(){
+    var rows = qsa('.multi-task-row');
+    rows.forEach(function(row,i){
+      var sel = row.querySelector('.multi-task-emp');
+      if(sel && sel.value) lastMultiEmployee = sel.value;
+      setRowEmployee(row, sel ? sel.value : lastMultiEmployee);
+      var num = row.querySelector('.multi-task-num'); if(num) num.textContent = String(i+1);
+    });
+  }
+  document.addEventListener('change',function(e){
+    if(e.target && e.target.classList && e.target.classList.contains('multi-task-emp')){
+      lastMultiEmployee = e.target.value || lastMultiEmployee;
+      setRowEmployee(e.target.closest('.multi-task-row'), e.target.value);
+    }
+  },true);
+  document.addEventListener('click',function(e){
+    var btn = e.target && e.target.closest ? e.target.closest('#multi-task-add-row') : null;
+    if(!btn) return;
+    var selected = '';
+    qsa('.multi-task-emp').forEach(function(sel){ if(sel.value) selected = sel.value; });
+    lastMultiEmployee = selected || lastMultiEmployee;
+    setTimeout(function(){
+      var rows = qsa('.multi-task-row');
+      if(rows.length) setRowEmployee(rows[rows.length-1], lastMultiEmployee);
+      fixMultiRows();
+    },80);
+  },true);
+  var multiObs = new MutationObserver(function(){ setTimeout(fixMultiRows,60); });
+  function startMultiObserver(){ var list=$('multi-task-list'); if(list) multiObs.observe(list,{childList:true,subtree:true}); }
+
+  // Analytics filters + report downloads.
+  function parseDate(v){
+    v = txt(v); if(!v) return null;
+    if(/^\d{4}-\d{2}-\d{2}/.test(v)) return new Date(v.slice(0,10)+'T00:00:00');
+    var m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/); if(m) return new Date(Number(m[3]),Number(m[2])-1,Number(m[1]));
+    var d = new Date(v); return isNaN(d) ? null : d;
+  }
+  function inRange(t,from,to){
+    var d = parseDate(taskAssignDate(t));
+    if(!d) return true;
+    if(from && d < from) return false;
+    if(to){ var end = new Date(to); end.setHours(23,59,59,999); if(d > end) return false; }
+    return true;
+  }
+  function isOnTime(t){
+    if(statusOf(t)!=='completed') return false;
+    var due = parseDate(taskDue(t));
+    var cd = parseDate(t.completedAt || t.CompletedAt || t['Completed At'] || taskDue(t));
+    if(!due) return true;
+    if(!cd) return false;
+    due.setHours(23,59,59,999);
+    return cd <= due;
+  }
+  function isPendingOrDelay(t){
+    var s = statusOf(t);
+    return s !== 'completed' || (typeof isOD === 'function' && isOD(t));
+  }
+  function departmentsFromData(){
+    var set = new Set();
+    try{ (allTasks||[]).forEach(function(t){ set.add(taskDept(t)); }); }catch(e){}
+    try{ (empReg||[]).forEach(function(e){ if(e && e.active !== false) set.add(txt(e.desig || e.role || 'Team')); }); }catch(e){}
+    return Array.from(set).filter(Boolean).sort();
+  }
+  function ensureAnalyticsTools(){
+    var page = $('pg-analytics'); if(!page) return;
+    var banner = $('analytics-banner'); if(!banner) return;
+    if(!$('analytics-report-tools')){
+      var box = document.createElement('div');
+      box.id = 'analytics-report-tools';
+      box.className = 'analytics-report-tools';
+      box.innerHTML = ''+
+        '<div class="fg"><label class="fl2">From Date</label><input type="date" id="an-from" class="fc" onchange="reRenderCharts()"></div>'+
+        '<div class="fg"><label class="fl2">To Date</label><input type="date" id="an-to" class="fc" onchange="reRenderCharts()"></div>'+
+        '<div class="fg"><label class="fl2">Department</label><select id="an-dept" class="fc" onchange="reRenderCharts()"><option value="">All Departments</option></select></div>'+
+        '<button class="btn bo bsm" type="button" onclick="exportAnalyticsReport(\'done\')">⬇ Work Done</button>'+
+        '<button class="btn bo bsm" type="button" onclick="exportAnalyticsReport(\'assigned\')">⬇ Work Assigned</button>'+
+        '<button class="btn bo bsm" type="button" onclick="exportAnalyticsReport(\'pending\')">⬇ Pending/Delay</button>'+
+        '<button class="btn bo bsm" type="button" onclick="exportAnalyticsReport(\'ontime\')">⬇ On-Time</button>'+
+        '<button class="btn bp bsm" type="button" onclick="exportAnalyticsReport(\'full\')">⬇ Full Analytics</button>';
+      banner.parentNode.insertBefore(box,banner.nextSibling);
+    }
+    var dept = $('an-dept');
+    if(dept){
+      var keep = dept.value;
+      dept.innerHTML = '<option value="">All Departments</option>' + departmentsFromData().map(function(d){ return '<option value="'+esc(d)+'"'+(d===keep?' selected':'')+'>'+esc(d)+'</option>'; }).join('');
+      if(keep) dept.value = keep;
+    }
+  }
+  var oldGetAnalyticsTasks = window.getAnalyticsTasks;
+  window.getAnalyticsTasks = function(){
+    applyDoneLocks();
+    var tasks = [];
+    try{ tasks = oldGetAnalyticsTasks ? oldGetAnalyticsTasks.call(this) : (allTasks || []).slice(); }catch(e){ tasks = (allTasks || []).slice(); }
+    var from = parseDate(($('an-from')||{}).value);
+    var to = parseDate(($('an-to')||{}).value);
+    var dept = txt(($('an-dept')||{}).value);
+    tasks = (tasks || []).filter(function(t){
+      if(!inRange(t,from,to)) return false;
+      if(dept && taskDept(t) !== dept) return false;
+      return true;
+    });
+    return tasks;
+  };
+  window.exportAnalyticsReport = function(type){
+    ensureAnalyticsTools();
+    var tasks = window.getAnalyticsTasks();
+    var title = 'full_analytics';
+    if(type === 'done'){ tasks = tasks.filter(function(t){ return statusOf(t)==='completed'; }); title = 'total_work_done'; }
+    else if(type === 'assigned'){ title = 'total_work_assigned'; }
+    else if(type === 'pending'){ tasks = tasks.filter(isPendingOrDelay); title = 'pending_delay_work'; }
+    else if(type === 'ontime'){ tasks = tasks.filter(isOnTime); title = 'on_time_work'; }
+    var rows = [['Task ID','Task','Employee','Email','Department','Assigned By','Assign Date','Due Date','Completed At','Status','Priority','Total Units','Done Units','Pending Units','Delivery','Drive Link','Verification Content'].join(',')];
+    tasks.forEach(function(t){
+      var vals = [
+        uiId(t), displayName(t), t.assignedTo || t.empName || (typeof uname==='function'?uname(taskEmail(t)):taskEmail(t)), taskEmail(t), taskDept(t), t.assignedByLabel || t.by || t.assignedBy || '', taskAssignDate(t), taskDue(t), t.completedAt || t.CompletedAt || '', statusOf(t), t.priority || t.Priority || '', taskTotal(t), taskDone(t), Math.max(0,taskTotal(t)-taskDone(t)), isOnTime(t)?'On Time':(statusOf(t)==='completed'?'Delayed/No Due Match':'Pending/Delay'), t.driveLink || t.DriveLink || '', t.submittedContent || t.WorkContent || t.VerificationContent || ''
+      ];
+      rows.push(vals.map(function(v){ return '"'+txt(v).replace(/"/g,'""')+'"'; }).join(','));
+    });
+    var blob = new Blob([rows.join('\n')],{type:'text/csv;charset=utf-8'});
+    var a = document.createElement('a');
+    var today = (typeof TODAY !== 'undefined' ? TODAY : new Date().toISOString().slice(0,10));
+    a.href = URL.createObjectURL(blob);
+    a.download = 'upgro_'+title+'_'+today+'.csv';
+    a.click();
+    if(typeof toast === 'function') toast('⬇ Report downloaded: '+tasks.length+' rows');
+  };
+
+  var oldRenderMyTasks = window.renderMyTasks;
+  window.renderMyTasks = function(){ applyDoneLocks(); var r = oldRenderMyTasks && oldRenderMyTasks.apply(this,arguments); setTimeout(addViewButtons,20); return r; };
+  var oldRenderAllTasks = window.renderAllTasks;
+  window.renderAllTasks = function(){ applyDoneLocks(); var r = oldRenderAllTasks && oldRenderAllTasks.apply(this,arguments); setTimeout(addViewButtons,20); return r; };
+  var oldPopulateSubSel = window.populateSubSel;
+  window.populateSubSel = function(){ applyDoneLocks(); var r = oldPopulateSubSel && oldPopulateSubSel.apply(this,arguments); return r; };
+  var oldBuildUI = window.buildUI;
+  window.buildUI = function(){ applyDoneLocks(); var r = oldBuildUI && oldBuildUI.apply(this,arguments); try{ ensureSubmitVerificationUI(); ensureAnalyticsTools(); startMultiObserver(); fixMultiRows(); addViewButtons(); }catch(e){} return r; };
+  var oldReRenderCharts = window.reRenderCharts;
+  window.reRenderCharts = function(){ ensureAnalyticsTools(); return oldReRenderCharts && oldReRenderCharts.apply(this,arguments); };
+  var oldLoadData = window.loadData;
+  window.loadData = async function(){ var r = oldLoadData && await oldLoadData.apply(this,arguments); applyDoneLocks(); try{ if(typeof buildUI==='function') buildUI(); }catch(e){} return r; };
+
+  function boot(){
+    try{ ensureSubmitVerificationUI(); ensureAnalyticsTools(); applyDoneLocks(); startMultiObserver(); fixMultiRows(); addViewButtons(); }catch(e){}
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded',function(){ setTimeout(boot,500); });
+  else setTimeout(boot,500);
+
+  window.fixTaskWorkflowNow = function(){ boot(); try{ if(typeof buildUI === 'function') buildUI(); }catch(e){} if(typeof toast === 'function') toast('✅ Task workflow patch active'); };
+})();
+
 </script>
 </body>
 </html>
