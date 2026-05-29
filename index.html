@@ -6231,7 +6231,7 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
       var notes = $('sub-notes');
       var holder = document.createElement('div');
       holder.className = 'verify-work-box';
-      holder.innerHTML = '<label class="fl2" style="color:var(--blue)">🧾 Submit Task For Verification *</label><textarea id="sub-content" class="fc" rows="5" placeholder="Please paste your content here for work verification...\nExample: final caption, ad copy, design text, completed checklist, published link details, etc."></textarea><div style="font-size:10px;color:var(--muted);margin-top:6px">Drive link optional hai, lekin verification ke liye content/summary yahan paste karna zaroori hai.</div>';
+      holder.innerHTML = '<label class="fl2" style="color:var(--blue)">🧾 Submit Task For Verification *</label><div style="font-size:12px;color:var(--text);font-weight:700;margin:0 0 6px 0;line-height:1.45">Before submitting, please recheck your work once.</div><div style="font-size:11px;color:var(--muted);margin:0 0 9px 0;line-height:1.55">If everything is checked, paste your final content below and submit it for verification.</div><label style="display:flex;align-items:flex-start;gap:8px;background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:11px;color:var(--text2);font-weight:600;line-height:1.4"><input type="checkbox" id="sub-recheck" style="margin-top:2px"> I have rechecked this work and it is ready for verification.</label><textarea id="sub-content" class="fc" rows="5" placeholder="Please paste your checked final content here...\nExample: final caption, ad copy, design text, completed checklist, published link details, etc."></textarea><div style="font-size:10px;color:var(--muted);margin-top:6px">Drive link optional hai, lekin final content/summary paste karna zaroori hai.</div>';
       if(notes){
         var fg = notes.closest('.fg') || notes.parentNode;
         if(fg && fg.parentNode) fg.parentNode.insertBefore(holder, fg);
@@ -6241,7 +6241,7 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
       }
     }
     var submitBtn = subBox.querySelector('button[onclick="submitWork()"]');
-    if(submitBtn) submitBtn.textContent = '📤 Submit Task For Verification';
+    if(submitBtn) submitBtn.textContent = '✅ Rechecked — Submit For Verification';
   }
 
   window.submitWork = async function(){
@@ -6254,7 +6254,9 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
     try{ driveLink = typeof getAllDriveLinks === 'function' ? getAllDriveLinks() : txt(($('sub-drive-link')||{}).value); }catch(e){ driveLink = txt(($('sub-drive-link')||{}).value); }
     var doneUnits = Math.max(1, parseInt(txt(($('sub-done-units')||{value:'1'}).value) || '1',10) || 1);
     if(!taskId){ if(typeof toast === 'function') toast('⚠ Please select a task first'); return; }
-    if(!content && !driveLink){ if(typeof toast === 'function') toast('⚠ Please paste your content or add a drive link for verification'); return; }
+    var recheckOk = !$('sub-recheck') || $('sub-recheck').checked;
+    if(!recheckOk){ if(typeof toast === 'function') toast('⚠ Please recheck the work and tick the checkbox before submitting'); return; }
+    if(!content && !driveLink){ if(typeof toast === 'function') toast('⚠ Please paste your checked final content or add a drive link for verification'); return; }
     if(!SURL){ if(typeof toast === 'function') toast('⚠ Connect Google Sheet in Settings'); return; }
     var t = findTask(taskId);
     if(!t){ if(typeof toast === 'function') toast('⚠ Task not found'); return; }
