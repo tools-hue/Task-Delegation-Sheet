@@ -1780,7 +1780,267 @@ function buildMeetingMailHtml(data){
   +(data.notes?'<tr><td style="padding:18px 28px 0"><div style="background:linear-gradient(180deg,#ffffff,#f5f3ff);border:1px solid #ddd6fe;border-radius:24px;padding:18px 20px;box-shadow:0 12px 30px rgba(124,58,237,.08)"><div style="font-size:11px;font-weight:900;letter-spacing:2px;color:#7c3aed;text-transform:uppercase;margin-bottom:10px">Notes</div><div style="font-size:13px;color:#334155;line-height:1.75">'+escapeHtml(data.notes)+'</div></div></td></tr>':'')
 
   +'<tr><td style="padding:24px 28px 30px"><div style="background:linear-gradient(180deg,#f8fafc,#e2e8f0);border:1px solid #cbd5e1;border-radius:24px;padding:20px;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.9)"><div style="display:inline-flex;align-items:center;gap:10px;background:#ffffff;border:1px solid #ccfbf1;border-radius:999px;padding:8px 14px;box-shadow:0 8px 20px rgba(15,23,42,.08)"><img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wgARCADIAMgDASIAAhEBAxEB/8QAHAABAQADAQEBAQAAAAAAAAAAAAcFBggEAQID/8QAGwEBAQADAQEBAAAAAAAAAAAAAAUDBAYHAgH/2gAMAwEAAhADEAAAAeqQAAAAAAAAAAAAAAAAAAADG/n3kvBzFqcj0TpjfuUur9mGG/ygAAAAAAAAGMjVa5S383vwW703j/ZMLb9S22v5gG1EAAAAAAAA8fmgOibe7tWt7f4tfpaNYJBX6fnASaoAAAAAAA1XLi2rF6FF9Pp/HlPFt1PJdOduiudej8to1fkFfj1gkVgAAAAAAEa3/mHB03gtcs6f+9uGfPvz0rwy6869Fc6yK1Gr8gr8esEisAAAAABqsVrPMua57Ns3T2fmzN+ieduieq8thnz78ryrrzr0VzrIrUavyCvx6wSKwAAAAAE+hnQMN6OZVvD7vDnlTfonnbonLihnz78ryrrzr0VzrIrUavyCvx6wSKwAAAAAGmQ28x3seR3/AMOZ8ersyromG3bLihHzK/Ksuw869HQiVV2+vy6oyKgSqoAAAAAGs67nNZ0eqwNciWO1L3Qkfxf6+sf8rjMsI+bf5Z5qGeZ0P+pBX9qCGacAAAAABhYb0Z59S/Etd6W5e1rmx/M3Ysmlzfkrzof5lz0Uq+5ZZ0wq/wA+55gZdAAAAAAABw33JJDnal7/AJknsM7FmJidr2f9ku6Rm1JAAAAAAAAAAAAAAAAAP//EACsQAAEEAQIEBQQDAAAAAAAAAAUCAwQGAQA1BzA0QBESExQVFiEyNjFQYP/aAAgBAQABBQL/AAcmfGh4lXgWxlOfFPaEcSswyNgLOu5zlWavC9+c7Qm+qMPzbCGMFyiy0nXDmF9+0OrwgPJk5ezVgGDcyz09uXHqsDI4H2SpkdOXysOMzZLK6ceixfV1SceEvtDS8NkX5GX1Cqs5IHapXWdmSJMCopKdkjMBQcPEDWPARqldZ2Jg8gQ47fGGUmTUg3KjwspyK3M3tOqV1nY3x5LMh11TyqfU0+Qtugrcze06pXWdgdPMA4xIk+WlRYnk0D2gtugrcze06pXWc6yyHIouRZJzCX5EgnJkAFh06B7QW3QVuZvadUrrOddXfRBZyp1dBGNJVduq0D2gtugrcze06pXWc68pyoBGjYZxSPwu3VaB7QW3QVuZvadUrrOdbdn1SPwu3VaB7QW3QVuZvadUrrOdbdn1SPwu3VaB7QW3QVuZvadUrrOdZmHJAr4idqoRHoqLdCflSfiJ2g7amhZMXMcIjRcxsgXQp0Z8RO1UYUiLK51leWwCost6YKAkZT1wyUh4zFnR5yTxmeUOS3DFQlKJxW2Wpsd958vBjOpVhaeda/17h5s9d/dx4tovbArXwt2r/wB7wUu3tpV7exJiRRH0wEr9aZMiOHc1bsXnGoaiAqv2XNZapMN6YYiFMB7TXvUO24w1IrFmsR/6oVdmlRx8yFkjXhNjVXx/D8Y7Eh89yO09n+NVU0h/iKUv7IW1KxjKWmWmtXqwOVoEVMEYwhbDS1Yz447FvPsLSvPv7TxOlLlWbh5ggJiOh25NC4nfam8TVxFReFS1xzHYp4dxvTVw8jeS009myrr1fWFjucI2VMWOnNWITa6i3aNVimYrRD+h/8QAOREAAAQDAwgGCQUAAAAAAAAAAQIDBQAEERIhQQYTMDFRYXHBFTM0gbHwFCIjQESRoeHxJDI1QmL/2gAIAQMBAT8B90IW2YC1pEtkccwAZdYO6/6/aH9vlWxRNBCojSo1+mjk2OdepwpEDCVMP3G86xhN2bmo6bYQ1QLdWtacR80h6mvTJ9VQNVaB3XaLJ6Qmn2YELFlIo3m5Bv8ACMqMpSMqINTTcOJtnD/W0cOOpsERlgEd+hUUIiW2cboyfaRehzoD7INY7dweboyhyqRkQBnZfVALhMH1Au/aP5h460vCGvswaFrybF5C1MXI+NMA5jDnlOgIi0tNyZAoIh4F3b8fH4jv5w8daXhDX2YNAzZNGdpj0yZPZQJv1jyDaPy3ZVZSFXkjSrYNEtVQxwoG7x4Qz9abhHxHfzh460vCGvswaB0eppOV6LSGhBvHfu4XQb+LDzjDP1puEfEd/OHjrS8Ia+zBoHUhzL1AMIMQ3RoFpf8AeGkhiqmtBhGaPn62cecO5DGULZDCG0BLLAA6BEheglT0vth4BE+2y8yuJlBslImUbg4xLNqLeorMF9cATtlqG3b8oUkVXNSWJNpZsTV9YLN91QuCE2mSEFFzLDmiiBa0vEce6HGTFvmjyxhrT86CQck5dA8pMp2yGGuul8IvaC55hWZLQDEAoFvwwrzgX/8AU2817KxYs1/rxgj+kgohmEaESrdW+8Bx74knRNBM6EwlbIYbWul8T84afmTzJ9Zvf//EADMRAAECBAEICAcBAAAAAAAAAAIBAwAEBREhEhQwMTNBcYETIjI0RFFhwRU1QJHR4fCh/9oACAECAQE/AfpFWyXg6gidkYlXTeRSLRhOyslLETwoRbk/t0OMPTF3yS18fL7RLB0bSJoqiDEg0iqdzXUkUSlZ8azU1iibvP8AUVTCaXloWmjeLIBLrE8ZSPUNOtFNo5vos7PY+Sfn2SKLsi4xVe9Ly0K1FZE7tdqPhboAk5N9ol1fmPD8vaKLsi4xVe9Ly0DlTCUl+hbG7i+mqKPT1bnUWZTra/8AL/eK1sh4x4fl7RRdkXGKr3peWgpEgyRZ4eJak9IH5qv9uitbIeMeH5e0UXZFxiq96XloKS4Ay9iXfAmPxRSvh+orBiTQ5K746VvN7ZSavaKOYi0WUu+KmqFMqqaAlXOUT0hp4gGyY3WDeJ1BDVjZYR0WUNW1vbdCvuYDk4w050oIegdZUiQwWywUsQoCB5xmvUtfG97wsqpIWUWKw4wpKhCtlhptGgQE+v8A/8QAQBAAAQMCAgUJBAgEBwAAAAAAAQIDBAAREiEFMXJzsRATIjJAQVFhwTBScZEUFSMzNEKS0URQoeFgY4Gis/Dx/9oACAEBAAY/Av8AAd3322ttVqsha5CvBtP70CRY+HZXPoZQJH5cYypbUiS62oGxQnoW+VXJuait26IVjV/pn2WQ6g2WhBIq5eT+gVzrmHEBbEE2vySpZHg2nifTsssqNhzZqwyRX2qsLCBiVbWryoPQWw2+2m3Np1LH71HbUnC4oY1fE9jIL7YI7ioUpxclsJTmelWEXbipPRb8fM1iV1eNP7Hr2WWVaucVxrwT4U9PkXbZSgqbT3r/ALckjY9eyKfkKwoHzPkKeethC1FQT4VF51N0FxPRPfnUrdnkkbHr2JtCmi5jF8jVzGX+qudeNkjqNjUmruix901F3qeNS92eSRsevYo5PuHKrmm58sBRObTfh5mpe9VxqLvU8al7s8kjY9ew43Ok6rqNDWqlPvqxLOodw8hWJfW8KibAqXvVcai71PGpe7PJI2PX26ltLLa8QzFfi3CrwvWJxS33lZDvNMGR984nFh93kibAqXvVcai71PGpe7PJI2PX261a+kmvFRqQ+4kKfRYJPu66jbB5ImwKl71XGou9TxqXuzySNj19usDM401c5rqX8U+tRtg8kTYFS96rjUXep41L3Z5JGx6+3VtDkl/FPrUbYPJE2BUveq41F3qeNS92eSRsevt1bQ5JfxT61G2DyRNgVL3quNRd6njUvdnkkbHr7dSGkKcViGSRX4R79BqVzzS2rlNsQt40wWWVuAJzwi9fhHv0GoyFpKVBGYNSVJjOqSXCQQmoylRnUpDiSSU+dSUIBUooNgK/CPfoNPl5lbYKPzC3t5bjayhYTkpJsRnTq33VvK50i6zfuFPsrkOrZCnOgVZUsGUzdvrDGOjRVHeQ8BrwKvX1Xo9wtAHCSk2ue/OmFuyzJaX3YioHxGdNOOPtspdTiTzirXpbTbyFuI6yUnMVzTstltz3VLFApNwe8e3m7HrT2+PAVI23amMP4ubxuK6Jt30YbSiWiSjPww3FSNt2nGXdFc4G1lIUtev/AG1oh0JwBbalYfDq1LntvqckOMd+oGpct5a+euQg377XqTGUbpaIUjyvf9vbyo6OutGXxp+JJirKseK2og0/pNaCho4rHxJqbJU0p1AW4CEd2dL0gGylpJKj5ZWAr6xS1zkdairyz1iorMaK4FIJy1k3rQraxhWhopI87JpUdPWWwAPjapkB6OvniTh7rG1s6fkOpKOfIwg+A/8AewdNtK7e8L8k2GtrDdb6QSddj/amNBNQAvGptKnEuYcJV5W8xRxWw+dfZoSi/ui1KmsNNPOpcSnC7qzqDJgaO+sHnijG2lVsII10FLbSojvIrLsWk9MD+A0qnGf8talg8P61orS5/j9KqwbtCkBPE/KtEaLdakyYJRzq40XrunP9q0427ElxoTX2sNEtNiB0sv6Cn9OuuuuaQdl4FqK8iPOtB71r/jNaPjSnpX2z3RhxBnI1ZH/vfWn4IQ7HjNLBRGdViLWZy7Fp5CpK1jSysSuj92cRIt860ClMlaBok4k9H7w3BN/lUZ8SHYM2N91IZ1in0v6QkaTcfN1rkHgKfjI0tLbgrXziI35UH1qFBXJUymMpKgtKb3sLVEX9Jchyoi8bT7edtX7Cpsv6c7MXKAx88M7+N/5F/8QAKRABAAEDAgUEAwADAAAAAAAAAREAITFR8BBBcYGhMEBhkbHB0VBg4f/aAAgBAQABPyH/AEOJNzYp8q+f5hTTxEq5e1gDZN0vik1izxpEKdqTKsrUqS7a/sB39rJCBpMNJgA5v8KPmrTl1xwlx4V7UF8O41hQctadiRRqMP7Q09QIDy2vSiEDSHJfoQdvZq26EJKMdUgV+jNd3Jr9j8UqLFRFCANvalugfmVeljFCV5iE1+PyoIILFeJ9o5GUnN0ObT1u0ZuaXiORYQz8UAwgIg6cPE+yOxlnBF66B4jfxTrACLP9+anNLBQ963TRW06cPE+yZF7Gq9SH6GlBvZ7c/Y+K3DVW6aK2nTh4n2KT2Iy5+j5rDzoYeQaVaF8NHDW4aq3TRW06cPE+uOtBnhzWUJik69ya5oFLMLkcX4nm8dbhqrdNFbTpw8T66BiUR91IGWVMVCeRuj5tmto1463DVW6aK2nTh4n1xIyRnesqDnpw62jXjrcNVbporadOHifXbfrx62jXjrcNVbporadOHifXbfrx62jXjrcNVbporadOHifXMpK3jnhAWIXjlRZGRPC/CAtDgcI048UKJNOXECAQoTLwpV4QCFwC8mfXm1fwAYaKSSPYYL0A8MemFi1D9ErTQYZva9Nx6EUOtZB30kSnIC+NKacLfE4k5G+SgXAhIoHn1KNd8ivVrVaACdaCIaRJE9fw34cJW66tJ1dxMYqjTSFlXXS1Xtz+9oC6E9IsSTQXpSWSYooAaCoJGE7tIYExYC46ytPrnpyXD78vXjYlE+4/FWzHJWiER6VLrAmF4NYvWfFMgc6chnK+rtf40ocGuFG+8m7HapICLpsMB0q7OGsAWkjCccWE81NRDLKkg9JqFaEsN6/f8PYEF/BGFAAAgORUxjMjNGIjRVDedQtNeYEzzooChcwoVjtHL6qGJh1B0I8qx52ZnH7W+KxJLOp3oAUI8z2TWrCLYoKJddzdmBRAC+fAQHOPrLSDGm0Am/ux+6m77BdYHO96TBYoHVyABYyFICfsVLPd6IWWuJ6eyIfJMbS2qHwpy8gBvNaJfKlmkvNfJOf2Ue4s2MRFyCPmo54wDrW/Jbl3o20wFPvO9HG2Cybda3/ChpOyMizYzKv+C//aAAwDAQACAAMAAAAQ8888888888888888888841G8888888888dE/888888888L2+888888884pxq8888888885ZCq88888888xKDCq888888885qDCq88888888uqLPs38888888Q+MzAV8888888e9voG988888888sMAE888888888888888888//EACURAQABBAEDBAMBAAAAAAAAAAERACExQWEwUbFxgaHwEECRwf/aAAgBAwEBPxD9SdRJCWwTtb270KAN4N3oo8qdNKVC3YEABh126YZG2QXwd0waywU10E3AzTOVmYtjAWJlSPYWI9Yn36RSsabtw3X8F3QlARoGuEW1/goRCVfJ6LiEN1IwPECS5S73ceq1REL0pe42md8zCsj7XLXy3z0bzyRXDNKmjWjBfAUmMMYYtf1uxa/4L7XLXy3z0EKsoIJXSzYEwKW2aQdaHYiMuxbHD+vtcn4X2uWvlvnoG5GXMzgk9mm3NiK+R/uvtcn4X2uWvlvnoC1pDAu2riLsRfPVPinITZW2RxaLyPAXdGLDLn16CUCBTF4wTmKca2xM3la14KhMPjsyhGJPLTQ8IddRFemECJe76EHCAXkMHAXlT5uwEviRAMask89CCjkBMG5BzBa1FaEJuJYSzm4CWpERINq49Gbt4xbmjSXMTUkbi0KYh9qjeKCSByDI2EoMYTBoAA9gL7z+/wD/xAAnEQEAAQMDAwQDAQEAAAAAAAABEQAhQTFRYTCBoXGRsfBAwfHR4f/aAAgBAgEBPxD8SQhMUojd7eP+1H+EwR5/XTYIW8Cts7DL7XqC1WALh2bRpvrfMr6xL3v0m+BGEzlvY8uhlAvBW3Nb8MGfTUgTSPgdEDKMf2mrBkhIwbsNuN6lLSKmbWeB/pa1fe4K8P4HRiEMUNiSJd+D3tQqVtlrpM8tjBrewVvtcFeH8DoRHvYUMGAbl1Zg7uzN+vg3hYF7p4edPrcNFb7XBXh/A6CoIG5pDJzfXGK8f9a+tw0VvtcFeH8DoMgjLVDBViFms205o9F4I4aMgcyh6JyQwU9skGnodC41pfLR0ZKXfSkZc2jtt71Exwum14btHTExYmwY70RhE/zoQdUjSbUmUolbZzH6o8TGfTarv0N4tZMdqi7hGk2pAJD8/wD/xAAqEAEAAQMEAQMDBAMAAAAAAAABEQAhMUFRYfBAIDCBEHHBkaGx0VBg4f/aAAgBAQABPxD/AENHA2TJwLL8VfScEMuhYPxNLhLSlaXJ48XWBS3Mu5ClhZByVDC0YAwoJfM08z5WRytT9YokCy4fFAXYwQASMNmjwdKCBQ4LEBjDETGBbx8RWFBn3f6f1vilvzXglID7qh805nRbVzf6of1rANgmgudmL4gQUMVgBgAWfsdEgNCOFgDRsXhkZAUgZEWzSDvwDGgip0AlpXfZNc48rQxgSyopptjD/wAc0Q42AgCHik9vLV0DmphJGfHLzTVigQAYew/Oi10CAAgDBXSbPEEzaHfR6g/bLALTl8fxZhbS3zSEkkoaSH8NaBcZBAGg+nSbPCFlgGQQi40wMMDKtik5fMsbobqCVd4ACaebkDwcfb0NHOk2eE4koiy6uZTgcDYoNKFqemk6jRlvY9ABo50mzwWZgMADq7Oq+JUKasiLiXwA/VbsqtCDnJ8c3n+K6Lb0wGjnSbPfHeFjA3E1IEBn35eKnziV0Ivmwb1Cko5GwWG4ljBOWui29MBo50mz30DRIcS6qfLCt1disgVCxeFKA5RIWWfoL0W3pgNHOk2e+gUMGWpmMF9A2P7rpNvrF6Lb0wGjnSbPB+6Tb6xei29MBo50mzwfuk2+sXotvTAaOdJs98+hRzhcwV278UsMU2iSiS8SfrRbX7ivhgtXbvxSEi4DaI4aRjWeTRELjQ6aiyRVSwFLhD0sWAMtdu/FCwc+QWBT3wcbXIhkLllqYlJEvBSxK25o8Q7+ORsEQRa1EIwRAEOggvqhRj7SRuCDbDmp3NMYUVYwRlLMgNAETk4ATEI/AlSnzNnsJEwSRuUDFAtHEBtUIOYVbYLb5owvDiWESyeFTY+xj7hhSBYbSz8VOgG0uBCyov4d6eUhBczD/FXLTShIkCQGy5zUI94QOLBITGDGKCAWNDupYHKzFWxdqxqccQy4N2j3xjnBWxAxuvfSMSfgRZXQUE80hEIhgoZi1E5s1BcTCT9VwDJOKhaI5MTO0DBdM5p5qfYCkYLkYoNlh5kgAN5Jcr3KYWtRADAcGqddKmTIYYgSWYRxSEBFRACuhAo0p4ZDgvIICJnjNSMgMUcbgSjclhPAyLqs+xRijbGgCAKPkIyXaUZblxSReFc8I7BObLZpuSQUWazNop2h5UDlZeiUu0toqEOi9D7wE68ssEAtpS2KvJqjhvZElBkaRJE8JQE2aQtvHcalam9UhHH7BSmRRZJpBYLwUvT8TJbCmxghKJVpOGoZHTqWq4tFinNFpMUJk8/uN4ETKygUIlbpmdwFLAIWYrPhF79S5ZGLbxjvTYvlcjjNtpz2pWd32ELIICSQgreFGBPFGi+GVASUwYiiuIniSSYMMVEWVRSFOcmIIgSSttRnMErEFsrsIiPJG/Ot7BtJVjjU2v8A4H//2Q==" alt="UpGro Media" style="width:28px;height:28px;border-radius:8px;object-fit:contain"><span style="font-size:13px;font-weight:900;color:#0f172a">UpGro Media Mission Control</span></div><div style="margin-top:12px;font-size:12px;color:#475569;line-height:1.7">Organized by '+escapeHtml(data.organizer||cu?.name||'UpGro Media')+'</div><div style="margin-top:6px;font-size:11px;color:#94a3b8">Official premium meeting invite · UpGro Media</div></div></td></tr>'
-  +'</table></td></tr></table></body></html>';
+  +'</table></td></tr></table><script>
+/* ============================================================
+   FAST MULTIPLE TASK ASSIGN PATCH v7
+   - Restores comma-to-new-row multiple assignment
+   - Save is instant: local UI first, server/mail sync in background
+   - Does not touch sidebar navigation or employee UI
+   ============================================================ */
+(function(){
+  'use strict';
+  if(window.__UG_FAST_MULTI_TASK_V7__) return;
+  window.__UG_FAST_MULTI_TASK_V7__ = true;
+
+  var D = document;
+  function byId(id){ return D.getElementById(id); }
+  function val(id){ var el=byId(id); return el ? String(el.value||'').trim() : ''; }
+  function setVal(id,v){ var el=byId(id); if(el) el.value = v || ''; }
+  function html(s){
+    return String(s==null?'':s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});
+  }
+  function msg(s){ try{ if(typeof toast==='function') toast(s); else console.log(s); }catch(_){ console.log(s); } }
+  function today(){ try{return new Date().toISOString().split('T')[0];}catch(_){return '';} }
+  function idCode(){
+    try{ if(typeof generateTaskId==='function') return generateTaskId(); }catch(_){ }
+    return 'UG-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
+  }
+  function safeName(email){ try{ if(typeof uname==='function') return uname(email); }catch(_){ } return String(email||'').split('@')[0] || 'Employee'; }
+  function safeDesig(email){ try{ if(typeof udesig==='function') return udesig(email); }catch(_){ } return 'Team'; }
+  function safeDisplayName(name,email,desig){
+    try{ if(typeof normalizeDisplayName==='function') return normalizeDisplayName(name,email,desig); }catch(_){ }
+    return name || safeName(email);
+  }
+  function safeAssignedBy(){
+    try{ if(typeof displayAssignedBy==='function') return displayAssignedBy((window.cu&&cu.name)||'Admin'); }catch(_){ }
+    return (window.cu&&cu.name) || 'Admin';
+  }
+  function activeUrl(){ try{return String(window.SURL||SURL||localStorage.getItem('ugv4_url')||localStorage.getItem('upgro_url')||'').trim();}catch(_){return '';} }
+  function getTotalUnits(){ var n=parseInt(val('add-units')||'1',10); return Math.max(1, isNaN(n)?1:n); }
+  function priority(){ return val('add-pri') || 'Medium'; }
+
+  function installStyle(){
+    if(byId('ug-fast-multi-style')) return;
+    var st=D.createElement('style'); st.id='ug-fast-multi-style';
+    st.textContent = ''+
+      '#ug-multi-box{margin-bottom:12px;padding:12px;border:1px solid var(--border);border-radius:12px;background:#f8fafc}'+
+      '.ug-multi-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}'+
+      '.ug-multi-title{font-size:11px;font-weight:800;color:var(--text);text-transform:uppercase;letter-spacing:.6px}'+
+      '.ug-multi-hint{font-size:11px;color:var(--muted);margin:0 0 10px;line-height:1.45}'+
+      '.ug-multi-row{display:grid;grid-template-columns:30px minmax(220px,1fr) 240px 34px;gap:8px;align-items:start;margin-bottom:8px}'+
+      '.ug-multi-num{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:3px}'+
+      '.ug-multi-input{height:36px}'+
+      '.ug-multi-emp{height:36px}'+
+      '.ug-multi-remove{height:36px;width:34px;padding:0;justify-content:center}'+
+      '.ug-original-hide{display:none!important}'+
+      '@media(max-width:768px){.ug-multi-row{grid-template-columns:28px 1fr 34px}.ug-multi-emp{grid-column:2/4}}';
+    D.head.appendChild(st);
+  }
+
+  function empOptions(selected){
+    var sel = byId('add-emp');
+    var opts = [];
+    if(sel && sel.options && sel.options.length){
+      opts = Array.from(sel.options).map(function(o){ return {value:o.value||'', text:o.textContent||''}; });
+    } else {
+      var list=[]; try{ list = (Array.isArray(window.empReg)?window.empReg:empReg)||[]; }catch(_){ list=[]; }
+      opts = [{value:'', text:'— Select Employee —'}].concat(list.filter(function(e){return e && e.email && e.active!==false && !e.isAdmin;}).map(function(e){return {value:e.email, text:(e.name||e.email)+' — '+(e.desig||e.role||'Team')};}));
+    }
+    if(!opts.some(function(o){return !o.value;})) opts.unshift({value:'', text:'— Select Employee —'});
+    return opts.map(function(o){return '<option value="'+html(o.value)+'"'+(o.value===selected?' selected':'')+'>'+html(o.text)+'</option>';}).join('');
+  }
+
+  function renumber(){ Array.from(D.querySelectorAll('.ug-multi-row')).forEach(function(r,i){ var n=r.querySelector('.ug-multi-num'); if(n) n.textContent=String(i+1); }); }
+
+  function splitInput(input,row){
+    var raw = input.value || '';
+    if(raw.indexOf(',') < 0) return;
+    var parts = raw.split(',').map(function(x){return x.trim();}).filter(Boolean);
+    if(!parts.length){ input.value=''; return; }
+    input.value = parts[0];
+    var emp = (row.querySelector('.ug-multi-emp')||{}).value || '';
+    parts.slice(1).forEach(function(p){ addRow(p,emp); });
+    var rows = D.querySelectorAll('.ug-multi-row');
+    var last = rows[rows.length-1];
+    if(last){ var inp = last.querySelector('.ug-multi-input'); if(inp) inp.focus(); }
+  }
+
+  function addRow(task,email){
+    var list = byId('ug-multi-list'); if(!list) return;
+    var row = D.createElement('div'); row.className='ug-multi-row';
+    row.innerHTML = '<div class="ug-multi-num">1</div>'+
+      '<input class="fc ug-multi-input" type="text" placeholder="Task likho, comma press karo..." value="'+html(task||'')+'">'+
+      '<select class="fc ug-multi-emp">'+empOptions(email||'')+'</select>'+
+      '<button type="button" class="btn bd bxs ug-multi-remove">×</button>';
+    list.appendChild(row);
+    var inp=row.querySelector('.ug-multi-input');
+    var rem=row.querySelector('.ug-multi-remove');
+    if(inp){
+      inp.addEventListener('input', function(){ splitInput(inp,row); });
+      inp.addEventListener('keydown', function(e){ if(e.key===','){ setTimeout(function(){ splitInput(inp,row); },0); } });
+    }
+    if(rem){ rem.onclick=function(){ var rows=D.querySelectorAll('.ug-multi-row'); if(rows.length<=1){ if(inp) inp.value=''; var s=row.querySelector('.ug-multi-emp'); if(s) s.value=''; } else row.remove(); renumber(); }; }
+    renumber();
+  }
+
+  function hideOriginalForAdd(){
+    var task=byId('add-task'), emp=byId('add-emp');
+    [task,emp].forEach(function(el){ if(!el) return; var fg=el.closest('.fg')||el.parentElement; if(fg) fg.classList.add('ug-original-hide'); });
+    var box=byId('ug-multi-box'); if(box) box.style.display='block';
+  }
+  function showOriginalForEdit(){
+    var task=byId('add-task'), emp=byId('add-emp');
+    [task,emp].forEach(function(el){ if(!el) return; var fg=el.closest('.fg')||el.parentElement; if(fg) fg.classList.remove('ug-original-hide'); });
+    var box=byId('ug-multi-box'); if(box) box.style.display='none';
+  }
+
+  function injectBox(){
+    installStyle();
+    var task = byId('add-task'); if(!task) return;
+    var taskFg = task.closest('.fg') || task.parentElement;
+    if(!byId('ug-multi-box')){
+      var box=D.createElement('div'); box.id='ug-multi-box';
+      box.innerHTML='<div class="ug-multi-head"><div class="ug-multi-title">📋 Multiple Task Assign</div><button type="button" class="btn bo bxs" id="ug-add-row">+ Add Row</button></div>'+ 
+        '<div class="ug-multi-hint">Task likho aur comma <b>,</b> press karo. Har comma ke baad automatic new task row add hogi. Har row me employee select karke ek click me assign karo.</div>'+ 
+        '<div id="ug-multi-list"></div>';
+      if(taskFg && taskFg.parentNode) taskFg.parentNode.insertBefore(box, taskFg);
+      var btn=byId('ug-add-row'); if(btn) btn.onclick=function(){ var first=D.querySelector('.ug-multi-emp'); addRow('', first?first.value:''); };
+    }
+    var list=byId('ug-multi-list'); if(list){ list.innerHTML=''; addRow('', ''); }
+    hideOriginalForAdd();
+  }
+
+  function collectRows(){
+    var rows = Array.from(D.querySelectorAll('.ug-multi-row')).map(function(r){
+      var inp=r.querySelector('.ug-multi-input'), sel=r.querySelector('.ug-multi-emp');
+      return {task:String((inp&&inp.value)||'').trim(), email:String((sel&&sel.value)||'').trim()};
+    }).filter(function(x){ return x.task || x.email; });
+    // Also support direct comma paste into original textarea if visible.
+    var raw = val('add-task');
+    var email = val('add-emp');
+    if(!rows.length && raw){ rows = raw.split(',').map(function(x){return x.trim();}).filter(Boolean).map(function(t){return {task:t,email:email};}); }
+    return rows;
+  }
+
+  var baseOpenAdd = window.openAddTask;
+  window.openAddTask = function(){
+    var r; try{ r = baseOpenAdd ? baseOpenAdd.apply(this, arguments) : undefined; }catch(e){ console.error(e); }
+    setTimeout(function(){
+      try{ if(typeof refillEmpDropdown==='function') refillEmpDropdown(); }catch(_){ }
+      injectBox();
+      var title=byId('m-add-t'); if(title) title.textContent='📋 Assign Multiple Tasks';
+    },0);
+    return r;
+  };
+
+  var baseOpenEdit = window.openEditTask;
+  window.openEditTask = function(){
+    var r = baseOpenEdit ? baseOpenEdit.apply(this, arguments) : undefined;
+    setTimeout(showOriginalForEdit,0);
+    return r;
+  };
+
+  function makeTask(row){
+    var taskCode = idCode();
+    var email = row.email;
+    var empName = safeName(email);
+    var desig = safeDesig(email);
+    var pri = priority();
+    var totalUnits = getTotalUnits();
+    var now = new Date().toLocaleString('en-IN');
+    var t = {
+      id:taskCode, taskCode:taskCode, taskId:taskCode,
+      task:row.task, Task:row.task, TaskName:row.task, WorkName:row.task,
+      email:email, assignedToEmail:email, empEmail:email, EmployeeEmail:email, AssignedTo_Email:email,
+      empName:empName, assignedTo:empName, AssignedTo_Name:empName,
+      assignedToLabel:safeDisplayName(empName,email,desig),
+      by:(window.cu&&cu.name)||'Admin', assignedBy:(window.cu&&cu.name)||'Admin', assignedByLabel:safeAssignedBy(),
+      adate:val('add-ad')||today(), AssignDate:val('add-ad')||today(),
+      ddate:val('add-dd'), DueDate:val('add-dd'),
+      priority:pri.toLowerCase(), Priority:pri,
+      status:'assigned', Status:'Assigned', ts:now, Timestamp:now,
+      notes:val('add-note'), Notes:val('add-note'), Description:val('add-note'),
+      references:val('add-ref'), References:val('add-ref'),
+      adCopy:val('add-copy'), AdCopy:val('add-copy'),
+      driveLink:val('add-drive-link'), DriveLink:val('add-drive-link'),
+      totalUnits:totalUnits, Count:totalUnits, doneUnits:0, DoneQty:0, pendingUnits:totalUnits, PendingQty:totalUnits,
+      desig:desig, changeCount:0, ChangeCount:0, acceptedAt:'', completedAt:'', _source:'tasks'
+    };
+    try{ if(typeof ensureTaskMeta==='function') t = ensureTaskMeta(t); }catch(_){ }
+    return t;
+  }
+
+  function payloadFromTask(t){
+    var taskName = t.task || t.Task || t.WorkName || '';
+    var htmlMail = '';
+    try{ if(typeof buildTaskMailHtml==='function') htmlMail = buildTaskMailHtml('assign', Object.assign({}, t, {countSummary:(typeof getTaskQtySummary==='function'?getTaskQtySummary(t):''), changeLabel:(typeof getTaskChangeLabel==='function'?getTaskChangeLabel(t):''), status:'Assigned'})); }catch(_){ }
+    return Object.assign({}, t, {
+      action:'addTask', sendEmail:true,
+      taskId:t.taskCode, taskCode:t.taskCode, TaskID:t.taskCode,
+      task:taskName, Task:taskName, TaskName:taskName, TaskTitle:taskName, taskName:taskName, workName:taskName, WorkName:taskName,
+      'Work Name':taskName, 'Task Name':taskName, 'Work Title':taskName, 'Task Title':taskName,
+      AssignedTo_Email:t.email, assignedToEmail:t.email, empEmail:t.email, EmployeeEmail:t.email, 'Assigned To Email':t.email,
+      AssignedTo_Name:t.assignedToLabel || t.empName, assignedTo:t.assignedToLabel || t.empName, empName:t.assignedToLabel || t.empName, EmployeeName:t.assignedToLabel || t.empName, 'Assigned To Name':t.assignedToLabel || t.empName,
+      by:t.by, assignedBy:t.by, AssignedBy:t.by, AssignedBy_Name:t.assignedByLabel, 'Assigned By Name':t.assignedByLabel,
+      emailHtml:htmlMail, emailBody:'Task ID: '+t.taskCode+'\nTask: '+taskName+'\nAssigned To: '+(t.assignedToLabel||t.empName)+'\nAssigned By: '+(t.assignedByLabel||t.by)+'\nStatus: Assigned'
+    });
+  }
+
+  function postBackground(payload){
+    var url = activeUrl(); if(!url) return;
+    setTimeout(function(){
+      try{
+        fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)}).catch(function(e){console.warn('background task sync failed',e);});
+      }catch(e){ console.warn('background task sync error',e); }
+    },0);
+  }
+
+  function refreshAfterSave(){
+    try{ if(typeof populateTaskFilterOptions==='function') populateTaskFilterOptions(); }catch(_){ }
+    try{ if(typeof populateSubSel==='function') populateSubSel(); }catch(_){ }
+    if(window.requestAnimationFrame){ requestAnimationFrame(function(){ try{ if(typeof buildUI==='function') buildUI(); }catch(e){console.error(e);} }); }
+    else setTimeout(function(){ try{ if(typeof buildUI==='function') buildUI(); }catch(e){console.error(e);} },0);
+  }
+
+  var baseSaveTask = window.saveTask;
+  window.saveTask = function(){
+    // Edit mode: original edit flow is safer.
+    try{ if(typeof editTaskId !== 'undefined' && editTaskId){ return baseSaveTask ? baseSaveTask.apply(this, arguments) : undefined; } }catch(_){ }
+
+    var box = byId('ug-multi-box');
+    var isMultiMode = box && box.style.display !== 'none';
+    if(!isMultiMode){ return baseSaveTask ? baseSaveTask.apply(this, arguments) : undefined; }
+
+    var rows = collectRows();
+    if(!rows.length){ msg('⚠ Please add at least one task'); return; }
+    var bad = rows.find(function(x){ return !x.task || !x.email; });
+    if(bad){ msg('⚠ Har task ke samne employee select karo'); return; }
+    var url = activeUrl();
+    if(!url){ msg('⚠ Connect Google Sheet in Settings'); return; }
+
+    var tasks = rows.map(makeTask);
+    try{ if(Array.isArray(window.allTasks)) tasks.forEach(function(t){ allTasks.push(t); }); }catch(_){ }
+
+    // Close modal and update UI immediately. No waiting for network/mail.
+    var modal = byId('m-add'); if(modal) modal.classList.add('hidden');
+    var list = byId('ug-multi-list'); if(list){ list.innerHTML=''; addRow('', ''); }
+    refreshAfterSave();
+    msg('✅ '+tasks.length+' task(s) assigned. Sync/mail background me ja raha hai.');
+
+    tasks.forEach(function(t){ postBackground(payloadFromTask(t)); });
+    return Promise.resolve({success:true, count:tasks.length});
+  };
+
+  // Make existing assign buttons use restored openAddTask.
+  D.addEventListener('click', function(e){
+    var btn = e.target && e.target.closest && e.target.closest('.assign-main-btn');
+    if(btn){ e.preventDefault(); e.stopPropagation(); window.openAddTask(); }
+  }, true);
+
+})();
+</script>
+
+</body></html>';
 }
 function getTestMailTarget(){
   const el=$('test-mail-email');
@@ -3636,7 +3896,267 @@ if(data.action === 'sendMeetingInvite'){
         +'</td></tr>'
 
         +'</table></td></tr></table>'
-        +'</body></html>';
+        +'<script>
+/* ============================================================
+   FAST MULTIPLE TASK ASSIGN PATCH v7
+   - Restores comma-to-new-row multiple assignment
+   - Save is instant: local UI first, server/mail sync in background
+   - Does not touch sidebar navigation or employee UI
+   ============================================================ */
+(function(){
+  'use strict';
+  if(window.__UG_FAST_MULTI_TASK_V7__) return;
+  window.__UG_FAST_MULTI_TASK_V7__ = true;
+
+  var D = document;
+  function byId(id){ return D.getElementById(id); }
+  function val(id){ var el=byId(id); return el ? String(el.value||'').trim() : ''; }
+  function setVal(id,v){ var el=byId(id); if(el) el.value = v || ''; }
+  function html(s){
+    return String(s==null?'':s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});
+  }
+  function msg(s){ try{ if(typeof toast==='function') toast(s); else console.log(s); }catch(_){ console.log(s); } }
+  function today(){ try{return new Date().toISOString().split('T')[0];}catch(_){return '';} }
+  function idCode(){
+    try{ if(typeof generateTaskId==='function') return generateTaskId(); }catch(_){ }
+    return 'UG-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
+  }
+  function safeName(email){ try{ if(typeof uname==='function') return uname(email); }catch(_){ } return String(email||'').split('@')[0] || 'Employee'; }
+  function safeDesig(email){ try{ if(typeof udesig==='function') return udesig(email); }catch(_){ } return 'Team'; }
+  function safeDisplayName(name,email,desig){
+    try{ if(typeof normalizeDisplayName==='function') return normalizeDisplayName(name,email,desig); }catch(_){ }
+    return name || safeName(email);
+  }
+  function safeAssignedBy(){
+    try{ if(typeof displayAssignedBy==='function') return displayAssignedBy((window.cu&&cu.name)||'Admin'); }catch(_){ }
+    return (window.cu&&cu.name) || 'Admin';
+  }
+  function activeUrl(){ try{return String(window.SURL||SURL||localStorage.getItem('ugv4_url')||localStorage.getItem('upgro_url')||'').trim();}catch(_){return '';} }
+  function getTotalUnits(){ var n=parseInt(val('add-units')||'1',10); return Math.max(1, isNaN(n)?1:n); }
+  function priority(){ return val('add-pri') || 'Medium'; }
+
+  function installStyle(){
+    if(byId('ug-fast-multi-style')) return;
+    var st=D.createElement('style'); st.id='ug-fast-multi-style';
+    st.textContent = ''+
+      '#ug-multi-box{margin-bottom:12px;padding:12px;border:1px solid var(--border);border-radius:12px;background:#f8fafc}'+
+      '.ug-multi-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}'+
+      '.ug-multi-title{font-size:11px;font-weight:800;color:var(--text);text-transform:uppercase;letter-spacing:.6px}'+
+      '.ug-multi-hint{font-size:11px;color:var(--muted);margin:0 0 10px;line-height:1.45}'+
+      '.ug-multi-row{display:grid;grid-template-columns:30px minmax(220px,1fr) 240px 34px;gap:8px;align-items:start;margin-bottom:8px}'+
+      '.ug-multi-num{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:3px}'+
+      '.ug-multi-input{height:36px}'+
+      '.ug-multi-emp{height:36px}'+
+      '.ug-multi-remove{height:36px;width:34px;padding:0;justify-content:center}'+
+      '.ug-original-hide{display:none!important}'+
+      '@media(max-width:768px){.ug-multi-row{grid-template-columns:28px 1fr 34px}.ug-multi-emp{grid-column:2/4}}';
+    D.head.appendChild(st);
+  }
+
+  function empOptions(selected){
+    var sel = byId('add-emp');
+    var opts = [];
+    if(sel && sel.options && sel.options.length){
+      opts = Array.from(sel.options).map(function(o){ return {value:o.value||'', text:o.textContent||''}; });
+    } else {
+      var list=[]; try{ list = (Array.isArray(window.empReg)?window.empReg:empReg)||[]; }catch(_){ list=[]; }
+      opts = [{value:'', text:'— Select Employee —'}].concat(list.filter(function(e){return e && e.email && e.active!==false && !e.isAdmin;}).map(function(e){return {value:e.email, text:(e.name||e.email)+' — '+(e.desig||e.role||'Team')};}));
+    }
+    if(!opts.some(function(o){return !o.value;})) opts.unshift({value:'', text:'— Select Employee —'});
+    return opts.map(function(o){return '<option value="'+html(o.value)+'"'+(o.value===selected?' selected':'')+'>'+html(o.text)+'</option>';}).join('');
+  }
+
+  function renumber(){ Array.from(D.querySelectorAll('.ug-multi-row')).forEach(function(r,i){ var n=r.querySelector('.ug-multi-num'); if(n) n.textContent=String(i+1); }); }
+
+  function splitInput(input,row){
+    var raw = input.value || '';
+    if(raw.indexOf(',') < 0) return;
+    var parts = raw.split(',').map(function(x){return x.trim();}).filter(Boolean);
+    if(!parts.length){ input.value=''; return; }
+    input.value = parts[0];
+    var emp = (row.querySelector('.ug-multi-emp')||{}).value || '';
+    parts.slice(1).forEach(function(p){ addRow(p,emp); });
+    var rows = D.querySelectorAll('.ug-multi-row');
+    var last = rows[rows.length-1];
+    if(last){ var inp = last.querySelector('.ug-multi-input'); if(inp) inp.focus(); }
+  }
+
+  function addRow(task,email){
+    var list = byId('ug-multi-list'); if(!list) return;
+    var row = D.createElement('div'); row.className='ug-multi-row';
+    row.innerHTML = '<div class="ug-multi-num">1</div>'+
+      '<input class="fc ug-multi-input" type="text" placeholder="Task likho, comma press karo..." value="'+html(task||'')+'">'+
+      '<select class="fc ug-multi-emp">'+empOptions(email||'')+'</select>'+
+      '<button type="button" class="btn bd bxs ug-multi-remove">×</button>';
+    list.appendChild(row);
+    var inp=row.querySelector('.ug-multi-input');
+    var rem=row.querySelector('.ug-multi-remove');
+    if(inp){
+      inp.addEventListener('input', function(){ splitInput(inp,row); });
+      inp.addEventListener('keydown', function(e){ if(e.key===','){ setTimeout(function(){ splitInput(inp,row); },0); } });
+    }
+    if(rem){ rem.onclick=function(){ var rows=D.querySelectorAll('.ug-multi-row'); if(rows.length<=1){ if(inp) inp.value=''; var s=row.querySelector('.ug-multi-emp'); if(s) s.value=''; } else row.remove(); renumber(); }; }
+    renumber();
+  }
+
+  function hideOriginalForAdd(){
+    var task=byId('add-task'), emp=byId('add-emp');
+    [task,emp].forEach(function(el){ if(!el) return; var fg=el.closest('.fg')||el.parentElement; if(fg) fg.classList.add('ug-original-hide'); });
+    var box=byId('ug-multi-box'); if(box) box.style.display='block';
+  }
+  function showOriginalForEdit(){
+    var task=byId('add-task'), emp=byId('add-emp');
+    [task,emp].forEach(function(el){ if(!el) return; var fg=el.closest('.fg')||el.parentElement; if(fg) fg.classList.remove('ug-original-hide'); });
+    var box=byId('ug-multi-box'); if(box) box.style.display='none';
+  }
+
+  function injectBox(){
+    installStyle();
+    var task = byId('add-task'); if(!task) return;
+    var taskFg = task.closest('.fg') || task.parentElement;
+    if(!byId('ug-multi-box')){
+      var box=D.createElement('div'); box.id='ug-multi-box';
+      box.innerHTML='<div class="ug-multi-head"><div class="ug-multi-title">📋 Multiple Task Assign</div><button type="button" class="btn bo bxs" id="ug-add-row">+ Add Row</button></div>'+ 
+        '<div class="ug-multi-hint">Task likho aur comma <b>,</b> press karo. Har comma ke baad automatic new task row add hogi. Har row me employee select karke ek click me assign karo.</div>'+ 
+        '<div id="ug-multi-list"></div>';
+      if(taskFg && taskFg.parentNode) taskFg.parentNode.insertBefore(box, taskFg);
+      var btn=byId('ug-add-row'); if(btn) btn.onclick=function(){ var first=D.querySelector('.ug-multi-emp'); addRow('', first?first.value:''); };
+    }
+    var list=byId('ug-multi-list'); if(list){ list.innerHTML=''; addRow('', ''); }
+    hideOriginalForAdd();
+  }
+
+  function collectRows(){
+    var rows = Array.from(D.querySelectorAll('.ug-multi-row')).map(function(r){
+      var inp=r.querySelector('.ug-multi-input'), sel=r.querySelector('.ug-multi-emp');
+      return {task:String((inp&&inp.value)||'').trim(), email:String((sel&&sel.value)||'').trim()};
+    }).filter(function(x){ return x.task || x.email; });
+    // Also support direct comma paste into original textarea if visible.
+    var raw = val('add-task');
+    var email = val('add-emp');
+    if(!rows.length && raw){ rows = raw.split(',').map(function(x){return x.trim();}).filter(Boolean).map(function(t){return {task:t,email:email};}); }
+    return rows;
+  }
+
+  var baseOpenAdd = window.openAddTask;
+  window.openAddTask = function(){
+    var r; try{ r = baseOpenAdd ? baseOpenAdd.apply(this, arguments) : undefined; }catch(e){ console.error(e); }
+    setTimeout(function(){
+      try{ if(typeof refillEmpDropdown==='function') refillEmpDropdown(); }catch(_){ }
+      injectBox();
+      var title=byId('m-add-t'); if(title) title.textContent='📋 Assign Multiple Tasks';
+    },0);
+    return r;
+  };
+
+  var baseOpenEdit = window.openEditTask;
+  window.openEditTask = function(){
+    var r = baseOpenEdit ? baseOpenEdit.apply(this, arguments) : undefined;
+    setTimeout(showOriginalForEdit,0);
+    return r;
+  };
+
+  function makeTask(row){
+    var taskCode = idCode();
+    var email = row.email;
+    var empName = safeName(email);
+    var desig = safeDesig(email);
+    var pri = priority();
+    var totalUnits = getTotalUnits();
+    var now = new Date().toLocaleString('en-IN');
+    var t = {
+      id:taskCode, taskCode:taskCode, taskId:taskCode,
+      task:row.task, Task:row.task, TaskName:row.task, WorkName:row.task,
+      email:email, assignedToEmail:email, empEmail:email, EmployeeEmail:email, AssignedTo_Email:email,
+      empName:empName, assignedTo:empName, AssignedTo_Name:empName,
+      assignedToLabel:safeDisplayName(empName,email,desig),
+      by:(window.cu&&cu.name)||'Admin', assignedBy:(window.cu&&cu.name)||'Admin', assignedByLabel:safeAssignedBy(),
+      adate:val('add-ad')||today(), AssignDate:val('add-ad')||today(),
+      ddate:val('add-dd'), DueDate:val('add-dd'),
+      priority:pri.toLowerCase(), Priority:pri,
+      status:'assigned', Status:'Assigned', ts:now, Timestamp:now,
+      notes:val('add-note'), Notes:val('add-note'), Description:val('add-note'),
+      references:val('add-ref'), References:val('add-ref'),
+      adCopy:val('add-copy'), AdCopy:val('add-copy'),
+      driveLink:val('add-drive-link'), DriveLink:val('add-drive-link'),
+      totalUnits:totalUnits, Count:totalUnits, doneUnits:0, DoneQty:0, pendingUnits:totalUnits, PendingQty:totalUnits,
+      desig:desig, changeCount:0, ChangeCount:0, acceptedAt:'', completedAt:'', _source:'tasks'
+    };
+    try{ if(typeof ensureTaskMeta==='function') t = ensureTaskMeta(t); }catch(_){ }
+    return t;
+  }
+
+  function payloadFromTask(t){
+    var taskName = t.task || t.Task || t.WorkName || '';
+    var htmlMail = '';
+    try{ if(typeof buildTaskMailHtml==='function') htmlMail = buildTaskMailHtml('assign', Object.assign({}, t, {countSummary:(typeof getTaskQtySummary==='function'?getTaskQtySummary(t):''), changeLabel:(typeof getTaskChangeLabel==='function'?getTaskChangeLabel(t):''), status:'Assigned'})); }catch(_){ }
+    return Object.assign({}, t, {
+      action:'addTask', sendEmail:true,
+      taskId:t.taskCode, taskCode:t.taskCode, TaskID:t.taskCode,
+      task:taskName, Task:taskName, TaskName:taskName, TaskTitle:taskName, taskName:taskName, workName:taskName, WorkName:taskName,
+      'Work Name':taskName, 'Task Name':taskName, 'Work Title':taskName, 'Task Title':taskName,
+      AssignedTo_Email:t.email, assignedToEmail:t.email, empEmail:t.email, EmployeeEmail:t.email, 'Assigned To Email':t.email,
+      AssignedTo_Name:t.assignedToLabel || t.empName, assignedTo:t.assignedToLabel || t.empName, empName:t.assignedToLabel || t.empName, EmployeeName:t.assignedToLabel || t.empName, 'Assigned To Name':t.assignedToLabel || t.empName,
+      by:t.by, assignedBy:t.by, AssignedBy:t.by, AssignedBy_Name:t.assignedByLabel, 'Assigned By Name':t.assignedByLabel,
+      emailHtml:htmlMail, emailBody:'Task ID: '+t.taskCode+'\nTask: '+taskName+'\nAssigned To: '+(t.assignedToLabel||t.empName)+'\nAssigned By: '+(t.assignedByLabel||t.by)+'\nStatus: Assigned'
+    });
+  }
+
+  function postBackground(payload){
+    var url = activeUrl(); if(!url) return;
+    setTimeout(function(){
+      try{
+        fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)}).catch(function(e){console.warn('background task sync failed',e);});
+      }catch(e){ console.warn('background task sync error',e); }
+    },0);
+  }
+
+  function refreshAfterSave(){
+    try{ if(typeof populateTaskFilterOptions==='function') populateTaskFilterOptions(); }catch(_){ }
+    try{ if(typeof populateSubSel==='function') populateSubSel(); }catch(_){ }
+    if(window.requestAnimationFrame){ requestAnimationFrame(function(){ try{ if(typeof buildUI==='function') buildUI(); }catch(e){console.error(e);} }); }
+    else setTimeout(function(){ try{ if(typeof buildUI==='function') buildUI(); }catch(e){console.error(e);} },0);
+  }
+
+  var baseSaveTask = window.saveTask;
+  window.saveTask = function(){
+    // Edit mode: original edit flow is safer.
+    try{ if(typeof editTaskId !== 'undefined' && editTaskId){ return baseSaveTask ? baseSaveTask.apply(this, arguments) : undefined; } }catch(_){ }
+
+    var box = byId('ug-multi-box');
+    var isMultiMode = box && box.style.display !== 'none';
+    if(!isMultiMode){ return baseSaveTask ? baseSaveTask.apply(this, arguments) : undefined; }
+
+    var rows = collectRows();
+    if(!rows.length){ msg('⚠ Please add at least one task'); return; }
+    var bad = rows.find(function(x){ return !x.task || !x.email; });
+    if(bad){ msg('⚠ Har task ke samne employee select karo'); return; }
+    var url = activeUrl();
+    if(!url){ msg('⚠ Connect Google Sheet in Settings'); return; }
+
+    var tasks = rows.map(makeTask);
+    try{ if(Array.isArray(window.allTasks)) tasks.forEach(function(t){ allTasks.push(t); }); }catch(_){ }
+
+    // Close modal and update UI immediately. No waiting for network/mail.
+    var modal = byId('m-add'); if(modal) modal.classList.add('hidden');
+    var list = byId('ug-multi-list'); if(list){ list.innerHTML=''; addRow('', ''); }
+    refreshAfterSave();
+    msg('✅ '+tasks.length+' task(s) assigned. Sync/mail background me ja raha hai.');
+
+    tasks.forEach(function(t){ postBackground(payloadFromTask(t)); });
+    return Promise.resolve({success:true, count:tasks.length});
+  };
+
+  // Make existing assign buttons use restored openAddTask.
+  D.addEventListener('click', function(e){
+    var btn = e.target && e.target.closest && e.target.closest('.assign-main-btn');
+    if(btn){ e.preventDefault(); e.stopPropagation(); window.openAddTask(); }
+  }, true);
+
+})();
+</script>
+
+</body></html>';
 
       GmailApp.sendEmail(att.email, data.subject || subject, 'Please enable HTML to view this email.', {
         htmlBody: htmlBody,
@@ -4654,5 +5174,265 @@ function deleteMeeting(id){
   }, 0);
 })();
 </script>
+<script>
+/* ============================================================
+   FAST MULTIPLE TASK ASSIGN PATCH v7
+   - Restores comma-to-new-row multiple assignment
+   - Save is instant: local UI first, server/mail sync in background
+   - Does not touch sidebar navigation or employee UI
+   ============================================================ */
+(function(){
+  'use strict';
+  if(window.__UG_FAST_MULTI_TASK_V7__) return;
+  window.__UG_FAST_MULTI_TASK_V7__ = true;
+
+  var D = document;
+  function byId(id){ return D.getElementById(id); }
+  function val(id){ var el=byId(id); return el ? String(el.value||'').trim() : ''; }
+  function setVal(id,v){ var el=byId(id); if(el) el.value = v || ''; }
+  function html(s){
+    return String(s==null?'':s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];});
+  }
+  function msg(s){ try{ if(typeof toast==='function') toast(s); else console.log(s); }catch(_){ console.log(s); } }
+  function today(){ try{return new Date().toISOString().split('T')[0];}catch(_){return '';} }
+  function idCode(){
+    try{ if(typeof generateTaskId==='function') return generateTaskId(); }catch(_){ }
+    return 'UG-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
+  }
+  function safeName(email){ try{ if(typeof uname==='function') return uname(email); }catch(_){ } return String(email||'').split('@')[0] || 'Employee'; }
+  function safeDesig(email){ try{ if(typeof udesig==='function') return udesig(email); }catch(_){ } return 'Team'; }
+  function safeDisplayName(name,email,desig){
+    try{ if(typeof normalizeDisplayName==='function') return normalizeDisplayName(name,email,desig); }catch(_){ }
+    return name || safeName(email);
+  }
+  function safeAssignedBy(){
+    try{ if(typeof displayAssignedBy==='function') return displayAssignedBy((window.cu&&cu.name)||'Admin'); }catch(_){ }
+    return (window.cu&&cu.name) || 'Admin';
+  }
+  function activeUrl(){ try{return String(window.SURL||SURL||localStorage.getItem('ugv4_url')||localStorage.getItem('upgro_url')||'').trim();}catch(_){return '';} }
+  function getTotalUnits(){ var n=parseInt(val('add-units')||'1',10); return Math.max(1, isNaN(n)?1:n); }
+  function priority(){ return val('add-pri') || 'Medium'; }
+
+  function installStyle(){
+    if(byId('ug-fast-multi-style')) return;
+    var st=D.createElement('style'); st.id='ug-fast-multi-style';
+    st.textContent = ''+
+      '#ug-multi-box{margin-bottom:12px;padding:12px;border:1px solid var(--border);border-radius:12px;background:#f8fafc}'+
+      '.ug-multi-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}'+
+      '.ug-multi-title{font-size:11px;font-weight:800;color:var(--text);text-transform:uppercase;letter-spacing:.6px}'+
+      '.ug-multi-hint{font-size:11px;color:var(--muted);margin:0 0 10px;line-height:1.45}'+
+      '.ug-multi-row{display:grid;grid-template-columns:30px minmax(220px,1fr) 240px 34px;gap:8px;align-items:start;margin-bottom:8px}'+
+      '.ug-multi-num{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:3px}'+
+      '.ug-multi-input{height:36px}'+
+      '.ug-multi-emp{height:36px}'+
+      '.ug-multi-remove{height:36px;width:34px;padding:0;justify-content:center}'+
+      '.ug-original-hide{display:none!important}'+
+      '@media(max-width:768px){.ug-multi-row{grid-template-columns:28px 1fr 34px}.ug-multi-emp{grid-column:2/4}}';
+    D.head.appendChild(st);
+  }
+
+  function empOptions(selected){
+    var sel = byId('add-emp');
+    var opts = [];
+    if(sel && sel.options && sel.options.length){
+      opts = Array.from(sel.options).map(function(o){ return {value:o.value||'', text:o.textContent||''}; });
+    } else {
+      var list=[]; try{ list = (Array.isArray(window.empReg)?window.empReg:empReg)||[]; }catch(_){ list=[]; }
+      opts = [{value:'', text:'— Select Employee —'}].concat(list.filter(function(e){return e && e.email && e.active!==false && !e.isAdmin;}).map(function(e){return {value:e.email, text:(e.name||e.email)+' — '+(e.desig||e.role||'Team')};}));
+    }
+    if(!opts.some(function(o){return !o.value;})) opts.unshift({value:'', text:'— Select Employee —'});
+    return opts.map(function(o){return '<option value="'+html(o.value)+'"'+(o.value===selected?' selected':'')+'>'+html(o.text)+'</option>';}).join('');
+  }
+
+  function renumber(){ Array.from(D.querySelectorAll('.ug-multi-row')).forEach(function(r,i){ var n=r.querySelector('.ug-multi-num'); if(n) n.textContent=String(i+1); }); }
+
+  function splitInput(input,row){
+    var raw = input.value || '';
+    if(raw.indexOf(',') < 0) return;
+    var parts = raw.split(',').map(function(x){return x.trim();}).filter(Boolean);
+    if(!parts.length){ input.value=''; return; }
+    input.value = parts[0];
+    var emp = (row.querySelector('.ug-multi-emp')||{}).value || '';
+    parts.slice(1).forEach(function(p){ addRow(p,emp); });
+    var rows = D.querySelectorAll('.ug-multi-row');
+    var last = rows[rows.length-1];
+    if(last){ var inp = last.querySelector('.ug-multi-input'); if(inp) inp.focus(); }
+  }
+
+  function addRow(task,email){
+    var list = byId('ug-multi-list'); if(!list) return;
+    var row = D.createElement('div'); row.className='ug-multi-row';
+    row.innerHTML = '<div class="ug-multi-num">1</div>'+
+      '<input class="fc ug-multi-input" type="text" placeholder="Task likho, comma press karo..." value="'+html(task||'')+'">'+
+      '<select class="fc ug-multi-emp">'+empOptions(email||'')+'</select>'+
+      '<button type="button" class="btn bd bxs ug-multi-remove">×</button>';
+    list.appendChild(row);
+    var inp=row.querySelector('.ug-multi-input');
+    var rem=row.querySelector('.ug-multi-remove');
+    if(inp){
+      inp.addEventListener('input', function(){ splitInput(inp,row); });
+      inp.addEventListener('keydown', function(e){ if(e.key===','){ setTimeout(function(){ splitInput(inp,row); },0); } });
+    }
+    if(rem){ rem.onclick=function(){ var rows=D.querySelectorAll('.ug-multi-row'); if(rows.length<=1){ if(inp) inp.value=''; var s=row.querySelector('.ug-multi-emp'); if(s) s.value=''; } else row.remove(); renumber(); }; }
+    renumber();
+  }
+
+  function hideOriginalForAdd(){
+    var task=byId('add-task'), emp=byId('add-emp');
+    [task,emp].forEach(function(el){ if(!el) return; var fg=el.closest('.fg')||el.parentElement; if(fg) fg.classList.add('ug-original-hide'); });
+    var box=byId('ug-multi-box'); if(box) box.style.display='block';
+  }
+  function showOriginalForEdit(){
+    var task=byId('add-task'), emp=byId('add-emp');
+    [task,emp].forEach(function(el){ if(!el) return; var fg=el.closest('.fg')||el.parentElement; if(fg) fg.classList.remove('ug-original-hide'); });
+    var box=byId('ug-multi-box'); if(box) box.style.display='none';
+  }
+
+  function injectBox(){
+    installStyle();
+    var task = byId('add-task'); if(!task) return;
+    var taskFg = task.closest('.fg') || task.parentElement;
+    if(!byId('ug-multi-box')){
+      var box=D.createElement('div'); box.id='ug-multi-box';
+      box.innerHTML='<div class="ug-multi-head"><div class="ug-multi-title">📋 Multiple Task Assign</div><button type="button" class="btn bo bxs" id="ug-add-row">+ Add Row</button></div>'+ 
+        '<div class="ug-multi-hint">Task likho aur comma <b>,</b> press karo. Har comma ke baad automatic new task row add hogi. Har row me employee select karke ek click me assign karo.</div>'+ 
+        '<div id="ug-multi-list"></div>';
+      if(taskFg && taskFg.parentNode) taskFg.parentNode.insertBefore(box, taskFg);
+      var btn=byId('ug-add-row'); if(btn) btn.onclick=function(){ var first=D.querySelector('.ug-multi-emp'); addRow('', first?first.value:''); };
+    }
+    var list=byId('ug-multi-list'); if(list){ list.innerHTML=''; addRow('', ''); }
+    hideOriginalForAdd();
+  }
+
+  function collectRows(){
+    var rows = Array.from(D.querySelectorAll('.ug-multi-row')).map(function(r){
+      var inp=r.querySelector('.ug-multi-input'), sel=r.querySelector('.ug-multi-emp');
+      return {task:String((inp&&inp.value)||'').trim(), email:String((sel&&sel.value)||'').trim()};
+    }).filter(function(x){ return x.task || x.email; });
+    // Also support direct comma paste into original textarea if visible.
+    var raw = val('add-task');
+    var email = val('add-emp');
+    if(!rows.length && raw){ rows = raw.split(',').map(function(x){return x.trim();}).filter(Boolean).map(function(t){return {task:t,email:email};}); }
+    return rows;
+  }
+
+  var baseOpenAdd = window.openAddTask;
+  window.openAddTask = function(){
+    var r; try{ r = baseOpenAdd ? baseOpenAdd.apply(this, arguments) : undefined; }catch(e){ console.error(e); }
+    setTimeout(function(){
+      try{ if(typeof refillEmpDropdown==='function') refillEmpDropdown(); }catch(_){ }
+      injectBox();
+      var title=byId('m-add-t'); if(title) title.textContent='📋 Assign Multiple Tasks';
+    },0);
+    return r;
+  };
+
+  var baseOpenEdit = window.openEditTask;
+  window.openEditTask = function(){
+    var r = baseOpenEdit ? baseOpenEdit.apply(this, arguments) : undefined;
+    setTimeout(showOriginalForEdit,0);
+    return r;
+  };
+
+  function makeTask(row){
+    var taskCode = idCode();
+    var email = row.email;
+    var empName = safeName(email);
+    var desig = safeDesig(email);
+    var pri = priority();
+    var totalUnits = getTotalUnits();
+    var now = new Date().toLocaleString('en-IN');
+    var t = {
+      id:taskCode, taskCode:taskCode, taskId:taskCode,
+      task:row.task, Task:row.task, TaskName:row.task, WorkName:row.task,
+      email:email, assignedToEmail:email, empEmail:email, EmployeeEmail:email, AssignedTo_Email:email,
+      empName:empName, assignedTo:empName, AssignedTo_Name:empName,
+      assignedToLabel:safeDisplayName(empName,email,desig),
+      by:(window.cu&&cu.name)||'Admin', assignedBy:(window.cu&&cu.name)||'Admin', assignedByLabel:safeAssignedBy(),
+      adate:val('add-ad')||today(), AssignDate:val('add-ad')||today(),
+      ddate:val('add-dd'), DueDate:val('add-dd'),
+      priority:pri.toLowerCase(), Priority:pri,
+      status:'assigned', Status:'Assigned', ts:now, Timestamp:now,
+      notes:val('add-note'), Notes:val('add-note'), Description:val('add-note'),
+      references:val('add-ref'), References:val('add-ref'),
+      adCopy:val('add-copy'), AdCopy:val('add-copy'),
+      driveLink:val('add-drive-link'), DriveLink:val('add-drive-link'),
+      totalUnits:totalUnits, Count:totalUnits, doneUnits:0, DoneQty:0, pendingUnits:totalUnits, PendingQty:totalUnits,
+      desig:desig, changeCount:0, ChangeCount:0, acceptedAt:'', completedAt:'', _source:'tasks'
+    };
+    try{ if(typeof ensureTaskMeta==='function') t = ensureTaskMeta(t); }catch(_){ }
+    return t;
+  }
+
+  function payloadFromTask(t){
+    var taskName = t.task || t.Task || t.WorkName || '';
+    var htmlMail = '';
+    try{ if(typeof buildTaskMailHtml==='function') htmlMail = buildTaskMailHtml('assign', Object.assign({}, t, {countSummary:(typeof getTaskQtySummary==='function'?getTaskQtySummary(t):''), changeLabel:(typeof getTaskChangeLabel==='function'?getTaskChangeLabel(t):''), status:'Assigned'})); }catch(_){ }
+    return Object.assign({}, t, {
+      action:'addTask', sendEmail:true,
+      taskId:t.taskCode, taskCode:t.taskCode, TaskID:t.taskCode,
+      task:taskName, Task:taskName, TaskName:taskName, TaskTitle:taskName, taskName:taskName, workName:taskName, WorkName:taskName,
+      'Work Name':taskName, 'Task Name':taskName, 'Work Title':taskName, 'Task Title':taskName,
+      AssignedTo_Email:t.email, assignedToEmail:t.email, empEmail:t.email, EmployeeEmail:t.email, 'Assigned To Email':t.email,
+      AssignedTo_Name:t.assignedToLabel || t.empName, assignedTo:t.assignedToLabel || t.empName, empName:t.assignedToLabel || t.empName, EmployeeName:t.assignedToLabel || t.empName, 'Assigned To Name':t.assignedToLabel || t.empName,
+      by:t.by, assignedBy:t.by, AssignedBy:t.by, AssignedBy_Name:t.assignedByLabel, 'Assigned By Name':t.assignedByLabel,
+      emailHtml:htmlMail, emailBody:'Task ID: '+t.taskCode+'\nTask: '+taskName+'\nAssigned To: '+(t.assignedToLabel||t.empName)+'\nAssigned By: '+(t.assignedByLabel||t.by)+'\nStatus: Assigned'
+    });
+  }
+
+  function postBackground(payload){
+    var url = activeUrl(); if(!url) return;
+    setTimeout(function(){
+      try{
+        fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)}).catch(function(e){console.warn('background task sync failed',e);});
+      }catch(e){ console.warn('background task sync error',e); }
+    },0);
+  }
+
+  function refreshAfterSave(){
+    try{ if(typeof populateTaskFilterOptions==='function') populateTaskFilterOptions(); }catch(_){ }
+    try{ if(typeof populateSubSel==='function') populateSubSel(); }catch(_){ }
+    if(window.requestAnimationFrame){ requestAnimationFrame(function(){ try{ if(typeof buildUI==='function') buildUI(); }catch(e){console.error(e);} }); }
+    else setTimeout(function(){ try{ if(typeof buildUI==='function') buildUI(); }catch(e){console.error(e);} },0);
+  }
+
+  var baseSaveTask = window.saveTask;
+  window.saveTask = function(){
+    // Edit mode: original edit flow is safer.
+    try{ if(typeof editTaskId !== 'undefined' && editTaskId){ return baseSaveTask ? baseSaveTask.apply(this, arguments) : undefined; } }catch(_){ }
+
+    var box = byId('ug-multi-box');
+    var isMultiMode = box && box.style.display !== 'none';
+    if(!isMultiMode){ return baseSaveTask ? baseSaveTask.apply(this, arguments) : undefined; }
+
+    var rows = collectRows();
+    if(!rows.length){ msg('⚠ Please add at least one task'); return; }
+    var bad = rows.find(function(x){ return !x.task || !x.email; });
+    if(bad){ msg('⚠ Har task ke samne employee select karo'); return; }
+    var url = activeUrl();
+    if(!url){ msg('⚠ Connect Google Sheet in Settings'); return; }
+
+    var tasks = rows.map(makeTask);
+    try{ if(Array.isArray(window.allTasks)) tasks.forEach(function(t){ allTasks.push(t); }); }catch(_){ }
+
+    // Close modal and update UI immediately. No waiting for network/mail.
+    var modal = byId('m-add'); if(modal) modal.classList.add('hidden');
+    var list = byId('ug-multi-list'); if(list){ list.innerHTML=''; addRow('', ''); }
+    refreshAfterSave();
+    msg('✅ '+tasks.length+' task(s) assigned. Sync/mail background me ja raha hai.');
+
+    tasks.forEach(function(t){ postBackground(payloadFromTask(t)); });
+    return Promise.resolve({success:true, count:tasks.length});
+  };
+
+  // Make existing assign buttons use restored openAddTask.
+  D.addEventListener('click', function(e){
+    var btn = e.target && e.target.closest && e.target.closest('.assign-main-btn');
+    if(btn){ e.preventDefault(); e.stopPropagation(); window.openAddTask(); }
+  }, true);
+
+})();
+</script>
+
 </body>
 </html>
