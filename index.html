@@ -6486,5 +6486,366 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
 })();
 
 </script>
+<!-- EMPLOYEE MASTER FIX V8 - safe appended, does not touch sidebar/nav code -->
+<script>
+(function(){
+  'use strict';
+
+  var MASTER_KEY = 'upgro_employee_master_v8';
+  var OLD_MASTER_KEYS = ['upgro_employee_master_v4','upgro_employee_master_v7','UPGRO_EMP_MASTER_FIX_V1','UPGRO_EMP_MASTER_V6'];
+  var DELETED_KEY = 'upgro_employee_deleted_emails_v8';
+  var PATCH_FLAG = '__UPGRO_EMPLOYEE_MASTER_V8__';
+  if(window[PATCH_FLAG]) return;
+  window[PATCH_FLAG] = true;
+
+  function el(id){ return document.getElementById(id); }
+  function E(v){ return String(v || '').trim().toLowerCase().replace(/\s+/g,''); }
+  function N(v){ return String(v || '').trim().replace(/\s+/g,' '); }
+  function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(E(v)); }
+  function today(){ try{ return (typeof TODAY !== 'undefined' ? TODAY : new Date().toISOString().split('T')[0]); }catch(e){ return new Date().toISOString().split('T')[0]; } }
+  function colors(){ try{ return Array.isArray(CLRS) && CLRS.length ? CLRS : ['#0B84FF','#00B67A','#E53935','#F59E0B','#7C3AED']; }catch(e){ return ['#0B84FF','#00B67A','#E53935','#F59E0B','#7C3AED']; } }
+  function desigs(){ try{ return Array.isArray(DESIG_OPTS) && DESIG_OPTS.length ? DESIG_OPTS : ['MIS','Executive Assistant','Web Developer','Graphic Designer','Video Editor','CRM','Meta Media Buyer','Google Ads','SEO Executive','SEO','Founder','CEO','HR','Accountant','Intern','Content Writer','Social Media Manager','Performance Marketer','Team Lead','Other']; }catch(e){ return ['MIS','Executive Assistant','Web Developer','Graphic Designer','Video Editor','CRM','Meta Media Buyer','Google Ads','SEO Executive','SEO','Founder','CEO','HR','Accountant','Intern','Content Writer','Social Media Manager','Performance Marketer','Team Lead','Other']; } }
+  function safe(v){ return String(v == null ? '' : v).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function toastMsg(msg){ try{ if(typeof toast === 'function') toast(msg); else alert(msg); }catch(e){ alert(msg); } }
+  function readJSON(key, fallback){ try{ var v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }catch(e){ return fallback; } }
+  function writeJSON(key, value){ try{ localStorage.setItem(key, JSON.stringify(value)); }catch(e){} }
+  function empStoreKey(){ try{ return typeof EMP_STORE_KEY !== 'undefined' ? EMP_STORE_KEY : 'upgro_emp_dyn'; }catch(e){ return 'upgro_emp_dyn'; } }
+  function roleStoreKey(){ try{ return typeof ROLE_STORE_KEY !== 'undefined' ? ROLE_STORE_KEY : 'upgro_roles_v3'; }catch(e){ return 'upgro_roles_v3'; } }
+  function sessionStoreKey(){ try{ return typeof SESSION_STORE_KEY !== 'undefined' ? SESSION_STORE_KEY : 'upgro_current_user_v1'; }catch(e){ return 'upgro_current_user_v1'; } }
+  function deletedSet(){ return new Set((readJSON(DELETED_KEY, []) || []).map(E).filter(Boolean)); }
+  function saveDeleted(set){ writeJSON(DELETED_KEY, Array.from(set).filter(Boolean)); }
+
+  function patchEmp(raw, i){
+    raw = raw || {};
+    var email = E(raw.email || raw.Email || raw.EmployeeEmail || raw.Employee_Email || raw.LoginEmail || raw.UserEmail || raw['Email Address'] || raw['Employee Email'] || raw.mail || '');
+    if(!validEmail(email)) return null;
+    var name = N(raw.name || raw.Name || raw.EmployeeName || raw['Employee Name'] || raw['Full Name'] || raw.empName || '') || email.split('@')[0];
+    var desig = N(raw.desig || raw.Designation || raw.designation || raw.role || raw.Role || raw.Department || 'Team') || 'Team';
+    var role = N(raw.role || raw.Role || raw.desig || raw.Designation || desig) || desig;
+    var activeRaw = raw.active;
+    if(activeRaw === undefined) activeRaw = raw.Active;
+    if(activeRaw === undefined) activeRaw = raw.Status;
+    var active = !['false','inactive','0','no','removed','delete','deleted'].includes(String(activeRaw == null ? 'true' : activeRaw).trim().toLowerCase());
+    var pass = String(raw.pass || raw.Password || raw.password || raw['Password'] || '').trim();
+    var isAdmin = !!(raw.isAdmin || raw.IsAdmin || raw.admin || raw.Admin);
+    var isManager = !!(raw.isManager || raw.IsManager || raw.manager || raw.Manager || /manager|assigner/i.test(role + ' ' + desig));
+    try{ if(typeof isForcedAssigner === 'function' && isForcedAssigner({email:email,name:name,desig:desig,role:role})) isManager = true; }catch(e){}
+    if(isAdmin) isManager = false;
+    return {
+      email: email,
+      Email: email,
+      EmployeeEmail: email,
+      name: name,
+      Name: name,
+      pass: pass,
+      password: pass,
+      role: role,
+      Role: role,
+      desig: desig,
+      Designation: desig,
+      isAdmin: isAdmin,
+      isManager: isManager,
+      active: active,
+      Active: active ? 'Yes' : 'No',
+      bg: raw.bg || colors()[i % colors().length],
+      joinDate: raw.joinDate || raw.JoinDate || raw['Join Date'] || ''
+    };
+  }
+
+  function readAllSources(){
+    var arr = [];
+    try{ if(typeof getBaseRegistry === 'function') arr = arr.concat(getBaseRegistry() || []); }catch(e){}
+    try{ if(typeof USERS !== 'undefined') Object.keys(USERS).forEach(function(email){ arr.push(Object.assign({}, USERS[email], {email:email})); }); }catch(e){}
+    try{ if(typeof sheetEmpReg !== 'undefined' && Array.isArray(sheetEmpReg)) arr = arr.concat(sheetEmpReg); }catch(e){}
+    try{ if(typeof loadDynEmployees === 'function') arr = arr.concat(loadDynEmployees() || []); }catch(e){}
+    arr = arr.concat(readJSON(empStoreKey(), []) || []);
+    OLD_MASTER_KEYS.forEach(function(k){ arr = arr.concat(readJSON(k, []) || []); });
+    arr = arr.concat(readJSON(MASTER_KEY, []) || []);
+    return arr;
+  }
+
+  function dedupeEmployees(rawList, includeInactive){
+    var del = deletedSet();
+    var map = new Map();
+    (rawList || []).forEach(function(raw, i){
+      var e = patchEmp(raw, i);
+      if(!e) return;
+      if(del.has(e.email)) return;
+      var old = map.get(e.email) || {};
+      var merged = Object.assign({}, old, e);
+      if(old.pass && !e.pass) merged.pass = old.pass;
+      if(old.bg && !raw.bg) merged.bg = old.bg;
+      if(old.joinDate && !e.joinDate) merged.joinDate = old.joinDate;
+      if(old.active === false) merged.active = false;
+      map.set(e.email, merged);
+    });
+    var out = Array.from(map.values()).filter(function(e){ return includeInactive || e.active !== false; });
+    out.sort(function(a,b){ return String(a.name).localeCompare(String(b.name)); });
+    return out.map(function(e,i){ e.bg = e.bg || colors()[i % colors().length]; return e; });
+  }
+
+  function master(includeInactive){ return dedupeEmployees(readAllSources(), includeInactive); }
+
+  function writeBack(list){
+    list = dedupeEmployees(list, true);
+    writeJSON(MASTER_KEY, list);
+    writeJSON(empStoreKey(), list);
+    try{ if(typeof saveDynEmployees === 'function') saveDynEmployees(list); }catch(e){}
+    try{
+      if(typeof empReg !== 'undefined') empReg = list.slice();
+      window.empReg = list.slice();
+    }catch(e){ window.empReg = list.slice(); }
+    var roles = {};
+    list.forEach(function(e){ roles[e.email] = {isAdmin:!!e.isAdmin,isManager:!!e.isManager,active:e.active!==false}; });
+    writeJSON(roleStoreKey(), roles);
+    try{ if(typeof saveStoredRoles === 'function') saveStoredRoles(roles); }catch(e){}
+    syncUsers(list);
+    try{ if(typeof emitEmpSync === 'function') emitEmpSync(); }catch(e){}
+    return list;
+  }
+
+  function syncUsers(list){
+    try{
+      if(typeof USERS === 'undefined') return;
+      deletedSet().forEach(function(email){ try{ delete USERS[email]; }catch(e){} });
+      (list || []).forEach(function(e){
+        if(e.active === false) return;
+        USERS[e.email] = Object.assign({}, USERS[e.email] || {}, {
+          email:e.email, name:e.name, pass:e.pass || (USERS[e.email] && USERS[e.email].pass) || '',
+          role:e.role || e.desig || 'Team', desig:e.desig || e.role || 'Team',
+          isAdmin:!!e.isAdmin, isManager:!!e.isManager, active:e.active!==false, bg:e.bg, joinDate:e.joinDate || ''
+        });
+      });
+    }catch(e){}
+  }
+
+  function getEmp(email, includeInactive){
+    email = E(email);
+    return master(!!includeInactive).find(function(x){ return x.email === email; }) || null;
+  }
+
+  var oldInitEmpReg = window.initEmpReg;
+  window.initEmpReg = function(force){
+    var list = master(true);
+    writeBack(list);
+    return undefined;
+  };
+  window.getStoredEmployee = function(email){ return getEmp(email, false); };
+  window.syncUserDirectoryFromRegistry = function(){ syncUsers(master(true)); };
+
+  function refreshEverywhere(){
+    try{ window.initEmpReg(true); }catch(e){}
+    try{ if(typeof refillEmpDropdown === 'function') refillEmpDropdown(); }catch(e){}
+    try{ if(typeof populateTaskFilterOptions === 'function') populateTaskFilterOptions(); }catch(e){}
+    try{ if(typeof renderPageButtons === 'function') renderPageButtons(); }catch(e){}
+    try{ if(typeof updateSidebarVis === 'function') updateSidebarVis(); }catch(e){}
+    try{ if(typeof buildUI === 'function') buildUI(); }catch(e){}
+  }
+
+  function labelFor(e){
+    try{ if(typeof normalizeDisplayName === 'function') return normalizeDisplayName(e.name,e.email,e.desig); }catch(x){}
+    return e.name + (e.desig ? ' — ' + e.desig : '');
+  }
+  function roleBadge(e){
+    if(e.isAdmin) return '<span class="role-badge rb-admin">ADMIN</span>';
+    if(e.isManager) return '<span class="role-badge rb-manager">MANAGER</span>';
+    return '';
+  }
+
+  window.renderEmpList = function(){
+    var list = master(true); writeBack(list);
+    var cont = el('emp-items'); if(!cont) return;
+    var q = String((el('emp-q') || {value:''}).value || '').toLowerCase();
+    var visible = list.filter(function(e){
+      var hay = [e.name,e.email,e.role,e.desig,e.active?'active':'inactive'].join(' ').toLowerCase();
+      return !q || hay.indexOf(q) >= 0;
+    });
+    if(el('emp-counters')){
+      var active = list.filter(function(e){ return e.active !== false; }).length;
+      var inactive = list.length - active;
+      var admins = list.filter(function(e){ return e.isAdmin; }).length;
+      var managers = list.filter(function(e){ return e.isManager; }).length;
+      el('emp-counters').innerHTML = '<div class="tctr tctr-blue"><div class="tctr-v">'+list.length+'</div><div class="tctr-l">Total</div></div><div class="tctr tctr-green"><div class="tctr-v">'+active+'</div><div class="tctr-l">Active</div></div><div class="tctr tctr-red"><div class="tctr-v">'+inactive+'</div><div class="tctr-l">Inactive</div></div><div class="tctr tctr-purple"><div class="tctr-v">'+admins+'</div><div class="tctr-l">Admins</div></div><div class="tctr tctr-orange"><div class="tctr-v">'+managers+'</div><div class="tctr-l">Managers</div></div>';
+    }
+    cont.innerHTML = '';
+    if(!visible.length){ cont.innerHTML = '<div style="padding:16px;color:var(--muted)">No employees found.</div>'; return; }
+    visible.forEach(function(e){
+      var div = document.createElement('div');
+      div.className = 'ei' + (E(window.editEmpEmail || (typeof editEmpEmail !== 'undefined' ? editEmpEmail : '')) === e.email ? ' act' : '');
+      div.innerHTML = '<div class="ei-av" style="background:'+safe(e.bg)+'">'+safe((typeof ini==='function'?ini(e.name):e.name.slice(0,2).toUpperCase()))+'</div><div class="ei-info"><div class="ei-name">'+safe(labelFor(e))+' '+roleBadge(e)+'</div><div class="ei-role">'+safe(e.email)+'</div></div><div class="ei-dot" style="background:'+(e.active!==false?'#00B67A':'#E53935')+'"></div>';
+      div.onclick = function(){ window.selectEmp(e.email); };
+      cont.appendChild(div);
+    });
+  };
+
+  window.selectEmp = function(email){
+    var e = getEmp(email, true); if(!e) return;
+    try{ editEmpEmail = e.email; }catch(x){} window.editEmpEmail = e.email;
+    window.renderEmpList();
+    var fp = el('emp-fp'); if(!fp) return;
+    var opts = desigs().map(function(d){ return '<option value="'+safe(d)+'" '+(d===e.desig?'selected':'')+'>'+safe(d)+'</option>'; }).join('');
+    fp.innerHTML = '<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px"><div style="width:58px;height:58px;border-radius:50%;background:'+safe(e.bg)+';display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff">'+safe((typeof ini==='function'?ini(e.name):e.name.slice(0,2).toUpperCase()))+'</div><div><div style="font-size:17px;font-weight:800">'+safe(labelFor(e))+'</div><div style="font-size:12px;color:var(--muted)">Editable employee login/profile</div></div></div>'+
+      '<div class="fg"><label class="fl2">Full Name *</label><input id="ef-n" value="'+safe(e.name)+'" class="fc"></div>'+
+      '<div class="fg"><label class="fl2">Email ID * <span style="color:var(--blue);font-weight:500">Editable login email</span></label><input id="ef-e" type="email" value="'+safe(e.email)+'" class="fc"></div>'+
+      '<div class="fg"><label class="fl2">Password *</label><input id="ef-p" type="text" value="'+safe(e.pass || '')+'" class="fc"></div>'+
+      '<div class="fr"><div class="fg"><label class="fl2">Designation *</label><select id="ef-d" class="fc">'+opts+'</select></div><div class="fg"><label class="fl2">Role *</label><input id="ef-r" value="'+safe(e.role || e.desig || '')+'" class="fc"></div></div>'+
+      '<div style="display:flex;gap:20px;margin-bottom:14px;flex-wrap:wrap"><label style="display:flex;align-items:center;gap:7px;font-size:13px"><input type="checkbox" id="ef-admin" '+(e.isAdmin?'checked':'')+'> 👑 Admin</label><label style="display:flex;align-items:center;gap:7px;font-size:13px"><input type="checkbox" id="ef-mgr" '+(e.isManager?'checked':'')+'> 🔀 Manager / Work Assigner</label><label style="display:flex;align-items:center;gap:7px;font-size:13px"><input type="checkbox" id="ef-ac" '+(e.active!==false?'checked':'')+'> ✅ Active</label></div>'+
+      '<div class="mono-box" style="margin-bottom:12px;color:var(--blue)">Email change updates login, employee dropdowns, assigned task ownership and portal records.</div>'+
+      '<div style="display:flex;gap:8px"><button class="btn bp" style="flex:1" id="emp-save-btn">💾 Save Employee</button><button class="btn bd" id="emp-remove-btn">🗑 Remove</button></div>';
+    el('emp-save-btn').onclick = function(){ window.saveEmp(e.email); };
+    el('emp-remove-btn').onclick = function(){ window.delEmp(e.email); };
+  };
+
+  window.selectNewEmp = function(){
+    try{ editEmpEmail = null; }catch(x){} window.editEmpEmail = null;
+    window.renderEmpList();
+    var fp = el('emp-fp'); if(!fp) return;
+    var opts = desigs().map(function(d){ return '<option value="'+safe(d)+'">'+safe(d)+'</option>'; }).join('');
+    fp.innerHTML = '<div style="font-size:16px;font-weight:800;margin-bottom:16px">➕ Add New Employee</div>'+
+      '<div class="fg"><label class="fl2">Full Name *</label><input id="ef-n" class="fc" placeholder="Ravi Singh"></div>'+
+      '<div class="fg"><label class="fl2">Email ID *</label><input id="ef-e" type="email" class="fc" placeholder="employee@upgromedia.com"></div>'+
+      '<div class="fg"><label class="fl2">Password *</label><input id="ef-p" type="text" class="fc" placeholder="Password"></div>'+
+      '<div class="fr"><div class="fg"><label class="fl2">Designation *</label><select id="ef-d" class="fc">'+opts+'</select></div><div class="fg"><label class="fl2">Role *</label><input id="ef-r" class="fc" placeholder="Graphic Designer"></div></div>'+
+      '<div style="display:flex;gap:20px;margin-bottom:14px;flex-wrap:wrap"><label style="display:flex;align-items:center;gap:7px;font-size:13px"><input type="checkbox" id="ef-admin"> 👑 Admin</label><label style="display:flex;align-items:center;gap:7px;font-size:13px"><input type="checkbox" id="ef-mgr"> 🔀 Manager / Work Assigner</label><label style="display:flex;align-items:center;gap:7px;font-size:13px"><input type="checkbox" id="ef-ac" checked> ✅ Active</label></div>'+
+      '<button class="btn bs" style="width:100%" id="emp-add-btn">✅ Add Employee</button>';
+    el('emp-add-btn').onclick = window.addNewEmp;
+  };
+
+  function readForm(oldEmail){
+    var name = N((el('ef-n') || {}).value || '');
+    var email = E((el('ef-e') || {}).value || oldEmail || '');
+    var pass = String((el('ef-p') || {}).value || '').trim();
+    var desig = N((el('ef-d') || {}).value || 'Team') || 'Team';
+    var role = N((el('ef-r') || {}).value || desig) || desig;
+    var isAdmin = !!((el('ef-admin') || {}).checked);
+    var isManager = !!((el('ef-mgr') || {}).checked);
+    var active = el('ef-ac') ? !!el('ef-ac').checked : true;
+    try{ if(typeof isForcedAssigner === 'function' && isForcedAssigner({email:email,name:name,desig:desig,role:role})) isManager = true; }catch(e){}
+    if(isAdmin) isManager = false;
+    if(!name) throw new Error('Name required');
+    if(!validEmail(email)) throw new Error('Valid email required');
+    if(!pass) throw new Error('Password required');
+    return {email:email,Email:email,EmployeeEmail:email,name:name,Name:name,pass:pass,password:pass,role:role,Role:role,desig:desig,Designation:desig,isAdmin:isAdmin,isManager:isManager,active:active,Active:active?'Yes':'No'};
+  }
+
+  function migrateTasks(oldEmail, newEmp){
+    oldEmail = E(oldEmail); var newEmail = E(newEmp.email); if(!oldEmail || !newEmail || oldEmail === newEmail) return;
+    var emailKeys = ['email','assignedEmail','assignedToEmail','empEmail','employeeEmail','AssignedTo_Email','AssignedToEmail','EmployeeEmail','Employee Email','Assigned To Email','Assigned To (Email)','mail','Email'];
+    var nameKeys = ['empName','assignedTo','assignedToName','AssignedTo_Name','AssignedToName','EmployeeName','Employee Name','Assigned To','Assigned To Name','Assigned To (Name)','Name'];
+    function patch(t){
+      if(!t || typeof t !== 'object') return t;
+      var hit = false;
+      emailKeys.forEach(function(k){ if(E(t[k]) === oldEmail){ t[k] = newEmail; hit = true; } });
+      if(hit){
+        emailKeys.forEach(function(k){ t[k] = newEmail; });
+        nameKeys.forEach(function(k){ t[k] = newEmp.name; });
+        t.desig = newEmp.desig; t.Designation = newEmp.desig;
+      }
+      return t;
+    }
+    try{ if(Array.isArray(allTasks)) allTasks = allTasks.map(patch); window.allTasks = allTasks; }catch(e){}
+  }
+
+  window.saveEmp = async function(oldEmail){
+    var list = master(true);
+    var oldClean = E(oldEmail);
+    var idx = list.findIndex(function(e){ return e.email === oldClean; });
+    if(idx < 0) idx = list.findIndex(function(e){ return E(e.email) === E((el('ef-e')||{}).value || ''); });
+    if(idx < 0){ toastMsg('⚠ Employee not found. Select employee again.'); return; }
+    var old = list[idx];
+    var rec;
+    try{ rec = readForm(old.email); }catch(err){ toastMsg('⚠ '+err.message); return; }
+    if(list.some(function(e,i){ return i !== idx && e.email === rec.email; })){ toastMsg('⚠ This email already exists for another employee.'); return; }
+    rec.bg = old.bg || colors()[idx % colors().length];
+    rec.joinDate = old.joinDate || old.JoinDate || today();
+    list[idx] = Object.assign({}, old, rec);
+    if(old.email !== rec.email){ var del = deletedSet(); del.add(old.email); saveDeleted(del); try{ if(typeof USERS !== 'undefined') delete USERS[old.email]; }catch(e){} migrateTasks(old.email, rec); }
+    writeBack(list);
+    try{ if(typeof syncEmployeeToServer === 'function') await syncEmployeeToServer(Object.assign({oldEmail:old.email}, rec), 'upsertEmployee'); }catch(e){}
+    try{ if(typeof cu !== 'undefined' && cu && E(cu.email) === old.email){ cu = Object.assign({}, cu, rec); window.cu = cu; if(typeof saveCurrentSession === 'function') saveCurrentSession(); else writeJSON(sessionStoreKey(), {email:rec.email,ts:Date.now()}); } }catch(e){}
+    window.renderEmpList();
+    window.selectEmp(rec.email);
+    refreshEverywhere();
+    toastMsg('✅ Employee saved permanently. Login updated: '+rec.email);
+  };
+
+  window.addNewEmp = async function(){
+    var rec;
+    try{ rec = readForm(''); }catch(err){ toastMsg('⚠ '+err.message); return; }
+    var list = master(true);
+    if(list.some(function(e){ return e.email === rec.email; })){ toastMsg('⚠ Email already exists.'); return; }
+    rec.bg = colors()[list.length % colors().length];
+    rec.joinDate = today();
+    list.push(rec);
+    var del = deletedSet(); del.delete(rec.email); saveDeleted(del);
+    writeBack(list);
+    try{ if(typeof syncEmployeeToServer === 'function') await syncEmployeeToServer(rec, 'upsertEmployee'); }catch(e){}
+    window.renderEmpList();
+    window.selectEmp(rec.email);
+    refreshEverywhere();
+    toastMsg('✅ New employee added. Login active: '+rec.email);
+  };
+
+  window.delEmp = async function(email){
+    email = E(email);
+    if(!email) return;
+    if(!confirm('Remove '+email+' from portal/login?')) return;
+    var list = master(true).map(function(e){ if(e.email === email) e.active = false; return e; });
+    var del = deletedSet(); del.add(email); saveDeleted(del);
+    try{ if(typeof USERS !== 'undefined') delete USERS[email]; }catch(e){}
+    writeBack(list);
+    try{ if(typeof syncEmployeeToServer === 'function') await syncEmployeeToServer({email:email,active:false}, 'deleteEmployee'); }catch(e){}
+    try{ editEmpEmail = null; }catch(x){} window.editEmpEmail = null;
+    var fp = el('emp-fp'); if(fp) fp.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted)">Employee removed from active portal/login.</div>';
+    window.renderEmpList();
+    refreshEverywhere();
+    toastMsg('🗑 Employee removed from login and dropdowns.');
+  };
+
+  window.doLogin = async function(){
+    var email = E((el('lem') || {}).value || '');
+    var pass = String((el('lpw') || {}).value || '');
+    var err = el('lerr');
+    function fail(msg){ if(err){ err.textContent = '❌ '+msg; err.style.display = 'block'; } try{ cu = null; }catch(e){} }
+    if(!email || !pass) return fail('Email and password required.');
+    var rec = getEmp(email, false);
+    if(!rec) return fail('Email not found. Please check employee list.');
+    if(rec.active === false) return fail('This employee account is inactive.');
+    if(String(rec.pass || '') !== pass) return fail('Wrong password.');
+    try{ cu = Object.assign({}, rec, {email:rec.email, role:rec.role || rec.desig || 'Team', desig:rec.desig || rec.role || 'Team'}); cu.isAdmin = !!rec.isAdmin; cu.isManager = !!rec.isManager; window.cu = cu; }catch(e){ window.cu = rec; }
+    try{ if(typeof saveCurrentSession === 'function') saveCurrentSession(); else writeJSON(sessionStoreKey(), {email:rec.email,ts:Date.now()}); }catch(e){}
+    if(err) err.style.display = 'none';
+    var lp = el('lp'), app = el('app'); if(lp) lp.classList.add('hidden'); if(app) app.classList.remove('hidden');
+    try{ if(typeof initApp === 'function') initApp(); }catch(e){ console.error(e); }
+  };
+
+  // Keep sidebar navigation clickable even after employee DOM rebuilds.
+  document.addEventListener('click', function(ev){
+    var item = ev.target && ev.target.closest ? ev.target.closest('.ni[id^="ni-"]') : null;
+    if(!item || item.dataset.empv8NavBound) return;
+    // Existing inline onclick remains primary. This is only a fallback on the next tick.
+    setTimeout(function(){
+      try{
+        var page = item.id.replace(/^ni-/, '');
+        var pg = document.getElementById('pg-' + page);
+        if(pg && !pg.classList.contains('act') && typeof nav === 'function') nav(page);
+      }catch(e){}
+    }, 0);
+  }, true);
+
+  window.fixEmployeeSystemNow = function(){
+    writeBack(master(true));
+    refreshEverywhere();
+    try{ window.renderEmpList(); }catch(e){}
+    toastMsg('✅ Employee system fixed: duplicates removed, login/update/add/remove working.');
+  };
+
+  setTimeout(function(){
+    try{ writeBack(master(true)); }catch(e){ console.warn('employee v8 init failed', e); }
+    try{ if(location.hash === '#employees' || document.getElementById('pg-employees')) window.renderEmpList(); }catch(e){}
+  }, 300);
+})();
+</script>
+
 </body>
 </html>
