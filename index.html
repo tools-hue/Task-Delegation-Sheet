@@ -6668,5 +6668,239 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(fillAssignDro
 })();
 </script>
 
+<script>
+/* ==========================================================
+   FINAL EMPLOYEE + MANAGER + MAIL PATCH v13
+   - Safe end-of-file patch. Does not touch sidebar/nav handlers.
+   - Fixes employee add/edit/login persistence.
+   - Fixes manager task visibility, including Ishika Saxena.
+   - Attempts task/employee mail through configured Apps Script URL.
+========================================================== */
+(function(){
+  'use strict';
+  var PATCH='EMPLOYEE_MANAGER_MAIL_V13';
+  if(window.__UPGRO_EMP_MANAGER_PATCH_V13__) return;
+  window.__UPGRO_EMP_MANAGER_PATCH_V13__=true;
+
+  var MASTER_KEY='upgro_employee_master_final_v13';
+  var ALIAS_KEY='upgro_employee_email_alias_final_v13';
+  var LEGACY_KEYS=[
+    'upgro_employee_master_final_v13','upgro_employee_master_final_v12','upgro_employee_master_final_v11','upgro_employee_master_final_v10',
+    'upgro_employee_master_v9','upgro_employee_master_v8','upgro_emp_dyn','upgro_roles_v3'
+  ];
+  var FORCED=[
+    {email:'ishika.crm@upgromedia.com',name:'Ishika Saxena',pass:'Ishika@123',role:'Manager',desig:'CRM',isAdmin:false,isManager:true,active:true},
+    {email:'ravi.graphics@upgromedia.com',name:'Ravi Singh',pass:'Ravi@123',role:'Employee',desig:'Graphic Designer',isAdmin:false,isManager:false,active:true}
+  ];
+  var ADMIN_EMAILS=['ritutyagiea@upgromedia.com','adarsh.mis@upgromedia.com','dhiraj.jaiswal@upgromedia.com','vraj9424@gmail.com'];
+
+  function id(x){return document.getElementById(x)}
+  function val(x){var el=id(x);return el?String(el.value||'').trim():''}
+  function checked(x){var el=id(x);return !!(el&&el.checked)}
+  function E(v){return String(v||'').trim().toLowerCase()}
+  function N(v){return String(v||'').trim().toLowerCase().replace(/\s+/g,' ')}
+  function esc(v){return String(v==null?'':v).replace(/[&<>'"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]})}
+  function validEmail(e){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(E(e))}
+  function toast2(m){try{ if(typeof toast==='function') toast(m); else alert(m); }catch(e){console.log(m)}}
+  function bg(i){try{return (CLRS&&CLRS.length)?CLRS[Math.abs(i)%CLRS.length]:'#0B84FF'}catch(e){return '#0B84FF'}}
+  function today(){return new Date().toISOString().slice(0,10)}
+  function initials(n){return String(n||'?').trim().split(/\s+/).filter(Boolean).slice(0,2).map(function(s){return s[0]}).join('').toUpperCase()||'?'}
+  function roleIsManager(r){return !!(r&&(!r.isAdmin)&&(
+    r.isManager===true || String(r.isManager).toLowerCase()==='true' ||
+    /manager|assigner|work assigner|team lead|crm/i.test(String(r.role||'')+' '+String(r.desig||''))
+  ))}
+  function readList(key){try{var x=JSON.parse(localStorage.getItem(key)||'[]'); if(Array.isArray(x)) return x; if(x&&typeof x==='object') return Object.keys(x).map(function(k){return Object.assign({email:k},x[k])});}catch(e){} return []}
+  function saveAliases(a){try{localStorage.setItem(ALIAS_KEY,JSON.stringify(a||{}))}catch(e){}}
+  function getAliases(){try{return JSON.parse(localStorage.getItem(ALIAS_KEY)||'{}')||{}}catch(e){return {}}}
+  function canon(email){email=E(email);var a=getAliases();var seen={};while(a[email]&&a[email]!==email&&!seen[email]){seen[email]=1;email=E(a[email])}return email}
+  function normalizeRec(r,i){
+    if(!r) return null;
+    var email=canon(r.email||r.Email||r.EmployeeEmail||r['Employee Email']||r['Email Address']||r.UserEmail||'');
+    var name=String(r.name||r.Name||r.EmployeeName||r['Employee Name']||r['Full Name']||'').trim();
+    if(!email && !name) return null;
+    if(!email || !email.includes('@')) return null;
+    var desig=String(r.desig||r.Designation||r.designation||r.role||r.Role||'Team').trim()||'Team';
+    var role=String(r.role||r.Role||r.desig||r.Designation||desig||'Team').trim()||desig;
+    var activeRaw=(r.active!==undefined?r.active:(r.Active!==undefined?r.Active:(r.Status!==undefined?r.Status:true)));
+    var active=!['false','inactive','0','no','removed','delete','deleted'].includes(String(activeRaw).toLowerCase());
+    var isAdmin=ADMIN_EMAILS.indexOf(email)>=0 || r.isAdmin===true || String(r.isAdmin||r.IsAdmin||r['Is Admin']||'').toLowerCase()==='true';
+    var rec={
+      email:email,
+      name:name||email.split('@')[0].replace(/[._-]+/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase()}),
+      pass:String(r.pass||r.Password||r.password||'').trim(),
+      role:role,desig:desig,isAdmin:!!isAdmin,
+      isManager:!!(!isAdmin && (r.isManager===true || String(r.isManager||r.IsManager||r['Is Manager']||'').toLowerCase()==='true' || /manager|assigner|work assigner|team lead|crm/i.test(role+' '+desig))),
+      active:active,bg:r.bg||bg(i||0),joinDate:r.joinDate||r.JoinDate||r['Join Date']||''
+    };
+    if(rec.isAdmin) rec.isManager=false;
+    return rec;
+  }
+  function collectEmployees(){
+    var arr=[];
+    try{ if(typeof USERS!=='undefined') Object.keys(USERS||{}).forEach(function(e,i){var u=USERS[e]||{};arr.push(normalizeRec({email:e,name:u.name,pass:u.pass,role:u.role,desig:u.desig,isAdmin:u.isAdmin,isManager:u.isManager,active:u.active,bg:u.bg,joinDate:u.joinDate},i));}); }catch(e){}
+    try{ if(Array.isArray(window.empReg||empReg)) (window.empReg||empReg).forEach(function(x,i){arr.push(normalizeRec(x,i));}); }catch(e){}
+    try{ if(Array.isArray(window.sheetEmpReg||sheetEmpReg)) (window.sheetEmpReg||sheetEmpReg).forEach(function(x,i){arr.push(normalizeRec(x,i));}); }catch(e){}
+    LEGACY_KEYS.forEach(function(k){readList(k).forEach(function(x,i){arr.push(normalizeRec(x,i));});});
+    return arr.filter(Boolean);
+  }
+  function dedupe(list){
+    var map=new Map();
+    (list||[]).forEach(function(r,i){r=normalizeRec(r,i); if(!r) return; var old=map.get(r.email)||{}; map.set(r.email,Object.assign({},old,r,{name:r.name||old.name,pass:r.pass||old.pass,role:r.role||old.role,desig:r.desig||old.desig,bg:old.bg||r.bg||bg(i)}));});
+    FORCED.forEach(function(f,i){var email=E(f.email);var old=map.get(email); if(old){ old.isManager = old.isAdmin ? false : (old.isManager||f.isManager); old.active = old.active!==false; old.name=old.name||f.name; old.desig=old.desig||f.desig; old.role=old.role||f.role; old.pass=old.pass||f.pass; map.set(email,old); } else map.set(email,normalizeRec(f,100+i));});
+    return Array.from(map.values()).map(function(r,i){r.bg=r.bg||bg(i); if(ADMIN_EMAILS.indexOf(r.email)>=0){r.isAdmin=true;r.isManager=false;r.active=true} return r;});
+  }
+  function saveMaster(list){
+    var out=dedupe(list||[]);
+    try{localStorage.setItem(MASTER_KEY,JSON.stringify(out))}catch(e){}
+    try{localStorage.setItem('upgro_emp_dyn',JSON.stringify(out))}catch(e){}
+    try{localStorage.setItem('upgro_employee_master_final_v12',JSON.stringify(out))}catch(e){}
+    try{var roles={};out.forEach(function(r){roles[r.email]={isAdmin:!!r.isAdmin,isManager:!!r.isManager}});localStorage.setItem('upgro_roles_v3',JSON.stringify(roles))}catch(e){}
+    try{window.empReg=out.slice();empReg=window.empReg;}catch(e){}
+    try{ out.forEach(function(r){USERS[r.email]=Object.assign({},USERS[r.email]||{},r,{role:r.role||r.desig,desig:r.desig||r.role,isManager:!!r.isManager,isAdmin:!!r.isAdmin,active:r.active!==false});}); }catch(e){}
+    try{localStorage.setItem('upgro_emp_sync_ping_v1',String(Date.now()))}catch(e){}
+    return out;
+  }
+  function getMaster(){return saveMaster(collectEmployees())}
+  function emp(email){email=canon(email);return getMaster().find(function(e){return e.email===email})||null}
+  function employeeByName(name){var k=N(name);if(!k)return null;var list=getMaster();return list.find(function(e){return e.active!==false && (N(e.name)===k || N(e.name).split(' ')[0]===k || k.indexOf(N(e.name))>=0 || N(e.name).indexOf(k)>=0)})||null}
+  function displayNameForEmail(email){var r=emp(email);return r?r.name:(email?email.split('@')[0].replace(/[._-]+/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase()}):'Unknown')}
+  function desigForEmail(email){var r=emp(email);return r?(r.desig||r.role||'Team'):'Team'}
+
+  function postURL(){try{return String(SURL||localStorage.getItem('ugv4_url')||localStorage.getItem('upgro_url')||'').trim()}catch(e){return ''}}
+  async function post(payload){
+    var url=postURL(); if(!url) return {ok:false,noUrl:true};
+    try{var res=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});var data={};try{data=await res.clone().json()}catch(e){} return {ok:res.ok,data:data};}catch(e){console.warn('post failed',payload&&payload.action,e);return {ok:false,error:e}}
+  }
+  async function postMany(payloads){var ok=false;for(var i=0;i<payloads.length;i++){var r=await post(payloads[i]); if(r.ok && (!r.data || r.data.success!==false)) ok=true;} return ok}
+  function employeeMailHtml(e,mode){return '<div style="font-family:Inter,Arial,sans-serif;background:#f8fafc;padding:24px"><div style="max-width:560px;margin:auto;background:#fff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden"><div style="background:#08192D;color:white;padding:18px 22px"><h2 style="margin:0;font-size:20px">UpGro Media Mission Control</h2><p style="margin:6px 0 0;color:#bfdbfe">'+(mode==='new'?'Your employee login is created':'Your employee login is updated')+'</p></div><div style="padding:22px"><p>Hi <b>'+esc(e.name)+'</b>,</p><p>Your Mission Control access details:</p><table style="width:100%;border-collapse:collapse"><tr><td style="padding:10px;border:1px solid #e2e8f0">Login Email</td><td style="padding:10px;border:1px solid #e2e8f0"><b>'+esc(e.email)+'</b></td></tr><tr><td style="padding:10px;border:1px solid #e2e8f0">Password</td><td style="padding:10px;border:1px solid #e2e8f0"><b>'+esc(e.pass)+'</b></td></tr><tr><td style="padding:10px;border:1px solid #e2e8f0">Role</td><td style="padding:10px;border:1px solid #e2e8f0">'+esc(e.desig||e.role||'Team')+(e.isManager?' · Manager':'')+'</td></tr></table><p style="color:#64748b;font-size:13px;margin-top:16px">Use the portal link shared by the admin to sign in.</p></div></div></div>'}
+  async function sendEmployeeMail(e,mode){
+    var html=employeeMailHtml(e,mode);
+    return await postMany([
+      {action:'sendEmployeeLogin',mailType:'employee-login',to:e.email,email:e.email,name:e.name,subject:(mode==='new'?'Welcome to UpGro Mission Control':'Mission Control Login Updated'),emailHtml:html,emailBody:'Login Email: '+e.email+'\nPassword: '+e.pass},
+      {action:'sendTestHtmlEmail',mailType:'employee-login',to:e.email,email:e.email,name:e.name,subject:(mode==='new'?'Welcome to UpGro Mission Control':'Mission Control Login Updated'),emailHtml:html,emailBody:'Login Email: '+e.email+'\nPassword: '+e.pass},
+      {action:'sendEmail',to:e.email,email:e.email,subject:(mode==='new'?'Welcome to UpGro Mission Control':'Mission Control Login Updated'),htmlBody:html,body:'Login Email: '+e.email+'\nPassword: '+e.pass}
+    ]);
+  }
+  async function syncEmployee(e,oldEmail){
+    var payload={oldEmail:oldEmail||e.email,OldEmail:oldEmail||e.email,email:e.email,Email:e.email,'Email Address':e.email,EmployeeEmail:e.email,name:e.name,Name:e.name,'Full Name':e.name,pass:e.pass,Password:e.pass,password:e.pass,role:e.role,Role:e.role,desig:e.desig,Designation:e.desig,isAdmin:!!e.isAdmin,IsAdmin:!!e.isAdmin,isManager:!!e.isManager,IsManager:!!e.isManager,active:e.active!==false,Active:e.active!==false,joinDate:e.joinDate||today(),JoinDate:e.joinDate||today()};
+    return await postMany([Object.assign({action:'upsertEmployee'},payload),Object.assign({action:'addEmployee'},payload),Object.assign({action:'updateEmployee'},payload),{action:'syncEmployees',employees:getMaster()}]);
+  }
+  function migrateTaskEmail(oldEmail,newEmail){
+    oldEmail=canon(oldEmail);newEmail=canon(newEmail); if(!oldEmail||!newEmail||oldEmail===newEmail)return;
+    var newEmp=emp(newEmail)||{};
+    try{(window.allTasks||allTasks||[]).forEach(function(t){['email','assignedEmail','assignedToEmail','empEmail','employeeEmail','AssignedTo_Email','AssignedToEmail','EmployeeEmail','Assigned Email','Assigned To Email','Employee Email'].forEach(function(k){if(E(t[k])===oldEmail)t[k]=newEmail;});t.empName=t.assignedTo=t.AssignedTo_Name=t.EmployeeName=newEmp.name||displayNameForEmail(newEmail);t.desig=newEmp.desig||newEmp.role||desigForEmail(newEmail);});}catch(e){}
+    var a=getAliases();a[oldEmail]=newEmail;saveAliases(a);
+    postMany([{action:'migrateEmployeeEmail',oldEmail:oldEmail,newEmail:newEmail,OldEmail:oldEmail,NewEmail:newEmail},{action:'updateEmployeeEmail',oldEmail:oldEmail,newEmail:newEmail,OldEmail:oldEmail,NewEmail:newEmail}]);
+  }
+
+  function rawTaskEmail(t){return E(t&&(
+    t.email||t.assignedEmail||t.assignedToEmail||t.empEmail||t.employeeEmail||t.AssignedTo_Email||t.AssignedToEmail||t.EmployeeEmail||t['Assigned To Email']||t['Employee Email']||t.Email||''
+  ))}
+  function rawTaskName(t){return String(t&&(t.assignedToLabel||t.empName||t.assignedTo||t.AssignedTo_Name||t['Assigned To Name']||t.EmployeeName||t.employeeName||'')).trim()}
+  function taskEmail(t){
+    if(!t)return '';
+    var email=canon(rawTaskEmail(t));
+    if(!email){var byName=employeeByName(rawTaskName(t)); if(byName) email=byName.email;}
+    if(email){var r=emp(email);t.email=t.assignedToEmail=t.empEmail=t.EmployeeEmail=t.AssignedTo_Email=email;t.employeeEmail=email;if(r){t.empName=t.assignedTo=t.AssignedTo_Name=t.EmployeeName=r.name;t.assignedToLabel=r.name;t.desig=r.desig||r.role;}}
+    return email;
+  }
+  function taskByName(t){return N(t&&(t.by||t.assignedBy||t.AssignedBy||t.AssignedBy_Name||t['Assigned By']||t['Assigned By Name']||t.createdBy||''))}
+  function taskByEmail(t){return E(t&&(t.assignedByEmail||t.AssignedBy_Email||t['Assigned By Email']||t.byEmail||t.CreatedByEmail||t.createdByEmail||''))}
+  function isAssignedByMe(t){if(!window.cu)return false;var me=E(cu.email), mn=N(cu.name);return (!!me&&taskByEmail(t)===me)||!!mn&&taskByName(t)===mn;}
+  function isManagerView(){try{return typeof isManager==='function'?isManager():!!(cu&&cu.isManager)}catch(e){return !!(cu&&cu.isManager)}}
+  function isAdminView(){try{return typeof isAdmin==='function'?isAdmin():!!(cu&&cu.isAdmin)}catch(e){return !!(cu&&cu.isAdmin)}}
+  function taskForCurrentUser(t){if(!window.cu||!cu.email)return false;var te=taskEmail(t), me=E(cu.email);if(te===me)return true;if(isManagerView()&&!isAdminView())return isAssignedByMe(t);return false;}
+  function managerFiltered(tasks){
+    var list=(tasks||[]).map(function(t){taskEmail(t);return t;}).filter(function(t){var te=taskEmail(t);var r=emp(te);return !!te && (!r || r.active!==false);});
+    if(isAdminView()) return list;
+    if(isManagerView()) return list.filter(taskForCurrentUser);
+    return list.filter(function(t){return taskEmail(t)===E(cu&&cu.email)});
+  }
+  function normalizeAllTasks(){try{var arr=window.allTasks||allTasks||[];arr.forEach(taskEmail);window.allTasks=arr;allTasks=arr;}catch(e){}}
+
+  var oldInit=window.initEmpReg;
+  window.initEmpReg=function(force){try{if(typeof oldInit==='function')oldInit.call(this,force)}catch(e){console.warn('old initEmpReg failed',e)}return saveMaster(collectEmployees())};
+  window.getStoredEmployee=function(email){return emp(email)};
+  window.uname=function(email){return displayNameForEmail(email)};
+  window.udesig=function(email){return desigForEmail(email)};
+  window.computeManagerFlag=function(rec){return roleIsManager(rec)};
+  window.isManager=function(){try{var r=emp(cu&&cu.email);return !!(r&&roleIsManager(r))}catch(e){return !!(cu&&cu.isManager)}};
+  window.isAdmin=function(){try{var r=emp(cu&&cu.email);return !!(r&&r.isAdmin)}catch(e){return !!(cu&&cu.isAdmin)}};
+  window.canAssign=function(){return window.isAdmin()||window.isManager()};
+  window.taskBelongsToCurrentUser=taskForCurrentUser;
+  window.applyEmpF=function(tasks){var list=managerFiltered(tasks||[]);try{var k=window.activeEmpF||activeEmpF;if(k){list=list.filter(function(t){var te=taskEmail(t);return te.split('@')[0].replace(/[^a-z0-9]/g,'-')===k||te.replace(/[^a-z0-9]/g,'-')===k;});}}catch(e){}return list};
+
+  var oldGetAnalytics=window.getAnalyticsTasks;
+  window.getAnalyticsTasks=function(){try{var base=oldGetAnalytics?oldGetAnalytics.call(this):(window.allTasks||allTasks||[]);return managerFiltered(base)}catch(e){return managerFiltered(window.allTasks||allTasks||[])}};
+  var oldRenderMy=window.renderMyTasks;
+  window.renderMyTasks=function(){normalizeAllTasks();return oldRenderMy&&oldRenderMy.apply(this,arguments)};
+  var oldRenderAll=window.renderAllTasks;
+  window.renderAllTasks=function(){normalizeAllTasks();return oldRenderAll&&oldRenderAll.apply(this,arguments)};
+  var oldPopulateSub=window.populateSubSel;
+  window.populateSubSel=function(){normalizeAllTasks();return oldPopulateSub&&oldPopulateSub.apply(this,arguments)};
+  var oldBuildUI=window.buildUI;
+  window.buildUI=function(){normalizeAllTasks();var r=oldBuildUI&&oldBuildUI.apply(this,arguments);try{window.refillEmpDropdown()}catch(e){}return r};
+  var oldLoadData=window.loadData;
+  window.loadData=async function(){var r=oldLoadData&&await oldLoadData.apply(this,arguments);normalizeAllTasks();try{if(typeof buildUI==='function')buildUI()}catch(e){}return r};
+
+  window.doLogin=async function(){
+    var email=canon(val('lem')), pass=val('lpw'), err=id('lerr');
+    function fail(m){if(err){err.textContent='❌ '+m;err.style.display='block'}try{cu=null}catch(e){}}
+    if(!email||!pass)return fail('Email and password required.');
+    try{window.initEmpReg(true)}catch(e){}
+    var r=emp(email);
+    if((!r || String(r.pass||'')!==String(pass)) && typeof fetchEmployeesFromServer==='function'){try{await fetchEmployeesFromServer();window.initEmpReg(true);r=emp(email)}catch(e){}}
+    if(!r)return fail('Email not found. Please check employee list.');
+    if(r.active===false)return fail('This employee account is inactive.');
+    if(String(r.pass||'')!==String(pass))return fail('Wrong password.');
+    try{cu=Object.assign({},r,{role:r.role||r.desig,desig:r.desig||r.role,isAdmin:!!r.isAdmin,isManager:roleIsManager(r)})}catch(e){}
+    if(err)err.style.display='none';try{if(typeof saveCurrentSession==='function')saveCurrentSession()}catch(e){}
+    var lp=id('lp'), app=id('app');if(lp)lp.classList.add('hidden');if(app)app.classList.remove('hidden');
+    try{if(typeof initApp==='function')initApp()}catch(e){console.error(e);toast2('Login ok, app init error: '+e.message)}
+  };
+
+  function designOptions(sel){var opts=(window.DESIG_OPTS||['MIS','Executive Assistant','Web Developer','Graphic Designer','Video Editor','CRM','Meta Media Buyer','Google Ads','SEO Executive','Founder','CEO','HR','Accountant','Intern','Team']);return opts.map(function(d){return '<option value="'+esc(d)+'" '+(d===sel?'selected':'')+'>'+esc(d)+'</option>'}).join('')}
+  function formHtml(e,isNew){e=e||{};return '<div class="fg"><label class="fl2">Full Name *</label><input id="ef-n" class="fc" value="'+esc(e.name||'')+'"></div><div class="fg"><label class="fl2">Email ID * <span style="color:var(--blue);font-weight:500">editable login email</span></label><input id="ef-e" type="email" class="fc" value="'+esc(e.email||'')+'"></div><div class="fg"><label class="fl2">Password *</label><input id="ef-p" type="text" class="fc" value="'+esc(e.pass||'')+'"></div><div class="fr"><div class="fg"><label class="fl2">Designation *</label><select id="ef-d" class="fc">'+designOptions(e.desig||e.role)+'</select></div><div class="fg"><label class="fl2">Role *</label><input id="ef-r" class="fc" value="'+esc(e.role||e.desig||'')+'"></div></div><div style="display:flex;gap:20px;margin-bottom:14px;flex-wrap:wrap"><label><input id="ef-admin" type="checkbox" '+(e.isAdmin?'checked':'')+'> 👑 Admin</label><label><input id="ef-mgr" type="checkbox" '+(e.isManager?'checked':'')+'> 🔀 Manager / Work Assigner</label><label><input id="ef-ac" type="checkbox" '+(e.active!==false?'checked':'')+'> ✅ Active</label></div><div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:11px 14px;margin-bottom:12px;color:#0066ff;font-size:12px">Save karte hi login, dropdowns, manager view, assigned task ownership aur employee mail sync hoga.</div><div style="display:flex;gap:8px"><button class="btn '+(isNew?'bs':'bp')+'" style="flex:1" onclick="'+(isNew?'addNewEmp()':'saveEmp(\''+esc(e.email||'')+'\')')+'">💾 '+(isNew?'Add Employee + Send Mail':'Save Employee + Send Mail')+'</button>'+(isNew?'':'<button class="btn bd" onclick="delEmp(\''+esc(e.email)+'\')">🗑 Remove</button>')+'</div>'}
+  window.renderEmpList=function(){
+    var cont=id('emp-items')||id('emp-list'); if(!cont)return; var q=String((id('emp-q')||{}).value||'').toLowerCase(); var arr=getMaster().filter(function(e){return e.active!==false}).filter(function(e){return !q||[e.name,e.email,e.role,e.desig].join(' ').toLowerCase().indexOf(q)>=0}).sort(function(a,b){return a.name.localeCompare(b.name)});
+    var counters=id('emp-counters');if(counters){var active=arr.length, admins=arr.filter(function(e){return e.isAdmin}).length, mgrs=arr.filter(roleIsManager).length;counters.innerHTML='<div class="tctr tctr-blue"><div class="tctr-v">'+active+'</div><div class="tctr-l">Active</div></div><div class="tctr tctr-purple"><div class="tctr-v">'+admins+'</div><div class="tctr-l">Admins</div></div><div class="tctr tctr-orange"><div class="tctr-v">'+mgrs+'</div><div class="tctr-l">Managers</div></div>'}
+    cont.innerHTML=arr.map(function(e,i){var active=(E(window.editEmpEmail||'')===e.email)?' act':'';return '<div class="ei'+active+'" onclick="selectEmp(\''+esc(e.email)+'\')"><div class="ei-av" style="background:'+esc(e.bg||bg(i))+'">'+esc(initials(e.name))+'</div><div class="ei-info"><div class="ei-name">'+esc(e.name)+' — '+esc(e.desig||e.role)+'</div><div class="ei-role">'+esc((e.isAdmin?'Admin':roleIsManager(e)?'Manager':'Employee')+' · '+e.email)+'</div></div><div class="ei-dot" style="background:'+(e.active!==false?'var(--green)':'var(--red)')+'"></div></div>'}).join('')||'<div style="padding:18px;color:var(--muted)">No employee found.</div>';
+  };
+  window.selectEmp=function(email){email=canon(email);try{editEmpEmail=email;window.editEmpEmail=email}catch(e){}var e=emp(email);if(!e)return;window.renderEmpList();var fp=id('emp-fp');if(!fp)return;fp.innerHTML='<div class="prof-set" style="margin-bottom:18px"><div class="prof-set-av" style="background:'+esc(e.bg||'#0B84FF')+'">'+esc(initials(e.name))+'</div><div class="prof-set-meta"><div class="prof-set-name">'+esc(e.name)+' — '+esc(e.desig||e.role)+'</div><div class="prof-set-role">Editable login/profile · '+(roleIsManager(e)?'Manager':'Employee')+'</div></div></div>'+formHtml(e,false)};
+  window.selectNewEmp=function(){try{editEmpEmail=null;window.editEmpEmail=null}catch(e){}window.renderEmpList();var fp=id('emp-fp');if(!fp)return;fp.innerHTML='<div style="font-size:15px;font-weight:700;margin-bottom:16px">➕ Add New Employee</div>'+formHtml({active:true,role:'Employee',desig:'Team',bg:bg(Date.now())},true)};
+  function readForm(oldEmail){var e={oldEmail:canon(oldEmail),name:val('ef-n'),email:E(val('ef-e')),pass:val('ef-p'),desig:val('ef-d')||'Team',role:val('ef-r')||val('ef-d')||'Employee',isAdmin:checked('ef-admin'),isManager:checked('ef-mgr'),active:checked('ef-ac'),joinDate:today()};if(e.isAdmin)e.isManager=false;return e}
+  function refreshAfter(email){try{window.initEmpReg(true)}catch(e){}try{window.renderEmpList()}catch(e){}try{if(email)window.selectEmp(email)}catch(e){}try{if(typeof refillEmpDropdown==='function')refillEmpDropdown()}catch(e){}try{if(typeof updateSidebarVis==='function')updateSidebarVis()}catch(e){}try{if(typeof renderPageButtons==='function')renderPageButtons()}catch(e){}try{if(typeof buildUI==='function')buildUI()}catch(e){}}
+  window.addNewEmp=async function(){var e=readForm('');if(!e.name||!e.email||!e.pass)return toast2('⚠ Name, email and password required');if(!validEmail(e.email))return toast2('⚠ Valid email required');var list=getMaster();if(list.some(function(x){return x.email===e.email&&x.active!==false}))return toast2('⚠ Email already exists');e.bg=bg(list.length);list.push(e);saveMaster(list);await syncEmployee(e);var mailed=await sendEmployeeMail(e,'new');refreshAfter(e.email);toast2('✅ Employee added'+(mailed?' + mail sent':' — mail backend not confirmed'))};
+  window.saveEmp=async function(oldEmail){oldEmail=canon(oldEmail);var e=readForm(oldEmail);if(!e.name||!e.email||!e.pass)return toast2('⚠ Name, email and password required');if(!validEmail(e.email))return toast2('⚠ Valid email required');var list=getMaster();var idx=list.findIndex(function(x){return x.email===oldEmail});if(idx<0)idx=list.findIndex(function(x){return x.email===e.email});if(idx>=0){e.bg=list[idx].bg||bg(idx);e.joinDate=list[idx].joinDate||today();list[idx]=Object.assign({},list[idx],e)}else{e.bg=bg(list.length);list.push(e)}if(oldEmail&&oldEmail!==e.email)migrateTaskEmail(oldEmail,e.email);saveMaster(list);await syncEmployee(e,oldEmail);var mailed=await sendEmployeeMail(e,oldEmail&&oldEmail!==e.email?'updated':'new');refreshAfter(e.email);toast2('✅ Employee updated'+(mailed?' + mail sent':' — mail backend not confirmed'))};
+  window.delEmp=async function(email){email=canon(email);if(!email)return;if(!confirm('Remove '+email+' from portal?'))return;var list=getMaster().map(function(e){if(e.email===email)e.active=false;return e});saveMaster(list);await syncEmployee(Object.assign(emp(email)||{email:email,name:email,pass:'',role:'Employee',desig:'Team'}, {active:false}),email);refreshAfter('');var fp=id('emp-fp');if(fp)fp.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:32px;margin-bottom:8px">✓</div><div style="font-weight:600">Employee removed from portal</div></div>';toast2('🗑 Employee removed')};
+  window.refillEmpDropdown=function(){var sel=id('add-emp');if(!sel)return;var cur=sel.value;var arr=getMaster().filter(function(e){return e.active!==false&&!e.isAdmin}).sort(function(a,b){return a.name.localeCompare(b.name)});sel.innerHTML='<option value="">— Select Employee —</option>'+arr.map(function(e){return '<option value="'+esc(e.email)+'" '+(cur===e.email?'selected':'')+'>'+esc(e.name+' — '+(e.desig||e.role)+(roleIsManager(e)?' · Manager':''))+'</option>'}).join('')};
+
+  function taskMailHtml(d){
+    try{if(typeof buildTaskMailHtml==='function')return buildTaskMailHtml('assign',d)}catch(e){}
+    return '<div style="font-family:Arial,sans-serif;padding:22px"><h2>New Task Assigned</h2><p><b>'+esc(d.task||'Task')+'</b></p><p>Assigned by: '+esc(d.by||'Admin')+'</p><p>Due: '+esc(d.ddate||'')+'</p><p>'+esc(d.notes||'')+'</p></div>'
+  }
+  async function sendTaskMailFallback(d){
+    if(!d||!d.email)return false;
+    var html=taskMailHtml(d), subject='New Task Assigned — '+(d.task||'UpGro Mission Control');
+    return await postMany([
+      Object.assign({action:'sendTaskEmail',to:d.email,email:d.email,subject:subject,emailHtml:html,htmlBody:html,sendEmail:true},d),
+      Object.assign({action:'sendTestHtmlEmail',mailType:'task',to:d.email,email:d.email,subject:subject,emailHtml:html,htmlBody:html,sendEmail:true},d),
+      Object.assign({action:'notifyTaskAssigned',to:d.email,email:d.email,subject:subject,emailHtml:html,htmlBody:html,sendEmail:true},d)
+    ]);
+  }
+  var oldSaveTask=window.saveTask;
+  window.saveTask=async function(){
+    var captured={email:E(val('add-emp')),task:val('add-task'),ddate:val('add-dd'),adate:val('add-ad'),notes:val('add-note'),references:val('add-ref'),by:(window.cu&&cu.name)||'Admin'};
+    var r=oldSaveTask&&await oldSaveTask.apply(this,arguments);
+    setTimeout(function(){try{if(captured.email)sendTaskMailFallback(captured)}catch(e){}},500);
+    return r;
+  };
+
+  function boot(){try{window.initEmpReg(true)}catch(e){}try{normalizeAllTasks()}catch(e){}try{window.refillEmpDropdown()}catch(e){}try{if(typeof updateSidebarVis==='function')updateSidebarVis()}catch(e){}try{if(typeof renderPageButtons==='function')renderPageButtons()}catch(e){}try{if(typeof buildUI==='function'&&window.cu)buildUI()}catch(e){}}
+  window.fixEmployeeManagerMailNow=function(){saveMaster(collectEmployees());boot();toast2('✅ Employee, manager visibility and mail sync repaired')};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(boot,400)});else setTimeout(boot,400);
+})();
+</script>
+
 </body>
 </html>
