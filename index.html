@@ -941,11 +941,15 @@ const USERS = {
   'neeraj.meta@upgromedia.com':        {pass:'Neeraj@1015',      name:'Neeraj Kumar Yadav',  role:'Manager - Meta',    desig:'Meta Media Buyer',   isAdmin:false, isManager:true},
   'adarsh.web@upgromedia.com':         {pass:'Adarsh@1010',      name:'Adarsh Srivastava',   role:'Web Developer',     desig:'Web Developer',      isAdmin:false, isManager:true},
   'ankit.seo@upgromedia.com':          {pass:'Ankit@1003',       name:'Ankit Prajapati',     role:'SEO Executive',     desig:'SEO Executive',      isAdmin:false, isManager:true},
+  'surya.meta@upgromedia.com':         {pass:'Surya@123',        name:'Surya Pratap Singh',  role:'Meta Media Buyer',  desig:'Meta Media Buyer',   isAdmin:false, isManager:true},
   'shubhi.meta@upgromedia.com':        {pass:'Shubhi@123',       name:'Shubhi Singh',        role:'Meta Media Buyer',  desig:'Meta Media Buyer',   isAdmin:false, isManager:true},
+  'ranveer.copywriter@upgromedia.com': {pass:'Ranveer@123',      name:'Ranveer Singh',       role:'Copywriter',        desig:'Copywriter',         isAdmin:false, isManager:true},
   'vishal.editor@upgromedia.com':      {pass:'Vishal@1002',      name:'Vishal Srivastava',   role:'Video Editor',      desig:'Video Editor',       isAdmin:false, isManager:false},
   'harsh.graphic@upgromedia.com':      {pass:'Harsh@1004',       name:'Harsh Kumar',         role:'Graphic Designer',  desig:'Graphic Designer',   isAdmin:false, isManager:false},
   'harsh.editor@upgromedia.com':       {pass:'Harsh@1007',       name:'Harsh Verma',         role:'Video Editor',      desig:'Video Editor',       isAdmin:false, isManager:false},
   'arpit@upgromedia.com':              {pass:'Arpit@1011',       name:'Arpit Yadav',         role:'Team',              desig:'Team',               isAdmin:false, isManager:false},
+  'junaid@upgromedia.com':             {pass:'Junaid@1014',      name:'Junaid',              role:'Google Ads',        desig:'Google Ads',         isAdmin:false, isManager:false},
+  'chandrakala.meta@upgromedia.com':   {pass:'Chandrakala@1016', name:'Chandrakala Waldia',  role:'Meta Media Buyer',  desig:'Meta Media Buyer',   isAdmin:false, isManager:false},
   'ishika.crm@upgromedia.com':         {pass:'Ishika@123',       name:'Ishika Saxena',       role:'CRM',               desig:'CRM',                isAdmin:false, isManager:true},
 };
 const CLRS=['#0B84FF','#E53935','#00B67A','#F59E0B','#7C3AED','#0E9F8E','#EA580C','#DB2777','#64748B','#D97706','#1565C0','#16A34A','#9333EA','#0891B2'];
@@ -1198,9 +1202,12 @@ function emitEmpSync(){
   try{localStorage.setItem(EMP_SYNC_KEY,String(Date.now()));}catch(e){}
 }
 function mergeRegistry(base,dyn,roles){
+  // Get removed set to filter everywhere
+  const _removed = typeof getRemovedSet==='function' ? getRemovedSet() : new Set();
   const map=new Map();
   [...base,...(Array.isArray(sheetEmpReg)?sheetEmpReg:[]),...dyn].forEach((e,i)=>{
     if(!e||!e.email)return;
+    if(_removed.has(String(e.email||'').trim().toLowerCase()))return; // Skip removed
     const email=String(e.email).trim().toLowerCase();
     const prev=map.get(email)||{};
     map.set(email,{
@@ -2273,7 +2280,10 @@ async function loadData(){
       const er=await fetch(SURL+'?action=getEmployees',{signal:AbortSignal.timeout(12000)});
       const ej=await er.json();
       const rawEmployees = Array.isArray(ej.employees) ? ej.employees : Array.isArray(ej.data) ? ej.data : Array.isArray(ej.rows) ? ej.rows : [];
-      sheetEmpReg = rawEmployees.map((r,i)=>parseEmployeeRow(r,i)).filter(Boolean);
+      // CRITICAL: Filter out locally removed employees from sheet data too
+      const localRemoved = typeof getRemovedSet==='function' ? getRemovedSet() : new Set();
+      sheetEmpReg = rawEmployees.map((r,i)=>parseEmployeeRow(r,i)).filter(Boolean)
+        .filter(function(e){ return !localRemoved.has(String(e.email||'').trim().toLowerCase()); });
       if(sheetEmpReg.length){
         try{ initEmpReg(true); }catch(_e){ console.error(_e); }
         refillEmpDropdown();
@@ -4209,6 +4219,10 @@ function buildRegistry(){
   // Merge locally added employees
   try{
     var stored=JSON.parse(localStorage.getItem(EMP_KEY)||'[]')||[];
+    // Also check ALL legacy removed sets (from other sessions/devices via localStorage sync)
+    ['upgro_emp_removed_final_v3','upgro_employee_removed_final_v3','upgro_removed_v5'].forEach(function(rk){
+      try{var ra=JSON.parse(localStorage.getItem(rk)||'[]');(Array.isArray(ra)?ra:[]).forEach(function(e){removed.add(ne(e));});}catch(_){}
+    });
     stored.forEach(function(e){
       if(!e||!e.email)return;
       var k=ne(e.email);
@@ -4659,7 +4673,20 @@ window.delEmp = async function(email){
   try{var roles2=JSON.parse(localStorage.getItem('upgro_roles_v3')||'{}');delete roles2[canon];localStorage.setItem('upgro_roles_v3',JSON.stringify(roles2));}catch(_){}
   editEmpEmail=null;
   broadcastChange('remove',canon);
-  if(window.SURL){try{await fetch(SURL,{method:'POST',body:JSON.stringify({action:'deleteEmployee',email:canon})});}catch(_){}}
+  if(window.SURL){
+    try{
+      // Delete from sheet — mark inactive so other portals' polling picks it up
+      await fetch(SURL,{method:'POST',body:JSON.stringify({
+        action:'deleteEmployee',
+        email:canon,
+        Email:canon,
+        active:false,
+        Active:false,
+        Status:'deleted',
+        deleted:true
+      })});
+    }catch(_){}
+  }
   if(cu&&ne(cu.email)===canon){try{localStorage.removeItem(SESS_KEY);}catch(_){}cu=null;}
   var fp=$('emp-fp');
   if(fp)fp.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:32px;margin-bottom:8px">✓</div><div style="font-weight:600">'+esc(emp.name)+' removed</div></div>';
@@ -4793,6 +4820,31 @@ window.addEventListener('storage',function(ev){
 });
 window.addEventListener('focus',function(){
   try{window.initEmpReg();refillEmpDropdown();buildEmpPills(allTasks||[]);}catch(_){}
+  // On focus, also fetch fresh employee data from sheet (cross-device sync)
+  if(window.SURL&&window.cu){
+    fetch(window.SURL+'?action=getEmployees',{signal:AbortSignal.timeout(8000)})
+      .then(function(r){return r.json();})
+      .then(function(j){
+        var rows=Array.isArray(j.employees)?j.employees:Array.isArray(j.data)?j.data:[];
+        if(!rows.length)return;
+        var removed=getRemovedSet();
+        var changed=false;
+        rows.forEach(function(r,i){
+          try{
+            var k=ne(r.email||r.Email||'');if(!k)return;
+            var active=String(r.active||r.Active||r.Status||'true').toLowerCase();
+            if(active==='false'||active==='inactive'||active==='0'||active==='deleted'){
+              if(!removed.has(k)){removed.add(k);saveRemovedSet(removed);delete USERS[k];try{empReg=empReg.filter(function(e){return e.email!==k;});}catch(_){}changed=true;}
+            }
+          }catch(_){}
+        });
+        if(changed){
+          try{window.initEmpReg();refillEmpDropdown();buildEmpPills(allTasks||[]);}catch(_){}
+          try{if(typeof updateSidebarVis==='function')updateSidebarVis();}catch(_){}
+          try{if(typeof buildUI==='function')buildUI();}catch(_){}
+        }
+      }).catch(function(){});
+  }
 });
 
 /* ── 30s SHEET POLLING — cross-device ──────────────── */
@@ -4805,11 +4857,24 @@ setInterval(function(){
       if(!rows.length)return;
       var removed=getRemovedSet();
       var changed=false;
+      // Build set of emails that exist in sheet
+      var sheetEmails=new Set(rows.map(function(r){return ne(r.email||r.Email||'');}).filter(Boolean));
+      
       rows.forEach(function(r,i){
         try{
           if(!r||!r.email)return;
-          var k=ne(r.email);
-          if(removed.has(k))return; // NEVER bring back removed employees
+          var k=ne(r.email||r.Email||'');
+          if(!k)return;
+          if(removed.has(k))return; // Locally removed — never bring back
+          // Check if sheet marks this employee as inactive/deleted
+          var active=String(r.active||r.Active||r.Status||'true').toLowerCase();
+          if(active==='false'||active==='inactive'||active==='0'||active==='deleted'){
+            // Sheet says deleted — add to removed set
+            removed.add(k);saveRemovedSet(removed);
+            delete USERS[k];
+            try{empReg=empReg.filter(function(e){return e.email!==k;});}catch(_){}
+            changed=true;return;
+          }
           var exists=buildRegistry().find(function(e){return e.email===k;});
           if(!exists){
             var rec=typeof parseEmployeeRow==='function'?parseEmployeeRow(r,i):null;
@@ -4817,6 +4882,7 @@ setInterval(function(){
           }
         }catch(_){}
       });
+      
       if(changed){
         try{window.initEmpReg();refillEmpDropdown();buildEmpPills(allTasks||[]);}catch(_){}
         try{if(typeof updateSidebarVis==='function')updateSidebarVis();}catch(_){}
