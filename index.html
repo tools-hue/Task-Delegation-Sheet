@@ -1308,6 +1308,7 @@ function flexDate(v){
   const raw=String(v).trim();
   if(!raw)return null;
 
+  // Excel serial number
   if(/^\d+$/.test(raw)){
     const num=Number(raw);
     if(num>30000 && num<90000){
@@ -1318,34 +1319,61 @@ function flexDate(v){
     if(num>1000000000000 && num<9999999999999)return new Date(num);
   }
 
-  let m=raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2})(?::(\d{2}))?)?$/i);
+  // ISO format: 2026-05-29 or 2026-05-29T10:00
+  let m=raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2})(?::(\d{2}))?)?/i);
   if(m){
     const d=new Date(Number(m[1]),Number(m[2])-1,Number(m[3]),Number(m[4]||0),Number(m[5]||0),Number(m[6]||0));
     if(!isNaN(d))return d;
   }
 
+  // DD/MM/YYYY or DD-MM-YYYY (Indian format — most common in sheets)
   m=raw.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})(?:,?\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(am|pm)?)?$/i);
   if(m){
-    let day=Number(m[1]), month=Number(m[2])-1, year=Number(m[3]);
-    let hour=Number(m[4]||0), minute=Number(m[5]||0), second=Number(m[6]||0);
+    let d1=Number(m[1]),d2=Number(m[2]),year=Number(m[3]);
+    let hour=Number(m[4]||0),minute=Number(m[5]||0),second=Number(m[6]||0);
     const mer=(m[7]||'').toLowerCase();
     if(mer==='pm'&&hour<12)hour+=12;
     if(mer==='am'&&hour===12)hour=0;
-    const d=new Date(year,month,day,hour,minute,second);
-    if(!isNaN(d))return d;
+    // If first number > 12 it must be day (DD/MM/YYYY)
+    // If second number > 12 it must be month written as day (MM/DD/YYYY is wrong)
+    // Default assume DD/MM/YYYY (Indian format)
+    let day=d1,month=d2-1;
+    if(d1>12&&d2<=12){day=d1;month=d2-1;} // Definitely DD/MM
+    else if(d2>12&&d1<=12){day=d2;month=d1-1;} // Definitely MM/DD (rare)
+    const dt=new Date(year,month,day,hour,minute,second);
+    if(!isNaN(dt))return dt;
   }
 
-  m=raw.match(/^([A-Za-z]{3,9})\s+(\d{1,2}),\s*(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(am|pm)?)?$/i);
+  // Month name format: "29 May 2026" or "May 29, 2026"
+  m=raw.match(/^(\d{1,2})\s+([A-Za-z]{3,9})\s+(\d{4})/);
+  if(m){
+    const months={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+    const mo=months[m[2].toLowerCase().slice(0,3)];
+    if(mo!==undefined){const dt=new Date(Number(m[3]),mo,Number(m[1]));if(!isNaN(dt))return dt;}
+  }
+  m=raw.match(/^([A-Za-z]{3,9})\s+(\d{1,2}),?\s*(\d{4})/);
   if(m){
     const d=new Date(raw);
     if(!isNaN(d))return d;
   }
 
+  // Last resort: native Date parse
+  const nd=new Date(raw);
+  if(!isNaN(nd)&&nd.getFullYear()>1970)return nd;
+
   return null;
 }
 function taskDateValue(t){
   if(!t)return null;
-  return flexDate(t.adate)||parseTaskTimestamp(t)||flexDate(t.ddate)||null;
+  // Try adate first, then timestamp, then ddate
+  // Use adate for range filtering (when was task assigned)
+  const a=flexDate(t.adate);
+  if(a&&!isNaN(a)) return a;
+  const ts=parseTaskTimestamp(t);
+  if(ts&&!isNaN(ts)) return ts;
+  const d=flexDate(t.ddate);
+  if(d&&!isNaN(d)) return d;
+  return null;
 }
 function sortTasksNewestFirst(tasks){
   return tasks.sort((a,b)=>{
@@ -1489,8 +1517,11 @@ function parseTaskRow(r){
   let status = normStatus(firstFilled(r,['Status','status','TaskStatus','taskStatus']) || 'Assigned');
   const ddate = String(firstFilled(r,['DueDate','ddate','dueDate','Due Date'])||'').slice(0,10);
   if(!['completed','done','finished','rejected','declined'].includes(status)&&ddate){
-    const due=pd(ddate); const now=new Date(); now.setHours(0,0,0,0);
-    if(due){ due.setHours(0,0,0,0); if(due<now) status='overdue'; }
+    const due=flexDate(ddate)||pd(ddate); const now=new Date(); now.setHours(0,0,0,0);
+    if(due){
+      const dueN=new Date(due); dueN.setHours(0,0,0,0);
+      if(dueN.getTime()<now.getTime()) status='overdue';
+    }
   }
   const totalUnitsRaw=readTotalUnits(r);
   const doneUnitsRaw=readDoneUnits(r);
@@ -2295,8 +2326,8 @@ async function loadData(){
         let status=normStatus(r.Status||r.status||'Assigned');
         const ddate=(r.DueDate||r['Due Date']||r.ddate||r.dueDate||'').toString().slice(0,10);
         if(!['completed','done','finished','rejected','declined'].includes(status)&&ddate){
-          const due=pd(ddate);const now=new Date();now.setHours(0,0,0,0);
-          if(due){due.setHours(0,0,0,0); if(due<now) status='overdue';}
+          const due=flexDate(ddate)||pd(ddate);const now=new Date();now.setHours(0,0,0,0);
+          if(due){const dueN=new Date(due);dueN.setHours(0,0,0,0);if(dueN.getTime()<now.getTime())status='overdue';}
         }
         const totalUnitsRaw=readTotalUnits(r);
         const doneUnitsRaw=readDoneUnits(r);
@@ -2459,18 +2490,52 @@ function applyEmpF(tasks){
   // Regular user: only their own tasks
   return tasks.filter(t=>taskBelongsToCurrentUser(t));
 }
+function taskAnyDate(t){
+  // Try all date fields — return first valid one
+  const candidates=[t.adate,t.ts,t.Timestamp,t.createdAt,t.ddate];
+  for(const c of candidates){
+    const d=flexDate(c);
+    if(d&&!isNaN(d))return d;
+  }
+  return parseTaskTimestamp(t)||null;
+}
 function applyDateF(tasks){
   const now=new Date();now.setHours(0,0,0,0);
   const endToday=new Date(now);endToday.setHours(23,59,59,999);
   if(dateRange==='all')return sortTasksNewestFirst(tasks);
+  function getD(t){
+    // For date range: use assign date (adate), fall back to any available date
+    const d=taskAnyDate(t);
+    if(!d)return null;
+    const nd=new Date(d);nd.setHours(0,0,0,0);
+    return nd;
+  }
   if(dateRange==='today')return sortTasksNewestFirst(tasks.filter(t=>{
-    const d=taskDateValue(t); if(!d) return false;
+    const d=getD(t); if(!d) return true; // If no date, include it
     return d>=now&&d<=endToday;
   }));
-  if(dateRange==='week'){const w=new Date(now);w.setDate(now.getDate()-6);return sortTasksNewestFirst(tasks.filter(t=>{const d=taskDateValue(t);return d&&d>=w&&d<=endToday;}));}
-  if(dateRange==='month'){const m=new Date(now.getFullYear(),now.getMonth(),1);return sortTasksNewestFirst(tasks.filter(t=>{const d=taskDateValue(t);return d&&d>=m&&d<=endToday;}));}
-  if(dateRange==='year'){const y=new Date(now.getFullYear(),0,1);return sortTasksNewestFirst(tasks.filter(t=>{const d=taskDateValue(t);return d&&d>=y&&d<=endToday;}));}
-  if(dateRange==='custom'){const f=$('dr-f'),t=$('dr-t');const fv=f?f.value:'',tv=t?t.value:'';return sortTasksNewestFirst(tasks.filter(t2=>{const d=taskDateValue(t2);if(!d)return false;const iso=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);return (!fv||iso>=fv)&&(!tv||iso<=tv);}));}
+  if(dateRange==='week'){
+    const w=new Date(now);w.setDate(now.getDate()-6);
+    return sortTasksNewestFirst(tasks.filter(t=>{const d=getD(t);if(!d)return true;return d>=w&&d<=endToday;}));
+  }
+  if(dateRange==='month'){
+    const m=new Date(now.getFullYear(),now.getMonth(),1);
+    return sortTasksNewestFirst(tasks.filter(t=>{const d=getD(t);if(!d)return true;return d>=m&&d<=endToday;}));
+  }
+  if(dateRange==='year'){
+    const y=new Date(now.getFullYear(),0,1);
+    return sortTasksNewestFirst(tasks.filter(t=>{const d=getD(t);if(!d)return true;return d>=y&&d<=endToday;}));
+  }
+  if(dateRange==='custom'){
+    const f=$('dr-f'),t2=$('dr-t');
+    const fv=f?f.value:'',tv=t2?t2.value:'';
+    if(!fv&&!tv)return sortTasksNewestFirst(tasks);
+    return sortTasksNewestFirst(tasks.filter(t=>{
+      const d=getD(t);if(!d)return true;
+      const iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      return (!fv||iso>=fv)&&(!tv||iso<=tv);
+    }));
+  }
   return sortTasksNewestFirst(tasks);
 }
 function setRange(r,btn){
@@ -2643,7 +2708,7 @@ function renderMyTasks(){
         ${copy?`<div style="margin-top:5px;font-size:11px;color:var(--text2);line-height:1.5"><b>Ad Copy:</b> ${copy}</div>`:''}
         ${notes?`<div style="margin-top:5px;font-size:11px;color:var(--text2);line-height:1.5"><b>Notes:</b> ${notes}</div>`:''}
       </div><span class="pill ${sc}">${st}</span></div>
-      <div class="tc-meta"><span>👤 By: ${t.assignedByLabel||displayAssignedBy(t.by||'Admin')}</span><span>📅 Assign: ${fd(t.adate)}</span><span>🕐 Due: ${fd(t.ddate)}</span>${d===null?'':d<0?`<span style="color:var(--red)">${Math.abs(d)}d overdue</span>`:d===0?'<span style="color:var(--orange)">Due today</span>':`<span>in ${d}d</span>`}${t.rejectReason?`<span style="color:var(--red)">Reason: ${escapeHtml(t.rejectReason)}</span>`:''}</div>
+      <div class="tc-meta"><span>👤 By: ${t.assignedByLabel||displayAssignedBy(t.by||'Admin')}</span><span>📅 Assign: ${fd(t.adate)}</span><span>🕐 Due: ${fd(t.ddate)}</span>${ns==='completed'||ns==='rejected'?'':d===null?'':d<0?`<span style="color:var(--red)">${Math.abs(d)}d overdue</span>`:d===0?'<span style="color:var(--orange)">Due today</span>':`<span>in ${d}d</span>`}${t.rejectReason?`<span style="color:var(--red)">Reason: ${escapeHtml(t.rejectReason)}</span>`:''}</div>
       <div class="tc-acts">${acts.join(' ')}</div>
     </div>`;
   }).join('');
@@ -2707,7 +2772,7 @@ function renderAllTasks(){
       <td><div style="font-weight:600">${t.assignedToLabel||normalizeDisplayName(t.empName,t.email,t.desig)}</div><div style="font-size:10px;color:var(--muted)">${escapeHtml(getTaskMailLabel(t))} • ${t.desig||udesig(t.email)}</div></td>
       <td style="color:var(--muted)">${t.assignedByLabel||displayAssignedBy(t.by||'—')}</td>
       <td>${fd(t.adate)}</td>
-      <td>${fd(t.ddate)}<div style="font-size:10px;color:${d!==null&&d<0?'var(--red)':'var(--muted)'}">${d===null?'':d<0?Math.abs(d)+'d late':d===0?'Today':'in '+d+'d'}</div></td>
+      <td>${fd(t.ddate)}<div style="font-size:10px;color:${d!==null&&d<0&&_ns2!=='completed'&&_ns2!=='rejected'?'var(--red)':'var(--muted)'}">${_ns2==='completed'||_ns2==='rejected'?'':d===null?'':d<0?Math.abs(d)+'d late':d===0?'Today':'in '+d+'d'}</div></td>
       <td><span class="pill ${sc}">${st}</span></td>
       <td><span class="pdot ${pc}"></span>${t.priority.charAt(0).toUpperCase()+t.priority.slice(1)}</td>
       <td><span style="font-size:11px;color:var(--purple);font-weight:700">${getTaskChangeLabel(t)}</span></td>
@@ -2964,12 +3029,13 @@ function drillStat(type){
   body.innerHTML=drillData.length===0?'<div style="text-align:center;padding:28px;color:var(--muted)">No tasks found</div>':
     drillData.slice(0,60).map(t=>{
       const d=dl(t.ddate);const ov=isOD(t);
+      const _ds=normStatus(t.status);
       return `<div style="background:var(--bg);border-radius:8px;padding:12px 14px;margin-bottom:8px;border:1px solid var(--border)">
         <div style="font-weight:600;margin-bottom:5px">${getTaskDisplayName(t)}</div>
         <div style="font-size:11px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap;align-items:center">
           <span>👤 ${uname(t.email)}</span><span>✉ ${escapeHtml(getTaskMailLabel(t))}</span><span>📅 Due: ${fd(t.ddate)}</span>
-          ${d!==null?`<span style="color:${d<0?'var(--red)':'var(--muted)'}">${d<0?Math.abs(d)+'d overdue':d===0?'Today':'in '+d+'d'}</span>`:''}
-          <span class="pill ${ov?'po':t.status==='completed'?'pc':t.status==='in progress'?'pp':'pa'}">${ov?'Overdue':{assigned:'Assigned','in progress':'In Progress',completed:'Completed'}[t.status]||t.status}</span>
+          ${_ds==='completed'||_ds==='rejected'?'':(d!==null?`<span style="color:${d<0?'var(--red)':'var(--muted)'}">${d<0?Math.abs(d)+'d overdue':d===0?'Today':'in '+d+'d'}</span>`:'')}
+          <span class="pill ${_ds==='completed'?'pc':_ds==='rejected'?'po':ov?'po':_ds==='in progress'?'pp':'pa'}">${_ds==='completed'?'Completed':_ds==='rejected'?'Rejected':ov?'Overdue':_ds==='in progress'?'In Progress':'Assigned'}</span>
         </div></div>`;
     }).join('');
   const m2=$('m-drill');if(m2)m2.classList.remove('hidden');
@@ -4324,12 +4390,14 @@ function deleteMeeting(id){
   window.isOD = function(t) {
     if(!t) return false;
     var s = String(t.status||'').toLowerCase().trim();
+    // Completed/done/rejected = NEVER overdue
     if(['completed','done','finished','rejected','declined'].indexOf(s)>=0) return false;
-    var d = pd(t.ddate);
-    if(!d) return false;
+    var d = typeof flexDate==='function' ? flexDate(t.ddate) : pd(t.ddate);
+    if(!d||isNaN(d)) return false;
     var now = new Date(); now.setHours(0,0,0,0);
     var due = new Date(d); due.setHours(0,0,0,0);
-    return due < now;
+    // Strictly BEFORE today = overdue (today is NOT overdue)
+    return due.getTime() < now.getTime();
   };
 
   /* ─── FIX normStatus — completed stays completed ─────────── */
@@ -4367,14 +4435,14 @@ function deleteMeeting(id){
         allTasks.forEach(function(t) {
           if(!t) return;
           var s = String(t.status||'').toLowerCase();
-          // Completed tasks can never be overdue
+          // Completed/rejected = NEVER touch status
           if(['completed','done','finished','rejected','declined'].indexOf(s)>=0) return;
-          // Only mark overdue if truly past due
-          if(window.isOD(t)) {
-            if(s!=='overdue') t.status='overdue';
-          } else {
-            // If marked overdue but date is today or future, revert
-            if(s==='overdue') t.status='assigned';
+          var isOverdue = window.isOD(t);
+          if(isOverdue && s!=='overdue') {
+            t.status='overdue';
+          } else if(!isOverdue && s==='overdue') {
+            // Was marked overdue but now due date is today/future — reset
+            t.status='assigned';
           }
         });
       }
@@ -5703,8 +5771,8 @@ async function loadData(){
         let status=normStatus(r.Status||r.status||'Assigned');
         const ddate=(r.DueDate||r['Due Date']||r.ddate||r.dueDate||'').toString().slice(0,10);
         if(!['completed','done','finished','rejected','declined'].includes(status)&&ddate){
-          const due=pd(ddate);const now=new Date();now.setHours(0,0,0,0);
-          if(due){due.setHours(0,0,0,0); if(due<now) status='overdue';}
+          const due=flexDate(ddate)||pd(ddate);const now=new Date();now.setHours(0,0,0,0);
+          if(due){const dueN=new Date(due);dueN.setHours(0,0,0,0);if(dueN.getTime()<now.getTime())status='overdue';}
         }
         const totalUnitsRaw=readTotalUnits(r);
         const doneUnitsRaw=readDoneUnits(r);
@@ -5867,18 +5935,52 @@ function applyEmpF(tasks){
   // Regular user: only their own tasks
   return tasks.filter(t=>taskBelongsToCurrentUser(t));
 }
+function taskAnyDate(t){
+  // Try all date fields — return first valid one
+  const candidates=[t.adate,t.ts,t.Timestamp,t.createdAt,t.ddate];
+  for(const c of candidates){
+    const d=flexDate(c);
+    if(d&&!isNaN(d))return d;
+  }
+  return parseTaskTimestamp(t)||null;
+}
 function applyDateF(tasks){
   const now=new Date();now.setHours(0,0,0,0);
   const endToday=new Date(now);endToday.setHours(23,59,59,999);
   if(dateRange==='all')return sortTasksNewestFirst(tasks);
+  function getD(t){
+    // For date range: use assign date (adate), fall back to any available date
+    const d=taskAnyDate(t);
+    if(!d)return null;
+    const nd=new Date(d);nd.setHours(0,0,0,0);
+    return nd;
+  }
   if(dateRange==='today')return sortTasksNewestFirst(tasks.filter(t=>{
-    const d=taskDateValue(t); if(!d) return false;
+    const d=getD(t); if(!d) return true; // If no date, include it
     return d>=now&&d<=endToday;
   }));
-  if(dateRange==='week'){const w=new Date(now);w.setDate(now.getDate()-6);return sortTasksNewestFirst(tasks.filter(t=>{const d=taskDateValue(t);return d&&d>=w&&d<=endToday;}));}
-  if(dateRange==='month'){const m=new Date(now.getFullYear(),now.getMonth(),1);return sortTasksNewestFirst(tasks.filter(t=>{const d=taskDateValue(t);return d&&d>=m&&d<=endToday;}));}
-  if(dateRange==='year'){const y=new Date(now.getFullYear(),0,1);return sortTasksNewestFirst(tasks.filter(t=>{const d=taskDateValue(t);return d&&d>=y&&d<=endToday;}));}
-  if(dateRange==='custom'){const f=$('dr-f'),t=$('dr-t');const fv=f?f.value:'',tv=t?t.value:'';return sortTasksNewestFirst(tasks.filter(t2=>{const d=taskDateValue(t2);if(!d)return false;const iso=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);return (!fv||iso>=fv)&&(!tv||iso<=tv);}));}
+  if(dateRange==='week'){
+    const w=new Date(now);w.setDate(now.getDate()-6);
+    return sortTasksNewestFirst(tasks.filter(t=>{const d=getD(t);if(!d)return true;return d>=w&&d<=endToday;}));
+  }
+  if(dateRange==='month'){
+    const m=new Date(now.getFullYear(),now.getMonth(),1);
+    return sortTasksNewestFirst(tasks.filter(t=>{const d=getD(t);if(!d)return true;return d>=m&&d<=endToday;}));
+  }
+  if(dateRange==='year'){
+    const y=new Date(now.getFullYear(),0,1);
+    return sortTasksNewestFirst(tasks.filter(t=>{const d=getD(t);if(!d)return true;return d>=y&&d<=endToday;}));
+  }
+  if(dateRange==='custom'){
+    const f=$('dr-f'),t2=$('dr-t');
+    const fv=f?f.value:'',tv=t2?t2.value:'';
+    if(!fv&&!tv)return sortTasksNewestFirst(tasks);
+    return sortTasksNewestFirst(tasks.filter(t=>{
+      const d=getD(t);if(!d)return true;
+      const iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      return (!fv||iso>=fv)&&(!tv||iso<=tv);
+    }));
+  }
   return sortTasksNewestFirst(tasks);
 }
 function setRange(r,btn){
@@ -6051,7 +6153,7 @@ function renderMyTasks(){
         ${copy?`<div style="margin-top:5px;font-size:11px;color:var(--text2);line-height:1.5"><b>Ad Copy:</b> ${copy}</div>`:''}
         ${notes?`<div style="margin-top:5px;font-size:11px;color:var(--text2);line-height:1.5"><b>Notes:</b> ${notes}</div>`:''}
       </div><span class="pill ${sc}">${st}</span></div>
-      <div class="tc-meta"><span>👤 By: ${t.assignedByLabel||displayAssignedBy(t.by||'Admin')}</span><span>📅 Assign: ${fd(t.adate)}</span><span>🕐 Due: ${fd(t.ddate)}</span>${d===null?'':d<0?`<span style="color:var(--red)">${Math.abs(d)}d overdue</span>`:d===0?'<span style="color:var(--orange)">Due today</span>':`<span>in ${d}d</span>`}${t.rejectReason?`<span style="color:var(--red)">Reason: ${escapeHtml(t.rejectReason)}</span>`:''}</div>
+      <div class="tc-meta"><span>👤 By: ${t.assignedByLabel||displayAssignedBy(t.by||'Admin')}</span><span>📅 Assign: ${fd(t.adate)}</span><span>🕐 Due: ${fd(t.ddate)}</span>${ns==='completed'||ns==='rejected'?'':d===null?'':d<0?`<span style="color:var(--red)">${Math.abs(d)}d overdue</span>`:d===0?'<span style="color:var(--orange)">Due today</span>':`<span>in ${d}d</span>`}${t.rejectReason?`<span style="color:var(--red)">Reason: ${escapeHtml(t.rejectReason)}</span>`:''}</div>
       <div class="tc-acts">${acts.join(' ')}</div>
     </div>`;
   }).join('');
@@ -6115,7 +6217,7 @@ function renderAllTasks(){
       <td><div style="font-weight:600">${t.assignedToLabel||normalizeDisplayName(t.empName,t.email,t.desig)}</div><div style="font-size:10px;color:var(--muted)">${escapeHtml(getTaskMailLabel(t))} • ${t.desig||udesig(t.email)}</div></td>
       <td style="color:var(--muted)">${t.assignedByLabel||displayAssignedBy(t.by||'—')}</td>
       <td>${fd(t.adate)}</td>
-      <td>${fd(t.ddate)}<div style="font-size:10px;color:${d!==null&&d<0?'var(--red)':'var(--muted)'}">${d===null?'':d<0?Math.abs(d)+'d late':d===0?'Today':'in '+d+'d'}</div></td>
+      <td>${fd(t.ddate)}<div style="font-size:10px;color:${d!==null&&d<0&&_ns2!=='completed'&&_ns2!=='rejected'?'var(--red)':'var(--muted)'}">${_ns2==='completed'||_ns2==='rejected'?'':d===null?'':d<0?Math.abs(d)+'d late':d===0?'Today':'in '+d+'d'}</div></td>
       <td><span class="pill ${sc}">${st}</span></td>
       <td><span class="pdot ${pc}"></span>${t.priority.charAt(0).toUpperCase()+t.priority.slice(1)}</td>
       <td><span style="font-size:11px;color:var(--purple);font-weight:700">${getTaskChangeLabel(t)}</span></td>
@@ -6372,12 +6474,13 @@ function drillStat(type){
   body.innerHTML=drillData.length===0?'<div style="text-align:center;padding:28px;color:var(--muted)">No tasks found</div>':
     drillData.slice(0,60).map(t=>{
       const d=dl(t.ddate);const ov=isOD(t);
+      const _ds=normStatus(t.status);
       return `<div style="background:var(--bg);border-radius:8px;padding:12px 14px;margin-bottom:8px;border:1px solid var(--border)">
         <div style="font-weight:600;margin-bottom:5px">${getTaskDisplayName(t)}</div>
         <div style="font-size:11px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap;align-items:center">
           <span>👤 ${uname(t.email)}</span><span>✉ ${escapeHtml(getTaskMailLabel(t))}</span><span>📅 Due: ${fd(t.ddate)}</span>
-          ${d!==null?`<span style="color:${d<0?'var(--red)':'var(--muted)'}">${d<0?Math.abs(d)+'d overdue':d===0?'Today':'in '+d+'d'}</span>`:''}
-          <span class="pill ${ov?'po':t.status==='completed'?'pc':t.status==='in progress'?'pp':'pa'}">${ov?'Overdue':{assigned:'Assigned','in progress':'In Progress',completed:'Completed'}[t.status]||t.status}</span>
+          ${_ds==='completed'||_ds==='rejected'?'':(d!==null?`<span style="color:${d<0?'var(--red)':'var(--muted)'}">${d<0?Math.abs(d)+'d overdue':d===0?'Today':'in '+d+'d'}</span>`:'')}
+          <span class="pill ${_ds==='completed'?'pc':_ds==='rejected'?'po':ov?'po':_ds==='in progress'?'pp':'pa'}">${_ds==='completed'?'Completed':_ds==='rejected'?'Rejected':ov?'Overdue':_ds==='in progress'?'In Progress':'Assigned'}</span>
         </div></div>`;
     }).join('');
   const m2=$('m-drill');if(m2)m2.classList.remove('hidden');
@@ -6417,7 +6520,6 @@ function getAnalyticsTasks(){
   return tasks;
 }
 
-let _chartRenderTimer=null;
 function reRenderCharts(){
   // ✅ FIX: Throttle chart re-renders to avoid blinking (max once per 600ms)
   if(_chartRenderTimer) clearTimeout(_chartRenderTimer);
@@ -7732,12 +7834,14 @@ function deleteMeeting(id){
   window.isOD = function(t) {
     if(!t) return false;
     var s = String(t.status||'').toLowerCase().trim();
+    // Completed/done/rejected = NEVER overdue
     if(['completed','done','finished','rejected','declined'].indexOf(s)>=0) return false;
-    var d = pd(t.ddate);
-    if(!d) return false;
+    var d = typeof flexDate==='function' ? flexDate(t.ddate) : pd(t.ddate);
+    if(!d||isNaN(d)) return false;
     var now = new Date(); now.setHours(0,0,0,0);
     var due = new Date(d); due.setHours(0,0,0,0);
-    return due < now;
+    // Strictly BEFORE today = overdue (today is NOT overdue)
+    return due.getTime() < now.getTime();
   };
 
   /* ─── FIX normStatus — completed stays completed ─────────── */
@@ -7775,14 +7879,14 @@ function deleteMeeting(id){
         allTasks.forEach(function(t) {
           if(!t) return;
           var s = String(t.status||'').toLowerCase();
-          // Completed tasks can never be overdue
+          // Completed/rejected = NEVER touch status
           if(['completed','done','finished','rejected','declined'].indexOf(s)>=0) return;
-          // Only mark overdue if truly past due
-          if(window.isOD(t)) {
-            if(s!=='overdue') t.status='overdue';
-          } else {
-            // If marked overdue but date is today or future, revert
-            if(s==='overdue') t.status='assigned';
+          var isOverdue = window.isOD(t);
+          if(isOverdue && s!=='overdue') {
+            t.status='overdue';
+          } else if(!isOverdue && s==='overdue') {
+            // Was marked overdue but now due date is today/future — reset
+            t.status='assigned';
           }
         });
       }
