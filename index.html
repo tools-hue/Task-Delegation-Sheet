@@ -943,10 +943,7 @@ const USERS = {
   'neeraj.meta@upgromedia.com':      {pass:'Neeraj@1015',     name:'Neeraj Kumar Yadav',    role:'Manager - Meta',     desig:'Meta Media Buyer', isAdmin:false, isManager:true},
   'adarsh.web@upgromedia.com':       {pass:'Adarsh@1010',     name:'Adarsh Srivastava',     role:'Web Developer',      desig:'Web Developer',    isAdmin:false, isManager:true},
   'ankit.seo@upgromedia.com':        {pass:'Ankit@1003',      name:'Ankit Prajapati',       role:'SEO Executive',      desig:'SEO',              isAdmin:false, isManager:true},
-  'surya.meta@upgromedia.com':       {pass:'Surya@123',        name:'Surya Pratap Singh',    role:'Meta Media Buyer',   desig:'Meta Media Buyer', isAdmin:false, isManager:true},
   'shubhi.meta@upgromedia.com':      {pass:'Shubhi@123',       name:'Shubhi Singh',          role:'Meta Media Buyer',   desig:'Meta Media Buyer', isAdmin:false, isManager:true},
-  'ranveer.copywriter@upgromedia.com':{pass:'Ranveer@123',     name:'Ranveer Singh',          role:'Copywriter',   desig:'Copywriter', isAdmin:false, isManager:true},
-
   // USERS
   'vishal.editor@upgromedia.com':    {pass:'Vishal@1002',     name:'Vishal Srivastava',     role:'Video Editor',       desig:'Video Editor',     isAdmin:false, isManager:false},
   'ankit.seo@upgromedia.com':        {pass:'Ankit@1003',      name:'Ankit Prajapati',       role:'SEO Executive',      desig:'SEO',              isAdmin:false, isManager:true},
@@ -954,10 +951,6 @@ const USERS = {
   'harsh.editor@upgromedia.com':     {pass:'Harsh@1007',      name:'Harsh Verma',           role:'Video Editor',       desig:'Video Editor',     isAdmin:false, isManager:false},
   'adarsh.web@upgromedia.com':       {pass:'Adarsh@1010',     name:'Adarsh Srivastava',     role:'Web Developer',      desig:'Web Developer',    isAdmin:false, isManager:true},
   'arpit@upgromedia.com':            {pass:'Arpit@1011',      name:'Arpit Yadav',           role:'Team',               desig:'Team',             isAdmin:false, isManager:false},
-  'junaid@upgromedia.com':           {pass:'Junaid@1014',     name:'Junaid',                role:'Google Ads',         desig:'Google Ads',       isAdmin:false, isManager:false},
-  'chnadrakala.meta@upgromedia.com': {pass:'Chandrakala@1016',name:'Chandrakala Waldia',    role:'Meta Media Buyer',   desig:'Meta Media Buyer', isAdmin:false, isManager:false},
-};
-
 const CLRS=['#0B84FF','#E53935','#00B67A','#F59E0B','#7C3AED','#0E9F8E','#EA580C','#DB2777','#64748B','#D97706','#1565C0','#16A34A','#9333EA','#0891B2'];
 const DESIG_OPTS=['MIS','Executive Assistant','Web Developer','Graphic Designer','Video Editor','CRM','Meta Media Buyer','Google Ads','SEO Executive','SEO','Founder','CEO','HR','Accountant','Intern','Content Writer','Social Media Manager','Performance Marketer','Team Lead','Other'];
 const PAGE_TITLES={dash:'Dashboard',mytasks:'My Tasks',alltasks:'All Tasks',analytics:'Analytics',employees:'Employees',forms:'Forms & Links',meetings:'Meetings',settings:'Settings'};
@@ -5061,10 +5054,10 @@ function deleteMeeting(id){
 })();
 
 </script>
-  /* ================================================================
-   UPGRO MISSION CONTROL — COMPLETE MASTER PATCH v2
+ /* ================================================================
+   UPGRO MISSION CONTROL — COMPLETE MASTER PATCH v3
    Paste as LAST <script> before </body>
-   Fixes ALL reported issues in one shot.
+   All issues fixed including Ishika CRM + all employees correct
 ================================================================ */
 (function () {
   'use strict';
@@ -5077,20 +5070,20 @@ function deleteMeeting(id){
     });
   }
   function normEmail(v) { return String(v || '').trim().toLowerCase(); }
-  function normName(v) { return String(v || '').trim().replace(/\s+/g, ' '); }
+  function normName(v)  { return String(v || '').trim().replace(/\s+/g, ' '); }
   function empIni(n) {
-    return normName(n).split(/\s+/).map(function (w) { return w[0] || ''; })
-      .join('').toUpperCase().slice(0, 2) || '?';
+    return normName(n).split(/\s+/).map(function(w){return w[0]||'';})
+      .join('').toUpperCase().slice(0,2)||'?';
   }
   function dispName(e) {
     if (!e) return '';
     try { return normalizeDisplayName(e.name, e.email, e.desig) || e.name || e.email; }
     catch (_) { return e.name || e.email || ''; }
   }
-  function isManagerFlag(rec) {
+  function isMgrFlag(rec) {
     if (!rec || rec.isAdmin) return false;
     try { return !!computeManagerFlag(rec); } catch (_) {}
-    return !!rec.isManager || /manager|assigner/i.test(String(rec.role || rec.desig || ''));
+    return !!rec.isManager || /manager|assigner/i.test(String(rec.role||rec.desig||''));
   }
   function desigOpts(cur) {
     var opts = typeof DESIG_OPTS !== 'undefined' ? DESIG_OPTS :
@@ -5098,131 +5091,196 @@ function deleteMeeting(id){
        'CRM','Meta Media Buyer','Google Ads','SEO Executive','SEO','Founder','CEO',
        'HR','Accountant','Intern','Content Writer','Social Media Manager',
        'Performance Marketer','Team Lead','Copywriter','Other'];
-    return opts.map(function (d) {
-      return '<option value="' + esc(d) + '"' + (d === cur ? ' selected' : '') + '>' + esc(d) + '</option>';
+    return opts.map(function(d){
+      return '<option value="'+esc(d)+'"'+(d===cur?' selected':'')+'>'+esc(d)+'</option>';
     }).join('');
   }
-  function clrAt(i) {
-    try { return CLRS[Math.abs(i || 0) % CLRS.length]; } catch (_) { return '#0B84FF'; }
-  }
+  function clrAt(i) { try { return CLRS[Math.abs(i||0)%CLRS.length]; } catch(_){ return '#0B84FF'; } }
   function todayStr() {
-    try { return typeof TODAY !== 'undefined' ? TODAY : new Date().toISOString().slice(0, 10); }
-    catch (_) { return new Date().toISOString().slice(0, 10); }
+    try { return typeof TODAY!=='undefined'?TODAY:new Date().toISOString().slice(0,10); }
+    catch(_){ return new Date().toISOString().slice(0,10); }
   }
 
-  /* ── STEP 1: FIX USERS OBJECT DUPLICATES ─────────────────── */
-  (function fixUsersDuplicates() {
-    var seen = {};
-    Object.keys(USERS).forEach(function (k) {
-      var canon = normEmail(k);
-      if (seen[canon]) {
-        // merge — keep isManager:true if either had it
-        USERS[canon] = Object.assign({}, seen[canon], USERS[k], {
-          isManager: !!(seen[canon].isManager || USERS[k].isManager)
+  /* ================================================================
+     STEP 1: CANONICAL EMPLOYEE MASTER LIST
+     Har employee ek baar — sahi role ke saath
+     isAdmin  = true  → Admin (CEO, Founder, EA, MIS)
+     isManager = true → Work assign kar sakta hai
+     normal user      → dono false
+  ================================================================ */
+  var MASTER_EMPLOYEES = [
+    // ── ADMINS ──────────────────────────────────────────────
+    { email:'ritutyagiea@upgromedia.com',    pass:'Ritu@1001',        name:'Ritu Tyagi',          role:'Executive Assistant', desig:'Executive Assistant', isAdmin:true,  isManager:false },
+    { email:'adarsh.mis@upgromedia.com',     pass:'Adarsh@1012',      name:'Adarsh Singh',         role:'MIS',                desig:'MIS',                 isAdmin:true,  isManager:false },
+    { email:'dhiraj.jaiswal@upgromedia.com', pass:'Dheeraj@1013',     name:'Dhiraj Jaiswal',       role:'Founder & CEO',      desig:'CEO',                 isAdmin:true,  isManager:false },
+    { email:'vraj9424@gmail.com',            pass:'Tarun@1017',       name:'Tarun Verma',          role:'Founder',            desig:'Founder',             isAdmin:true,  isManager:false },
+
+    // ── MANAGERS (Work Assigners) ────────────────────────────
+    { email:'vikasvideoedit@upgromedia.com', pass:'Vikas@1005',       name:'Vikas Pandey',         role:'Manager - Video',    desig:'Video Editor',        isAdmin:false, isManager:true  },
+    { email:'dharmendra.web@upgromedia.com', pass:'Dharmendra@1008',  name:'Dharmendra Sharma',    role:'Manager - Web',      desig:'Web Developer',       isAdmin:false, isManager:true  },
+    { email:'abhishek.meta@upgromedia.com',  pass:'Abhishek@1006',    name:'Abhishek Kasaudhan',   role:'Manager - Meta',     desig:'Meta Media Buyer',    isAdmin:false, isManager:true  },
+    { email:'neeraj.meta@upgromedia.com',    pass:'Neeraj@1015',      name:'Neeraj Kumar Yadav',   role:'Manager - Meta',     desig:'Meta Media Buyer',    isAdmin:false, isManager:true  },
+    { email:'adarsh.web@upgromedia.com',     pass:'Adarsh@1010',      name:'Adarsh Srivastava',    role:'Web Developer',      desig:'Web Developer',       isAdmin:false, isManager:true  },
+    { email:'ankit.seo@upgromedia.com',      pass:'Ankit@1003',       name:'Ankit Prajapati',      role:'SEO Executive',      desig:'SEO Executive',       isAdmin:false, isManager:true  },
+    { email:'surya.meta@upgromedia.com',     pass:'Surya@123',        name:'Surya Pratap Singh',   role:'Meta Media Buyer',   desig:'Meta Media Buyer',    isAdmin:false, isManager:true  },
+    { email:'shubhi.meta@upgromedia.com',    pass:'Shubhi@123',       name:'Shubhi Singh',         role:'Meta Media Buyer',   desig:'Meta Media Buyer',    isAdmin:false, isManager:true  },
+    { email:'ranveer.copywriter@upgromedia.com', pass:'Ranveer@123',  name:'Ranveer Singh',        role:'Copywriter',         desig:'Copywriter',          isAdmin:false, isManager:true  },
+
+    // ── NORMAL USERS ─────────────────────────────────────────
+    { email:'vishal.editor@upgromedia.com',  pass:'Vishal@1002',      name:'Vishal Srivastava',    role:'Video Editor',       desig:'Video Editor',        isAdmin:false, isManager:false },
+    { email:'harsh.graphic@upgromedia.com',  pass:'Harsh@1004',       name:'Harsh Kumar',          role:'Graphic Designer',   desig:'Graphic Designer',    isAdmin:false, isManager:false },
+    { email:'harsh.editor@upgromedia.com',   pass:'Harsh@1007',       name:'Harsh Verma',          role:'Video Editor',       desig:'Video Editor',        isAdmin:false, isManager:false },
+    { email:'arpit@upgromedia.com',          pass:'Arpit@1011',       name:'Arpit Yadav',          role:'Team',               desig:'Team',                isAdmin:false, isManager:false },
+    { email:'junaid@upgromedia.com',         pass:'Junaid@1014',      name:'Junaid',               role:'Google Ads',         desig:'Google Ads',          isAdmin:false, isManager:false },
+    { email:'chandrakala.meta@upgromedia.com', pass:'Chandrakala@1016', name:'Chandrakala Waldia', role:'Meta Media Buyer',   desig:'Meta Media Buyer',    isAdmin:false, isManager:false },
+    { email:'ishika.crm@upgromedia.com',     pass:'Ishika@123',       name:'Ishika Saxena',        role:'CRM',                desig:'CRM',                 isAdmin:false, isManager:false },
+  ];
+
+  /* ── Build base list with colors ─────────────────────────── */
+  var BASE_MAP = new Map();
+  MASTER_EMPLOYEES.forEach(function(e, i) {
+    BASE_MAP.set(normEmail(e.email), Object.assign({}, e, {
+      email: normEmail(e.email),
+      active: true,
+      bg: clrAt(i),
+      joinDate: ''
+    }));
+  });
+
+  /* ── Sync USERS object from master ───────────────────────── */
+  // First clear all existing keys
+  Object.keys(USERS).forEach(function(k) { delete USERS[k]; });
+  // Then set from master
+  BASE_MAP.forEach(function(emp, email) {
+    USERS[email] = {
+      pass: emp.pass, name: emp.name, role: emp.role, desig: emp.desig,
+      isAdmin: !!emp.isAdmin, isManager: !!emp.isManager,
+      active: true, bg: emp.bg, joinDate: emp.joinDate
+    };
+  });
+
+  /* ── STEP 2: MERGE WITH LOCALLY ADDED EMPLOYEES ─────────── */
+  function loadLocalExtra() {
+    var extra = [];
+    ['upgro_emp_dyn','upgro_employee_registry_final_v3','upgro_emp_dyn_v2'].forEach(function(k) {
+      try {
+        var arr = JSON.parse(localStorage.getItem(k) || '[]') || [];
+        if (Array.isArray(arr)) extra = extra.concat(arr);
+      } catch(_) {}
+    });
+    return extra;
+  }
+
+  function buildCleanEmpReg() {
+    var finalMap = new Map(BASE_MAP);
+
+    // Merge locally added employees (not in master)
+    loadLocalExtra().forEach(function(raw, i) {
+      if (!raw || !raw.email) return;
+      var k = normEmail(raw.email);
+      if (!finalMap.has(k)) {
+        // This is a locally added employee — keep them
+        finalMap.set(k, {
+          email: k,
+          name: normName(raw.name || ''),
+          pass: String(raw.pass || ''),
+          role: String(raw.role || raw.desig || 'Team'),
+          desig: String(raw.desig || raw.role || 'Team'),
+          isAdmin: !!raw.isAdmin,
+          isManager: !!raw.isManager,
+          active: raw.active !== false,
+          bg: raw.bg || clrAt(finalMap.size),
+          joinDate: raw.joinDate || ''
         });
-        if (k !== canon) delete USERS[k];
       } else {
-        seen[canon] = USERS[k];
-        if (k !== canon) {
-          USERS[canon] = USERS[k];
-          delete USERS[k];
+        // Master employee — only update pass if locally changed
+        var master = finalMap.get(k);
+        if (raw.pass && raw.pass !== master.pass) {
+          finalMap.set(k, Object.assign({}, master, { pass: raw.pass }));
         }
       }
     });
-    // Force correct isManager for known forced assigners
-    ['ankit.seo@upgromedia.com','adarsh.web@upgromedia.com',
-     'surya.meta@upgromedia.com','shubhi.meta@upgromedia.com',
-     'ranveer.copywriter@upgromedia.com'].forEach(function (em) {
-      if (USERS[em]) USERS[em].isManager = true;
-    });
-  })();
 
-  /* ── STEP 2: CLEAN empReg — NO DUPLICATES ────────────────── */
-  function getCleanEmpReg() {
-    try { initEmpReg(true); } catch (_) {}
-    var seen = new Map();
-    (Array.isArray(empReg) ? empReg : []).forEach(function (e, i) {
-      if (!e || !e.email) return;
-      var k = normEmail(e.email);
-      var prev = seen.get(k);
-      if (prev) {
-        // merge, keep better data
-        seen.set(k, Object.assign({}, prev, e, {
-          email: k,
-          isManager: isManagerFlag(Object.assign({}, prev, e)),
-          active: prev.active !== false && e.active !== false,
-          bg: prev.bg || e.bg || clrAt(i)
-        }));
-      } else {
-        seen.set(k, Object.assign({}, e, { email: k }));
-      }
+    // Load removed list
+    var removed = new Set();
+    try {
+      var rm = JSON.parse(localStorage.getItem('upgro_employee_removed_final_v3') || '[]') || [];
+      rm.forEach(function(e) {
+        var k = normEmail(e);
+        // Only remove non-master employees
+        if (!BASE_MAP.has(k)) removed.add(k);
+      });
+    } catch(_) {}
+
+    var result = [];
+    finalMap.forEach(function(emp) {
+      if (!removed.has(emp.email)) result.push(emp);
     });
-    return Array.from(seen.values()).filter(function (e) {
-      return e.email && e.email.indexOf('@') > 0;
-    }).sort(function (a, b) {
-      return String(a.name || '').localeCompare(String(b.name || ''));
+
+    return result.sort(function(a, b) {
+      return String(a.name||'').localeCompare(String(b.name||''));
     });
   }
 
-  /* ── STEP 3: PERSIST CLEAN empReg ───────────────────────────*/
   function persistClean(list) {
     empReg = list;
-    try { localStorage.setItem('upgro_emp_dyn', JSON.stringify(list)); } catch (_) {}
-    try { localStorage.setItem('upgro_employee_registry_final_v3', JSON.stringify(list)); } catch (_) {}
+    var toStore = list.map(function(e) { return Object.assign({}, e); });
+    try { localStorage.setItem('upgro_emp_dyn', JSON.stringify(toStore)); } catch(_) {}
+    try { localStorage.setItem('upgro_employee_registry_final_v3', JSON.stringify(toStore)); } catch(_) {}
     try {
       var roles = {};
-      list.forEach(function (e) { roles[e.email] = { isAdmin: !!e.isAdmin, isManager: !!e.isManager }; });
+      list.forEach(function(e) { roles[e.email] = { isAdmin:!!e.isAdmin, isManager:!!e.isManager }; });
       localStorage.setItem('upgro_roles_v3', JSON.stringify(roles));
-    } catch (_) {}
-    // Sync back to USERS
-    list.forEach(function (e) {
-      USERS[e.email] = Object.assign(USERS[e.email] || {}, {
-        pass: e.pass, name: e.name, role: e.role || e.desig,
-        desig: e.desig || e.role, isAdmin: !!e.isAdmin,
-        isManager: !!e.isManager, active: e.active !== false,
-        bg: e.bg, joinDate: e.joinDate || ''
+    } catch(_) {}
+    // Sync USERS
+    list.forEach(function(e) {
+      USERS[e.email] = Object.assign(USERS[e.email]||{}, {
+        pass:e.pass, name:e.name, role:e.role||e.desig,
+        desig:e.desig||e.role, isAdmin:!!e.isAdmin,
+        isManager:!!e.isManager, active:e.active!==false,
+        bg:e.bg, joinDate:e.joinDate||''
       });
     });
   }
 
-  /* Run initial clean */
-  var cleanList = getCleanEmpReg();
+  // Initial clean build
+  var cleanList = buildCleanEmpReg();
   persistClean(cleanList);
 
-  /* ── STEP 4: OVERRIDE initEmpReg ────────────────────────────*/
-  window.initEmpReg = function (force) {
-    var cl = getCleanEmpReg();
+  /* ── STEP 3: OVERRIDE initEmpReg ────────────────────────────*/
+  window.initEmpReg = function(force) {
+    var cl = buildCleanEmpReg();
     persistClean(cl);
     return cl;
   };
 
-  /* ── STEP 5: RENDER EMP LIST — NO DUPLICATES ────────────────*/
-  window.renderEmpList = function () {
+  /* ── STEP 4: RENDER EMP LIST ─────────────────────────────── */
+  window.renderEmpList = function() {
     window.initEmpReg(true);
-    var q = String(($('emp-q') || { value: '' }).value || '').toLowerCase();
+    var q = String(($('emp-q')||{value:''}).value||'').toLowerCase();
     var cont = $('emp-items');
     var counters = $('emp-counters');
     var list = Array.isArray(empReg) ? empReg : [];
 
     if (counters) {
-      var total = list.length;
-      var active = list.filter(function (e) { return e.active !== false; }).length;
-      var inactive = list.filter(function (e) { return e.active === false; }).length;
-      var admins = list.filter(function (e) { return e.isAdmin; }).length;
-      var managers = list.filter(function (e) { return isManagerFlag(e); }).length;
+      var total   = list.length;
+      var active  = list.filter(function(e){return e.active!==false;}).length;
+      var inactive= list.filter(function(e){return e.active===false;}).length;
+      var admins  = list.filter(function(e){return e.isAdmin;}).length;
+      var mgrs    = list.filter(function(e){return isMgrFlag(e);}).length;
       counters.innerHTML =
-        '<div class="tctr tctr-blue"><div class="tctr-v">' + total + '</div><div class="tctr-l">Total Employees</div></div>' +
-        '<div class="tctr tctr-green"><div class="tctr-v">' + active + '</div><div class="tctr-l">Active</div></div>' +
-        '<div class="tctr tctr-red"><div class="tctr-v">' + inactive + '</div><div class="tctr-l">Inactive</div></div>' +
-        '<div class="tctr tctr-purple"><div class="tctr-v">' + admins + '</div><div class="tctr-l">Admins</div></div>' +
-        '<div class="tctr tctr-orange"><div class="tctr-v">' + managers + '</div><div class="tctr-l">Assigners</div></div>';
+        '<div class="tctr tctr-blue"><div class="tctr-v">'+total+'</div><div class="tctr-l">Total Employees</div></div>'+
+        '<div class="tctr tctr-green"><div class="tctr-v">'+active+'</div><div class="tctr-l">Active</div></div>'+
+        '<div class="tctr tctr-red"><div class="tctr-v">'+inactive+'</div><div class="tctr-l">Inactive</div></div>'+
+        '<div class="tctr tctr-purple"><div class="tctr-v">'+admins+'</div><div class="tctr-l">Admins</div></div>'+
+        '<div class="tctr tctr-orange"><div class="tctr-v">'+mgrs+'</div><div class="tctr-l">Assigners</div></div>';
     }
 
     if (!cont) return;
 
-    var filtered = list.filter(function (e) {
+    var filtered = list.filter(function(e) {
       if (!q) return true;
-      return (dispName(e) + ' ' + e.email + ' ' + (e.role || '') + ' ' + (e.desig || ''))
+      return (dispName(e)+' '+e.email+' '+(e.role||'')+' '+(e.desig||''))
         .toLowerCase().indexOf(q) >= 0;
     });
 
@@ -5231,28 +5289,29 @@ function deleteMeeting(id){
       return;
     }
 
-    cont.innerHTML = filtered.map(function (e) {
+    cont.innerHTML = filtered.map(function(e) {
       var isAct = e.active !== false;
       var badge = e.isAdmin
         ? '<span class="role-badge rb-admin">Admin</span>'
-        : (isManagerFlag(e) ? '<span class="role-badge rb-manager">Manager</span>' : '');
-      return '<div class="ei' + (editEmpEmail === e.email ? ' act' : '') +
-        '" onclick="selectEmp(\'' + esc(e.email) + '\')">' +
-        '<div class="ei-av" style="background:' + esc(e.bg || '#0B84FF') + '">' + esc(empIni(e.name)) + '</div>' +
-        '<div class="ei-info">' +
-          '<div class="ei-name">' + esc(dispName(e)) + ' ' + badge + '</div>' +
-          '<div class="ei-role">' + esc(e.desig || e.role || 'Team') + '</div>' +
-        '</div>' +
-        '<div class="ei-dot" title="' + (isAct ? 'Active' : 'Inactive') + '" style="background:' + (isAct ? '#00B67A' : '#E53935') + '"></div>' +
+        : (isMgrFlag(e) ? '<span class="role-badge rb-manager">Manager</span>' : '');
+      return '<div class="ei'+(editEmpEmail===e.email?' act':'')+
+        '" onclick="selectEmp(\''+esc(e.email)+'\')">'+
+        '<div class="ei-av" style="background:'+esc(e.bg||'#0B84FF')+'">'+esc(empIni(e.name))+'</div>'+
+        '<div class="ei-info">'+
+          '<div class="ei-name">'+esc(dispName(e))+' '+badge+'</div>'+
+          '<div class="ei-role">'+esc(e.desig||e.role||'Team')+'</div>'+
+        '</div>'+
+        '<div class="ei-dot" title="'+(isAct?'Active':'Inactive')+
+          '" style="background:'+(isAct?'#00B67A':'#E53935')+'"></div>'+
         '</div>';
     }).join('');
   };
 
-  /* ── STEP 6: SELECT EMP — FULL EDIT FORM ────────────────────*/
-  window.selectEmp = function (email) {
+  /* ── STEP 5: SELECT EMP ──────────────────────────────────── */
+  window.selectEmp = function(email) {
     window.initEmpReg(true);
     var canon = normEmail(email);
-    var e = empReg.find(function (x) { return normEmail(x.email) === canon; });
+    var e = empReg.find(function(x){ return normEmail(x.email)===canon; });
     if (!e) return;
     editEmpEmail = e.email;
     window.renderEmpList();
@@ -5260,607 +5319,527 @@ function deleteMeeting(id){
     var fp = $('emp-fp');
     if (!fp) return;
 
+    var isMasterEmp = BASE_MAP.has(canon);
+
     fp.innerHTML =
-      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">' +
-        '<div style="width:50px;height:50px;border-radius:50%;background:' + esc(e.bg || '#0B84FF') +
-          ';display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff">' +
-          esc(empIni(e.name)) + '</div>' +
-        '<div><div style="font-size:16px;font-weight:700">' + esc(dispName(e)) + '</div>' +
-        '<div style="font-size:12px;color:var(--muted)">' + esc(e.email) + '</div></div>' +
-      '</div>' +
-      '<div class="fg"><label class="fl2">Full Name</label>' +
-        '<input id="ef-n" value="' + esc(e.name || '') + '" class="fc"></div>' +
-      '<div class="fg"><label class="fl2">Email (readonly)</label>' +
-        '<input id="ef-e" value="' + esc(e.email) + '" class="fc" style="background:#f9f9f9;color:var(--muted)" readonly></div>' +
-      '<div class="fg"><label class="fl2">Password</label>' +
-        '<input id="ef-p" type="password" value="' + esc(e.pass || '') + '" class="fc" placeholder="Leave blank to keep current"></div>' +
-      '<div class="fg"><label class="fl2">Designation</label>' +
-        '<select id="ef-d" class="fc">' + desigOpts(e.desig) + '</select></div>' +
-      '<div class="fg"><label class="fl2">Role</label>' +
-        '<input id="ef-r" value="' + esc(e.role || e.desig || '') + '" class="fc"></div>' +
-      '<div style="display:flex;gap:20px;margin-bottom:14px;flex-wrap:wrap">' +
-        '<label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer">' +
-          '<input type="checkbox" id="ef-admin"' + (e.isAdmin ? ' checked' : '') +
-          ' style="width:14px;height:14px;accent-color:var(--blue)"> 👑 Admin</label>' +
-        '<label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer">' +
-          '<input type="checkbox" id="ef-mgr"' + (isManagerFlag(e) ? ' checked' : '') +
-          ' style="width:14px;height:14px;accent-color:var(--purple)"> 🔀 Manager (Work Assigner)</label>' +
-        '<label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer">' +
-          '<input type="checkbox" id="ef-ac"' + (e.active !== false ? ' checked' : '') +
-          ' style="width:14px;height:14px;accent-color:var(--green)"> ✅ Active</label>' +
-      '</div>' +
-      '<div style="display:flex;gap:8px">' +
-        '<button class="btn bp" style="flex:1" onclick="saveEmp(\'' + esc(e.email) + '\')">💾 Save Changes</button>' +
-        '<button class="btn bd bsm" onclick="delEmp(\'' + esc(e.email) + '\')">🗑 Remove</button>' +
+      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">'+
+        '<div style="width:50px;height:50px;border-radius:50%;background:'+esc(e.bg||'#0B84FF')+
+          ';display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff">'+
+          esc(empIni(e.name))+'</div>'+
+        '<div><div style="font-size:16px;font-weight:700">'+esc(dispName(e))+'</div>'+
+        '<div style="font-size:12px;color:var(--muted)">'+esc(e.email)+'</div></div>'+
+      '</div>'+
+      '<div class="fg"><label class="fl2">Full Name</label>'+
+        '<input id="ef-n" value="'+esc(e.name||'')+'" class="fc"></div>'+
+      '<div class="fg"><label class="fl2">Email '+(isMasterEmp?'(readonly)':'*')+'</label>'+
+        '<input id="ef-e" value="'+esc(e.email)+'" class="fc"'+
+        (isMasterEmp?' style="background:#f9f9f9;color:var(--muted)" readonly':'')+' placeholder="email@upgromedia.com"></div>'+
+      '<div class="fg"><label class="fl2">Password</label>'+
+        '<input id="ef-p" type="password" value="'+esc(e.pass||'')+'" class="fc" placeholder="Blank rakho to current rahega"></div>'+
+      '<div class="fg"><label class="fl2">Designation</label>'+
+        '<select id="ef-d" class="fc">'+desigOpts(e.desig)+'</select></div>'+
+      '<div class="fg"><label class="fl2">Role</label>'+
+        '<input id="ef-r" value="'+esc(e.role||e.desig||'')+'" class="fc"></div>'+
+      '<div style="display:flex;gap:20px;margin-bottom:14px;flex-wrap:wrap">'+
+        '<label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer">'+
+          '<input type="checkbox" id="ef-admin"'+(e.isAdmin?' checked':'')+
+          ' style="width:14px;height:14px;accent-color:var(--blue)"> 👑 Admin</label>'+
+        '<label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer">'+
+          '<input type="checkbox" id="ef-mgr"'+(isMgrFlag(e)?' checked':'')+
+          ' style="width:14px;height:14px;accent-color:var(--purple)"> 🔀 Manager (Work Assigner)</label>'+
+        '<label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer">'+
+          '<input type="checkbox" id="ef-ac"'+(e.active!==false?' checked':'')+
+          ' style="width:14px;height:14px;accent-color:var(--green)"> ✅ Active</label>'+
+      '</div>'+
+      '<div style="display:flex;gap:8px">'+
+        '<button class="btn bp" style="flex:1" onclick="saveEmp(\''+esc(e.email)+'\')">💾 Save Changes</button>'+
+        (!isMasterEmp ? '<button class="btn bd bsm" onclick="delEmp(\''+esc(e.email)+'\')">🗑 Remove</button>' : '')+
       '</div>';
   };
 
-  /* ── STEP 7: SAVE EMP ───────────────────────────────────────*/
-  window.saveEmp = async function (oldEmail) {
+  /* ── STEP 6: SAVE EMP ────────────────────────────────────── */
+  window.saveEmp = async function(oldEmail) {
     window.initEmpReg(true);
     var canon = normEmail(oldEmail);
-    var name = normName(($('ef-n') || { value: '' }).value);
-    var passNew = String(($('ef-p') || { value: '' }).value || '').trim();
-    var desig = String(($('ef-d') || { value: 'Team' }).value || 'Team').trim() || 'Team';
-    var role = String(($('ef-r') || { value: '' }).value || desig).trim() || desig;
-    var isAdm = !!(($('ef-admin') || {}).checked);
-    var isMgr = !!(($('ef-mgr') || {}).checked);
-    var active = !!(($('ef-ac') || { checked: true }).checked);
+    var name    = normName(($('ef-n')||{value:''}).value);
+    var passNew = String(($('ef-p')||{value:''}).value||'').trim();
+    var desig   = String(($('ef-d')||{value:'Team'}).value||'Team').trim()||'Team';
+    var role    = String(($('ef-r')||{value:''}).value||desig).trim()||desig;
+    var isAdm   = !!(($('ef-admin')||{}).checked);
+    var isMgr   = !!(($('ef-mgr')||{}).checked);
+    var active  = !!(($('ef-ac')||{checked:true}).checked);
 
     if (!name) { toast('⚠ Name required'); return; }
 
-    var idx = empReg.findIndex(function (e) { return normEmail(e.email) === canon; });
+    var idx = empReg.findIndex(function(e){ return normEmail(e.email)===canon; });
     if (idx < 0) { toast('⚠ Employee not found'); return; }
 
     var existing = empReg[idx];
     if (isAdm) isMgr = false;
 
-    empReg[idx] = Object.assign({}, existing, {
-      name: name, pass: passNew || existing.pass || '',
-      desig: desig, role: role,
-      isAdmin: isAdm, isManager: isMgr, active: active
+    var updated = Object.assign({}, existing, {
+      name:name, pass:passNew||existing.pass||'',
+      desig:desig, role:role,
+      isAdmin:isAdm, isManager:isMgr,
+      active:active
     });
-    empReg[idx].isManager = isManagerFlag(empReg[idx]);
-    if (isAdm) empReg[idx].isManager = false;
+    updated.isManager = isMgrFlag(updated);
+    if (isAdm) updated.isManager = false;
+    empReg[idx] = updated;
+
+    // Update master map password if master employee
+    if (BASE_MAP.has(canon)) {
+      var bm = BASE_MAP.get(canon);
+      BASE_MAP.set(canon, Object.assign({}, bm, {
+        pass: passNew || bm.pass,
+        name: name, desig: desig, role: role,
+        isAdmin: isAdm, isManager: updated.isManager, active: active
+      }));
+    }
 
     persistClean(empReg);
 
-    // Update USERS
-    if (USERS[canon]) Object.assign(USERS[canon], {
-      name: name, pass: passNew || existing.pass || '',
-      role: role, desig: desig, isAdmin: isAdm,
-      isManager: empReg[idx].isManager, active: active
-    });
-
-    // If current user, refresh session
     if (cu && normEmail(cu.email) === canon) {
-      cu = Object.assign(cu, empReg[idx]);
-      try { saveCurrentSession(); } catch (_) {}
-      try { rehydrateCurrentUser(true); } catch (_) {}
+      cu = Object.assign(cu, updated);
+      try { saveCurrentSession(); } catch(_) {}
+      try { rehydrateCurrentUser(true); } catch(_) {}
     }
 
-    try { emitEmpSync(); } catch (_) {}
+    try { emitEmpSync(); } catch(_) {}
 
-    // Server sync
     if (window.SURL) {
       try {
-        await fetch(SURL, {
-          method: 'POST',
-          body: JSON.stringify(Object.assign({ action: 'upsertEmployee' }, empReg[idx]))
+        await fetch(SURL, { method:'POST',
+          body: JSON.stringify(Object.assign({action:'upsertEmployee'}, updated))
         });
-      } catch (_) {}
+      } catch(_) {}
     }
 
     toast('✅ Employee updated!');
     window.renderEmpList();
     window.selectEmp(canon);
-    try { refillEmpDropdown(); } catch (_) {}
-    try { buildEmpPills(allTasks); } catch (_) {}
-    try { buildUI(); } catch (_) {}
+    try { refillEmpDropdown(); } catch(_) {}
+    try { buildEmpPills(allTasks); } catch(_) {}
+    try { buildUI(); } catch(_) {}
   };
 
-  /* ── STEP 8: ADD NEW EMP ────────────────────────────────────*/
-  window.addNewEmp = async function () {
+  /* ── STEP 7: ADD NEW EMP ─────────────────────────────────── */
+  window.addNewEmp = async function() {
     window.initEmpReg(true);
-    var name = normName(($('ef-n') || { value: '' }).value);
-    var email = normEmail(($('ef-e') || { value: '' }).value);
-    var pass = String(($('ef-p') || { value: '' }).value || '').trim();
-    var desig = String(($('ef-d') || { value: 'Team' }).value || 'Team').trim() || 'Team';
-    var role = String(($('ef-r') || { value: '' }).value || desig).trim() || desig;
-    var isAdm = !!(($('ef-admin') || {}).checked);
-    var isMgr = !!(($('ef-mgr') || {}).checked);
+    var name    = normName(($('ef-n')||{value:''}).value);
+    var email   = normEmail(($('ef-e')||{value:''}).value);
+    var pass    = String(($('ef-p')||{value:''}).value||'').trim();
+    var desig   = String(($('ef-d')||{value:'Team'}).value||'Team').trim()||'Team';
+    var role    = String(($('ef-r')||{value:''}).value||desig).trim()||desig;
+    var isAdm   = !!(($('ef-admin')||{}).checked);
+    var isMgr   = !!(($('ef-mgr')||{}).checked);
 
-    if (!name || !email || !pass) { toast('⚠ Name, email aur password required'); return; }
+    if (!name||!email||!pass) { toast('⚠ Name, email aur password required'); return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('⚠ Valid email required'); return; }
-    if (empReg.find(function (e) { return normEmail(e.email) === email; })) {
+    if (empReg.find(function(e){ return normEmail(e.email)===email; })) {
       toast('⚠ Ye email already exists'); return;
     }
     if (isAdm) isMgr = false;
 
     var newEmp = {
-      email: email, name: name, pass: pass,
-      role: role, desig: desig,
-      isAdmin: isAdm, isManager: isMgr,
-      active: true,
-      bg: clrAt(empReg.length),
-      joinDate: todayStr()
+      email:email, name:name, pass:pass, role:role, desig:desig,
+      isAdmin:isAdm, isManager:isMgr, active:true,
+      bg:clrAt(empReg.length), joinDate:todayStr()
     };
-    newEmp.isManager = isManagerFlag(newEmp);
+    newEmp.isManager = isMgrFlag(newEmp);
     if (isAdm) newEmp.isManager = false;
 
     empReg.push(newEmp);
     persistClean(empReg);
+    USERS[email] = { pass:pass, name:name, role:role, desig:desig,
+      isAdmin:isAdm, isManager:newEmp.isManager, active:true,
+      bg:newEmp.bg, joinDate:newEmp.joinDate };
 
-    USERS[email] = {
-      pass: pass, name: name, role: role, desig: desig,
-      isAdmin: isAdm, isManager: newEmp.isManager,
-      active: true, bg: newEmp.bg, joinDate: newEmp.joinDate
-    };
+    try { emitEmpSync(); } catch(_) {}
 
-    try { emitEmpSync(); } catch (_) {}
-
-    // Server sync
     var synced = false;
     if (window.SURL) {
       try {
-        await fetch(SURL, {
-          method: 'POST',
-          body: JSON.stringify(Object.assign({ action: 'upsertEmployee' }, newEmp))
+        await fetch(SURL, { method:'POST',
+          body: JSON.stringify(Object.assign({action:'upsertEmployee'}, newEmp))
         });
         synced = true;
-      } catch (_) {}
+      } catch(_) {}
     }
 
     window.initEmpReg(true);
     window.renderEmpList();
     window.selectEmp(email);
-    try { refillEmpDropdown(); } catch (_) {}
-    try { buildEmpPills(allTasks); } catch (_) {}
-    try { buildUI(); } catch (_) {}
-    toast(synced ? ('✅ Employee added: ' + name) : ('✅ Employee added locally: ' + name));
+    try { refillEmpDropdown(); } catch(_) {}
+    try { buildEmpPills(allTasks); } catch(_) {}
+    try { buildUI(); } catch(_) {}
+    toast(synced ? ('✅ Employee added: '+name) : ('✅ Employee added locally: '+name));
   };
 
-  /* ── STEP 9: SELECT NEW EMP FORM ────────────────────────────*/
-  window.selectNewEmp = function () {
+  /* ── STEP 8: SELECT NEW EMP FORM ────────────────────────── */
+  window.selectNewEmp = function() {
     editEmpEmail = null;
     window.renderEmpList();
     var fp = $('emp-fp');
     if (!fp) return;
     fp.innerHTML =
-      '<div style="font-size:15px;font-weight:700;margin-bottom:16px">➕ Add New Employee</div>' +
-      '<div class="fg"><label class="fl2">Full Name *</label><input id="ef-n" class="fc" placeholder="e.g. Rahul Sharma"></div>' +
-      '<div class="fg"><label class="fl2">Email *</label><input id="ef-e" class="fc" placeholder="rahul@upgromedia.com"></div>' +
-      '<div class="fg"><label class="fl2">Password *</label><input id="ef-p" type="password" class="fc" placeholder="e.g. Rahul@1020"></div>' +
-      '<div class="fg"><label class="fl2">Designation *</label><select id="ef-d" class="fc">' + desigOpts('Team') + '</select></div>' +
-      '<div class="fg"><label class="fl2">Role *</label><input id="ef-r" class="fc" placeholder="e.g. SEO Executive"></div>' +
-      '<div style="display:flex;gap:20px;margin-bottom:14px;flex-wrap:wrap">' +
-        '<label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer">' +
-          '<input type="checkbox" id="ef-admin" style="width:14px;height:14px;accent-color:var(--blue)"> 👑 Admin</label>' +
-        '<label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer">' +
-          '<input type="checkbox" id="ef-mgr" style="width:14px;height:14px;accent-color:var(--purple)"> 🔀 Manager (Work Assigner)</label>' +
-      '</div>' +
+      '<div style="font-size:15px;font-weight:700;margin-bottom:16px">➕ Add New Employee</div>'+
+      '<div class="fg"><label class="fl2">Full Name *</label><input id="ef-n" class="fc" placeholder="e.g. Rahul Sharma"></div>'+
+      '<div class="fg"><label class="fl2">Email *</label><input id="ef-e" class="fc" placeholder="rahul@upgromedia.com"></div>'+
+      '<div class="fg"><label class="fl2">Password *</label><input id="ef-p" type="password" class="fc" placeholder="e.g. Rahul@1020"></div>'+
+      '<div class="fg"><label class="fl2">Designation *</label><select id="ef-d" class="fc">'+desigOpts('Team')+'</select></div>'+
+      '<div class="fg"><label class="fl2">Role *</label><input id="ef-r" class="fc" placeholder="e.g. CRM Executive"></div>'+
+      '<div style="display:flex;gap:20px;margin-bottom:14px;flex-wrap:wrap">'+
+        '<label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer">'+
+          '<input type="checkbox" id="ef-admin" style="width:14px;height:14px;accent-color:var(--blue)"> 👑 Admin</label>'+
+        '<label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer">'+
+          '<input type="checkbox" id="ef-mgr" style="width:14px;height:14px;accent-color:var(--purple)"> 🔀 Manager (Work Assigner)</label>'+
+      '</div>'+
       '<button class="btn bs" style="width:100%" onclick="addNewEmp()">✅ Add Employee</button>';
   };
 
-  /* ── STEP 10: DEL EMP — REMOVE FROM EVERYWHERE ──────────────*/
-  window.delEmp = async function (email) {
+  /* ── STEP 9: DEL EMP (only non-master) ──────────────────── */
+  window.delEmp = async function(email) {
     window.initEmpReg(true);
     var canon = normEmail(email);
-    var emp = empReg.find(function (e) { return normEmail(e.email) === canon; });
-    if (!emp) { toast('⚠ Employee not found'); return; }
-    if (!confirm('Remove ' + emp.name + '?\nTask history safe rahegi. Login, dropdown, list sab se hat jayega.')) return;
 
-    empReg = empReg.filter(function (e) { return normEmail(e.email) !== canon; });
-    delete USERS[canon];
-    editEmpEmail = null;
-    persistClean(empReg);
-    try { emitEmpSync(); } catch (_) {}
-
-    // Server sync
-    if (window.SURL) {
-      try {
-        await fetch(SURL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'deleteEmployee', email: canon })
-        });
-      } catch (_) {}
+    if (BASE_MAP.has(canon)) {
+      toast('⚠ Default employees delete nahi ho sakte. Unhe Inactive mark karo.');
+      return;
     }
 
-    if (cu && normEmail(cu.email) === canon) {
-      try { clearCurrentSession(); } catch (_) {}
+    var emp = empReg.find(function(e){ return normEmail(e.email)===canon; });
+    if (!emp) { toast('⚠ Employee not found'); return; }
+    if (!confirm('Remove '+emp.name+'?\nTask history safe rahegi.')) return;
+
+    empReg = empReg.filter(function(e){ return normEmail(e.email)!==canon; });
+    delete USERS[canon];
+    editEmpEmail = null;
+
+    // Save to removed list
+    try {
+      var rm = JSON.parse(localStorage.getItem('upgro_employee_removed_final_v3')||'[]')||[];
+      if (rm.indexOf(canon) < 0) rm.push(canon);
+      localStorage.setItem('upgro_employee_removed_final_v3', JSON.stringify(rm));
+    } catch(_) {}
+
+    persistClean(empReg);
+    try { emitEmpSync(); } catch(_) {}
+
+    if (window.SURL) {
+      try {
+        await fetch(SURL, { method:'POST',
+          body: JSON.stringify({action:'deleteEmployee', email:canon})
+        });
+      } catch(_) {}
     }
 
     var fp = $('emp-fp');
     if (fp) fp.innerHTML =
-      '<div style="text-align:center;padding:40px;color:var(--muted)">' +
-      '<div style="font-size:32px;margin-bottom:8px">✓</div>' +
-      '<div style="font-weight:600">Employee removed</div>' +
-      '<div style="font-size:12px;margin-top:4px">Sab jagah se remove ho gaya.</div></div>';
+      '<div style="text-align:center;padding:40px;color:var(--muted)">'+
+      '<div style="font-size:32px;margin-bottom:8px">✓</div>'+
+      '<div style="font-weight:600">Employee removed</div></div>';
 
-    toast('🗑 Employee removed: ' + emp.name);
+    toast('🗑 Employee removed: '+emp.name);
     window.renderEmpList();
-    try { refillEmpDropdown(); } catch (_) {}
-    try { buildEmpPills(allTasks); } catch (_) {}
-    try { buildUI(); } catch (_) {}
+    try { refillEmpDropdown(); } catch(_) {}
+    try { buildEmpPills(allTasks); } catch(_) {}
+    try { buildUI(); } catch(_) {}
   };
 
-  /* ── STEP 11: SYNC EMPS ─────────────────────────────────────*/
-  window.syncEmps = async function () {
+  /* ── STEP 10: SYNC EMPS ──────────────────────────────────── */
+  window.syncEmps = async function() {
     if (!window.SURL) { toast('⚠ Connect Google Sheet first'); return; }
     window.initEmpReg(true);
-    var list = empReg.map(function (e) {
-      return { name: e.name, email: e.email, pass: e.pass, role: e.role,
-        desig: e.desig, isAdmin: !!e.isAdmin, isManager: !!e.isManager,
-        active: e.active !== false, joinDate: e.joinDate || '' };
+    var list = empReg.map(function(e){
+      return { name:e.name, email:e.email, pass:e.pass, role:e.role,
+        desig:e.desig, isAdmin:!!e.isAdmin, isManager:!!e.isManager,
+        active:e.active!==false, joinDate:e.joinDate||'' };
     });
     try {
-      await fetch(SURL, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'syncEmployees', employees: list })
+      await fetch(SURL, { method:'POST',
+        body: JSON.stringify({action:'syncEmployees', employees:list})
       });
-      toast('✅ ' + list.length + ' employees synced!');
-    } catch (err) { toast('❌ Sync failed: ' + (err.message || 'Network error')); }
+      toast('✅ '+list.length+' employees synced to sheet!');
+    } catch(err) { toast('❌ Sync failed: '+(err.message||'Network error')); }
   };
 
-  /* ── STEP 12: FIX QUICK FILTER PILLS — NO DUPLICATES ────────*/
-  window.buildEmpPills = function (tasks) {
+  /* ── STEP 11: QUICK FILTER PILLS — NO DUPLICATES ─────────── */
+  window.buildEmpPills = function(tasks) {
     if (!canAssign()) return;
     var cont = $('emp-pills');
     if (!cont) return;
 
-    // Build unique employee map by canonical email
-    var empMap = new Map();
     window.initEmpReg(true);
+    var empMap = new Map();
 
-    // Use empReg as source of truth (already deduped)
-    empReg.filter(function (e) { return e.active !== false; })
-      .forEach(function (e, i) {
+    empReg.filter(function(e){ return e.active!==false; })
+      .forEach(function(e) {
         var k = normEmail(e.email);
         if (!empMap.has(k)) {
-          empMap.set(k, {
-            key: k,
-            label: dispName(e) || e.name,
-            email: k,
-            bg: e.bg || clrAt(i),
-            cnt: 0
-          });
+          empMap.set(k, { key:k, label:dispName(e)||e.name, bg:e.bg||'#0B84FF', cnt:0 });
         }
       });
 
-    // Count tasks per employee
-    (Array.isArray(tasks) ? tasks : []).forEach(function (t) {
-      var k = normEmail(t.email || t.assignedToEmail || t.empEmail || '');
+    (Array.isArray(tasks)?tasks:[]).forEach(function(t) {
+      var k = normEmail(t.email||t.assignedToEmail||t.empEmail||'');
       if (empMap.has(k)) empMap.get(k).cnt++;
     });
 
-    // Sort by name
-    var sorted = Array.from(empMap.values()).sort(function (a, b) {
+    var sorted = Array.from(empMap.values()).sort(function(a,b){
       return a.label.localeCompare(b.label);
     });
 
     cont.innerHTML = '';
 
-    // All button
     var all = document.createElement('span');
-    all.className = 'efp' + (activeEmpF === null ? ' act' : '');
+    all.className = 'efp'+(activeEmpF===null?' act':'');
     all.textContent = '🌐 All';
-    all.onclick = function () { setEmpF(null, all); };
+    all.onclick = function(){ setEmpF(null, all); };
     cont.appendChild(all);
 
-    sorted.forEach(function (e) {
+    sorted.forEach(function(e) {
       var sp = document.createElement('span');
-      sp.className = 'efp' + (activeEmpF === e.key ? ' act' : '');
-      sp.innerHTML = '<span class="efav" style="background:' + esc(e.bg) + '">' +
-        esc(empIni(e.label)) + '</span>' + esc(e.label);
-      sp.onclick = (function (key) {
-        return function () { setEmpF(key, sp); };
-      })(e.key);
+      sp.className = 'efp'+(activeEmpF===e.key?' act':'');
+      sp.innerHTML = '<span class="efav" style="background:'+esc(e.bg)+'">'+
+        esc(empIni(e.label))+'</span>'+esc(e.label);
+      sp.onclick = (function(key){ return function(){ setEmpF(key, sp); }; })(e.key);
       cont.appendChild(sp);
     });
   };
 
-  /* ── STEP 13: FIX refillEmpDropdown — NO DUPLICATES ─────────*/
-  window.refillEmpDropdown = function () {
+  /* ── STEP 12: refillEmpDropdown — NO DUPLICATES ──────────── */
+  window.refillEmpDropdown = function() {
     window.initEmpReg(true);
     var sel = $('add-emp');
     if (!sel) return;
     var old = normEmail(sel.value);
     sel.innerHTML = '<option value="">— Select Employee —</option>';
 
-    var list = empReg.filter(function (e) { return e.active !== false; });
-
-    // Filter based on role
+    var list = empReg.filter(function(e){ return e.active!==false; });
     try {
-      if (!isAdmin() && isManager()) {
-        list = list.filter(function (e) { return !e.isAdmin; });
-      } else if (!isAdmin() && !isManager()) {
-        list = [];
-      }
-    } catch (_) {}
+      if (!isAdmin() && isManager()) list = list.filter(function(e){ return !e.isAdmin; });
+      else if (!isAdmin() && !isManager()) list = [];
+    } catch(_) {}
 
-    list.sort(function (a, b) { return String(a.name || '').localeCompare(String(b.name || '')); })
-      .forEach(function (e) {
+    list.sort(function(a,b){ return String(a.name||'').localeCompare(String(b.name||'')); })
+      .forEach(function(e) {
         var o = document.createElement('option');
         o.value = e.email;
-        var prefix = e.isAdmin ? '👑 ' : (isManagerFlag(e) ? '🔀 ' : '');
-        o.textContent = prefix + dispName(e) + ' — ' + (e.desig || e.role || 'Team');
+        var prefix = e.isAdmin ? '👑 ' : (isMgrFlag(e) ? '🔀 ' : '');
+        o.textContent = prefix+dispName(e)+' — '+(e.desig||e.role||'Team');
         sel.appendChild(o);
       });
 
     if (old) sel.value = old;
   };
 
-  /* ── STEP 14: FIX LOGIN — USE CLEAN empReg ──────────────────*/
-  window.doLogin = async function () {
+  /* ── STEP 13: FIX doLogin ────────────────────────────────── */
+  window.doLogin = async function() {
     var emailInput = $('lem');
-    var passInput = $('lpw');
-    var errBox = $('lerr');
-    var email = normEmail((emailInput || { value: '' }).value);
-    var pass = String((passInput || { value: '' }).value || '');
+    var passInput  = $('lpw');
+    var errBox     = $('lerr');
+    var email = normEmail((emailInput||{value:''}).value);
+    var pass  = String((passInput||{value:''}).value||'');
 
     if (emailInput && email) emailInput.value = email;
     function fail(msg) {
-      if (errBox) { errBox.textContent = '❌ ' + msg; errBox.style.display = 'block'; }
-      try { cu = null; } catch (_) {}
+      if (errBox) { errBox.textContent='❌ '+msg; errBox.style.display='block'; }
+      try { cu=null; } catch(_) {}
     }
-    if (!email || !pass) return fail('Email aur password required.');
+    if (!email||!pass) return fail('Email aur password required.');
 
     window.initEmpReg(true);
-    var emp = empReg.find(function (e) { return normEmail(e.email) === email; });
+    var emp = empReg.find(function(e){ return normEmail(e.email)===email; });
 
-    // Fallback: try fetching from server
     if (!emp && window.SURL) {
       try {
-        var res = await fetch(SURL + '?action=getEmployees', { signal: AbortSignal.timeout(10000) });
+        var res = await fetch(SURL+'?action=getEmployees', {signal:AbortSignal.timeout(10000)});
         var j = await res.json();
-        var rows = Array.isArray(j.employees) ? j.employees :
-          Array.isArray(j.data) ? j.data : [];
-        rows.forEach(function (r, i) {
+        var rows = Array.isArray(j.employees)?j.employees:Array.isArray(j.data)?j.data:[];
+        rows.forEach(function(r,i) {
           try {
-            var rec = parseEmployeeRow(r, i);
-            if (rec && !empReg.find(function (x) { return normEmail(x.email) === normEmail(rec.email); })) {
+            var rec = parseEmployeeRow(r,i);
+            if (rec && !empReg.find(function(x){ return normEmail(x.email)===normEmail(rec.email); })) {
               empReg.push(rec);
             }
-          } catch (_) {}
+          } catch(_) {}
         });
-        persistClean(getCleanEmpReg());
-        emp = empReg.find(function (e) { return normEmail(e.email) === email; });
-      } catch (_) {}
+        persistClean(buildCleanEmpReg());
+        emp = empReg.find(function(e){ return normEmail(e.email)===email; });
+      } catch(_) {}
     }
 
     if (!emp) return fail('Employee nahi mila. Admin se contact karein.');
-    if (String(emp.pass || '') !== String(pass)) return fail('Password galat hai.');
-    if (emp.active === false) return fail('Ye account inactive hai.');
+    if (String(emp.pass||'')!==String(pass)) return fail('Password galat hai.');
+    if (emp.active===false) return fail('Ye account inactive hai.');
 
     cu = Object.assign({}, emp, {
-      email: emp.email,
-      role: emp.role || emp.desig,
-      desig: emp.desig || emp.role,
-      isAdmin: !!emp.isAdmin,
-      isManager: isManagerFlag(emp)
+      email:emp.email, role:emp.role||emp.desig,
+      desig:emp.desig||emp.role,
+      isAdmin:!!emp.isAdmin, isManager:isMgrFlag(emp)
     });
 
-    if (errBox) errBox.style.display = 'none';
-    try { saveCurrentSession(); } catch (_) {}
+    if (errBox) errBox.style.display='none';
+    try { saveCurrentSession(); } catch(_) {}
 
-    var lp = $('lp'), app = $('app');
+    var lp=$('lp'), app=$('app');
     if (lp) lp.classList.add('hidden');
     if (app) app.classList.remove('hidden');
-    try { initApp(); } catch (err) {
+    try { initApp(); } catch(err) {
       console.error(err);
-      toast('Login hua, app load me kuch issue: ' + err.message);
+      toast('Login hua, app load me issue: '+err.message);
     }
   };
 
-  /* ── STEP 15: FIX OVERDUE LOGIC ─────────────────────────────
-     Overdue SIRF tab show ho jab:
-     - status completed/rejected NAHI hai
-     - due date PAST ho
-     - Task submitted/accepted bhi ho sakta hai, overdue tab bhi lagta hai
-  ─────────────────────────────────────────────────────────── */
-  window.isOD = function (t) {
+  /* ── STEP 14: OVERDUE FIX ────────────────────────────────── */
+  window.isOD = function(t) {
     if (!t) return false;
-    var s = String(t.status || '').toLowerCase().trim();
-    // Completed ya rejected tasks KABHI overdue nahi
-    if (s === 'completed' || s === 'done' || s === 'finished' ||
-        s === 'rejected' || s === 'declined') return false;
+    var s = String(t.status||'').toLowerCase().trim();
+    if (s==='completed'||s==='done'||s==='finished'||
+        s==='rejected'||s==='declined') return false;
     var d = pd(t.ddate);
     if (!d) return false;
-    var now = new Date();
-    now.setHours(0, 0, 0, 0);
-    d.setHours(0, 0, 0, 0);
+    var now = new Date(); now.setHours(0,0,0,0);
+    d.setHours(0,0,0,0);
     return d < now;
   };
 
-  /* ── STEP 16: FIX normStatus — submitted work stays correct ─*/
-  var _origNormStatus = window.normStatus;
-  window.normStatus = function (raw) {
-    if (!raw) return 'assigned';
-    var s = String(raw).trim().toLowerCase().replace(/[-_]/g, ' ');
-    if (s === 'completed' || s === 'done' || s === 'finished') return 'completed';
-    if (s === 'in progress' || s === 'inprogress' || s === 'started' ||
-        s === 'working' || s === 'accepted') return 'in progress';
-    if (s === 'rejected' || s === 'declined' || s === 'reject') return 'rejected';
-    // IMPORTANT: submitted/complete ke baad overdue mat banana
-    if (s === 'overdue' || s === 'late' || s === 'past due') return 'overdue';
-    return 'assigned';
-  };
-
-  /* ── STEP 17: FIX parseTaskRow — completed tasks never overdue*/
-  var _origParseTaskRow = window.parseTaskRow;
-  window.parseTaskRow = function (r) {
-    var t = _origParseTaskRow ? _origParseTaskRow(r) : r;
-    if (!t) return t;
-    // Re-check overdue with fixed isOD
-    if (window.isOD(t) && t.status !== 'overdue') {
-      t.status = 'overdue';
-    } else if (!window.isOD(t) && t.status === 'overdue') {
-      // Was marked overdue but due date not yet passed — reset
-      t.status = 'assigned';
-    }
-    return t;
-  };
-
-  /* ── STEP 18: FIX submitWork — after submit, no overdue ──────*/
-  var _origSubmitWork = window.submitWork;
-  window.submitWork = async function () {
-    var taskId = ($('sub-task') || { value: '' }).value;
-    var status = ($('sub-stat') || { value: 'Completed' }).value;
-    var notes = ($('sub-notes') || { value: '' }).value.trim();
-    var driveLink = (typeof getAllDriveLinks === 'function') ? getAllDriveLinks() : '';
-    var doneUnitsEl = $('sub-done-units');
-    var doneUnits = Math.max(1, parseInt((doneUnitsEl || { value: '1' }).value || '1', 10) || 1);
+  /* ── STEP 15: submitWork — no overdue after submit ───────── */
+  window.submitWork = async function() {
+    var taskId    = ($('sub-task')||{value:''}).value;
+    var status    = ($('sub-stat')||{value:'Completed'}).value;
+    var notes     = ($('sub-notes')||{value:''}).value.trim();
+    var driveLink = (typeof getAllDriveLinks==='function') ? getAllDriveLinks() : '';
+    var doneUnits = Math.max(1, parseInt(($('sub-done-units')||{value:'1'}).value||'1',10)||1);
 
     if (!taskId) { toast('⚠ Please select a task first'); return; }
     if (!window.SURL) { toast('⚠ Connect Google Sheet in Settings'); return; }
 
-    var t = allTasks.find(function (x) { return x.id === taskId; });
+    var t = allTasks.find(function(x){ return x.id===taskId; });
     if (!t) { toast('⚠ Task not found'); return; }
+    try { ensureTaskMeta(t); } catch(_) {}
 
-    try { ensureTaskMeta(t); } catch (_) {}
+    var totalUnits   = Math.max(1, Number(t.totalUnits||1)||1);
+    var currentDone  = Math.max(0, Number(t.doneUnits||0)||0);
+    var currentPend  = Math.max(0, totalUnits-currentDone);
+    doneUnits = Math.min(Math.max(1, doneUnits), Math.max(1, currentPend));
 
-    var totalUnits = Math.max(1, Number(t.totalUnits || 1) || 1);
-    var currentDone = Math.max(0, Number(t.doneUnits || 0) || 0);
-    var currentPending = Math.max(0, totalUnits - currentDone);
-    doneUnits = Math.min(Math.max(1, doneUnits), Math.max(1, currentPending));
-
-    var updatedDone = Math.min(totalUnits, currentDone + doneUnits);
-    var updatedPending = Math.max(0, totalUnits - updatedDone);
+    var updatedDone = Math.min(totalUnits, currentDone+doneUnits);
+    var updatedPend = Math.max(0, totalUnits-updatedDone);
     var now = new Date().toLocaleString('en-IN');
+    var newStatus = (status==='Completed'||updatedPend===0) ? 'completed' : 'in progress';
 
-    // Status determination
-    var newStatus = (status === 'Completed' || updatedPending === 0) ? 'completed' : 'in progress';
-
-    // Update local state — NEVER set to overdue after submit
     statusOverrides.set(taskId, {
-      status: newStatus,
-      completedAt: newStatus === 'completed' ? now : '',
-      driveLink: driveLink || (t.driveLink || ''),
-      doneUnits: updatedDone,
-      pendingUnits: updatedPending
+      status:newStatus, completedAt:newStatus==='completed'?now:'',
+      driveLink:driveLink||(t.driveLink||''),
+      doneUnits:updatedDone, pendingUnits:updatedPend
     });
-    t.status = newStatus;
-    if (newStatus === 'completed') t.completedAt = now;
-    t.driveLink = driveLink || t.driveLink || '';
-    t.doneUnits = updatedDone;
-    t.pendingUnits = updatedPending;
-    try { ensureTaskMeta(t); } catch (_) {}
+    t.status=newStatus;
+    if (newStatus==='completed') t.completedAt=now;
+    t.driveLink=driveLink||t.driveLink||'';
+    t.doneUnits=updatedDone; t.pendingUnits=updatedPend;
+    try { ensureTaskMeta(t); } catch(_) {}
 
     buildUI();
 
     try {
-      var countSummary = updatedPending + ' Pending / ' + updatedDone + ' Submit / Total ' + totalUnits;
-      await fetch(SURL, {
-        method: 'POST',
-        body: JSON.stringify({
-          action: 'submitWork',
-          taskId: taskId,
-          taskCode: t.taskCode || t.taskId || taskId,
-          email: cu.email,
-          empName: cu.name,
-          task: (typeof getTaskDisplayName === 'function') ? getTaskDisplayName(t) : (t.task || ''),
-          status: newStatus === 'completed' ? 'Completed' : 'In Progress',
-          notes: notes,
-          driveLink: driveLink,
-          doneUnits: doneUnits,
-          updatedDoneUnits: updatedDone,
-          pendingUnits: updatedPending,
-          totalUnits: totalUnits,
-          id: taskId,
-          adate: t.adate || '',
-          ddate: t.ddate || '',
-          countSummary: countSummary,
-          deleteEmailOnComplete: false,
-          keepEmail: true,
-          preserveEmail: true
-        })
-      });
+      var countSummary = updatedPend+' Pending / '+updatedDone+' Submit / Total '+totalUnits;
+      var dispN = (typeof getTaskDisplayName==='function') ? getTaskDisplayName(t) : (t.task||'');
+      await fetch(SURL, { method:'POST', body: JSON.stringify({
+        action:'submitWork', taskId:taskId,
+        taskCode:t.taskCode||t.taskId||taskId,
+        email:cu.email, empName:cu.name,
+        task:dispN, workName:dispN,
+        status:newStatus==='completed'?'Completed':'In Progress',
+        notes:notes, driveLink:driveLink,
+        doneUnits:doneUnits, updatedDoneUnits:updatedDone,
+        pendingUnits:updatedPend, totalUnits:totalUnits,
+        id:taskId, adate:t.adate||'', ddate:t.ddate||'',
+        countSummary:countSummary,
+        deleteEmailOnComplete:false, keepEmail:true, preserveEmail:true
+      })});
       toast('✅ Work submitted successfully!');
-    } catch (e) {
-      toast('⚠ Submitted locally, sheet sync failed');
-    }
+    } catch(e) { toast('⚠ Submitted locally, sheet sync failed'); }
 
-    // Clear form
-    var sn = $('sub-notes'); if (sn) sn.value = '';
-    var sdl = $('sub-drive-link'); if (sdl) sdl.value = '';
-    var extra = $('sub-extra-drive-links'); if (extra) extra.innerHTML = '';
-    var sdu = $('sub-done-units'); if (sdu) sdu.value = '1';
-    try { populateSubSel(); } catch (_) {}
+    var sn=$('sub-notes'); if(sn) sn.value='';
+    var sdl=$('sub-drive-link'); if(sdl) sdl.value='';
+    var ex=$('sub-extra-drive-links'); if(ex) ex.innerHTML='';
+    var sdu=$('sub-done-units'); if(sdu) sdu.value='1';
+    try { populateSubSel(); } catch(_) {}
   };
 
-  /* ── STEP 19: CHANGE OWN PASSWORD ───────────────────────────*/
-  window.changeOwnPassword = function () {
-    var cur  = ($('self-cur-pass')     || { value: '' }).value;
-    var nw   = ($('self-new-pass')     || { value: '' }).value;
-    var conf = ($('self-confirm-pass') || { value: '' }).value;
+  /* ── STEP 16: CHANGE OWN PASSWORD ───────────────────────── */
+  window.changeOwnPassword = function() {
+    var cur  = ($('self-cur-pass')||{value:''}).value;
+    var nw   = ($('self-new-pass')||{value:''}).value;
+    var conf = ($('self-confirm-pass')||{value:''}).value;
 
-    if (!cur || !nw || !conf) { toast('⚠ Teeno fields required'); return; }
-    if (!cu || !cu.email) { toast('⚠ Not logged in'); return; }
+    if (!cur||!nw||!conf) { toast('⚠ Teeno fields required'); return; }
+    if (!cu||!cu.email)   { toast('⚠ Not logged in'); return; }
 
     window.initEmpReg(true);
-    var stored = empReg.find(function (e) { return normEmail(e.email) === normEmail(cu.email); });
-    if (!stored || String(stored.pass || '') !== String(cur)) {
+    var stored = empReg.find(function(e){ return normEmail(e.email)===normEmail(cu.email); });
+    if (!stored||String(stored.pass||'')!==String(cur)) {
       toast('❌ Current password galat hai'); return;
     }
-    if (nw !== conf) { toast('❌ New passwords match nahi karte'); return; }
-    if (nw.length < 6) { toast('⚠ Password kam se kam 6 characters ka hona chahiye'); return; }
+    if (nw!==conf)   { toast('❌ New passwords match nahi karte'); return; }
+    if (nw.length<6) { toast('⚠ Password kam se kam 6 characters'); return; }
 
-    var idx = empReg.findIndex(function (e) { return normEmail(e.email) === normEmail(cu.email); });
-    if (idx >= 0) empReg[idx].pass = nw;
-    if (USERS[cu.email]) USERS[cu.email].pass = nw;
-    cu.pass = nw;
-
+    var idx = empReg.findIndex(function(e){ return normEmail(e.email)===normEmail(cu.email); });
+    if (idx>=0) empReg[idx].pass=nw;
+    if (USERS[cu.email]) USERS[cu.email].pass=nw;
+    if (BASE_MAP.has(normEmail(cu.email))) {
+      var bm=BASE_MAP.get(normEmail(cu.email));
+      BASE_MAP.set(normEmail(cu.email), Object.assign({},bm,{pass:nw}));
+    }
+    cu.pass=nw;
     persistClean(empReg);
-    try { saveCurrentSession(); } catch (_) {}
+    try { saveCurrentSession(); } catch(_) {}
 
     if (window.SURL) {
-      fetch(SURL, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'updateEmployee', email: cu.email, pass: nw, Password: nw })
-      }).catch(function () {});
+      fetch(SURL, { method:'POST',
+        body: JSON.stringify({action:'updateEmployee', email:cu.email, pass:nw, Password:nw})
+      }).catch(function(){});
     }
 
-    ['self-cur-pass', 'self-new-pass', 'self-confirm-pass'].forEach(function (id) {
-      var el = $(id); if (el) el.value = '';
+    ['self-cur-pass','self-new-pass','self-confirm-pass'].forEach(function(id){
+      var el=$(id); if(el) el.value='';
     });
     toast('✅ Password update ho gaya!');
   };
 
-  /* ── STEP 20: FIX allTasks — recheck overdue status ─────────*/
-  function recheckAllTasksOverdue() {
+  /* ── STEP 17: RECHECK OVERDUE ON LOAD ───────────────────── */
+  function recheckOverdue() {
     if (!Array.isArray(allTasks)) return;
-    allTasks.forEach(function (t) {
+    allTasks.forEach(function(t) {
       if (!t) return;
-      var s = String(t.status || '').toLowerCase();
-      if (s === 'completed' || s === 'rejected' || s === 'done') return;
-      if (window.isOD(t)) {
-        if (s !== 'overdue') t.status = 'overdue';
-      } else {
-        if (s === 'overdue') t.status = 'assigned';
-      }
+      var s = String(t.status||'').toLowerCase();
+      if (s==='completed'||s==='rejected'||s==='done') return;
+      if (window.isOD(t)) { if(s!=='overdue') t.status='overdue'; }
+      else { if(s==='overdue') t.status='assigned'; }
     });
   }
 
-  /* ── STEP 21: HOOK INTO loadData TO FIX TASKS AFTER LOAD ────*/
+  /* ── STEP 18: HOOK loadData ──────────────────────────────── */
   var _origLoadData = window.loadData;
-  window.loadData = async function () {
+  window.loadData = async function() {
     if (_origLoadData) await _origLoadData();
-    try { recheckAllTasksOverdue(); } catch (_) {}
-    try { buildEmpPills(allTasks); } catch (_) {}
-    try { refillEmpDropdown(); } catch (_) {}
+    try { recheckOverdue(); } catch(_) {}
+    try { buildEmpPills(allTasks); } catch(_) {}
+    try { refillEmpDropdown(); } catch(_) {}
   };
 
-  /* ── STEP 22: RUN INITIAL REFRESH ───────────────────────────*/
-  try { recheckAllTasksOverdue(); } catch (_) {}
-  try { refillEmpDropdown(); } catch (_) {}
-  try { buildEmpPills(allTasks || []); } catch (_) {}
+  /* ── STEP 19: INITIAL REFRESH ───────────────────────────── */
+  try { recheckOverdue(); } catch(_) {}
+  try { refillEmpDropdown(); } catch(_) {}
+  try { buildEmpPills(allTasks||[]); } catch(_) {}
   try {
     if ($('pg-employees') && $('pg-employees').classList.contains('act')) {
       window.renderEmpList();
     }
-  } catch (_) {}
+  } catch(_) {}
 
-  console.log('[UpGro Master Patch v2] Applied. empReg:', empReg.length, 'employees.');
-})();
-</body>
+  console.log('[UpGro Master Patch v3] Applied. empReg:', empReg.length, 'employees.');
+})();</body>
 </html>
