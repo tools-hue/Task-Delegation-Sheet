@@ -2759,9 +2759,10 @@ function renderAllTasks(){
   if(!tasks.length){if(nil)nil.style.display='block';return;}
   if(nil)nil.style.display='none';
   tasks.slice(0,300).forEach((t,i)=>{
-        const _ns2=normStatus(t.status);
+    const _ns2=normStatus(t.status);
     const ov=isOD(t)&&_ns2!=='completed'&&_ns2!=='rejected';
     const st=_ns2==='completed'?'Completed':_ns2==='rejected'?'Rejected':shouldShowAccept(t)?'Assigned':ov?'Overdue':_ns2==='in progress'?'In Progress':'Assigned';
+    const sc=_ns2==='completed'?'pc':_ns2==='rejected'?'po':shouldShowAccept(t)?'pa':ov?'po':_ns2==='in progress'?'pp':'pa';
     const pc={low:'plow',medium:'pmed',high:'phi',urgent:'purg'}[t.priority]||'pmed';
     const d=dl(t.ddate);
     const tr=document.createElement('tr');
@@ -6204,9 +6205,10 @@ function renderAllTasks(){
   if(!tasks.length){if(nil)nil.style.display='block';return;}
   if(nil)nil.style.display='none';
   tasks.slice(0,300).forEach((t,i)=>{
-        const _ns2=normStatus(t.status);
+    const _ns2=normStatus(t.status);
     const ov=isOD(t)&&_ns2!=='completed'&&_ns2!=='rejected';
     const st=_ns2==='completed'?'Completed':_ns2==='rejected'?'Rejected':shouldShowAccept(t)?'Assigned':ov?'Overdue':_ns2==='in progress'?'In Progress':'Assigned';
+    const sc=_ns2==='completed'?'pc':_ns2==='rejected'?'po':shouldShowAccept(t)?'pa':ov?'po':_ns2==='in progress'?'pp':'pa';
     const pc={low:'plow',medium:'pmed',high:'phi',urgent:'purg'}[t.priority]||'pmed';
     const d=dl(t.ddate);
     const tr=document.createElement('tr');
