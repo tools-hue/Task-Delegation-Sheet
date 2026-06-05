@@ -950,7 +950,7 @@ const USERS = {
   'arpit@upgromedia.com':              {pass:'Arpit@1011',       name:'Arpit Yadav',         role:'Team',              desig:'Team',               isAdmin:false, isManager:false},
   'junaid@upgromedia.com':             {pass:'Junaid@1014',      name:'Junaid',              role:'Google Ads',        desig:'Google Ads',         isAdmin:false, isManager:false},
   'chandrakala.meta@upgromedia.com':   {pass:'Chandrakala@1016', name:'Chandrakala Waldia',  role:'Meta Media Buyer',  desig:'Meta Media Buyer',   isAdmin:false, isManager:false},
-  'ishika.crm@upgromedia.com':         {pass:'Ishika@123',       name:'Ishika Saxena',       role:'CRM',               desig:'CRM',                isAdmin:false, isManager:false},
+  'ishika.crm@upgromedia.com':         {pass:'Ishika@123',       name:'Ishika Saxena',       role:'CRM',               desig:'CRM',                isAdmin:false, isManager:true},
 };
 const CLRS=['#0B84FF','#E53935','#00B67A','#F59E0B','#7C3AED','#0E9F8E','#EA580C','#DB2777','#64748B','#D97706','#1565C0','#16A34A','#9333EA','#0891B2'];
 const DESIG_OPTS=['MIS','Executive Assistant','Web Developer','Graphic Designer','Video Editor','CRM','Meta Media Buyer','Google Ads','SEO Executive','SEO','Founder','CEO','HR','Accountant','Intern','Content Writer','Social Media Manager','Performance Marketer','Team Lead','Other'];
@@ -2041,24 +2041,19 @@ function updateSidebarVis(){
   const niEmp=$('ni-employees');
   const sec=$('sb-mgmt-sec');
   const niMtg=$('ni-meetings');
+  // ALL TASKS: sabhi ko dikhao (admin=sab data, manager=team data, user=apna data)
+  if(niAll)niAll.style.display='';
+  if(sec)sec.style.display='';
+  if(niMtg)niMtg.style.display='';
   if(isAdmin()){
-    if(niAll)niAll.style.display='';
     if(niAn)niAn.style.display='';
     if(niEmp)niEmp.style.display='';
-    if(niMtg)niMtg.style.display='';
-    if(sec)sec.style.display='';
   } else if(isManager()){
-    if(niAll)niAll.style.display='';
     if(niAn)niAn.style.display='';
     if(niEmp)niEmp.style.display='none';
-    if(niMtg)niMtg.style.display='';
-    if(sec)sec.style.display='';
   } else {
-    if(niAll)niAll.style.display='none';
     if(niAn)niAn.style.display='none';
     if(niEmp)niEmp.style.display='none';
-    if(niMtg)niMtg.style.display='';  // all users can see meetings they're invited to
-    if(sec)sec.style.display='';
   }
 }
 
@@ -2169,9 +2164,11 @@ function closeSB(){const sb=$('sb');if(sb)sb.classList.remove('mob');}
 //  NAVIGATION
 // ════════════════════════════════════════════════════════════════
 function nav(page){
-  // Restrict pages for regular users
-  if(!canAssign()&&(page==='alltasks'||page==='analytics'||page==='employees'))return;
+  // Only restrict employees page to admins
   if(!isAdmin()&&page==='employees')return;
+  // Analytics only for admin/manager
+  if(!canAssign()&&page==='analytics')return;
+  // All Tasks: everyone can see (filtered by role in renderAllTasks)
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('act'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('act'));
   const pg=$('pg-'+page);if(!pg)return;
@@ -4197,6 +4194,10 @@ function saveRemovedSet(s){ try{localStorage.setItem(REM_KEY,JSON.stringify(Arra
 /* ── BUILD REGISTRY ─────────────────────────────────── */
 function buildRegistry(){
   var removed = getRemovedSet();
+  // Sync removed set from all legacy keys too
+  ['upgro_emp_removed_final_v3','upgro_employee_removed_final_v3'].forEach(function(k){
+    try{var a=JSON.parse(localStorage.getItem(k)||'[]');a.forEach(function(e){removed.add(ne(e));});}catch(_){}
+  });
   // Start from USERS object (master list)
   var map = new Map();
   try{
@@ -4430,46 +4431,47 @@ window.renderAllTasks = function(){
   });
 };
 
-/* ── applyEmpF — admin sees all, others see own ─────── */
+/* ── applyEmpF — admin=all, manager=team, user=own ──── */
 window.applyEmpF = function(tasks){
   var _isAdmin=false,_isMgr=false;
   try{_isAdmin=isAdmin();}catch(_){}
   try{_isMgr=isManager();}catch(_){}
+
+  // ADMIN: sabhi tasks dikhao, filter pills se hi filter hoga
   if(_isAdmin){
     if(typeof activeEmpF!=='undefined'&&activeEmpF){
       return tasks.filter(function(t){
         var k=ne(t.email||t.assignedToEmail||t.empEmail||'');
-        return k===ne(activeEmpF)||k.split('@')[0]===activeEmpF;
+        return k===ne(activeEmpF);
       });
     }
     return tasks;
   }
+
+  // MANAGER: apne assigned tasks + apni team ke tasks
   if(_isMgr){
-    var cuEmail='';try{cuEmail=ne(cu.email);}catch(_){}
-    var cuName='';try{cuName=String(cu.name||'').toLowerCase();}catch(_){}
+    var cuEmail='';try{cuEmail=ne(cu&&cu.email);}catch(_){}
+    var cuName='';try{cuName=String((cu&&cu.name)||'').toLowerCase().trim();}catch(_){}
     var merged=tasks.filter(function(t){
-      // Show tasks assigned BY this manager OR assigned TO this manager
-      var byName=String(t.by||t.assignedBy||'').toLowerCase();
-      var byEmail=ne(t.byEmail||t.assignedByEmail||'');
+      var byName=String(t.by||t.assignedBy||'').toLowerCase().trim();
       var toEmail=ne(t.email||t.assignedToEmail||t.empEmail||'');
-      return byName===cuName||byEmail===cuEmail||toEmail===cuEmail||(typeof taskBelongsToCurrentUser==='function'&&taskBelongsToCurrentUser(t));
+      return byName===cuName||toEmail===cuEmail||(typeof taskBelongsToCurrentUser==='function'&&taskBelongsToCurrentUser(t));
     });
-    var uniq=new Map();merged.forEach(function(t){uniq.set(t.id||JSON.stringify(t),t);});
+    var uniq=new Map();
+    merged.forEach(function(t){uniq.set(t.id||JSON.stringify(t),t);});
     var final=Array.from(uniq.values());
     if(typeof activeEmpF!=='undefined'&&activeEmpF){
-      return final.filter(function(t){
-        var k=ne(t.email||t.assignedToEmail||t.empEmail||'');
-        return k===ne(activeEmpF)||k.split('@')[0]===activeEmpF;
-      });
+      return final.filter(function(t){return ne(t.email||t.assignedToEmail||t.empEmail||'')===ne(activeEmpF);});
     }
     return final;
   }
-  // Regular user — only own tasks
+
+  // REGULAR USER: sirf apne tasks
+  var myEmail='';try{myEmail=ne(cu&&cu.email);}catch(_){}
   return tasks.filter(function(t){
-    try{return taskBelongsToCurrentUser(t);}catch(_){
-      var myEmail='';try{myEmail=ne(cu.email);}catch(_2){}
-      return ne(t.email||t.assignedToEmail||t.empEmail||'')===myEmail;
-    }
+    var tEmail=ne(t.email||t.assignedToEmail||t.empEmail||'');
+    if(myEmail&&tEmail===myEmail)return true;
+    try{return taskBelongsToCurrentUser(t);}catch(_){return false;}
   });
 };
 
@@ -4644,16 +4646,21 @@ window.delEmp = async function(email){
   if(!confirm('Remove '+emp.name+'? Task history safe rahegi.'))return;
   // Add to removed set — permanently
   var removed=getRemovedSet();removed.add(canon);saveRemovedSet(removed);
-  // Remove from USERS immediately
+  // Remove EVERYWHERE immediately
   delete USERS[canon];
-  // Remove from empReg
   try{empReg=empReg.filter(function(e){return ne(e.email)!==canon;});}catch(_){}
-  // Remove from localStorage stored list
-  try{
-    var stored=JSON.parse(localStorage.getItem(EMP_KEY)||'[]')||[];
-    stored=stored.filter(function(e){return ne(e.email||'')!==canon;});
-    localStorage.setItem(EMP_KEY,JSON.stringify(stored));
-  }catch(_){}
+  try{sheetEmpReg=(sheetEmpReg||[]).filter(function(e){return ne(e.email||'')!==canon;});}catch(_){}
+  // Remove from ALL localStorage keys
+  ['upgro_emp_v5','upgro_emp_dyn','upgro_employee_registry_final_v3','upgro_emp_dyn_v2'].forEach(function(k){
+    try{
+      var stored=JSON.parse(localStorage.getItem(k)||'[]')||[];
+      stored=stored.filter(function(e){return ne(e.email||'')!==canon;});
+      localStorage.setItem(k,JSON.stringify(stored));
+    }catch(_){}
+  });
+  // Also clear any role overrides
+  try{var roles=JSON.parse(localStorage.getItem('upgro_roles_v4')||'{}');delete roles[canon];localStorage.setItem('upgro_roles_v4',JSON.stringify(roles));}catch(_){}
+  try{var roles2=JSON.parse(localStorage.getItem('upgro_roles_v3')||'{}');delete roles2[canon];localStorage.setItem('upgro_roles_v3',JSON.stringify(roles2));}catch(_){}
   editEmpEmail=null;
   broadcastChange('remove',canon);
   if(window.SURL){try{await fetch(SURL,{method:'POST',body:JSON.stringify({action:'deleteEmployee',email:canon})});}catch(_){}}
@@ -4760,15 +4767,26 @@ function broadcastChange(action,data){
   try{if(!_bc)_bc=new BroadcastChannel('upgro_emp_v5');_bc.postMessage({action:action,data:data,ts:Date.now()});}catch(_){}
   try{localStorage.setItem('upgro_emp_ping_v5',JSON.stringify({action:action,ts:Date.now()}));}catch(_){}
   try{if(typeof emitEmpSync==='function')emitEmpSync();}catch(_){}
+  // Also update sidebar visibility immediately
+  try{if(typeof updateSidebarVis==='function')updateSidebarVis();}catch(_){}
+  try{if(typeof renderPageButtons==='function')renderPageButtons();}catch(_){}
 }
 function handleBroadcast(msg){
   if(!msg||!msg.action)return;
   try{window.initEmpReg();}catch(_){}
   try{refillEmpDropdown();}catch(_){}
   try{buildEmpPills(allTasks||[]);}catch(_){}
-  if(typeof renderEmpList==='function'){try{if($('pg-employees')&&$('pg-employees').classList.contains('act'))window.renderEmpList();}catch(_){}}
+  try{if(typeof updateSidebarVis==='function')updateSidebarVis();}catch(_){}
+  try{if(typeof renderPageButtons==='function')renderPageButtons();}catch(_){}
+  if(typeof renderEmpList==='function'){
+    try{if($('pg-employees')&&$('pg-employees').classList.contains('act'))window.renderEmpList();}catch(_){}
+  }
+  // Rebuild task filters too
+  try{if(typeof populateTaskFilterOptions==='function')populateTaskFilterOptions();}catch(_){}
+  try{if(typeof buildUI==='function')buildUI();}catch(_){}
   if(msg.action==='remove'&&msg.data&&cu&&ne(msg.data)===ne(cu.email)){
-    notify('⚠ Aapka account remove hua. Logout...');setTimeout(function(){try{logout();}catch(_){}},2000);
+    notify('⚠ Aapka account remove hua. Logout...');
+    setTimeout(function(){try{logout();}catch(_){}},2000);
   }
 }
 try{_bc=new BroadcastChannel('upgro_emp_v5');_bc.onmessage=function(ev){handleBroadcast(ev.data);};}catch(_){}
@@ -4803,7 +4821,12 @@ setInterval(function(){
           }
         }catch(_){}
       });
-      if(changed){try{window.initEmpReg();refillEmpDropdown();buildEmpPills(allTasks||[]);}catch(_){}}
+      if(changed){
+        try{window.initEmpReg();refillEmpDropdown();buildEmpPills(allTasks||[]);}catch(_){}
+        try{if(typeof updateSidebarVis==='function')updateSidebarVis();}catch(_){}
+        try{if(typeof renderPageButtons==='function')renderPageButtons();}catch(_){}
+        try{if(typeof buildUI==='function')buildUI();}catch(_){}
+      }
     }).catch(function(){});
 },30000);
 
