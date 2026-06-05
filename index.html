@@ -2291,6 +2291,8 @@ async function loadData(){
     }catch(e){ sheetEmpReg = sheetEmpReg || []; }
     try{const r2=await fetch(SURL+'?action=getFormLinks');const j2=await r2.json();if(j2.links)formLinks=j2.links;}catch(e){}
     if(cu)pollNotifications();
+    // Broadcast employee update to all tabs when data loads
+    try { if(typeof broadcastEmpChange==='function') broadcastEmpChange('refresh',null); } catch(_){}
   }catch(e){
     if(sync)sync.textContent='🔴 Offline — '+e.message.slice(0,40);
     statusOverrides.forEach((ov,id)=>{const t=allTasks.find(x=>x.id===id);if(t)Object.assign(t,ov);});
@@ -3241,110 +3243,10 @@ function selectNewEmp(){
   </div>
   <button class="btn bs" style="width:100%" onclick="addNewEmp()">✅ Add Employee</button>`;
 }
-async function saveEmp(oldEmail){
-  initEmpReg(true);
-  const name=($('ef-n')||{value:''}).value.trim();
-  const pass=($('ef-p')||{value:''}).value.trim();
-  const desig=($('ef-d')||{value:''}).value;
-  const roleVal=(($('ef-r')||{value:''}).value||desig).trim()||desig;
-  const isAdminCk=($('ef-admin')||{checked:false}).checked;
-  const isMgrCk=($('ef-mgr')||{checked:false}).checked;
-  const active=($('ef-ac')||{checked:true}).checked;
-  if(!name){toast('⚠ Name required');return;}
-  const idx=empReg.findIndex(e=>e.email===String(oldEmail).trim().toLowerCase());
-  if(idx<0){toast('⚠ Employee not found');return;}
-  const existing=empReg[idx];
-  const normalizedEmail=String(oldEmail).trim().toLowerCase();
-  const managerFlag=!!(isMgrCk || isForcedAssigner({email:normalizedEmail,name,desig,role:roleVal}));
-  empReg[idx]={
-    ...existing,
-    email:normalizedEmail,
-    name,
-    pass:pass||existing.pass,
-    desig,
-    role:roleVal,
-    isAdmin:!!isAdminCk,
-    isManager:managerFlag,
-    active
-  };
-  persistEmpRegistry();
-  syncUserDirectoryFromRegistry();
-  if(USERS[normalizedEmail]){
-    USERS[normalizedEmail]={
-      ...(USERS[normalizedEmail]||{}),
-      name,
-      pass:pass||existing.pass,
-      role:roleVal,
-      desig,
-      isAdmin:!!isAdminCk,
-      isManager:managerFlag,
-      active,
-      bg:existing.bg,
-      joinDate:existing.joinDate||''
-    };
-  }
-  emitEmpSync();
-  if(cu&&cu.email===normalizedEmail) saveCurrentSession();
-  rehydrateCurrentUser(true);
-  toast('✅ Employee updated and role synced live!');
-  renderEmpList();
-  selectEmp(oldEmail);
-  refillEmpDropdown();
-  buildUI();
-}
-async function addNewEmp(){
-  initEmpReg(true);
-  const name=($('ef-n')||{value:''}).value.trim();
-  const email=($('ef-e')||{value:''}).value.trim().toLowerCase();
-  const pass=($('ef-p')||{value:''}).value.trim();
-  const desig=($('ef-d')||{value:'Team'}).value;
-  const roleVal=(($('ef-r')||{value:''}).value||desig).trim()||desig;
-  const isAdminCk=($('ef-admin')||{checked:false}).checked;
-  const isMgrCk=($('ef-mgr')||{checked:false}).checked;
-  const emailRx=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if(!name||!email||!pass){toast('⚠ Name, email and password required');return;}
-  if(!emailRx.test(email)){toast('⚠ Please enter a valid email address');return;}
-  if(empReg.find(e=>String(e.email||'').trim().toLowerCase()===email)){toast('⚠ Email already exists');return;}
-  const managerFlag=!!(isMgrCk || isForcedAssigner({email,name,desig,role:roleVal}));
-  const newEmp={email,name,pass,role:roleVal,desig,isAdmin:!!isAdminCk,isManager:managerFlag,active:true,bg:CLRS[empReg.length%CLRS.length],joinDate:TODAY};
+// saveEmp replaced by Fix v4 CLEAN — see bottom script
 
-  empReg=[...empReg,newEmp];
-  USERS[email]={
-    ...(USERS[email]||{}),
-    email,name,pass,role:roleVal,desig,
-    isAdmin:!!isAdminCk,
-    isManager:managerFlag,
-    active:true,
-    bg:newEmp.bg,
-    joinDate:TODAY
-  };
-  persistEmpRegistry();
-  syncUserDirectoryFromRegistry();
-  try{ localStorage.setItem(EMP_STORE_KEY, JSON.stringify(loadDynEmployees())); }catch(_e){}
-  emitEmpSync();
+// addNewEmp replaced by Fix v4 CLEAN — see bottom script
 
-  const synced=await syncEmployeeToServer(newEmp,'upsertEmployee');
-  initEmpReg(true);
-  renderEmpList();
-  selectEmp(email);
-  refillEmpDropdown();
-  buildUI();
-  toast(synced ? ('✅ Employee added: '+name) : ('✅ Employee added locally: '+name+' (sheet sync failed)'));
-}
-async function delEmp(email){
-  if(!confirm('Remove '+email+'? Task history will remain.'))return;
-  initEmpReg(true);
-  empReg=empReg.filter(e=>e.email!==String(email).trim().toLowerCase());
-  delete USERS[String(email).trim().toLowerCase()];
-  editEmpEmail=null;
-  persistEmpRegistry();
-  syncUserDirectoryFromRegistry();
-  emitEmpSync();
-  await syncEmployeeToServer({email:String(email).trim().toLowerCase()},'deleteEmployee');
-  if(cu&&cu.email===String(email).trim().toLowerCase()) rehydrateCurrentUser(true);
-  const fp=$('emp-fp');if(fp)fp.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:32px;margin-bottom:8px">✓</div><div style="font-weight:600">Employee removed</div></div>';
-  toast('🗑 Employee removed');renderEmpList();refillEmpDropdown();buildUI();
-}
 async function syncEmps(){
   if(!SURL){toast('⚠ Connect Google Sheet first');return;}
   const emps=empReg.map(e=>({name:e.name,email:e.email,pass:e.pass,role:e.role,desig:e.desig,isAdmin:e.isAdmin,isManager:e.isManager||false,active:e.active,joinDate:e.joinDate||''}));
@@ -4277,10 +4179,10 @@ function deleteMeeting(id){
       });
     } catch(_){}
 
-    // Filter removed (only non-master)
+    // Filter removed employees (ALL including master)
     var result = [];
     map.forEach(function(emp) {
-      if(removed.has(emp.email) && !MASTER_MAP.has(emp.email)) return;
+      if(removed.has(emp.email)) return;
       emp.isManager = isMgr(emp);
       if(emp.isAdmin) emp.isManager = false;
       emp.active = true;
@@ -4312,10 +4214,10 @@ function deleteMeeting(id){
         USERS[e.email] = {pass:e.pass,name:e.name,role:e.role||e.desig,desig:e.desig||e.role,
           isAdmin:!!e.isAdmin,isManager:isMgr(e),active:true,bg:e.bg,joinDate:e.joinDate||''};
       });
-      // Remove deleted (non-master) employees from USERS
-      var removed = getRemovedSet();
-      removed.forEach(function(email) {
-        if(!MASTER_MAP.has(email)) delete USERS[email];
+      // Remove ALL deleted employees from USERS
+      var removed2 = getRemovedSet();
+      removed2.forEach(function(email) {
+        delete USERS[email];
       });
     } catch(_){}
     try { empReg = arr; } catch(_){}
@@ -4606,7 +4508,7 @@ function deleteMeeting(id){
         '<input id="ef-n" value="'+esc(e.name||'')+'" class="fc"></div>'+
       '<div class="fg"><label class="fl2">Email</label>'+
         '<input id="ef-e" value="'+esc(e.email)+'" class="fc"'+
-        (isMasterEmp?' style="background:#f9f9f9;color:var(--muted)" readonly':'')+
+        ''+
         ' placeholder="email@upgromedia.com"></div>'+
       '<div class="fg"><label class="fl2">Password <span style="color:var(--muted);font-weight:400">(blank rakho = current rahega)</span></label>'+
         '<input id="ef-p" type="password" value="" class="fc" placeholder="New password..."></div>'+
@@ -4625,7 +4527,7 @@ function deleteMeeting(id){
       '</div>'+
       '<div style="display:flex;gap:8px">'+
         '<button class="btn bp" style="flex:1" onclick="saveEmp(\''+esc(e.email)+'\')">💾 Save Changes</button>'+
-        (!isMasterEmp?'<button class="btn bd bsm" onclick="delEmp(\''+esc(e.email)+'\')">🗑 Remove</button>':'')+
+        '<button class="btn bd bsm" onclick="delEmp(\''+esc(e.email)+'\')">🗑 Remove</button>'+
       '</div>';
   };
 
@@ -4780,10 +4682,7 @@ function deleteMeeting(id){
   /* ─── DELETE EMP ─────────────────────────────────────────── */
   window.delEmp = async function(email) {
     var canon = ne(email);
-    if(MASTER_MAP.has(canon)){
-      notify('⚠ Default employees delete nahi ho sakte — Password change karo agar zarurat ho.');
-      return;
-    }
+    // ALL employees including master ones can be removed by admin
     var emp = getEmpByEmail(canon);
     if(!emp){ notify('⚠ Employee not found'); return; }
     if(!confirm('Remove '+emp.name+'?\nTask history safe rahegi.')){ return; }
@@ -4792,7 +4691,8 @@ function deleteMeeting(id){
     removed.add(canon);
     saveRemovedSet(removed);
 
-    // Remove from empReg
+    // Remove from ALL registries including master map
+    MASTER_MAP.delete(canon);
     try { empReg = empReg.filter(function(e){ return ne(e.email)!==canon; }); } catch(_){}
     delete USERS[canon];
     editEmpEmail=null;
@@ -5096,6 +4996,137 @@ function deleteMeeting(id){
       notify(failed?('⚠ '+saved+' saved, '+failed+' failed'):('✅ '+saved+' tasks assigned!'));
     };
   })();
+
+  /* ─── REAL-TIME CROSS-USER/CROSS-TAB SYNC ──────────────── */
+  // BroadcastChannel: same browser ke alag tabs mein instant sync
+  var _syncChannel = null;
+  var _SYNC_KEY = 'upgro_emp_broadcast_v4';
+  
+  function broadcastEmpChange(action, data) {
+    // Method 1: BroadcastChannel (same browser, different tabs - INSTANT)
+    try {
+      if(!_syncChannel) _syncChannel = new BroadcastChannel('upgro_emp_sync');
+      _syncChannel.postMessage({action:action, data:data, ts:Date.now()});
+    } catch(_){}
+    // Method 2: localStorage event (also triggers storage event in other tabs)
+    try {
+      localStorage.setItem(_SYNC_KEY, JSON.stringify({action:action, ts:Date.now()}));
+    } catch(_){}
+    // Method 3: Legacy emitEmpSync
+    try { emitEmpSync(); } catch(_){}
+  }
+
+  function handleEmpBroadcast(msg) {
+    if(!msg || !msg.action) return;
+    // Reload employee registry from storage
+    try { window.initEmpReg(true); } catch(_){}
+    // Refresh all UI that shows employees
+    try { refillEmpDropdown(); } catch(_){}
+    try { buildEmpPills(allTasks||[]); } catch(_){}
+    try {
+      if(typeof renderEmpList==='function' && $('pg-employees') && 
+         $('pg-employees').classList.contains('act')) renderEmpList();
+    } catch(_){}
+    // If current logged-in user was removed, logout
+    try {
+      if(cu && cu.email && msg.action==='remove' && msg.data && ne(msg.data)===ne(cu.email)) {
+        notify('⚠ Aapka account remove kar diya gaya hai. Logout ho raha hai...');
+        setTimeout(function(){ try { logout(); } catch(_){} }, 2000);
+      }
+    } catch(_){}
+    // Rebuild UI
+    try { updateSidebarVis(); renderPageButtons(); } catch(_){}
+    try { buildUI(); } catch(_){}
+  }
+
+  // Listen for BroadcastChannel messages (same browser different tabs)
+  try {
+    _syncChannel = new BroadcastChannel('upgro_emp_sync');
+    _syncChannel.onmessage = function(ev) { handleEmpBroadcast(ev.data); };
+  } catch(_){}
+
+  // Listen for localStorage events (same browser different tabs - fallback)
+  window.addEventListener('storage', function(ev) {
+    if(ev.key === _SYNC_KEY) {
+      try { var msg=JSON.parse(ev.newValue||'{}'); handleEmpBroadcast(msg); } catch(_){}
+    }
+    // Also handle legacy sync keys
+    if(ev.key === 'upgro_emp_sync_ping_v1' || ev.key === 'upgro_emp_dyn' || ev.key === 'upgro_emp_registry_v4') {
+      try { window.initEmpReg(true); refillEmpDropdown(); buildEmpPills(allTasks||[]); } catch(_){}
+    }
+  });
+
+  // Window focus pe sync (jab user dusri window se waapis aaye)
+  window.addEventListener('focus', function() {
+    try { window.initEmpReg(true); refillEmpDropdown(); buildEmpPills(allTasks||[]); } catch(_){}
+  });
+
+  // Sheet polling: har 45 seconds mein employee data fresh karo (different devices/users)
+  setInterval(function() {
+    if(!window.SURL || !window.cu) return;
+    fetch(window.SURL + '?action=getEmployees', {signal: AbortSignal.timeout(8000)})
+      .then(function(res){ return res.json(); })
+      .then(function(j) {
+        var rows = Array.isArray(j.employees)?j.employees:Array.isArray(j.data)?j.data:[];
+        if(!rows.length) return;
+        // Merge sheet employees with local
+        rows.forEach(function(r,i) {
+          try {
+            if(!r||!r.email) return;
+            var k = ne(r.email);
+            var existsLocally = buildRegistry().find(function(e){ return e.email===k; });
+            if(!existsLocally) {
+              // New employee added by someone else on sheet
+              var parsed = typeof parseEmployeeRow==='function' ? parseEmployeeRow(r,i) : null;
+              if(parsed) {
+                var list = buildRegistry();
+                list.push(parsed);
+                persistRegistry(list);
+              }
+            } else {
+              // Update password/role if changed on sheet
+              var stored = getEmpByEmail(k);
+              if(stored && r.pass && r.pass !== stored.pass) {
+                var list = buildRegistry();
+                var idx = list.findIndex(function(e){return e.email===k;});
+                if(idx>=0){ list[idx].pass=r.pass; persistRegistry(list); }
+              }
+            }
+          } catch(_){}
+        });
+        refillEmpDropdown();
+        buildEmpPills(allTasks||[]);
+      })
+      .catch(function(){});
+  }, 45000);
+
+  // Override emitEmpSync to use BroadcastChannel too
+  var _origEmitEmpSync = window.emitEmpSync;
+  window.emitEmpSync = function() {
+    try { if(_origEmitEmpSync) _origEmitEmpSync(); } catch(_){}
+    broadcastEmpChange('update', null);
+  };
+
+  // Patch addNewEmp to broadcast
+  var _origAddNewEmp = window.addNewEmp;
+  window.addNewEmp = async function() {
+    await _origAddNewEmp.apply(this, arguments);
+    broadcastEmpChange('add', null);
+  };
+
+  // Patch saveEmp to broadcast
+  var _origSaveEmpBroadcast = window.saveEmp;
+  window.saveEmp = async function(oldEmail) {
+    await _origSaveEmpBroadcast.apply(this, arguments);
+    broadcastEmpChange('update', oldEmail);
+  };
+
+  // Patch delEmp to broadcast (already defined above, wrap it)
+  var _origDelEmpBroadcast = window.delEmp;
+  window.delEmp = async function(email) {
+    await _origDelEmpBroadcast.apply(this, arguments);
+    broadcastEmpChange('remove', email);
+  };
 
   /* ─── INITIAL BOOT ───────────────────────────────────────── */
   try { window.initEmpReg(true); } catch(_){}
